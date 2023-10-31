@@ -24,10 +24,8 @@ case $ENV in
 			-f ./deployments/helm/backend/values-staging.yaml \
 			--set=env=${ENV} \
 			--set=hydra.env=${ENV} \
-			--set=gezu.env=${ENV} \
 			--set=aurora.env=${ENV} \
 			--set=hydra.image.tag=${TAG} \
-			--set=gezu.image.tag=${TAG} \
 			--set=aurora.image.tag=${TAG} \
 			--set=appVersion=${TAG}
 

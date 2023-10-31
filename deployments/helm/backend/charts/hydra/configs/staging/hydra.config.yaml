@@ -16,7 +16,7 @@ remoteTrace:
   traceCollector: "http://jaeger-tracing-collector.monitoring:14268/api/traces"
   ratio: 1
 nats:
-  clusterId: "mm-printing"
+  clusterId: "tech4edu"
   address: "nats-streaming-client.nats-streaming"
 redis:
   host: "redis-master.databases:6379"
