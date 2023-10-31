@@ -1,7 +1,7 @@
-image: docker:git
+image: docker:24.0.5
 
 services:
-  - docker:git-dind
+  - docker:24.0.5-dind
 stages:
   - build
   - test
@@ -14,6 +14,7 @@ variables:
   COMPOSE_PROJECT_NAME: mmprinting
 
 before_script:
+  - docker info
   - echo $CI_REGISTRY_USER
   - echo $CI_REGISTRY_PASSWORD
   - echo $CI_REGISTRY
