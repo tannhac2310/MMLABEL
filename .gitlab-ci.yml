@@ -1,21 +1,19 @@
-image: docker:24.0.5
+image: docker:git
 
 services:
-  - docker:24.0.5-dind
+  - docker:git
 stages:
   - build
   - test
   - deploy
 variables:
-  DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
-  DOCKER_HOST: tcp://docker:2375
+  DOCKER_HOST: tcp://localhost:2375
   BUILDER_IMAGE: ${CI_REGISTRY_IMAGE}:builder
   KUBECONFIG: /etc/deploy/config
   COMPOSE_PROJECT_NAME: mmprinting
 
 before_script:
-  - docker info
   - echo $CI_REGISTRY_USER
   - echo $CI_REGISTRY_PASSWORD
   - echo $CI_REGISTRY
