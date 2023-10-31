@@ -1,0 +1,28 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: {{ .Release.Name }}-api-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+{{- if .Values.publicAddresses.api }}
+  - port:
+      number: 443
+      name: https-secondary
+      protocol: HTTPS
+    hosts:
+    - "{{ .Values.publicAddresses.api }}"
+    tls:
+      credentialName: cert-{{ .Values.publicAddresses.api }}
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+{{ else }}
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+{{- end }}

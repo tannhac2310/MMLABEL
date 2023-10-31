@@ -1,0 +1,48 @@
+name: "Hydra"
+port: ":4100"
+env: "local"
+debug: true
+logger:
+  logLvl: "debug"
+  logReq: true
+  logResp: true
+statsEnabled: true
+remoteProfiler:
+  enabled: true
+  profilerURL: "http://pyroscope:4040"
+remoteTrace:
+  enabled: true
+  traceAgent: "jaeger:6831"
+  traceCollector: "http://jaeger:14268/api/traces"
+  ratio: 1
+nats:
+  clusterId: "local-cluster"
+  address: "nats_streaming"
+cockroachdb:
+  uri: "cG9zdGdyZXM6Ly9yb290QGRiOjI2MjU3L3Bvc3RncmVzP3NzbG1vZGU9ZGlzYWJsZSZwb29sX21heF9jb25ucz01MCZwb29sX21heF9jb25uX2xpZmV0aW1lPTVtJnBvb2xfaGVhbHRoX2NoZWNrX3BlcmlvZD0zMHM="
+  migrationPath: "file://./migrations"
+jwt:
+  expiry: 10h
+  encryptionKey : "KJAfbaiufbcHCVBAHDc"
+  audience: "flamingo-group"
+  issuer: "hydra"
+redis:
+  host: "redis:6379"
+  password: "MTIz"
+firebase:
+  configPath: ./resources/configs/local/firebase-adminsdk-creds.json
+smsBrandName:
+  baseUrl: ""
+  token: ""
+  name: ""
+  templateOTP: "Your flamingo-group confirmation code: {{ .OTPCode }}"
+  otpLiveTime: 2m
+  debugPhoneNumbers:
+    - "0975463818"
+s3Storage:
+  region: us-east-1
+  bucket: flamingo-group
+  accessKey: access_key
+  secretKey: secret_key
+  endpoint: http://s3_storage:9000
+fcmServerKey: ""

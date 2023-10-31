@@ -1,0 +1,20 @@
+image:
+  tag: v21.2.4
+#
+#storage:
+#  persistentVolume:
+#    enabled: true
+#    storageClass: managed-premium-retain
+#    size: '20Gi'
+
+statefulset:
+  resources:
+    limits:
+      memory: "1Gi"
+    requests:
+      memory: "1Gi"
+conf:
+  cache: "1Gi"
+  max-sql-memory: "1Gi"
+tls:
+  enabled: true

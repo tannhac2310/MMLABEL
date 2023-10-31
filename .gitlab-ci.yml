@@ -1,0 +1,65 @@
+image: docker:git
+
+services:
+  - docker:git
+stages:
+  - build
+  - test
+  - deploy
+variables:
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_HOST: tcp://localhost:2375
+  BUILDER_IMAGE: ${CI_REGISTRY_IMAGE}:builder
+  KUBECONFIG: /etc/deploy/config
+  COMPOSE_PROJECT_NAME: mmprinting
+
+before_script:
+  - echo $CI_REGISTRY_USER
+  - echo $CI_REGISTRY_PASSWORD
+  - echo $CI_REGISTRY
+  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+build-builder:
+  stage: build
+  only:
+    refs:
+      - merge_requests
+    changes:
+      - "**/*.{go}"
+  except:
+    - master
+    - develop
+  script:
+    - docker pull ${BUILDER_IMAGE} || true
+    - docker build --target=builder --cache-from ${BUILDER_IMAGE} --tag ${BUILDER_IMAGE} --network host .
+    - docker push ${BUILDER_IMAGE}
+
+build-release:
+  stage: build
+  script:
+    - docker pull ${BUILDER_IMAGE} || true
+    - docker build --build-arg VERSION=${CI_COMMIT_TAG} --build-arg GIT_HASH=${CI_COMMIT_SHORT_SHA}  --cache-from ${BUILDER_IMAGE} --tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG} --network host .
+    - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
+  only:
+    - tags
+deploy_development:
+  stage: deploy
+  image: dtzar/helm-kubectl:3.1.2
+  before_script:
+    - mkdir -p /etc/deploy
+    - echo ${kube_config} | base64 -d > ${KUBECONFIG}
+  script: |
+    echo "Deploy to development server"
+    helm upgrade --install flamingo-group \
+        ./deployments/helm/backend/ \
+        -f ./deployments/helm/backend/values-staging.yaml \
+        -n backend \
+        --set=hydra.env=staging \
+        --set=aurora.env=staging \
+        --set=hydra.image.tag=${CI_COMMIT_TAG} \
+        --set=aurora.image.tag=${CI_COMMIT_TAG} \
+        --set=appVersion=${CI_COMMIT_TAG}
+  environment:
+    name: staging
+  only:
+    - tags

@@ -1,0 +1,71 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: mongodb-0
+spec:
+  storageClassName: local-storage
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  claimRef:
+    namespace: databases
+    name: datadir-mongodb-0
+  hostPath:
+    path: "/flamingo-group/mongodb-0"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/persistent
+              operator: In
+              values:
+                - "true"
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: mongodb-1
+spec:
+  storageClassName: local-storage
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  claimRef:
+    namespace: databases
+    name: datadir-mongodb-1
+  hostPath:
+    path: "/flamingo-group/mongodb-1"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/persistent
+              operator: In
+              values:
+                - "true"
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: mongodb-2
+spec:
+  storageClassName: local-storage
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  claimRef:
+    namespace: databases
+    name: datadir-mongodb-2
+  hostPath:
+    path: "/flamingo-group/mongodb-2"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/persistent
+              operator: In
+              values:
+                - "true"

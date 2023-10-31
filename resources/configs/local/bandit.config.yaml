@@ -1,0 +1,31 @@
+name: "Bandit"
+env: "local"
+debug: true
+logger:
+  logLvl: "debug"
+  logReq: true
+  logResp: true
+statsEnabled: true
+remoteProfiler:
+  enabled: true
+  profilerURL: "http://pyroscope:4040"
+remoteTrace:
+  enabled: true
+  traceAgent: "jaeger:6831"
+  traceCollector: "http://jaeger:14268/api/traces"
+  ratio: 1
+nats:
+  clusterId: "local-cluster"
+  address: "nats_streaming"
+cockroachdb:
+  uri: "cG9zdGdyZXM6Ly9yb290QGRiOjI2MjU3L3Bvc3RncmVzP3NzbG1vZGU9ZGlzYWJsZSZwb29sX21heF9jb25ucz01MCZwb29sX21heF9jb25uX2xpZmV0aW1lPTVtJnBvb2xfaGVhbHRoX2NoZWNrX3BlcmlvZD0zMHM="
+defaultPondInitDevice:
+  feeder: 1
+  paddleWheel: 3
+  syphonPump: 1
+  sumPump: 1
+  airBlower: 1
+iotHub:
+  maxIdleConnections: 100
+  requestTimeout: 300
+  connectTimeout: 5

@@ -1,0 +1,54 @@
+image:
+  tag: 4.4.4
+
+architecture: replicaset
+auth:
+  enabled: true
+
+replicaSetName: rs0
+replicaCount: 3
+
+persistence:
+  enabled: true
+  storageClass: managed-premium-retain
+
+auth:
+  rootPassword: z4MwnEUu9l
+  replicaSetKey: FuNI3lmBte
+
+initdbScripts:
+  initdb.js: |-
+    db.getSiblingDB('admin').createUser(
+            {
+                user: "flamingo-group",
+                pwd: "dJam94TlRrMk5qZ3lOakU1TENKc",
+                roles: [
+                    {
+                        role: "readWrite",
+                        db: "flamingo-group"
+                    },
+                    {
+                        role: "read",
+                        db: "admin"
+                    }
+                ]
+            }
+    );
+
+    db.getSiblingDB('flamingo-group').createUser(
+            {
+                user: "flamingo-group",
+                pwd: "dJam94TlRrMk5qZ3lOakU1TENKc",
+                roles: [
+                    {
+                        role: "readWrite",
+                        db: "flamingo-group"
+                    },
+                    {
+                        role: "read",
+                        db: "admin"
+                    }
+                ]
+            }
+    );
+

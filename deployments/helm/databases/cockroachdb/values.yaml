@@ -1,0 +1,13 @@
+statefulset:
+  resources:
+    limits:
+      cpu: "1"
+      memory: "1Gi"
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+conf:
+  cache: "1Gi"
+  max-sql-memory: "1Gi"
+tls:
+  enabled: true

@@ -1,0 +1,25 @@
+architecture: "standalone"
+auth:
+  password: "Tkd0S09HRlJXWFIzZW5kblMzTlRjUT09"
+
+image:
+  repository: bitnami/redis
+  tag: 5.0.9
+
+master:
+  persistence:
+    enabled: true
+    storageClass: "managed-premium-retain"
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: 250m
+    limits:
+      memory: "1Gi"
+      cpu: 500m
+
+volumePermissions:
+  enabled: false
+
+service:
+  type: ClusterIP

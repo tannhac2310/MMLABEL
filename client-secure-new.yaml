@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cockroachdb-client-secure
+  labels:
+    app: cockroachdb-client
+spec:
+  serviceAccountName: cockroachdb
+  initContainers:
+ # the cluster CA to the certs directory.
+  - name: init-certs
+    image: busybox
+    imagePullPolicy: IfNotPresent
+    command:
+    - "/bin/sh"
+    - "-c"
+    - "cp -f /certs/* /cockroach-certs/; chmod 0400 /cockroach-certs/*.key"
+    volumeMounts:
+    - mountPath: /cockroach-certs/
+      name: certs
+    - mountPath: /certs/
+      name: certs-secret
+  containers:
+  - name: cockroachdb-client
+    image: cockroachdb/cockroach:v21.2.4
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+    - name: certs
+      mountPath: /cockroach-certs
+    # Keep a pod open indefinitely so kubectl exec can be used to get a shell to it
+    # and run cockroach client commands, such as cockroach sql, cockroach node status, etc.
+    command:
+    - sleep
+    - "2147483648" # 2^31
+  # This pod isn't doing anything important, so don't bother waiting to terminate it.
+  terminationGracePeriodSeconds: 0
+  volumes:
+  - emptyDir: {}
+    name: certs
+  - name: certs-secret
+    projected:
+      defaultMode: 420
+      sources:
+      - secret:
+          items:
+          - key: ca.crt
+            mode: 256
+            path: ca.crt
+          - key: tls.crt
+            mode: 256
+            path: client.root.crt
+          - key: tls.key
+            mode: 256
+            path: client.root.key
+          name: cockroachdb-client-secret
+  - name: cockroachdb-token-w6jgk
+    secret:
+      defaultMode: 420
+      secretName: cockroachdb-token-w6jgk

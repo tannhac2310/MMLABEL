@@ -1,0 +1,24 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}-monitoring-ingress
+spec:
+  hosts:
+{{- if .Values.publicAddresses.api }}
+  - "{{ .Values.publicAddresses.api  }}"
+{{else}}
+  - "*"
+{{- end}}
+  gateways:
+  - {{ .Release.Name }}-monitoring-gateway
+  http:
+  - match:
+    - uri:
+        prefix: "/Fy94jG0NEzWTHE0bzjzL/"
+    rewrite:
+      uri: "/"
+    route:
+    - destination:
+        host: loki
+        port:
+          number: 3100

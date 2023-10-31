@@ -1,0 +1,37 @@
+name: "Gezu"
+port: ":5100"
+env: "local"
+debug: true
+logger:
+  logLvl: "debug"
+  logReq: true
+  logResp: true
+statsEnabled: true
+remoteProfiler:
+  enabled: true
+  profilerURL: "http://pyroscope:4040"
+remoteTrace:
+  enabled: true
+  traceAgent: "jaeger:6831"
+  traceCollector: "http://jaeger:14268/api/traces"
+  ratio: 1
+nats:
+  clusterId: "local-cluster"
+  address: "nats_streaming"
+cockroachdb:
+  uri: "cG9zdGdyZXM6Ly9yb290QGRiOjI2MjU3L3Bvc3RncmVzP3NzbG1vZGU9ZGlzYWJsZSZwb29sX21heF9jb25ucz01MCZwb29sX21heF9jb25uX2xpZmV0aW1lPTVtJnBvb2xfaGVhbHRoX2NoZWNrX3BlcmlvZD0zMHM="
+  migrationPath: "file://./migrations"
+jwt:
+  expiry: 1h
+  encryptionKey: "KJAfbaiufbcHCVBAHDc"
+  audience: "flamingo-group"
+  issuer: "hydra"
+zalo:
+  oaCallbackUrl: "https://mmlabel.buonho.vn/aurora/oa/callback1"
+  oaApiUriV2: "https://openapi.zalo.me/v2.0"
+  oaAccessTokeUrl: "https://oauth.zaloapp.com/v4/oa/access_token"
+  oaPermissionUrl: "https://oauth.zaloapp.com/v4/oa/permission"
+redis:
+  host: "redis:6379"
+  password: "MTIz"
+websockerDocsDir: "./resources/ws/"

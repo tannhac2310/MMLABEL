@@ -1,0 +1,15 @@
+Name,Code,en_US,vi_VN
+ErrUnknown,1000,Something went wrong,Lỗi không xác định
+ErrInvalidArgument,1001,Invalid argument,Dữ liệu đầu vào không hợp lệ
+ErrWrongEmail,1002,Wrong email,Sai email
+ErrWrongPassword,1003,Wrong password,Sai mật khẩu
+ErrAccountInActive,1004,Your account is inactive,Tài khoản chưa kích hoạt
+ErrUserNotFound,1005,User not found,Người dùng không tồn tại
+ErrPermissionDenied,1006,Permission denied,Không có quyền sử dụng
+ErrAccountExisted,1007,Account already existed,Tài khoản đã tồn tại
+ErrInvalidOldPassword,1008,Old password does not match,Mật khẩu cũ không đúng
+ErrInvalidOTP,1009,Invalid OTP,Mã OTP không hợp lệ
+ErrUnauthenticated,2001,Unauthenticated,Lỗi xác thực
+ErrAttendanceUserNotInClass,3001,Students who have not yet registered for the class, Học viên chưa đăng lý lớp học
+ErrNotFoundOrNotPermission,4001,Data not found or you can not access it, Dữ liệu không tim thấy hoặc bạn không có quyền truy cập
+ErrZaloAppIDExisted,4002,Zalo app already existed, Zalo app đã được kết nối

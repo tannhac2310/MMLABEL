@@ -1,0 +1,76 @@
+#apiVersion: networking.istio.io/v1alpha3
+#kind: VirtualService
+#metadata:
+#  name: {{ .Release.Name }}-api-ingress
+#spec:
+#  hosts:
+#  - "*"
+#  gateways:
+#  - {{ .Release.Name }}-api-gateway
+#  http:
+#  - match:
+#    - uri:
+#        prefix: "/hydra"
+#    route:
+#    - destination:
+#        host: {{ .Release.Name }}-hydra
+#        port:
+#          number: 80
+#  - match:
+#    - uri:
+#        prefix: "/gezu"
+#    route:
+#    - destination:
+#        host: {{ .Release.Name }}-gezu
+#        port:
+#          number: 80
+#  - match:
+#    - uri:
+#        prefix: "/aurora"
+#    route:
+#    - destination:
+#        host: {{ .Release.Name }}-aurora
+#        port:
+#          number: 80
+#  - match:
+#    - uri:
+#        prefix: "/flamingo-group-images"
+#    route:
+#    - destination:
+#        host: s3-storage-minio
+#        port:
+#          number: 9000
+#  - match:
+#    - uri:
+#        prefix: "/database"
+#    route:
+#      - destination:
+#          host: s3-storage-minio
+#          port:
+#            number: 9000
+#  - match:
+#    - uri:
+#        prefix: "/databases"
+#    route:
+#      - destination:
+#          host: s3-storage-minio
+#          port:
+#            number: 9000
+#  - match:
+#    - uri:
+#        prefix: "/files"
+#    route:
+#      - destination:
+#          host: s3-storage-minio
+#          port:
+#            number: 9000
+#  - match:
+#    - uri:
+#        prefix: "/swagger-ui/"
+#    rewrite:
+#      uri: "/"
+#    route:
+#    - destination:
+#        host: {{ .Release.Name }}-backend
+#        port:
+#          number: 80

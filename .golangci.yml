@@ -1,0 +1,54 @@
+run:
+  tests: false
+  skip-dirs:
+    - mock
+    - tools
+
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - deadcode
+    - depguard
+    - errcheck
+    - goconst
+    - gocritic
+    - gocyclo
+    - gofmt
+    - goimports
+    - golint
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - interfacer
+    - misspell
+    - prealloc
+    - rowserrcheck
+    - scopelint
+    - staticcheck
+    - structcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - varcheck
+    - whitespace
+
+issues:
+  exclude:
+    - composites
+  exclude-rules:
+    # disable unused linter for packages in features directory,
+    # because those are invoked by godog, that makes the
+    # unused linter reports false positive errors.
+    - path: features
+      linters:
+        - unused
+    - path: mocks
+      linters:
+        - unused
+    - path: pkg/swag
+      linters:
+        - unused

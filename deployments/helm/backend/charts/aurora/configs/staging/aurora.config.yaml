@@ -1,0 +1,40 @@
+name: "Aurora"
+port: ":5100"
+env: "staging"
+debug: true
+logger:
+  logLvl: "debug"
+  logReq: true
+  logResp: true
+statsEnabled: true
+remoteProfiler:
+  enabled: true
+  profilerURL: "http://pyroscope.monitoring"
+remoteTrace:
+  enabled: true
+  traceAgent: "jaeger-tracing-agent.monitoring:6831"
+  traceCollector: "http://jaeger-tracing-collector.monitoring:14268/api/traces"
+  ratio: 1
+zalo:
+  oaCallbackUrl: "https://mmlabel.buonho.vn/aurora/oa/callback"
+  oaAccessTokeUrl: "https://oauth.zaloapp.com/v4/oa/access_token"
+  oaPermissionUrl: "https://oauth.zaloapp.com/v4/oa/permission"
+nats:
+  clusterId: "tech4edu"
+  address: "nats-streaming-client.nats-streaming"
+cockroachdb:
+  uri: "cG9zdGdyZXM6Ly90ZWNoNGVkdTpNNjc2M3pVbnI4dEJkd3lkQGNvY2tyb2FjaGRiLmRhdGFiYXNlczoyNjI1Ny9wb3N0Z3Jlcz9wb29sX21heF9jb25ucz01MCZwb29sX21heF9jb25uX2xpZmV0aW1lPTVtJnBvb2xfaGVhbHRoX2NoZWNrX3BlcmlvZD0zMHM="
+  migrationPath: "file://./migrations"
+iotHub:
+  maxIdleConnections: 100
+  requestTimeout: 300
+  connectTimeout: 5
+jwt:
+  expiry: 365h
+  encryptionKey : "NsdXN0dZXIubG9jYWw6Mjcw"
+  audience: "mmprinting"
+  issuer: "hydra"
+redis:
+  host: "redis-master.databases:6379"
+  password: "NGtKOGFRWXR3endnS3NTcQ=="
+websockerDocsDir: "/ws-docs/"

@@ -1,0 +1,52 @@
+volumePermissions:
+  enabled: false
+
+mongodbRootPassword: example
+shards: 4
+replicaSetKey: replicaSetKey
+
+configsvr:
+  replicas: 3
+
+shardsvr:
+  dataNode:
+    replicas: 2
+
+#common:
+  #initScriptsCM: |
+    #db.getSiblingDB('admin').createUser(
+          #{
+              #user: "hydra",
+              #pwd: "hydra",
+              #roles: [
+                  #{
+                      #role: "readWrite",
+                      #db: "hydra"
+                  #},
+                  #{
+                      #role: "read",
+                      #db: "admin"
+                  #}
+              #]
+          #}
+  #);
+
+  #db.getSiblingDB('hydra').createUser(
+          #{
+              #user: "hydra",
+              #pwd: "hydra",
+              #roles: [
+                  #{
+                      #role: "readWrite",
+                      #db: "hydra"
+                  #},
+                  #{
+                      #role: "read",
+                      #db: "admin"
+                  #}
+              #]
+          #}
+  #);
+
+
+

@@ -1,0 +1,39 @@
+name: "Hydra"
+port: ":4100"
+env: "staging"
+debug: true
+logger:
+  logLvl: "debug"
+  logReq: true
+  logResp: true
+statsEnabled: true
+remoteProfiler:
+  enabled: false
+  profilerURL: "http://pyroscope:4040"
+remoteTrace:
+  enabled: true
+  traceAgent: "jaeger-tracing-agent.monitoring:6831"
+  traceCollector: "http://jaeger-tracing-collector.monitoring:14268/api/traces"
+  ratio: 1
+nats:
+  clusterId: "flamingo-group"
+  address: "nats-streaming-client.nats-streaming"
+redis:
+  host: "redis-master.databases:6379"
+  password: "NGtKOGFRWXR3endnS3NTcQ=="
+cockroachdb:
+  uri: "cG9zdGdyZXM6Ly90ZWNoNGVkdTpNNjc2M3pVbnI4dEJkd3lkQGNvY2tyb2FjaGRiLmRhdGFiYXNlczoyNjI1Ny9wb3N0Z3Jlcz9wb29sX21heF9jb25ucz01MCZwb29sX21heF9jb25uX2xpZmV0aW1lPTVtJnBvb2xfaGVhbHRoX2NoZWNrX3BlcmlvZD0zMHM="
+  migrationPath: "file://./migrations"
+jwt:
+  expiry: 365h
+  encryptionKey: "NsdXN0dZXIubG9jYWw6Mjcw"
+  audience: "mmprinting"
+  issuer: "hydra"
+firebase:
+  configPath: /secrets/firebase-adminsdk-creds.json
+s3Storage:
+  region: us-east-1
+  bucket: flamingo-group-images
+  accessKey: bX983KRuvA7dF8MYthfK
+  secretKey: YOwWxiBiountG3xwcild
+  endpoint: https://edv.app:8080

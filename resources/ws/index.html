@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Debugs WebSocket</title>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://www.jqueryscript.net/demo/Beautiful-JSON-Viewer-Editor/dist/jquery.json-editor.min.js"></script>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+
+    <script src="js/socket.js"></script>
+    <script src="js/action.js"></script>
+</head>
+<body>
+<div class="mdl-grid">
+    <div class="mdl-cell mdl-cell--4-col">
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input" type="text" id="server_url" value="localhost:8888/gezu/ws">
+            <label class="mdl-textfield__label" for="server_url">Server Url...</label>
+        </div>
+        <!-- Accent-colored raised button with ripple -->
+        <button id="btn_connect" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
+            CONNECT
+        </button>
+    </div>
+    <div class="mdl-cell mdl-cell--8-col">
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input" id="token" value="">
+            <label class="mdl-textfield__label" for="token">User Token</label>
+        </div>
+    </div>
+    <div class="mdl-cell mdl-cell--2-col">
+        <!-- Simple list -->
+        <style>
+            .demo-list-item {
+                width: 300px;
+                height: 300px;
+                overflow: auto;
+            }
+            .mdl-list__item:hover {
+                background: rgb(63,81,181);
+            }
+
+            .active {
+                background: rgb(63,81,181);
+            }
+        </style>
+
+        <ul class="demo-list-item mdl-list">
+
+        </ul>
+    </div>
+    <div class="mdl-cell mdl-cell--5-col">
+        <div class="mdl-textfield mdl-js-textfield" style="width:100%;">
+            <div>Request data</div>
+            <pre id="json-request"></pre>
+        </div>
+    </div>
+    <div class="mdl-cell mdl-cell--5-col">
+        <div class="mdl-textfield mdl-js-textfield" style="width:100%;">
+            <div>Description: <span id="description"></span></div>
+            <pre id="json-response"></pre>
+        </div>
+    </div>
+    <div class="mdl-cell mdl-cell--5-col">
+        <button id="btn_send" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
+            Send
+        </button>
+    </div>
+</div>
+<div id="content-log" class="mdl-grid log-socket mdl-card mdl-shadow--8dp">
+    <div class="mdl-cell mdl-cell--12-col content-log mdl-color--grey-200">
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,15 @@
+#{{- if .Values.publicAddresses.api }}
+#apiVersion: cert-manager.io/v1
+#kind: Certificate
+#metadata:
+#  name: {{ .Values.publicAddresses.api }}
+#  namespace: istio-system
+#spec:
+#  commonName: {{ .Values.publicAddresses.api }}
+#  dnsNames:
+#  - {{ .Values.publicAddresses.api }}
+#  issuerRef:
+#    kind: ClusterIssuer
+#    name: {{ .Values.certIssuer }}
+#  secretName: cert-{{ .Values.publicAddresses.api }}
+#{{- end  }}

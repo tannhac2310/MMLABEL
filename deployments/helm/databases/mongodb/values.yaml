@@ -1,0 +1,57 @@
+image:
+  tag: 4.4.4
+
+architecture: replicaset
+auth:
+  enabled: true
+
+replicaSetName: rs0
+replicaCount: 3
+
+persistence:
+  enabled: true
+  storageClass: local-storage
+
+auth:
+  rootPassword: z4MwnEUu9l
+  replicaSetKey: FuNI3lmBte
+
+volumePermissions:
+  enabled: true
+
+initdbScripts:
+  initdb.js: |-
+    db.getSiblingDB('admin').createUser(
+            {
+                user: "hydra",
+                pwd: "hydra",
+                roles: [
+                    {
+                        role: "readWrite",
+                        db: "hydra"
+                    },
+                    {
+                        role: "read",
+                        db: "admin"
+                    }
+                ]
+            }
+    );
+
+    db.getSiblingDB('hydra').createUser(
+            {
+                user: "hydra",
+                pwd: "hydra",
+                roles: [
+                    {
+                        role: "readWrite",
+                        db: "hydra"
+                    },
+                    {
+                        role: "read",
+                        db: "admin"
+                    }
+                ]
+            }
+    );
+

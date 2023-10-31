@@ -1,0 +1,185 @@
+{{- if .Values.testFt.enabled -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "nats-streaming.fullname" . }}-sub
+  labels:
+{{ include "nats-streaming.labels" . | indent 4 }}
+  annotations:
+    pod.beta.kubernetes.io/init-containers: '[
+      {
+        "name": "init-nats-streaming-client",
+        "image": "busybox",
+        "command": ["sh", "-c", "until nslookup nats-streaming-client; do echo waiting for nats; sleep 2; done;"]
+      }
+      ]'
+spec:
+  backoffLimit: 6
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: nats-streaming-sub
+          image: golang:1.13
+          env:
+            - name: CLUSTER_ID
+              value: {{ .Values.streaming.id }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              mkdir ~/test && cd ~/test
+              cat > main.go <<EOF
+              package main
+
+              import (
+                "fmt"
+                "log"
+                "net"
+                "os"
+                "strings"
+                "time"
+
+                "github.com/nats-io/stan.go"
+              )
+
+              func main() {
+                natsIPs, err := net.LookupIP("nats-streaming-client")
+                if err != nil {
+                  log.Fatalln(err)
+                }
+                natsURLs := make([]string, 0, len(natsIPs))
+                for _, ip := range natsIPs {
+                  natsURLs = append(natsURLs, fmt.Sprintf("nats://%s:4222", ip.String()))
+                }
+                h, _ := os.Hostname()
+                sc, err := stan.Connect(
+                  os.Getenv("CLUSTER_ID"),
+                  h,
+                  stan.Pings(1, 30),
+                  stan.MaxPubAcksInflight(20),
+                  stan.PubAckWait(5*time.Second),
+                  stan.NatsURL(strings.Join(natsURLs, ",")),
+                  stan.SetConnectionLostHandler(func(con stan.Conn, reason error) {
+                    log.Fatalf("Connection lost, reason: %v", reason)
+                  }),
+                )
+                if err != nil {
+                  log.Fatalln(err)
+                }
+                defer sc.Close()
+
+                messages := make([]string, 0, 10000)
+                sub, err := sc.QueueSubscribe("test-subject", "qtest", func(m *stan.Msg) {
+                  time.Sleep(100 * time.Millisecond)
+                  messages = append(messages, string(m.Data))
+                  fmt.Printf("total messages: %d\n", len(messages))
+                  if err := m.Ack(); err != nil {
+                    log.Fatalln(err)
+                  }
+                }, stan.MaxInflight(10), stan.SetManualAckMode(), stan.DeliverAllAvailable(), stan.DurableName("durable"))
+                if err != nil {
+                  log.Fatalln(err)
+                }
+                defer sub.Unsubscribe()
+
+                fmt.Println("waiting for messages")
+                time.Sleep(30 * time.Minute)
+                if len(messages) != 10000 {
+                  log.Fatalf("total messages should be 10000, got: %d", len(messages))
+                }
+              }
+              EOF
+
+              go mod init test
+              go run main.go
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "nats-streaming.fullname" . }}-pub
+  labels:
+{{ include "nats-streaming.labels" . | indent 4 }}
+  annotations:
+    pod.beta.kubernetes.io/init-containers: '[
+      {
+        "name": "init-nats-streaming-client",
+        "image": "busybox",
+        "command": ["sh", "-c", "until nslookup nats-streaming-client; do echo waiting for nats; sleep 2; done;"]
+      }
+      ]'
+spec:
+  backoffLimit: 6
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: nats-streaming-pub
+          image: golang:1.13
+          env:
+            - name: CLUSTER_ID
+              value: {{ .Values.streaming.id }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              mkdir ~/test && cd ~/test
+              cat > main.go <<EOF
+              package main
+
+              import (
+                "fmt"
+                "log"
+                "net"
+                "os"
+                "strings"
+                "time"
+
+                "github.com/nats-io/stan.go"
+              )
+
+              func main() {
+                natsIPs, err := net.LookupIP("nats-streaming-client")
+                if err != nil {
+                  log.Fatalln(err)
+                }
+                natsURLs := make([]string, 0, len(natsIPs))
+                for _, ip := range natsIPs {
+                  natsURLs = append(natsURLs, fmt.Sprintf("nats://%s:4222", ip.String()))
+                }
+                h, _ := os.Hostname()
+                sc, err := stan.Connect(
+                  os.Getenv("CLUSTER_ID"),
+                  h,
+                  stan.Pings(1, 30),
+                  stan.MaxPubAcksInflight(20),
+                  stan.PubAckWait(5*time.Second),
+                  stan.NatsURL(strings.Join(natsURLs, ",")),
+                  stan.SetConnectionLostHandler(func(con stan.Conn, reason error) {
+                    log.Fatalf("Connection lost, reason: %v", reason)
+                  }),
+                )
+                if err != nil {
+                  log.Fatalln(err)
+                }
+                defer sc.Close()
+
+                i := 1
+                for {
+                  msg := fmt.Sprintf("%d", i)
+                  fmt.Printf("publish message: %q\n", msg)
+                  if err := sc.Publish("test-subject", []byte(msg)); err != nil {
+                    log.Println("failed to publish '", msg, "':", err)
+                    continue
+                  }
+                  i++
+                  if i > 10000 {
+                    break
+                  }
+                }
+              }
+              EOF
+
+              go mod init test
+              go run main.go
+{{- end }}
