@@ -3,7 +3,7 @@
 ## Overview
 
 Service ports:
- - 4100: Hydra (manage account, user, authenticate of flamingo-group system)
+ - 4100: Hydra (manage account, user, authenticate of mm-printing system)
  - 6100: Aurora (printing management, ...)
  - 8082: Swagger UI (api documents)
 

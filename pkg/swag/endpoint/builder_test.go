@@ -24,7 +24,7 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/swag"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/swag/endpoint"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/swag/swagger"
-)flamingo-group
+)mm-printing
 
 func Echo(w http.ResponseWriter, _ *http.Request) {
 	io.WriteString(w, "hello world")

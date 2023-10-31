@@ -131,7 +131,7 @@ func Run(ctx context.Context, configPath string) {
 			}
 
 			return profiler.Start(profiler.Config{
-				ApplicationName: fmt.Sprintf("flamingo-group.%s", cfg.Name),
+				ApplicationName: fmt.Sprintf("mm-printing.%s", cfg.Name),
 				ServerAddress:   cfg.RemoteProfiler.ProfilerURL,
 			})
 		}),

@@ -8,7 +8,7 @@ command -v helm
 
 # environment variables for local env
 export ENV=${ENV:-staging}
-export ORG=${ORG:-flamingo-group}
+export ORG=${ORG:-mm-printing}
 export TAG=${TAG:-v0.1.80-rc5}
 export NAMESPACE=${NAMESPACE:-backend}
 

@@ -16,7 +16,7 @@ remoteTrace:
   traceCollector: "http://jaeger-tracing-collector.monitoring:14268/api/traces"
   ratio: 1
 nats:
-  clusterId: "flamingo-group"
+  clusterId: "mm-printing"
   address: "nats-streaming-client.nats-streaming"
 cockroachdb:
   uri: "cG9zdGdyZXM6Ly90ZWNoNGVkdTpNNjc2M3pVbnI4dEJkd3lkQGNvY2tyb2FjaGRiLmRhdGFiYXNlczoyNjI1Ny9wb3N0Z3Jlcz9wb29sX21heF9jb25ucz01MCZwb29sX21heF9jb25uX2xpZmV0aW1lPTVtJnBvb2xfaGVhbHRoX2NoZWNrX3BlcmlvZD0zMHM=
@@ -24,13 +24,13 @@ cockroachdb:
 jwt:
   expiry: 1h
   encryptionKey : "KJAfbaiufbcHCVBAHDc"
-  audience: "flamingo-group"
+  audience: "mm-printing"
   issuer: "hydra"
 firebase:
   configPath: /secrets/firebase-adminsdk-creds.json
 s3Storage:
   region: us-east-1
-  bucket: flamingo-group-images
+  bucket: mm-printing-images
   accessKey: bX983KRuvA7dF8MYthfK
   secretKey: YOwWxiBiountG3xwcild
   endpoint: https://edv.app:8080

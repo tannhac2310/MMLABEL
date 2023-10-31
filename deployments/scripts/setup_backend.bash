@@ -7,7 +7,7 @@ NAMESPACE=backend
 case $ENV in
 
   "dev")
-		helm upgrade --install flamingo-group -n $NAMESPACE \
+		helm upgrade --install mm-printing -n $NAMESPACE \
 			./deployments/helm/backend \
 			--set=env=${ENV} \
 			--set=hydra.env=${ENV} \
@@ -19,7 +19,7 @@ case $ENV in
     ;;
 
   "staging")
-		helm upgrade --install flamingo-group -n $NAMESPACE \
+		helm upgrade --install mm-printing -n $NAMESPACE \
 			./deployments/helm/backend \
 			-f ./deployments/helm/backend/values-staging.yaml \
 			--set=env=${ENV} \
@@ -31,7 +31,7 @@ case $ENV in
 			--set=aurora.image.tag=${TAG} \
 			--set=appVersion=${TAG}
 
-# helm upgrade --install flamingo-group \
+# helm upgrade --install mm-printing \
 #        ./deployments/helm/backend/ \
 #        -f ./deployments/helm/backend/values-staging.yaml \
 #        -n backend \

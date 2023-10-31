@@ -1,11 +1,11 @@
 db.getSiblingDB('admin').createUser(
         {
-            user: "flamingo-group",
-            pwd: "flamingo-group",
+            user: "mm-printing",
+            pwd: "mm-printing",
             roles: [
                 {
                     role: "readWrite",
-                    db: "flamingo-group"
+                    db: "mm-printing"
                 },
                 {
                     role: "read",
@@ -15,14 +15,14 @@ db.getSiblingDB('admin').createUser(
         }
 );
 
-db.getSiblingDB('flamingo-group').createUser(
+db.getSiblingDB('mm-printing').createUser(
         {
-            user: "flamingo-group",
-            pwd: "flamingo-group",
+            user: "mm-printing",
+            pwd: "mm-printing",
             roles: [
                 {
                     role: "readWrite",
-                    db: "flamingo-group"
+                    db: "mm-printing"
                 },
                 {
                     role: "read",

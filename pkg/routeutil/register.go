@@ -19,9 +19,9 @@ import (
 )
 
 var api = swag.New(
-	swag.Title("flamingo-group backend"),
+	swag.Title("mm-printing backend"),
 	swag.Version(version.Version),
-	swag.ContactEmail("support@flamingo-group.com"),
+	swag.ContactEmail("support@mm-printing.com"),
 	swag.BasePath("/"),
 	swag.Schemes("http", "https"),
 	swag.SecurityScheme("Authorization", swagger.APIKeySecurity("Authorization", "header")),

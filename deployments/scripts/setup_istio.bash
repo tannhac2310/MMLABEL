@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-ROOT=~/.flamingo-group
+ROOT=~/.mm-printing
 if [[ ! -d $ROOT ]]; then
   mkdir -p $ROOT
 fi

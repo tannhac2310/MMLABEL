@@ -25,9 +25,9 @@ case $ENV in
 #		kubectl -n databases apply -f client-secure.yaml
 #
 #		kubectl -n databases exec -i cockroachdb-client-secure \
-#			-- ./cockroach sql --certs-dir=/cockroach-certs --host=cockroachdb-public --execute="CREATE USER flamingo-group WITH PASSWORD 'flamingo-group';"
+#			-- ./cockroach sql --certs-dir=/cockroach-certs --host=cockroachdb-public --execute="CREATE USER mm-printing WITH PASSWORD 'mm-printing';"
 #		kubectl -n databases exec -i cockroachdb-client-secure \
-#			-- ./cockroach sql --certs-dir=/cockroach-certs --host=cockroachdb-public --execute="GRANT admin TO flamingo-group;"
+#			-- ./cockroach sql --certs-dir=/cockroach-certs --host=cockroachdb-public --execute="GRANT admin TO mm-printing;"
 #    ;;
 
   "staging")
@@ -37,9 +37,9 @@ case $ENV in
     kubectl -n databases apply -f client-secure-new.yaml
 
     kubectl -n databases exec -i cockroachdb-client-secure \
-      -- ./cockroach sql --certs-dir=/cockroach-certs --host=cockroachdb-public --execute="CREATE USER flamingo-group WITH PASSWORD 'M6763zUnr8tBdwyd';"
+      -- ./cockroach sql --certs-dir=/cockroach-certs --host=cockroachdb-public --execute="CREATE USER mm-printing WITH PASSWORD 'M6763zUnr8tBdwyd';"
     kubectl -n databases exec -i cockroachdb-client-secure \
-      -- ./cockroach sql --certs-dir=/cockroach-certs --host=cockroachdb-public --execute="GRANT admin TO flamingo-group;"
+      -- ./cockroach sql --certs-dir=/cockroach-certs --host=cockroachdb-public --execute="GRANT admin TO mm-printing;"
     ;;
 
   "production")
@@ -49,9 +49,9 @@ case $ENV in
 		kubectl -n databases apply -f client-secure-new.yaml
 
 		kubectl -n databases exec -i cockroachdb-client-secure \
-			-- ./cockroach sql --certs-dir=/cockroach-certs --host=cockroachdb-public --execute="CREATE USER flamingo-group WITH PASSWORD 'M6763zUnr8tBdwyd';"
+			-- ./cockroach sql --certs-dir=/cockroach-certs --host=cockroachdb-public --execute="CREATE USER mm-printing WITH PASSWORD 'M6763zUnr8tBdwyd';"
 		kubectl -n databases exec -i cockroachdb-client-secure \
-			-- ./cockroach sql --certs-dir=/cockroach-certs --host=cockroachdb-public --execute="GRANT admin TO flamingo-group;"
+			-- ./cockroach sql --certs-dir=/cockroach-certs --host=cockroachdb-public --execute="GRANT admin TO mm-printing;"
 		;;
   *)
 		echo "not register env $ENV"

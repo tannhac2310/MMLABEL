@@ -24,7 +24,7 @@ cockroachdb:
 jwt:
   expiry: 10h
   encryptionKey : "KJAfbaiufbcHCVBAHDc"
-  audience: "flamingo-group"
+  audience: "mm-printing"
   issuer: "hydra"
 redis:
   host: "redis:6379"
@@ -35,13 +35,13 @@ smsBrandName:
   baseUrl: ""
   token: ""
   name: ""
-  templateOTP: "Your flamingo-group confirmation code: {{ .OTPCode }}"
+  templateOTP: "Your mm-printing confirmation code: {{ .OTPCode }}"
   otpLiveTime: 2m
   debugPhoneNumbers:
     - "0975463818"
 s3Storage:
   region: us-east-1
-  bucket: flamingo-group
+  bucket: mm-printing
   accessKey: access_key
   secretKey: secret_key
   endpoint: http://s3_storage:9000

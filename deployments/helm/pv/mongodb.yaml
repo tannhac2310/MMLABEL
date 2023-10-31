@@ -12,7 +12,7 @@ spec:
     namespace: databases
     name: datadir-mongodb-0
   hostPath:
-    path: "/flamingo-group/mongodb-0"
+    path: "/mm-printing/mongodb-0"
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -36,7 +36,7 @@ spec:
     namespace: databases
     name: datadir-mongodb-1
   hostPath:
-    path: "/flamingo-group/mongodb-1"
+    path: "/mm-printing/mongodb-1"
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -60,7 +60,7 @@ spec:
     namespace: databases
     name: datadir-mongodb-2
   hostPath:
-    path: "/flamingo-group/mongodb-2"
+    path: "/mm-printing/mongodb-2"
   nodeAffinity:
     required:
       nodeSelectorTerms:

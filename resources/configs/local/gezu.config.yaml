@@ -24,7 +24,7 @@ cockroachdb:
 jwt:
   expiry: 1h
   encryptionKey: "KJAfbaiufbcHCVBAHDc"
-  audience: "flamingo-group"
+  audience: "mm-printing"
   issuer: "hydra"
 zalo:
   oaCallbackUrl: "https://mmlabel.buonho.vn/aurora/oa/callback1"

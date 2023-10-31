@@ -20,7 +20,7 @@ zalo:
   oaAccessTokeUrl: "https://oauth.zaloapp.com/v4/oa/access_token"
   oaPermissionUrl: "https://oauth.zaloapp.com/v4/oa/permission"
 nats:
-  clusterId: "flamingo-group"
+  clusterId: "mm-printing"
   address: "nats-streaming-client.nats-streaming"
 cockroachdb:
   uri: "cG9zdGdyZXM6Ly90ZWNoNGVkdTp0ZWNoNGVkdUBjb2Nrcm9hY2hkYi5kYXRhYmFzZXM6MjYyNTcvcG9zdGdyZXM/cG9vbF9tYXhfY29ubnM9NTAmcG9vbF9tYXhfY29ubl9saWZldGltZT01bSZwb29sX2hlYWx0aF9jaGVja19wZXJpb2Q9MzBz"
@@ -32,7 +32,7 @@ iotHub:
 jwt:
   expiry: 1h
   encryptionKey : "KJAfbaiufbcHCVBAHDc"
-  audience: "flamingo-group"
+  audience: "mm-printing"
   issuer: "hydra"
 redis:
   host: "redis-master.databases:6379"

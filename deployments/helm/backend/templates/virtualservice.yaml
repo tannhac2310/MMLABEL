@@ -34,7 +34,7 @@
 #          number: 80
 #  - match:
 #    - uri:
-#        prefix: "/flamingo-group-images"
+#        prefix: "/mm-printing-images"
 #    route:
 #    - destination:
 #        host: s3-storage-minio

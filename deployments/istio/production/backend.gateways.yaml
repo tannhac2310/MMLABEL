@@ -35,7 +35,7 @@
 #        prefix: "/hydra"
 #    route:
 #    - destination:
-#        host: flamingo-group-hydra
+#        host: mm-printing-hydra
 #        port:
 #          number: 80
 #  - match:
@@ -43,7 +43,7 @@
 #        prefix: "/gezu"
 #    route:
 #    - destination:
-#        host: flamingo-group-gezu
+#        host: mm-printing-gezu
 #        port:
 #          number: 80
 #  - match:
@@ -51,12 +51,12 @@
 #        prefix: "/demeter"
 #    route:
 #    - destination:
-#        host: flamingo-group-demeter
+#        host: mm-printing-demeter
 #        port:
 #          number: 80
 #  - match:
 #    - uri:
-#        prefix: "/flamingo-group-images"
+#        prefix: "/mm-printing-images"
 #    route:
 #    - destination:
 #        host: s3-storage-minio

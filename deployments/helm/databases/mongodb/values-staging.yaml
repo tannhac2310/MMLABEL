@@ -20,12 +20,12 @@ initdbScripts:
   initdb.js: |-
     db.getSiblingDB('admin').createUser(
             {
-                user: "flamingo-group",
+                user: "mm-printing",
                 pwd: "dJam94TlRrMk5qZ3lOakU1TENKc",
                 roles: [
                     {
                         role: "readWrite",
-                        db: "flamingo-group"
+                        db: "mm-printing"
                     },
                     {
                         role: "read",
@@ -35,14 +35,14 @@ initdbScripts:
             }
     );
 
-    db.getSiblingDB('flamingo-group').createUser(
+    db.getSiblingDB('mm-printing').createUser(
             {
-                user: "flamingo-group",
+                user: "mm-printing",
                 pwd: "dJam94TlRrMk5qZ3lOakU1TENKc",
                 roles: [
                     {
                         role: "readWrite",
-                        db: "flamingo-group"
+                        db: "mm-printing"
                     },
                     {
                         role: "read",

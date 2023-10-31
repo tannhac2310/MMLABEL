@@ -61,7 +61,7 @@ priorityClassName: ""
 ## Distributed Minio ref: https://docs.minio.io/docs/distributed-minio-quickstart-guide
 ##
 existingSecret: ""
-accessKey: flamingo-groupserver
+accessKey: mm-printingserver
 secretKey: oGBy+GmMTvdbTKn0+WWR03ov9SfYm15m9jyVPbfDjHfpwreXqMWn+77Pd873o4+LlzQiw1dZt9t4b2A6rKhXXg==
 certsPath: "/etc/minio/certs/"
 configPathmc: "/etc/minio/mc/"

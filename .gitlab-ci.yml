@@ -57,7 +57,7 @@ deploy_development:
     - echo ${kube_config} | base64 -d > ${KUBECONFIG}
   script: |
     echo "Deploy to development server"
-    helm upgrade --install flamingo-group \
+    helm upgrade --install mm-printing \
         ./deployments/helm/backend/ \
         -f ./deployments/helm/backend/values-staging.yaml \
         -n backend \

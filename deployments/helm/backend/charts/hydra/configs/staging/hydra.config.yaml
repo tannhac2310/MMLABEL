@@ -16,7 +16,7 @@ remoteTrace:
   traceCollector: "http://jaeger-tracing-collector.monitoring:14268/api/traces"
   ratio: 1
 nats:
-  clusterId: "flamingo-group"
+  clusterId: "mm-printing"
   address: "nats-streaming-client.nats-streaming"
 redis:
   host: "redis-master.databases:6379"
@@ -33,7 +33,7 @@ firebase:
   configPath: /secrets/firebase-adminsdk-creds.json
 s3Storage:
   region: us-east-1
-  bucket: flamingo-group-images
+  bucket: mm-printing-images
   accessKey: bX983KRuvA7dF8MYthfK
   secretKey: YOwWxiBiountG3xwcild
   endpoint: https://edv.app:8080

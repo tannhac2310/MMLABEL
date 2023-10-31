@@ -3,11 +3,11 @@ replicaCount: 3
 storageClass: ""
 
 streaming:
-  id: flamingo-group
+  id: mm-printing
   debug:
     enabled: true
     trace: true
-  ftGroup: flamingo-group
+  ftGroup: mm-printing
 
 image:
   repository: nats-streaming

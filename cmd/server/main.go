@@ -58,15 +58,15 @@ func main() {
 
 	cmdVersion := &cobra.Command{
 		Use:   "version",
-		Short: "Print the version number of flamingo-group backend",
+		Short: "Print the version number of mm-printing backend",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("flamingo-group backend " + version.Version)
+			fmt.Println("mm-printing backend " + version.Version)
 			fmt.Println("Git hash " + version.GitHash)
 			fmt.Println("Go version " + version.GoVersion)
 		},
 	}
 
-	rootCmd := &cobra.Command{Use: "flamingo-group"}
+	rootCmd := &cobra.Command{Use: "mm-printing"}
 	rootCmd.AddCommand(
 		cmdMigrate,
 		cmdHydra,

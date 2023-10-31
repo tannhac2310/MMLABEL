@@ -19,7 +19,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/swag"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/swag/swagger"
-)flamingo-group
+)
 
 func TestDescription(t *testing.T) {
 	api := swag.New(

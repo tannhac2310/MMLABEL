@@ -43,7 +43,7 @@ services:
     environment:
       MINIO_ACCESS_KEY: access_key
       MINIO_SECRET_KEY: secret_key
-      INIT_BUCKET_NAME: flamingo-group
+      INIT_BUCKET_NAME: mm-printing
     volumes:
       - "./scripts/:/scripts/"
     entrypoint: /scripts/init_s3_bucket.sh
@@ -75,10 +75,10 @@ services:
       context: ../
       dockerfile: ${DOCKER_FILE}
       target: dev_env
-    image: flamingo-group_dev_image
+    image: mm-printing_dev_image
     volumes:
-      - "../:/flamingo-group/"
-    working_dir: /flamingo-group
+      - "../:/mm-printing/"
+    working_dir: /mm-printing
     entrypoint: modd --file=modd_hydra.conf
     ports:
       - "4100:4100"
@@ -87,10 +87,10 @@ services:
       context: ../
       dockerfile: ${DOCKER_FILE}
       target: dev_env
-    image: flamingo-group_dev_image
+    image: mm-printing_dev_image
     volumes:
-      - "../:/flamingo-group/"
-    working_dir: /flamingo-group
+      - "../:/mm-printing/"
+    working_dir: /mm-printing
     entrypoint: modd --file=modd_gezu.conf
     ports:
       - "5100:5100"
@@ -99,18 +99,18 @@ services:
       context: ../
       dockerfile: ${DOCKER_FILE}
       target: dev_env
-    image: flamingo-group_dev_image
+    image: mm-printing_dev_image
     volumes:
-      - "../:/flamingo-group/"
-    working_dir: /flamingo-group
+      - "../:/mm-printing/"
+    working_dir: /mm-printing
     entrypoint: modd --file=modd_aurora.conf
     ports:
       - "6100:6100"
   mock_gen:
     image: vektra/mockery
     volumes:
-      - "../:/flamingo-group/"
-    working_dir: /flamingo-group
+      - "../:/mm-printing/"
+    working_dir: /mm-printing
   # hydra_test:
   #   build:
   #     context: ../
