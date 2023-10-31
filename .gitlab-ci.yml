@@ -1,7 +1,8 @@
 image: docker:git
 
 services:
-  - docker:git
+  - name: my-docker:0.0.2
+    command: [ "dockerd", "-H", "tcp://0.0.0.0:2375" ]
 stages:
   - build
   - test
