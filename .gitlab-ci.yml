@@ -2,7 +2,7 @@ image: docker:git
 
 services:
   - name: docker:git
-    command: [ "dockerd", "-H", "tcp://0.0.0.0:2375" ]
+    command: [ "dockerd", "-H", "tcp://localhost:2375" ]
 stages:
   - build
   - test
