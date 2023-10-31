@@ -1,7 +1,8 @@
 image: docker:git
 
 services:
-  - docker:git
+  - name: docker:git
+    command: [ "dockerd", "-H", "tcp://0.0.0.0:2375" ]
 stages:
   - build
   - test
@@ -37,9 +38,16 @@ build-builder:
 build-release:
   stage: build
   script:
-    - docker pull ${BUILDER_IMAGE} || true
-    - docker build --build-arg VERSION=${CI_COMMIT_TAG} --build-arg GIT_HASH=${CI_COMMIT_SHORT_SHA}  --cache-from ${BUILDER_IMAGE} --tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG} --network host .
-    - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
+    - |
+      echo "Waiting docker to launch on 2375..."
+      while ! nc -z localhost 2375; do
+        sleep 1
+      done
+      echo "Docker launched"
+
+      docker pull ${BUILDER_IMAGE} || true
+      docker build --build-arg VERSION=${CI_COMMIT_TAG} --build-arg GIT_HASH=${CI_COMMIT_SHORT_SHA}  --cache-from ${BUILDER_IMAGE} --tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG} --network host .
+      docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
   only:
     - tags
 deploy_development:
