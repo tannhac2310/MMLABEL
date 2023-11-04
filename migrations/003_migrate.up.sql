@@ -32,15 +32,20 @@ CREATE TABLE employees
     CONSTRAINT pk_employees PRIMARY KEY (id ASC)
 );
 
+-- SỐ LỆNH SX	KINH DOANH	KHÁCH HÀNG	TÊN /MÃ SP	TÊN NVL 	SỐ MÉT	SỐ LƯỢNG TỜ	SỐ LƯỢNG TP	SỐ LƯỢNG GIAO	NGÀY BẮT ĐẦU-KẾT THÚC	SỰ CỐ	GHI CHÚ	HÌNH ẢNH SẢN PHẨM
 CREATE TABLE production_orders
 (
     id                      VARCHAR(50)  NOT NULL,
     product_code            VARCHAR(255) NOT NULL,
     product_name            VARCHAR(255) NOT NULL,
     customer_id             VARCHAR(50)  NOT NULL REFERENCES customers(id),
+    sales_id                VARCHAR(50)  NOT NULL REFERENCES employees(id),
+    qty_paper               INT DEFAULT NULL,
+    qty_finished            INT DEFAULT NULL,
+    qty_delivered           INT DEFAULT NULL,
     planned_production_date TIMESTAMPTZ  NOT NULL,
     delivery_date           TIMESTAMPTZ  NOT NULL,
-    responsible             STRING[], -- INSERT INTO a VALUES (ARRAY['sky', 'road', 'car']);
+    delivered_image         VARCHAR(255) NULL,
     status                  SMALLINT     DEFAULT 1,
     note                    TEXT,
     created_by              VARCHAR(50)  NOT NULL,
