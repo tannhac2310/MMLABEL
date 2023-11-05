@@ -38,7 +38,7 @@ func (c *customerService) CreateCustomer(ctx context.Context, opt *CreateCustome
 	if errTx != nil {
 		return "", errTx
 	}
-	return now.String(), nil
+	return customer.ID, nil
 }
 
 type CreateCustomerOpts struct {

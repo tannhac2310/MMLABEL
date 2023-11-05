@@ -148,6 +148,7 @@ func Run(ctx context.Context, configPath string) {
 			},
 			// controller, register routes
 			controller.RegisterConfigController,
+			controller.RegisterCustomerController,
 		),
 	}
 
