@@ -30,9 +30,15 @@ build-builder:
     - master
     - develop
   script:
-    - docker pull ${BUILDER_IMAGE} || true
-    - docker build --target=builder --cache-from ${BUILDER_IMAGE} --tag ${BUILDER_IMAGE} --network host .
-    - docker push ${BUILDER_IMAGE}
+    - |
+      echo "Waiting docker to launch on 2375..."
+      while ! nc -z localhost 2375; do
+        sleep 1
+      done
+      echo "Docker launched"
+      docker pull ${BUILDER_IMAGE} || true
+      docker build --target=builder --cache-from ${BUILDER_IMAGE} --tag ${BUILDER_IMAGE} --network host .
+      docker push ${BUILDER_IMAGE}
 
 build-release:
   stage: build
