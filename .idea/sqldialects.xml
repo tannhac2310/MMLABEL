@@ -3,5 +3,6 @@
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/migrations/001_migrate.up.sql" dialect="Cockroach" />
     <file url="file://$PROJECT_DIR$/migrations/002_migrate.up.sql" dialect="Cockroach" />
+    <file url="file://$PROJECT_DIR$/migrations/003_migrate.up.sql" dialect="Cockroach" />
   </component>
 </project>

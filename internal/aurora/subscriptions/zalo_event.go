@@ -6,7 +6,6 @@ import (
 
 	"go.uber.org/zap"
 
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/message"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/constants"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/nats"
@@ -14,11 +13,10 @@ import (
 )
 
 type ZaloEventSubscription struct {
-	db             cockroach.Ext
-	busFactory     nats.BusFactory
-	logger         *zap.Logger
-	wsService      ws.WebSocketService
-	messageService message.Service
+	db         cockroach.Ext
+	busFactory nats.BusFactory
+	logger     *zap.Logger
+	wsService  ws.WebSocketService
 }
 
 func NewZaloSubscription(
@@ -26,14 +24,12 @@ func NewZaloSubscription(
 	busFactory nats.BusFactory,
 	logger *zap.Logger,
 	wsService ws.WebSocketService,
-	messageService message.Service,
 ) *ZaloEventSubscription {
 	return &ZaloEventSubscription{
-		db:             db,
-		busFactory:     busFactory,
-		logger:         logger,
-		wsService:      wsService,
-		messageService: messageService,
+		db:         db,
+		busFactory: busFactory,
+		logger:     logger,
+		wsService:  wsService,
 	}
 }
 

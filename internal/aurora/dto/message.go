@@ -1,51 +1,65 @@
 package dto
 
 import (
-	"time"
-
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/commondto"
 )
 
-type MessageFilter struct {
-	ChatID string `json:"chatId"`
+type CustomerFilter struct {
+	Name  string `json:"name"`
+	Phone string `json:"phone"`
 }
 
-type FindMessageRequest struct {
-	Filter *MessageFilter    `json:"filter" binding:"required"`
+type FindCustomersRequest struct {
+	Filter *CustomerFilter   `json:"filter" binding:"required"`
 	Paging *commondto.Paging `json:"paging" binding:"required"`
 }
 
-type FindMessageResponse struct {
-	Messages []*Message `json:"messages"`
-	Total    int64      `json:"total"`
+type FindCustomersResponse struct {
+	Customers []*Customer `json:"customers"`
+	Total     int64       `json:"total"`
 }
-type Coordinates struct {
-	Latitude  string `json:"latitude"`
-	Longitude string `json:"longitude"`
+type Customer struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Avatar      string `json:"avatar"`
+	PhoneNumber string `json:"phone_number"`
+	Email       string `json:"email"`
+	Status      int16  `json:"status"`
+	Type        int16  `json:"type"`
+	Address     string `json:"address"`
 }
-type PayloadAttachment struct {
-	ID          string       `json:"id"`
-	Thumbnail   string       `json:"thumbnail"`
-	URL         string       `json:"url"`
-	Description string       `json:"description"`
-	Coordinates *Coordinates `json:"coordinates"`
-	Size        string       `json:"size"`
-	Name        string       `json:"name"`
-	Checksum    string       `json:"checksum"`
-	Type        string       `json:"type"`
+
+type CreateCustomerRequest struct {
+	Name        string `json:"name" binding:"required"`
+	Avatar      string `json:"avatar"`
+	PhoneNumber string `json:"phone_number"`
+	Email       string `json:"email"`
+	Status      int16  `json:"status" binding:"required"`
+	Type        int16  `json:"type"`
+	Address     string `json:"address"`
 }
-type Attachment struct {
-	Payload *PayloadAttachment `json:"payload"`
-	Type    string             `json:"type"`
+
+type CreateCustomerResponse struct {
+	ID string `json:"id"`
 }
-type Message struct {
-	ID                string        `json:"id"`
-	ChatID            string        `json:"chatId"`
-	ChatTitle         string        `json:"chatTitle"`
-	AuthorID          string        `json:"authorId"`
-	Message           string        `json:"message"`
-	CreatedAt         time.Time     `json:"createdAt"`
-	UpdatedAt         time.Time     `json:"updatedAt"`
-	Attachments       []*Attachment `json:"attachments"`
-	ExternalMessageID string        `json:"externalMessageId"`
+
+type EditCustomerRequest struct {
+	ID          string `json:"id"`
+	Name        string `json:"name" binding:"required"`
+	Avatar      string `json:"avatar"`
+	PhoneNumber string `json:"phone_number"`
+	Email       string `json:"email"`
+	Status      int16  `json:"status" binding:"required"`
+	Type        int16  `json:"type"`
+	Address     string `json:"address"`
+}
+
+type EditCustomerResponse struct {
+}
+
+type DeleteCustomerRequest struct {
+	ID string `json:"id"`
+}
+
+type DeleteCustomerResponse struct {
 }
