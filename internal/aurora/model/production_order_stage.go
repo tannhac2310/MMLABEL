@@ -1,0 +1,74 @@
+package model
+
+import (
+	"database/sql"
+	"time"
+)
+
+const (
+	ProductionOrderStageFieldID                = "id"
+	ProductionOrderStageFieldProductionOrderID = "production_order_id"
+	ProductionOrderStageFieldStageID           = "stage_id"
+	ProductionOrderStageFieldStartedAt         = "started_at"
+	ProductionOrderStageFieldCompletedAt       = "completed_at"
+	ProductionOrderStageFieldStatus            = "status"
+	ProductionOrderStageFieldCondition         = "condition"
+	ProductionOrderStageFieldNote              = "note"
+	ProductionOrderStageFieldData              = "data"
+	ProductionOrderStageFieldCreatedAt         = "created_at"
+	ProductionOrderStageFieldUpdatedAt         = "updated_at"
+	ProductionOrderStageFieldDeletedAt         = "deleted_at"
+)
+
+type ProductionOrderStage struct {
+	ID                string                 `db:"id"`
+	ProductionOrderID string                 `db:"production_order_id"`
+	StageID           string                 `db:"stage_id"`
+	StartedAt         sql.NullTime           `db:"started_at"`
+	CompletedAt       sql.NullTime           `db:"completed_at"`
+	Status            int16                  `db:"status"`
+	Condition         sql.NullString         `db:"condition"`
+	Note              sql.NullString         `db:"note"`
+	Data              map[string]interface{} `db:"data"`
+	CreatedAt         time.Time              `db:"created_at"`
+	UpdatedAt         time.Time              `db:"updated_at"`
+	DeletedAt         sql.NullTime           `db:"deleted_at"`
+}
+
+func (rcv *ProductionOrderStage) FieldMap() (fields []string, values []interface{}) {
+	fields = []string{
+		ProductionOrderStageFieldID,
+		ProductionOrderStageFieldProductionOrderID,
+		ProductionOrderStageFieldStageID,
+		ProductionOrderStageFieldStartedAt,
+		ProductionOrderStageFieldCompletedAt,
+		ProductionOrderStageFieldStatus,
+		ProductionOrderStageFieldCondition,
+		ProductionOrderStageFieldNote,
+		ProductionOrderStageFieldData,
+		ProductionOrderStageFieldCreatedAt,
+		ProductionOrderStageFieldUpdatedAt,
+		ProductionOrderStageFieldDeletedAt,
+	}
+
+	values = []interface{}{
+		&rcv.ID,
+		&rcv.ProductionOrderID,
+		&rcv.StageID,
+		&rcv.StartedAt,
+		&rcv.CompletedAt,
+		&rcv.Status,
+		&rcv.Condition,
+		&rcv.Note,
+		&rcv.Data,
+		&rcv.CreatedAt,
+		&rcv.UpdatedAt,
+		&rcv.DeletedAt,
+	}
+
+	return
+}
+
+func (*ProductionOrderStage) TableName() string {
+	return "production_order_stage"
+}

@@ -18,7 +18,6 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/configs"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/controller"
 	repository2 "mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/message"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/messagerelation"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/subscriptions"
 	pkgConfig "mmlabel.gitlab.com/mm-printing-backend/pkg/configs"
@@ -125,7 +124,7 @@ func Run(ctx context.Context, configPath string) {
 				return ws.NewApp(hostName, zapLogger, redisDB)
 			},
 
-			message.NewService,
+			customer.NewService,
 			messagerelation.NewService,
 		),
 		// nats streaming

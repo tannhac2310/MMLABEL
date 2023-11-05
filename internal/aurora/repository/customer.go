@@ -8,26 +8,25 @@ import (
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
-type ChatRepo interface {
-	Insert(ctx context.Context, e *model.Chat) error
-	Update(ctx context.Context, e *model.Chat) error
+type CustomerRepo interface {
+	Insert(ctx context.Context, e *model.Customer) error
+	Update(ctx context.Context, e *model.Customer) error
 	SoftDelete(ctx context.Context, id string) error
-	Search(ctx context.Context, s *SearchChatsOpts) ([]*ChatData, error)
-	Count(ctx context.Context, s *SearchChatsOpts) (*CountResult, error)
-	SearchOne(ctx context.Context, s *SearchChatsOpts) (*ChatData, error)
+	Search(ctx context.Context, s *SearchCustomersOpts) ([]*CustomerData, error)
+	Count(ctx context.Context, s *SearchCustomersOpts) (*CountResult, error)
+	SearchOne(ctx context.Context, s *SearchCustomersOpts) (*CustomerData, error)
 }
 
-type chatsRepo struct {
+type customersRepo struct {
 }
 
-func NewChatRepo() ChatRepo {
-	return &chatsRepo{}
+func NewCustomerRepo() CustomerRepo {
+	return &customersRepo{}
 }
 
-func (r *chatsRepo) Insert(ctx context.Context, e *model.Chat) error {
+func (r *customersRepo) Insert(ctx context.Context, e *model.Customer) error {
 	err := cockroach.Create(ctx, e)
 	if err != nil {
 		return fmt.Errorf("r.baseRepo.Create: %w", err)
@@ -36,12 +35,12 @@ func (r *chatsRepo) Insert(ctx context.Context, e *model.Chat) error {
 	return nil
 }
 
-func (r *chatsRepo) Update(ctx context.Context, e *model.Chat) error {
+func (r *customersRepo) Update(ctx context.Context, e *model.Customer) error {
 	e.UpdatedAt = time.Now()
 	return cockroach.Update(ctx, e)
 }
 
-func (r *chatsRepo) SoftDelete(ctx context.Context, id string) error {
+func (r *customersRepo) SoftDelete(ctx context.Context, id string) error {
 	sql := `UPDATE message
 		SET deleted_at = NOW()
 		WHERE id = $1`
@@ -57,47 +56,35 @@ func (r *chatsRepo) SoftDelete(ctx context.Context, id string) error {
 	return nil
 }
 
-// SearchChatsOpts all params is options
-type SearchChatsOpts struct {
-	IDs        []string
-	ID         string
-	AuthorID   string
-	EntityType enum.ChatEntityType
-	EntityID   string
-	Limit      int64
-	Offset     int64
-	Sort       *Sort
+// SearchCustomersOpts all params is options
+type SearchCustomersOpts struct {
+	IDs    []string
+	Name   string
+	Phone  string
+	Limit  int64
+	Offset int64
+	Sort   *Sort
 }
 
-func (s *SearchChatsOpts) buildQuery(isCount bool) (string, []interface{}) {
+func (s *SearchCustomersOpts) buildQuery(isCount bool) (string, []interface{}) {
 	var args []interface{}
 	conds := ""
 	joins := ""
 
 	if len(s.IDs) > 0 {
 		args = append(args, s.IDs)
-		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.ChatFieldID)
+		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.CustomerFieldID)
+	}
+	if s.Name != "" {
+		args = append(args, s.Name)
+		conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.CustomerFieldName, len(args))
+	}
+	if s.Phone != "" {
+		args = append(args, s.Phone)
+		conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.CustomerFieldPhoneNumber, len(args))
 	}
 
-	if s.ID != "" {
-		args = append(args, s.ID)
-		conds += fmt.Sprintf(" AND b.%s = $%d", model.ChatFieldID, len(args))
-	}
-	if s.AuthorID != "" {
-		args = append(args, s.AuthorID)
-		conds += fmt.Sprintf(" AND b.%s = $%d", model.ChatFieldAuthorID, len(args))
-	}
-
-	if s.EntityType > 0 {
-		args = append(args, s.EntityType)
-		conds += fmt.Sprintf(" AND b.%s = $%d", model.ChatFieldEntityType, len(args))
-	}
-	if s.EntityID != "" {
-		args = append(args, s.EntityID)
-		conds += fmt.Sprintf(" AND b.%s = $%d", model.ChatFieldEntityID, len(args))
-	}
-
-	b := &model.Chat{}
+	b := &model.Customer{}
 	fields, _ := b.FieldMap()
 	if isCount {
 		return fmt.Sprintf(`SELECT count(*) as cnt
@@ -117,12 +104,12 @@ func (s *SearchChatsOpts) buildQuery(isCount bool) (string, []interface{}) {
 		OFFSET %d`, strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
 }
 
-type ChatData struct {
-	*model.Chat
+type CustomerData struct {
+	*model.Customer
 }
 
-func (r *chatsRepo) Search(ctx context.Context, s *SearchChatsOpts) ([]*ChatData, error) {
-	message := make([]*ChatData, 0)
+func (r *customersRepo) Search(ctx context.Context, s *SearchCustomersOpts) ([]*CustomerData, error) {
+	message := make([]*CustomerData, 0)
 	sql, args := s.buildQuery(false)
 	err := cockroach.Select(ctx, sql, args...).ScanAll(&message)
 	if err != nil {
@@ -131,8 +118,8 @@ func (r *chatsRepo) Search(ctx context.Context, s *SearchChatsOpts) ([]*ChatData
 
 	return message, nil
 }
-func (r *chatsRepo) SearchOne(ctx context.Context, s *SearchChatsOpts) (*ChatData, error) {
-	message := &ChatData{}
+func (r *customersRepo) SearchOne(ctx context.Context, s *SearchCustomersOpts) (*CustomerData, error) {
+	message := &CustomerData{}
 	sql, args := s.buildQuery(false)
 	err := cockroach.Select(ctx, sql, args...).ScanOne(message)
 	if err != nil {
@@ -142,7 +129,7 @@ func (r *chatsRepo) SearchOne(ctx context.Context, s *SearchChatsOpts) (*ChatDat
 	return message, nil
 }
 
-func (r *chatsRepo) Count(ctx context.Context, s *SearchChatsOpts) (*CountResult, error) {
+func (r *customersRepo) Count(ctx context.Context, s *SearchCustomersOpts) (*CountResult, error) {
 	countResult := &CountResult{}
 	sql, args := s.buildQuery(true)
 	err := cockroach.Select(ctx, sql, args...).ScanOne(countResult)
