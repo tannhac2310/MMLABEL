@@ -35,7 +35,7 @@ type User struct {
 	Address     string          `db:"address"`
 	PhoneNumber string          `db:"phone_number"`
 	Email       string          `db:"email"`
-	Linked      []string        `db:"linked"`
+	Linked      string          `db:"linked"`
 	Status      enum.UserStatus `db:"status"`
 	Type        enum.UserType   `db:"type"`
 	CreatedAt   time.Time       `db:"created_at"`

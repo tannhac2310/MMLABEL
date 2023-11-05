@@ -80,6 +80,7 @@ CREATE TABLE user_role
     id         VARCHAR(50) NOT NULL,
     user_id    VARCHAR(50) NOT NULL,
     role_id    VARCHAR(50) NOT NULL,
+    created_by VARCHAR(50),
     created_at TIMESTAMPTZ NOT NULL DEFAULT now():::TIMESTAMPTZ,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now():::TIMESTAMPTZ,
     deleted_at TIMESTAMPTZ,

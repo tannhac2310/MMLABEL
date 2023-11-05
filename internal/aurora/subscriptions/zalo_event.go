@@ -13,11 +13,10 @@ import (
 )
 
 type ZaloEventSubscription struct {
-	db             cockroach.Ext
-	busFactory     nats.BusFactory
-	logger         *zap.Logger
-	wsService      ws.WebSocketService
-	messageService customer.Service
+	db         cockroach.Ext
+	busFactory nats.BusFactory
+	logger     *zap.Logger
+	wsService  ws.WebSocketService
 }
 
 func NewZaloSubscription(
@@ -25,14 +24,12 @@ func NewZaloSubscription(
 	busFactory nats.BusFactory,
 	logger *zap.Logger,
 	wsService ws.WebSocketService,
-	messageService customer.Service,
 ) *ZaloEventSubscription {
 	return &ZaloEventSubscription{
-		db:             db,
-		busFactory:     busFactory,
-		logger:         logger,
-		wsService:      wsService,
-		messageService: messageService,
+		db:         db,
+		busFactory: busFactory,
+		logger:     logger,
+		wsService:  wsService,
 	}
 }
 

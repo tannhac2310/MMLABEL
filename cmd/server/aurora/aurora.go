@@ -18,7 +18,7 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/configs"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/controller"
 	repository2 "mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/messagerelation"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/customer"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/subscriptions"
 	pkgConfig "mmlabel.gitlab.com/mm-printing-backend/pkg/configs"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
@@ -110,11 +110,7 @@ func Run(ctx context.Context, configPath string) {
 		fx.Provide(
 			repository.NewUserRepo,
 			repository.NewPermissionRepo,
-			repository2.NewMessageRepo,
-			repository2.NewChatRepo,
-			repository2.NewMessageRelationRepo,
-			repository2.NewZaloRepo,
-			repository2.NewCrmContactRepo,
+			repository2.NewCustomerRepo,
 		),
 		// services
 		fx.Provide(
@@ -125,7 +121,6 @@ func Run(ctx context.Context, configPath string) {
 			},
 
 			customer.NewService,
-			messagerelation.NewService,
 		),
 		// nats streaming
 		fx.Provide(func(cfg *pkgConfig.BaseConfig, zapLogger *zap.Logger) (nats.BusFactory, error) {
