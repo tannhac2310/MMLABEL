@@ -2,8 +2,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/hydra/dto"
@@ -38,7 +36,6 @@ func (a *authController) LoginFirebase(c *gin.Context) {
 
 func (a *authController) toLoginResponse(c context.Context, r *auth.LoginResult) (*dto.LoginResponse, error) {
 	u, err := a.userService.FindUserByID(c, r.UserID)
-	fmt.Println("------------------->", u)
 	if err != nil {
 		return nil, err
 	}
@@ -49,6 +46,8 @@ func (a *authController) toLoginResponse(c context.Context, r *auth.LoginResult)
 		Profile: &dto.UserProfile{
 			ID:          u.ID,
 			Name:        u.Name,
+			Code:        u.Code,
+			Departments: u.Departments.String,
 			Avatar:      u.Avatar,
 			PhoneNumber: u.PhoneNumber,
 			Email:       u.Email,

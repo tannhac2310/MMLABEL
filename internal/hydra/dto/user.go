@@ -15,6 +15,8 @@ type (
 		PhoneNumber string          `json:"phoneNumber"`
 		Email       string          `json:"email"`
 		Address     string          `json:"address"`
+		Code        string          `json:"code"`
+		Departments string          `json:"departments"`
 		Type        enum.UserType   `json:"type"`
 		Status      enum.UserStatus `json:"status"`
 		CreatedAt   time.Time       `json:"createdAt"`
@@ -115,9 +117,8 @@ type (
 	}
 
 	FindUsersResponse struct {
-		Users    []*User           `json:"users"`
-		NextPage *commondto.Paging `json:"nextPage"`
-		Total    int64             `json:"total"`
+		Users []*User `json:"users"`
+		Total int64   `json:"total"`
 	}
 
 	ChangePasswordRequest struct {

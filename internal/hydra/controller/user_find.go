@@ -6,7 +6,6 @@ import (
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/hydra/dto"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/apperror"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/commondto"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/service/user"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/transportutil"
 )
@@ -41,23 +40,9 @@ func (u *userController) FindUsers(c *gin.Context) {
 		userResp = append(userResp, toUserResp(f))
 	}
 
-	nextPage := &commondto.Paging{
-		Limit:  req.Paging.Limit,
-		Offset: req.Paging.Offset + req.Paging.Limit,
-	}
-
-	if int64(len(users)) <= req.Paging.Limit {
-		nextPage = nil
-	}
-
-	if l := int64(len(userResp)); l > req.Paging.Limit {
-		userResp = userResp[:req.Paging.Limit]
-	}
-
 	transportutil.SendJSONResponse(c, &dto.FindUsersResponse{
-		Users:    userResp,
-		NextPage: nextPage,
-		Total:    total.Count,
+		Users: userResp,
+		Total: total.Count,
 	})
 }
 
@@ -71,6 +56,8 @@ func toUserResp(e *repository.UserData) *dto.User {
 		Address:     e.Address,
 		Type:        e.Type,
 		Status:      e.Status,
+		Code:        e.Code,
+		Departments: e.Departments.String,
 		CreatedAt:   e.CreatedAt,
 		UpdatedAt:   e.UpdatedAt,
 	}
