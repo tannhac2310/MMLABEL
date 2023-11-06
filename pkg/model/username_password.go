@@ -8,6 +8,7 @@ import (
 const (
 	UserNamePasswordFieldID          = "id"
 	UserNamePasswordFieldUserID      = "user_id"
+	UserNamePasswordFieldUserName    = "username"
 	UserNamePasswordFieldEmail       = "email"
 	UserNamePasswordFieldPhoneNumber = "phone_number"
 	UserNamePasswordFieldPassword    = "password"
@@ -19,6 +20,7 @@ const (
 type UserNamePassword struct {
 	ID          string         `db:"id"`
 	UserID      string         `db:"user_id"`
+	UserName    string         `db:"username"`
 	Email       sql.NullString `db:"email,omitempty"`
 	PhoneNumber sql.NullString `db:"phone_number"`
 	Password    string         `db:"password"`
@@ -35,6 +37,7 @@ func (u *UserNamePassword) FieldMap() (fields []string, values []interface{}) {
 	fields = []string{
 		UserNamePasswordFieldID,
 		UserNamePasswordFieldUserID,
+		UserNamePasswordFieldUserName,
 		UserNamePasswordFieldEmail,
 		UserNamePasswordFieldPhoneNumber,
 		UserNamePasswordFieldPassword,
@@ -46,6 +49,7 @@ func (u *UserNamePassword) FieldMap() (fields []string, values []interface{}) {
 	values = []interface{}{
 		&u.ID,
 		&u.UserID,
+		&u.UserName,
 		&u.Email,
 		&u.PhoneNumber,
 		&u.Password,

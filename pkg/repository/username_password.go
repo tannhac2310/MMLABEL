@@ -55,7 +55,7 @@ func (u *userNamePasswordRepo) FindByUserID(ctx context.Context, id string) (*mo
 
 func (u *userNamePasswordRepo) FindByUserName(ctx context.Context, userName string) (*model.UserNamePassword, error) {
 	e := &model.UserNamePassword{}
-	err := cockroach.FindOne(ctx, e, "email = $1 OR phone_number = $1", userName)
+	err := cockroach.FindOne(ctx, e, "email = $1 OR phone_number = $1 OR username = $1", userName)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.FindOne: %w", err)
 	}

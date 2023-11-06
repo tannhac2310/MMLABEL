@@ -59,8 +59,8 @@ VALUES ('p', 'root', 'root'),
        ('p', 'user', '/gezu/ws')
 ;
 INSERT INTO "users"
-(id, name, avatar, phone_number, email, linked, "status","type", created_at, updated_at, deleted_at)
-VALUES ('01F3A27E8JFY7WZTV8FDDBWMJ3', 'Admin', '', '0799590102', 'hoanggiangco94@gmail.com', '', 1,3, '2021-04-15 13:06:54.205',
+(id, name,code, avatar, phone_number, email, linked, "status","type", created_at, updated_at, deleted_at)
+VALUES ('01F3A27E8JFY7WZTV8FDDBWMJ3', 'Admin', 'supperamdin','', '0799590102', 'hoanggiangco94@gmail.com', '', 1,3, '2021-04-15 13:06:54.205',
         '2021-04-15 13:06:54.205', NULL);
 
 INSERT INTO username_passwords

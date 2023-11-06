@@ -22,10 +22,12 @@ CREATE TABLE users
 (
     id           VARCHAR(50)  NOT NULL,
     name         VARCHAR(255) NOT NULL,
+    code         VARCHAR(255) NOT NULL,
     avatar       VARCHAR(512) NOT NULL DEFAULT '':::STRING,
     phone_number VARCHAR(50)  NOT NULL DEFAULT '':::STRING,
     email        VARCHAR(255) NOT NULL DEFAULT '':::STRING,
     linked       VARCHAR(255),
+    departments  text, -- `BGD,HCNX,IC`
     status       INT2                  DEFAULT 1,
     type         INT2                  DEFAULT 1,
     language_id  INT2                  default 1,
@@ -35,8 +37,7 @@ CREATE TABLE users
     updated_at   TIMESTAMPTZ  NOT NULL DEFAULT now():::TIMESTAMPTZ,
     deleted_at   TIMESTAMPTZ,
     CONSTRAINT pk_users PRIMARY KEY (id ASC),
-    UNIQUE INDEX idx_users__email (email ASC),
-    UNIQUE INDEX idx_users__phone_number (phone_number ASC)
+    UNIQUE INDEX idx_users__code (code ASC)
 );
 
 COMMENT ON COLUMN users.status IS '1: active, 2: ban';
@@ -104,6 +105,7 @@ CREATE TABLE username_passwords
 (
     id           VARCHAR(50) NOT NULL,
     user_id      VARCHAR(50) NOT NULL,
+    username     VARCHAR(50),
     phone_number VARCHAR(50),
     email        VARCHAR(255),
     password     VARCHAR(512),
@@ -112,6 +114,7 @@ CREATE TABLE username_passwords
     deleted_at   TIMESTAMPTZ,
     CONSTRAINT pk_username_passwords PRIMARY KEY (id ASC),
     CONSTRAINT fk__username_password__user_id FOREIGN KEY (user_id) REFERENCES users (id),
+    UNIQUE INDEX idx_username_passwords__username (username ASC),
     UNIQUE INDEX idx_username_passwords__email (email ASC),
     UNIQUE INDEX idx_username_passwords__phone_number (phone_number ASC)
 );
@@ -128,4 +131,18 @@ CREATE TABLE user_fcm_tokens
     CONSTRAINT pk_user_fcm_tokens PRIMARY KEY (id ASC),
     CONSTRAINT fk__user_fcm_tokens__user_id FOREIGN KEY (user_id) REFERENCES users (id),
     UNIQUE INDEX idx__user_fcm_tokens__user_id__device_id (user_id, device_id)
+);
+create table departments
+(
+    id         varchar(50)                            NOT NULL,
+    name       varchar(255)                           not null,
+    short_name varchar(255)                           not null,
+    code       varchar(255)                           not null,
+    stage_code varchar(255)                           not null,
+    priority   bigint                   default 100,
+    created_at timestamp with time zone default now() not null,
+    updated_at timestamp with time zone default now() not null,
+    deleted_at timestamp with time zone,
+    CONSTRAINT pk_departments PRIMARY KEY (id ASC),
+    UNIQUE INDEX idx_departments__code (code ASC)
 );
