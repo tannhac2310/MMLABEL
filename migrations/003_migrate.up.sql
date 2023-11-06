@@ -45,7 +45,7 @@ CREATE TABLE production_orders
     qty_delivered           INT                   DEFAULT NULL,
     planned_production_date TIMESTAMPTZ  NOT NULL,
     delivery_date           TIMESTAMPTZ  NOT NULL,
-    delivered_image         VARCHAR(255) NULL,
+    delivery_image         VARCHAR(255) NULL,
     status                  SMALLINT              DEFAULT 1,
     note                    TEXT,
     created_by              VARCHAR(50)  NOT NULL,

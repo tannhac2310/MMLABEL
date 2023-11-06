@@ -3,6 +3,8 @@ package model
 import (
 	"database/sql"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
 const (
@@ -16,7 +18,7 @@ const (
 	ProductionOrderFieldQtyDelivered          = "qty_delivered"
 	ProductionOrderFieldPlannedProductionDate = "planned_production_date"
 	ProductionOrderFieldDeliveryDate          = "delivery_date"
-	ProductionOrderFieldDeliveredImage        = "delivered_image"
+	ProductionOrderFieldDeliveryImage         = "delivery_image"
 	ProductionOrderFieldStatus                = "status"
 	ProductionOrderFieldNote                  = "note"
 	ProductionOrderFieldCreatedBy             = "created_by"
@@ -26,23 +28,23 @@ const (
 )
 
 type ProductionOrder struct {
-	ID                    string         `db:"id"`
-	ProductCode           string         `db:"product_code"`
-	ProductName           string         `db:"product_name"`
-	CustomerID            string         `db:"customer_id"`
-	SalesID               string         `db:"sales_id"`
-	QtyPaper              int64          `db:"qty_paper"`
-	QtyFinished           int64          `db:"qty_finished"`
-	QtyDelivered          int64          `db:"qty_delivered"`
-	PlannedProductionDate time.Time      `db:"planned_production_date"`
-	DeliveryDate          time.Time      `db:"delivery_date"`
-	DeliveredImage        sql.NullString `db:"delivered_image"`
-	Status                int16          `db:"status"`
-	Note                  sql.NullString `db:"note"`
-	CreatedBy             string         `db:"created_by"`
-	CreatedAt             time.Time      `db:"created_at"`
-	UpdatedAt             time.Time      `db:"updated_at"`
-	DeletedAt             sql.NullTime   `db:"deleted_at"`
+	ID                    string                     `db:"id"`
+	ProductCode           string                     `db:"product_code"`
+	ProductName           string                     `db:"product_name"`
+	CustomerID            string                     `db:"customer_id"`
+	SalesID               string                     `db:"sales_id"`
+	QtyPaper              int64                      `db:"qty_paper"`
+	QtyFinished           int64                      `db:"qty_finished"`
+	QtyDelivered          int64                      `db:"qty_delivered"`
+	PlannedProductionDate time.Time                  `db:"planned_production_date"`
+	DeliveryDate          time.Time                  `db:"delivery_date"`
+	DeliveryImage         sql.NullString             `db:"delivery_image"`
+	Status                enum.ProductionOrderStatus `db:"status"`
+	Note                  sql.NullString             `db:"note"`
+	CreatedBy             string                     `db:"created_by"`
+	CreatedAt             time.Time                  `db:"created_at"`
+	UpdatedAt             time.Time                  `db:"updated_at"`
+	DeletedAt             sql.NullTime               `db:"deleted_at"`
 }
 
 func (rcv *ProductionOrder) FieldMap() (fields []string, values []interface{}) {
@@ -57,7 +59,7 @@ func (rcv *ProductionOrder) FieldMap() (fields []string, values []interface{}) {
 		ProductionOrderFieldQtyDelivered,
 		ProductionOrderFieldPlannedProductionDate,
 		ProductionOrderFieldDeliveryDate,
-		ProductionOrderFieldDeliveredImage,
+		ProductionOrderFieldDeliveryImage,
 		ProductionOrderFieldStatus,
 		ProductionOrderFieldNote,
 		ProductionOrderFieldCreatedBy,
@@ -77,7 +79,7 @@ func (rcv *ProductionOrder) FieldMap() (fields []string, values []interface{}) {
 		&rcv.QtyDelivered,
 		&rcv.PlannedProductionDate,
 		&rcv.DeliveryDate,
-		&rcv.DeliveredImage,
+		&rcv.DeliveryImage,
 		&rcv.Status,
 		&rcv.Note,
 		&rcv.CreatedBy,

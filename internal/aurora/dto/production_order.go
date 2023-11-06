@@ -1,0 +1,90 @@
+package dto
+
+import (
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/commondto"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
+	"time"
+)
+
+type ProductionOrderFilter struct {
+	IDs                       []string
+	ProductCode               string                     `json:"productCode"`
+	ProductName               string                     `json:"productName"`
+	CustomerID                string                     `json:"customerID"`
+	Status                    enum.ProductionOrderStatus `json:"status"`
+	PlannedProductionDateFrom time.Time                  `json:"plannedProductionDateFrom"`
+	PlannedProductionDateTo   time.Time                  `json:"plannedProductionDateTo"`
+	DeliveryDateFrom          time.Time                  `json:"deliveryDateFrom"`
+	DeliveryDateTo            time.Time                  `json:"deliveryDateTo"`
+}
+
+type FindProductionOrdersRequest struct {
+	Filter *ProductionOrderFilter `json:"filter" binding:"required"`
+	Paging *commondto.Paging      `json:"paging" binding:"required"`
+}
+
+type FindProductionOrdersResponse struct {
+	ProductionOrders []*ProductionOrder `json:"production_orders"`
+	Total            int64              `json:"total"`
+}
+type ProductionOrder struct {
+	ID                    string                     `json:"id"`
+	ProductCode           string                     `json:"productCode"`
+	ProductName           string                     `json:"productName"`
+	CustomerID            string                     `json:"customerID"`
+	SalesID               string                     `json:"salesID"`
+	QtyPaper              int64                      `json:"qtyPaper"`
+	QtyFinished           int64                      `json:"qtyFinished"`
+	QtyDelivered          int64                      `json:"qtyDelivered"`
+	PlannedProductionDate time.Time                  `json:"plannedProductionDate"`
+	DeliveryDate          time.Time                  `json:"deliveryDate"`
+	DeliveryImage         string                     `json:"deliveredImage"`
+	Status                enum.ProductionOrderStatus `json:"status"`
+	Note                  string                     `json:"note"`
+	CreatedBy             string                     `json:"createdBy"`
+	CreatedAt             time.Time                  `json:"createdAt"`
+	UpdatedAt             time.Time                  `json:"updatedAt"`
+}
+
+type CreateProductionOrderRequest struct {
+	ProductCode           string                     `json:"productCode"  binding:"required"`
+	ProductName           string                     `json:"productName"  binding:"required"`
+	CustomerID            string                     `json:"customerID"  binding:"required"`
+	SalesID               string                     `json:"salesID"`
+	QtyPaper              int64                      `json:"qtyPaper"`
+	QtyFinished           int64                      `json:"qtyFinished"`
+	QtyDelivered          int64                      `json:"qtyDelivered"`
+	PlannedProductionDate time.Time                  `json:"plannedProductionDate"`
+	DeliveryDate          time.Time                  `json:"deliveryDate"`
+	DeliveryImage         string                     `json:"deliveredImage"`
+	Status                enum.ProductionOrderStatus `json:"status"  binding:"required"`
+	Note                  string                     `json:"note"`
+}
+
+type CreateProductionOrderResponse struct {
+	ID string `json:"id"`
+}
+
+type EditProductionOrderRequest struct {
+	ID                    string                     `json:"id"`
+	ProductCode           string                     `json:"productCode"  binding:"required"`
+	ProductName           string                     `json:"productName"  binding:"required"`
+	QtyPaper              int64                      `json:"qtyPaper"`
+	QtyFinished           int64                      `json:"qtyFinished"`
+	QtyDelivered          int64                      `json:"qtyDelivered"`
+	PlannedProductionDate time.Time                  `json:"plannedProductionDate"`
+	DeliveryDate          time.Time                  `json:"deliveryDate"`
+	DeliveryImage         string                     `json:"deliveryImage"`
+	Status                enum.ProductionOrderStatus `json:"status"  binding:"required"`
+	Note                  string                     `json:"note"`
+}
+
+type EditProductionOrderResponse struct {
+}
+
+type DeleteProductionOrderRequest struct {
+	ID string `json:"id"`
+}
+
+type DeleteProductionOrderResponse struct {
+}

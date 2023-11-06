@@ -41,7 +41,7 @@ func (r *customersRepo) Update(ctx context.Context, e *model.Customer) error {
 }
 
 func (r *customersRepo) SoftDelete(ctx context.Context, id string) error {
-	sql := `UPDATE message
+	sql := `UPDATE customers
 		SET deleted_at = NOW()
 		WHERE id = $1`
 

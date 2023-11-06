@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_order"
 	"os"
 
 	"github.com/casbin/casbin/v2"
@@ -111,6 +112,7 @@ func Run(ctx context.Context, configPath string) {
 			repository.NewUserRepo,
 			repository.NewPermissionRepo,
 			repository2.NewCustomerRepo,
+			repository2.NewProductionOrderRepo,
 		),
 		// services
 		fx.Provide(
@@ -121,6 +123,7 @@ func Run(ctx context.Context, configPath string) {
 			},
 
 			customer.NewService,
+			production_order.NewService,
 		),
 		// nats streaming
 		fx.Provide(func(cfg *pkgConfig.BaseConfig, zapLogger *zap.Logger) (nats.BusFactory, error) {
@@ -149,6 +152,7 @@ func Run(ctx context.Context, configPath string) {
 			// controller, register routes
 			controller.RegisterConfigController,
 			controller.RegisterCustomerController,
+			controller.RegisterProductionOrderController,
 		),
 	}
 
