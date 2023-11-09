@@ -132,17 +132,17 @@ CREATE TABLE user_fcm_tokens
     CONSTRAINT fk__user_fcm_tokens__user_id FOREIGN KEY (user_id) REFERENCES users (id),
     UNIQUE INDEX idx__user_fcm_tokens__user_id__device_id (user_id, device_id)
 );
+
 create table departments
 (
     id         varchar(50)                            NOT NULL,
+    parent_id  varchar(50),
     name       varchar(255)                           not null,
     short_name varchar(255)                           not null,
     code       varchar(255)                           not null,
-    stage_code varchar(255)                           not null,
     priority   bigint                   default 100,
     created_at timestamp with time zone default now() not null,
     updated_at timestamp with time zone default now() not null,
     deleted_at timestamp with time zone,
-    CONSTRAINT pk_departments PRIMARY KEY (id ASC),
-    UNIQUE INDEX idx_departments__code (code ASC)
+    CONSTRAINT pk_departments PRIMARY KEY (id ASC)
 );

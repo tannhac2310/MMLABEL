@@ -14,23 +14,23 @@ CREATE TABLE customers
     deleted_at   TIMESTAMPTZ,
     CONSTRAINT pk_customers PRIMARY KEY (id ASC)
 );
-
-CREATE TABLE employees
-(
-    id           VARCHAR(50)  NOT NULL,
-    name         VARCHAR(255) NOT NULL,
-    avatar       VARCHAR(512),
-    phone_number VARCHAR(50),
-    email        VARCHAR(255),
-    status       SMALLINT              DEFAULT 1,
-    type         SMALLINT              DEFAULT 1,
-    address      VARCHAR(512),
-    created_by   VARCHAR(50)  NOT NULL,
-    created_at   TIMESTAMPTZ  NOT NULL DEFAULT now():::TIMESTAMPTZ,
-    updated_at   TIMESTAMPTZ  NOT NULL DEFAULT now():::TIMESTAMPTZ,
-    deleted_at   TIMESTAMPTZ,
-    CONSTRAINT pk_employees PRIMARY KEY (id ASC)
-);
+--
+-- CREATE TABLE employees
+-- (
+--     id           VARCHAR(50)  NOT NULL,
+--     name         VARCHAR(255) NOT NULL,
+--     avatar       VARCHAR(512),
+--     phone_number VARCHAR(50),
+--     email        VARCHAR(255),
+--     status       SMALLINT              DEFAULT 1,
+--     type         SMALLINT              DEFAULT 1,
+--     address      VARCHAR(512),
+--     created_by   VARCHAR(50)  NOT NULL,
+--     created_at   TIMESTAMPTZ  NOT NULL DEFAULT now():::TIMESTAMPTZ,
+--     updated_at   TIMESTAMPTZ  NOT NULL DEFAULT now():::TIMESTAMPTZ,
+--     deleted_at   TIMESTAMPTZ,
+--     CONSTRAINT pk_employees PRIMARY KEY (id ASC)
+-- );
 
 -- SỐ LỆNH SX	KINH DOANH	KHÁCH HÀNG	TÊN /MÃ SP	TÊN NVL 	SỐ MÉT	SỐ LƯỢNG TỜ	SỐ LƯỢNG TP	SỐ LƯỢNG GIAO	NGÀY BẮT ĐẦU-KẾT THÚC	SỰ CỐ	GHI CHÚ	HÌNH ẢNH SẢN PHẨM
 CREATE TABLE production_orders
@@ -45,7 +45,7 @@ CREATE TABLE production_orders
     qty_delivered           INT                   DEFAULT NULL,
     planned_production_date TIMESTAMPTZ  NOT NULL,
     delivery_date           TIMESTAMPTZ  NOT NULL,
-    delivery_image         VARCHAR(255) NULL,
+    delivery_image          VARCHAR(255) NULL,
     status                  SMALLINT              DEFAULT 1,
     note                    TEXT,
     created_by              VARCHAR(50)  NOT NULL,
@@ -73,9 +73,15 @@ CREATE TABLE devices
 CREATE TABLE stages -- công đoạn
 (
     id         VARCHAR(50)  NOT NULL,
+    parent_id  VARCHAR(50),
+    department_code  VARCHAR(50),
     name       VARCHAR(255) NOT NULL,
+    short_name VARCHAR(255) NOT NULL,
     code       VARCHAR(255) NOT NULL,
+    sorting    INT                   DEFAULT 1,
+    error_code TEXT, -- NVL1,NVL2,NVL3
     data       JSONB,
+    note       TEXT,
     status     SMALLINT              DEFAULT 1,
     created_by VARCHAR(50)  NOT NULL,
     created_at TIMESTAMPTZ  NOT NULL DEFAULT now():::TIMESTAMPTZ,
@@ -109,9 +115,9 @@ CREATE TABLE production_order_state_device_assignments
     production_order_stage_id VARCHAR(50)  NOT NULL,
     device_id                 VARCHAR(255) NOT NULL,
     quantity                  INT                   DEFAULT 0,
-    process_status            SMALLINT              , -- null not set, 1: success, 0: failed
+    process_status            SMALLINT, -- null not set, 1: success, 0: failed
     status                    SMALLINT              DEFAULT 1,
-    settings                  JSONB, -- thông tin cấu hình máy lưu bằng jsonb
+    settings                  JSONB,    -- thông tin cấu hình máy lưu bằng jsonb
     note                      TEXT,
     created_at                TIMESTAMPTZ  NOT NULL DEFAULT now():::TIMESTAMPTZ,
     updated_at                TIMESTAMPTZ  NOT NULL DEFAULT now():::TIMESTAMPTZ,
