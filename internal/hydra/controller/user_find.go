@@ -29,7 +29,7 @@ func (u *userController) FindUsers(c *gin.Context) {
 		Email:       req.Filter.Email,
 		GroupID:     req.Filter.GroupID,
 		RoleID:      req.Filter.RoleID,
-	}, req.Paging.Limit+1, req.Paging.Offset)
+	}, req.Paging.Limit, req.Paging.Offset)
 	if err != nil {
 		transportutil.Error(c, err)
 		return

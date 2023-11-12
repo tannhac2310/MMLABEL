@@ -20,7 +20,7 @@ const (
 type UserNamePassword struct {
 	ID          string         `db:"id"`
 	UserID      string         `db:"user_id"`
-	UserName    string         `db:"username"`
+	UserName    sql.NullString `db:"username"`
 	Email       sql.NullString `db:"email,omitempty"`
 	PhoneNumber sql.NullString `db:"phone_number"`
 	Password    string         `db:"password"`
