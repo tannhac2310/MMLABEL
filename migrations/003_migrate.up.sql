@@ -155,3 +155,5 @@ CREATE TABLE options
     deleted_at TIMESTAMPTZ,
     CONSTRAINT pk_options PRIMARY KEY (id ASC)
 );
+-- exec /cockroach/cockroach start --join=${STATEFULSET_NAME}-0.${STATEFULSET_FQDN}:26257 --advertise-host=$(hostname).${STATEFULSET_FQDN} --certs-dir=/cockroach/cockroach-certs/ --http-port=8080 --port=26257 --cach │
+-- │ e=1Gi --max-sql-memory=1Gi --logtostderr=INFO

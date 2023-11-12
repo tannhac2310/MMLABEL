@@ -112,7 +112,7 @@ type (
 	}
 
 	FindUsersRequest struct {
-		Filter *UserFilter       `json:"filter"`
+		Filter *UserFilter       `json:"filter"  binding:"required"`
 		Paging *commondto.Paging `json:"paging" binding:"required"`
 	}
 
