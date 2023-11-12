@@ -8,14 +8,12 @@ import (
 type UserType uint8
 
 const (
-	UserTypeStudent UserType = iota + 1
-	UserTypeTeacher
+	UserTypeCustomer UserType = iota + 1
 	UserTypeEmployee
 )
 
 var UserTypeName = map[UserType]string{
-	UserTypeStudent:  "student",
-	UserTypeTeacher:  "teacher",
+	UserTypeCustomer: "customer",
 	UserTypeEmployee: "employee",
 }
 

@@ -8,14 +8,18 @@ import (
 type StageStatus uint8
 
 const (
-	StageStatusActive StageStatus = iota + 1
-	StageStatusDisable
+	StageStatusPending StageStatus = iota + 1
+	StageStatusStart
+	StageStatusDoing
+	StageStatusPausing
 	StageStatusComplete
 )
 
 var StageStatusName = map[StageStatus]string{
-	StageStatusActive:   "active",
-	StageStatusDisable:  "disable",
+	StageStatusPending:  "pending",
+	StageStatusStart:    "start",
+	StageStatusDoing:    "doing",
+	StageStatusPausing:  "pausing",
 	StageStatusComplete: "complete",
 }
 

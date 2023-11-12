@@ -10,7 +10,7 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 )
 
-func (p *ZaloEventSubscription) handleZaloEvent(msg *stan.Msg) {
+func (p *EventMQTTSubscription) handleZaloEvent(msg *stan.Msg) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 

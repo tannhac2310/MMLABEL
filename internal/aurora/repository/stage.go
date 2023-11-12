@@ -10,23 +10,22 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 )
 
-type CustomerRepo interface {
-	Insert(ctx context.Context, e *model.Customer) error
-	Update(ctx context.Context, e *model.Customer) error
+type StageRepo interface {
+	Insert(ctx context.Context, e *model.Stage) error
+	Update(ctx context.Context, e *model.Stage) error
 	SoftDelete(ctx context.Context, id string) error
-	Search(ctx context.Context, s *SearchCustomersOpts) ([]*CustomerData, error)
-	Count(ctx context.Context, s *SearchCustomersOpts) (*CountResult, error)
-	SearchOne(ctx context.Context, s *SearchCustomersOpts) (*CustomerData, error)
+	Search(ctx context.Context, s *SearchStagesOpts) ([]*StageData, error)
+	Count(ctx context.Context, s *SearchStagesOpts) (*CountResult, error)
 }
 
-type customersRepo struct {
+type stagesRepo struct {
 }
 
-func NewCustomerRepo() CustomerRepo {
-	return &customersRepo{}
+func NewStageRepo() StageRepo {
+	return &stagesRepo{}
 }
 
-func (r *customersRepo) Insert(ctx context.Context, e *model.Customer) error {
+func (r *stagesRepo) Insert(ctx context.Context, e *model.Stage) error {
 	err := cockroach.Create(ctx, e)
 	if err != nil {
 		return fmt.Errorf("r.baseRepo.Create: %w", err)
@@ -35,13 +34,13 @@ func (r *customersRepo) Insert(ctx context.Context, e *model.Customer) error {
 	return nil
 }
 
-func (r *customersRepo) Update(ctx context.Context, e *model.Customer) error {
+func (r *stagesRepo) Update(ctx context.Context, e *model.Stage) error {
 	e.UpdatedAt = time.Now()
 	return cockroach.Update(ctx, e)
 }
 
-func (r *customersRepo) SoftDelete(ctx context.Context, id string) error {
-	sql := `UPDATE customers
+func (r *stagesRepo) SoftDelete(ctx context.Context, id string) error {
+	sql := `UPDATE stages
 		SET deleted_at = NOW()
 		WHERE id = $1`
 
@@ -56,35 +55,35 @@ func (r *customersRepo) SoftDelete(ctx context.Context, id string) error {
 	return nil
 }
 
-// SearchCustomersOpts all params is options
-type SearchCustomersOpts struct {
+// SearchStagesOpts all params is options
+type SearchStagesOpts struct {
 	IDs    []string
 	Name   string
-	Phone  string
+	Code   string
 	Limit  int64
 	Offset int64
 	Sort   *Sort
 }
 
-func (s *SearchCustomersOpts) buildQuery(isCount bool) (string, []interface{}) {
+func (s *SearchStagesOpts) buildQuery(isCount bool) (string, []interface{}) {
 	var args []interface{}
 	conds := ""
 	joins := ""
 
 	if len(s.IDs) > 0 {
 		args = append(args, s.IDs)
-		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.CustomerFieldID)
+		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.StageFieldID)
 	}
 	if s.Name != "" {
 		args = append(args, s.Name)
-		conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.CustomerFieldName, len(args))
+		conds += fmt.Sprintf(" AND (b.%[1]s ILIKE $%[3]d OR b.%[2]s ILIKE $%[3]d)", model.StageFieldName, model.StageFieldShortName, len(args))
 	}
-	if s.Phone != "" {
-		args = append(args, s.Phone)
-		conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.CustomerFieldPhoneNumber, len(args))
+	if s.Code != "" {
+		args = append(args, s.Code)
+		conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.StageFieldCode, len(args))
 	}
 
-	b := &model.Customer{}
+	b := &model.Stage{}
 	fields, _ := b.FieldMap()
 	if isCount {
 		return fmt.Sprintf(`SELECT count(*) as cnt
@@ -104,12 +103,12 @@ func (s *SearchCustomersOpts) buildQuery(isCount bool) (string, []interface{}) {
 		OFFSET %d`, strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
 }
 
-type CustomerData struct {
-	*model.Customer
+type StageData struct {
+	*model.Stage
 }
 
-func (r *customersRepo) Search(ctx context.Context, s *SearchCustomersOpts) ([]*CustomerData, error) {
-	message := make([]*CustomerData, 0)
+func (r *stagesRepo) Search(ctx context.Context, s *SearchStagesOpts) ([]*StageData, error) {
+	message := make([]*StageData, 0)
 	sql, args := s.buildQuery(false)
 	err := cockroach.Select(ctx, sql, args...).ScanAll(&message)
 	if err != nil {
@@ -118,18 +117,8 @@ func (r *customersRepo) Search(ctx context.Context, s *SearchCustomersOpts) ([]*
 
 	return message, nil
 }
-func (r *customersRepo) SearchOne(ctx context.Context, s *SearchCustomersOpts) (*CustomerData, error) {
-	message := &CustomerData{}
-	sql, args := s.buildQuery(false)
-	err := cockroach.Select(ctx, sql, args...).ScanOne(message)
-	if err != nil {
-		return nil, fmt.Errorf("cockroach.Select1: %w", err)
-	}
 
-	return message, nil
-}
-
-func (r *customersRepo) Count(ctx context.Context, s *SearchCustomersOpts) (*CountResult, error) {
+func (r *stagesRepo) Count(ctx context.Context, s *SearchStagesOpts) (*CountResult, error) {
 	countResult := &CountResult{}
 	sql, args := s.buildQuery(true)
 	err := cockroach.Select(ctx, sql, args...).ScanOne(countResult)

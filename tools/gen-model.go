@@ -25,7 +25,7 @@ var (
 
 func init() {
 	flag.StringVar(&pkgName, "pkg", "model", "pkgName")
-	flag.StringVar(&outDir, "o", "pkg/model/", "output dir")
+	flag.StringVar(&outDir, "o", "internal/aurora/model/", "output dir")
 	flag.StringVar(&connectionUri, "db", "postgres://root@localhost:26257/postgres?sslmode=disable", "db connection")
 	flag.Parse()
 

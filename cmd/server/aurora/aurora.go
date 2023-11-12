@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"log"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_order"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/stage"
 	"os"
 
 	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
-	"github.com/nats-io/stan.go"
 	"github.com/pyroscope-io/pyroscope/pkg/agent/profiler"
 	"go.opentelemetry.io/otel/exporters/metric/prometheus"
 	"go.uber.org/fx"
@@ -113,6 +113,7 @@ func Run(ctx context.Context, configPath string) {
 			repository.NewPermissionRepo,
 			repository2.NewCustomerRepo,
 			repository2.NewProductionOrderRepo,
+			repository2.NewStageRepo,
 		),
 		// services
 		fx.Provide(
@@ -121,9 +122,9 @@ func Run(ctx context.Context, configPath string) {
 				hostName, _ := os.Hostname()
 				return ws.NewApp(hostName, zapLogger, redisDB)
 			},
-
 			customer.NewService,
 			production_order.NewService,
+			stage.NewService,
 		),
 		// nats streaming
 		fx.Provide(func(cfg *pkgConfig.BaseConfig, zapLogger *zap.Logger) (nats.BusFactory, error) {
@@ -136,7 +137,7 @@ func Run(ctx context.Context, configPath string) {
 		}),
 		// subsciptions
 		fx.Provide(
-			subscriptions.NewZaloSubscription,
+			subscriptions.NewMQTTSubscription,
 		),
 		// invoke init func
 		fx.Invoke(
@@ -153,6 +154,7 @@ func Run(ctx context.Context, configPath string) {
 			controller.RegisterConfigController,
 			controller.RegisterCustomerController,
 			controller.RegisterProductionOrderController,
+			controller.RegisterStageController,
 		),
 	}
 
@@ -211,29 +213,24 @@ func run(
 func runWorker(
 	lifecycle fx.Lifecycle,
 	zapLogger *zap.Logger,
-	busFactory nats.BusFactory,
-	zaloEventSubscription *subscriptions.ZaloEventSubscription,
+	eventMQTTSubscription *subscriptions.EventMQTTSubscription,
 ) {
 	closeSubs := func() {}
 
 	subscribe := func() error {
+		fmt.Println("==============================================MQTT==============================================")
 		zapLogger.Info("start worker, subscribe to nats server...")
 
-		subs := []stan.Subscription{}
-
-		zaloEventSubs, err := zaloEventSubscription.Subscribe()
+		err := eventMQTTSubscription.Subscribe()
 		if err != nil {
-			return fmt.Errorf("err zaloEventSubscription.Subscribe: %w", err)
+			return fmt.Errorf("err eventMQTTSubscription.Subscribe: %w", err)
 		}
 
-		subs = append(subs, zaloEventSubs...)
+		zapLogger.Info("subscribe done")
 
-		zapLogger.Info("subscribe done", zap.Int("totalSub", len(subs)))
 		closeSubs = func() {
 			zapLogger.Info("close all subscriptions...")
-			for _, sub := range subs {
-				_ = sub.Close()
-			}
+
 		}
 
 		return nil
@@ -243,8 +240,6 @@ func runWorker(
 	if err != nil {
 		zapLogger.Panic("err subscribe worker", zap.Error(err))
 	}
-
-	busFactory.RegisterCallbackConnected([]nats.Callback{subscribe})
 
 	lifecycle.Append(
 		fx.Hook{

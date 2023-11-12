@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"time"
 )
 
@@ -21,18 +22,18 @@ const (
 )
 
 type ProductionOrderStage struct {
-	ID                string                 `db:"id"`
-	ProductionOrderID string                 `db:"production_order_id"`
-	StageID           string                 `db:"stage_id"`
-	StartedAt         sql.NullTime           `db:"started_at"`
-	CompletedAt       sql.NullTime           `db:"completed_at"`
-	Status            int16                  `db:"status"`
-	Condition         sql.NullString         `db:"condition"`
-	Note              sql.NullString         `db:"note"`
-	Data              map[string]interface{} `db:"data"`
-	CreatedAt         time.Time              `db:"created_at"`
-	UpdatedAt         time.Time              `db:"updated_at"`
-	DeletedAt         sql.NullTime           `db:"deleted_at"`
+	ID                string                          `db:"id"`
+	ProductionOrderID string                          `db:"production_order_id"`
+	StageID           string                          `db:"stage_id"`
+	StartedAt         sql.NullTime                    `db:"started_at"`
+	CompletedAt       sql.NullTime                    `db:"completed_at"`
+	Status            enum.ProductionOrderStageStatus `db:"status"`
+	Condition         sql.NullString                  `db:"condition"`
+	Note              sql.NullString                  `db:"note"`
+	Data              map[string]interface{}          `db:"data"`
+	CreatedAt         time.Time                       `db:"created_at"`
+	UpdatedAt         time.Time                       `db:"updated_at"`
+	DeletedAt         sql.NullTime                    `db:"deleted_at"`
 }
 
 func (rcv *ProductionOrderStage) FieldMap() (fields []string, values []interface{}) {
