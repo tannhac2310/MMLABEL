@@ -12,7 +12,6 @@ import (
 	"golang.org/x/tools/imports"
 
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/repository"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/service/category"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/service/group"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/service/role"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/service/upload"
@@ -66,14 +65,12 @@ func main() {
 	genTracing(repository.NewUserNotificationRepo, "repository", "./pkg/tracingutil/repository/user_notification_trace.go", "userNotificationRepo")
 	genTracing(repository.NewUserRoleRepo, "repository", "./pkg/tracingutil/repository/user_role.go", "userRoleRepo")
 	genTracing(repository.NewUserNamePasswordRepo, "repository", "./pkg/tracingutil/repository/username_password_trace.go", "userNamePasswordRepo")
-	genTracing(repository.NewCategoryRepo, "repository", "./pkg/tracingutil/repository/category.go", "categoryRepo")
 
 	genTracing(user.NewService, "service", "./pkg/tracingutil/service/user_trace.go", "userService")
 	genTracing(group.NewService, "service", "./pkg/tracingutil/service/group_trace.go", "groupService")
 	genTracing(role.NewService, "service", "./pkg/tracingutil/service/role_trace.go", "roleService")
 	genTracing(upload.NewService, "service", "./pkg/tracingutil/service/upload_trace.go", "uploadService")
 	genTracing(user.NewService, "service", "./pkg/tracingutil/service/user_trace.go", "userService")
-	genTracing(category.NewService, "service", "./pkg/tracingutil/service/category_trace.go", "categoryService")
 }
 
 func genTracing(

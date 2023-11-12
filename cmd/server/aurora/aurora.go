@@ -113,6 +113,7 @@ func Run(ctx context.Context, configPath string) {
 			repository.NewPermissionRepo,
 			repository2.NewCustomerRepo,
 			repository2.NewProductionOrderRepo,
+			repository2.NewProductionOrderStageRepo,
 			repository2.NewStageRepo,
 		),
 		// services

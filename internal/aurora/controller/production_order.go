@@ -2,7 +2,6 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_order"
@@ -32,6 +31,21 @@ func (s productionOrderController) CreateProductionOrder(c *gin.Context) {
 	}
 
 	userID := interceptor.UserIDFromCtx(c)
+	orderStage := make([]*production_order.ProductionOrderStage, 0)
+
+	for _, stage := range req.ProductionOrderStages {
+		orderStage = append(orderStage, &production_order.ProductionOrderStage{
+			StageID:             stage.StageID,
+			EstimatedStartAt:    stage.EstimatedStartAt,
+			EstimatedCompleteAt: stage.EstimatedCompleteAt,
+			StartedAt:           stage.StartedAt,
+			CompletedAt:         stage.CompletedAt,
+			Status:              stage.Status,
+			Condition:           stage.Condition,
+			Note:                stage.Note,
+			Data:                stage.Data,
+		})
+	}
 
 	id, err := s.productionOrderService.CreateProductionOrder(c, &production_order.CreateProductionOrderOpts{
 		ProductCode:           req.ProductCode,
@@ -46,6 +60,7 @@ func (s productionOrderController) CreateProductionOrder(c *gin.Context) {
 		DeliveryImage:         req.DeliveryImage,
 		Status:                req.Status,
 		Note:                  req.Note,
+		ProductionOrderStage:  orderStage,
 		CreatedBy:             userID,
 	})
 	if err != nil {
@@ -137,6 +152,21 @@ func (s productionOrderController) FindProductionOrders(c *gin.Context) {
 }
 
 func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
+	orderStage := make([]*dto.OrderStage, 0)
+	for _, item := range f.ProductionOrderStage {
+		orderStage = append(orderStage, &dto.OrderStage{
+			ID:                  item.ID,
+			StageID:             item.StageID,
+			EstimatedStartAt:    item.EstimatedStartAt.Time,
+			EstimatedCompleteAt: item.EstimatedCompleteAt.Time,
+			StartedAt:           item.StartedAt.Time,
+			CompletedAt:         item.CompletedAt.Time,
+			Status:              item.Status,
+			Condition:           item.Condition.String,
+			Note:                item.Note.String,
+			Data:                item.Data,
+		})
+	}
 	return &dto.ProductionOrder{
 		ID:                    f.ID,
 		ProductCode:           f.ProductCode,
@@ -151,6 +181,7 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 		DeliveryImage:         f.DeliveryImage.String,
 		Status:                f.Status,
 		Note:                  f.Note.String,
+		ProductionOrderStages: orderStage,
 		CreatedBy:             f.CreatedBy,
 		CreatedAt:             f.CreatedAt,
 		UpdatedAt:             f.UpdatedAt,

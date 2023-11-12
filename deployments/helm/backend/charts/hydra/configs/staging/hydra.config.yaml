@@ -36,4 +36,4 @@ s3Storage:
   bucket: mm-printing-images
   accessKey: bX983KRuvA7dF8MYthfK
   secretKey: YOwWxiBiountG3xwcild
-  endpoint: https://edv.app:8080
+  endpoint: "https://mmlabel.buonho.vn/"

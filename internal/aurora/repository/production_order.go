@@ -17,7 +17,6 @@ type ProductionOrderRepo interface {
 	SoftDelete(ctx context.Context, id string) error
 	Search(ctx context.Context, s *SearchProductionOrdersOpts) ([]*ProductionOrderData, error)
 	Count(ctx context.Context, s *SearchProductionOrdersOpts) (*CountResult, error)
-	SearchOne(ctx context.Context, s *SearchProductionOrdersOpts) (*ProductionOrderData, error)
 }
 
 type productionOrdersRepo struct {
@@ -113,16 +112,6 @@ func (r *productionOrdersRepo) Search(ctx context.Context, s *SearchProductionOr
 	err := cockroach.Select(ctx, sql, args...).ScanAll(&message)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.Select: %w", err)
-	}
-
-	return message, nil
-}
-func (r *productionOrdersRepo) SearchOne(ctx context.Context, s *SearchProductionOrdersOpts) (*ProductionOrderData, error) {
-	message := &ProductionOrderData{}
-	sql, args := s.buildQuery(false)
-	err := cockroach.Select(ctx, sql, args...).ScanOne(message)
-	if err != nil {
-		return nil, fmt.Errorf("cockroach.Select1: %w", err)
 	}
 
 	return message, nil

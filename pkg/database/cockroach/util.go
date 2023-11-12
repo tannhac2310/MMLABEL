@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgconn"
@@ -258,6 +259,12 @@ func String(s string) sql.NullString {
 	}
 }
 
+func Time(s time.Time) sql.NullTime {
+	return sql.NullTime{
+		Time:  s,
+		Valid: !s.IsZero(),
+	}
+}
 func Float64(f float64) sql.NullFloat64 {
 	return sql.NullFloat64{
 		Float64: f,

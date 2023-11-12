@@ -48,7 +48,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 	var port = 31883
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", broker, port))
-	opts.SetClientID("go_mqtt_client")
+	//opts.SetClientID("go_mqtt_client")
 	opts.SetUsername("user1")
 	opts.SetPassword("123")
 	opts.SetDefaultPublishHandler(messagePubHandler)

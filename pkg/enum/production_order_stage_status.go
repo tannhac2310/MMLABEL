@@ -8,7 +8,8 @@ import (
 type ProductionOrderStageStatus uint8
 
 const (
-	ProductionOrderStageStatusPending ProductionOrderStageStatus = iota + 1
+	ProductionOrderStageStatusNone ProductionOrderStageStatus = iota + 1
+	ProductionOrderStageStatusPending
 	ProductionOrderStageStatusStart
 	ProductionOrderStageStatusDoing
 	ProductionOrderStageStatusPausing
@@ -16,6 +17,7 @@ const (
 )
 
 var ProductionOrderStageStatusName = map[ProductionOrderStageStatus]string{
+	ProductionOrderStageStatusNone:     "", // chua bat dau
 	ProductionOrderStageStatusPending:  "pending",
 	ProductionOrderStageStatusStart:    "start",
 	ProductionOrderStageStatusDoing:    "doing",

@@ -5,24 +5,24 @@ set -euo pipefail
 NAMESPACE=backend
 
 case $ENV in
-
-  "dev")
-		helm upgrade --install mm-printing -n $NAMESPACE \
-			./deployments/helm/backend \
-			--set=env=${ENV} \
-			--set=hydra.env=${ENV} \
-			--set=gezu.env=${ENV} \
-			--set=aurora.env=${ENV} \
-			--set=hydra.image.tag=${TAG} \
-			--set=gezu.image.tag=${TAG}
-			--set=aurora.image.tag=${TAG}
-    ;;
+#
+#  "dev")
+#		helm upgrade --install mm-printing -n $NAMESPACE \
+#			./deployments/helm/backend \
+#			--set=env=${ENV} \
+#			--set=hydra.env=${ENV} \
+#			--set=gezu.env=${ENV} \
+#			--set=aurora.env=${ENV} \
+#			--set=hydra.image.tag=${TAG} \
+#			--set=gezu.image.tag=${TAG}
+#			--set=aurora.image.tag=${TAG}
+#    ;;
 
   "staging")
-		helm upgrade --install mm-printing -n $NAMESPACE \
+		helm upgrade --install mm-printing \
 			./deployments/helm/backend \
 			-f ./deployments/helm/backend/values-staging.yaml \
-			--set=env=${ENV} \
+			 -n backend \
 			--set=hydra.env=${ENV} \
 			--set=aurora.env=${ENV} \
 			--set=hydra.image.tag=${TAG} \

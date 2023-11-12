@@ -2,6 +2,7 @@ package production_order
 
 import (
 	"context"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 
 	"github.com/go-redis/redis"
 
@@ -17,23 +18,27 @@ type Service interface {
 }
 
 type productionOrderService struct {
-	productionOrderRepo repository.ProductionOrderRepo
-	cfg                 *configs.Config
-	redisDB             redis.Cmdable
+	productionOrderRepo      repository.ProductionOrderRepo
+	productionOrderStageRepo repository.ProductionOrderStageRepo
+	cfg                      *configs.Config
+	redisDB                  redis.Cmdable
 }
 
 func NewService(
 	productionOrderRepo repository.ProductionOrderRepo,
+	productionOrderStageRepo repository.ProductionOrderStageRepo,
 	cfg *configs.Config,
 	redisDB redis.Cmdable,
 ) Service {
 	return &productionOrderService{
-		productionOrderRepo: productionOrderRepo,
-		cfg:                 cfg,
-		redisDB:             redisDB,
+		productionOrderRepo:      productionOrderRepo,
+		productionOrderStageRepo: productionOrderStageRepo,
+		cfg:                      cfg,
+		redisDB:                  redisDB,
 	}
 }
 
 type Data struct {
 	*repository.ProductionOrderData
+	ProductionOrderStage []*model.ProductionOrderStage
 }

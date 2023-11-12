@@ -41,6 +41,7 @@ type ProductionOrder struct {
 	DeliveryImage         string                     `json:"deliveredImage"`
 	Status                enum.ProductionOrderStatus `json:"status"`
 	Note                  string                     `json:"note"`
+	ProductionOrderStages []*OrderStage              `json:"production_order_stages"`
 	CreatedBy             string                     `json:"createdBy"`
 	CreatedAt             time.Time                  `json:"createdAt"`
 	UpdatedAt             time.Time                  `json:"updatedAt"`
@@ -57,10 +58,35 @@ type CreateProductionOrderRequest struct {
 	PlannedProductionDate time.Time                  `json:"plannedProductionDate"`
 	DeliveryDate          time.Time                  `json:"deliveryDate"`
 	DeliveryImage         string                     `json:"deliveredImage"`
+	ProductionOrderStages []CreateOrderStage         `json:"production_order_stages"`
 	Status                enum.ProductionOrderStatus `json:"status"  binding:"required"`
 	Note                  string                     `json:"note"`
 }
 
+type OrderStage struct {
+	ID                  string                          `json:"id"`
+	StageID             string                          `json:"stageID"`
+	EstimatedStartAt    time.Time                       `json:"estimatedStartAt"`
+	EstimatedCompleteAt time.Time                       `json:"estimatedCompleteAt"`
+	StartedAt           time.Time                       `json:"startedAt"`
+	CompletedAt         time.Time                       `json:"completedAt"`
+	Status              enum.ProductionOrderStageStatus `json:"status"`
+	Condition           string                          `json:"condition"`
+	Note                string                          `json:"note"`
+	Data                map[string]interface{}          `json:"data"`
+}
+
+type CreateOrderStage struct {
+	StageID             string                          `json:"stageID"`
+	EstimatedStartAt    time.Time                       `json:"estimatedStartAt"`
+	EstimatedCompleteAt time.Time                       `json:"estimatedCompleteAt"`
+	StartedAt           time.Time                       `json:"startedAt"`
+	CompletedAt         time.Time                       `json:"completedAt"`
+	Status              enum.ProductionOrderStageStatus `json:"status"`
+	Condition           string                          `json:"condition"`
+	Note                string                          `json:"note"`
+	Data                map[string]interface{}          `json:"data"`
+}
 type CreateProductionOrderResponse struct {
 	ID string `json:"id"`
 }

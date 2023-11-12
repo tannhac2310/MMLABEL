@@ -30,11 +30,18 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 
 	results := make([]*Data, 0, len(productionOrders))
 	for _, productionOrder := range productionOrders {
+		//find stage
+		stages, err := c.productionOrderStageRepo.Search(ctx, &repository.SearchProductionOrderStagesOpts{
+			ProductionOrderID: productionOrder.ID,
+			Limit:             1000,
+			Offset:            0,
+		})
 		if err != nil {
 			return nil, nil, err
 		}
 		results = append(results, &Data{
-			ProductionOrderData: productionOrder,
+			ProductionOrderData:  productionOrder,
+			ProductionOrderStage: stages,
 		})
 	}
 	return results, total, nil

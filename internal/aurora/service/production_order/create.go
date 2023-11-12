@@ -2,6 +2,7 @@ package production_order
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"time"
@@ -13,9 +14,9 @@ import (
 
 func (c *productionOrderService) CreateProductionOrder(ctx context.Context, opt *CreateProductionOrderOpts) (string, error) {
 	now := time.Now()
-
+	id := idutil.ULIDNow()
 	productionOrder := &model.ProductionOrder{
-		ID:                    idutil.ULIDNow(),
+		ID:                    id,
 		ProductCode:           opt.ProductCode,
 		ProductName:           opt.ProductName,
 		CustomerID:            opt.CustomerID,
@@ -37,6 +38,29 @@ func (c *productionOrderService) CreateProductionOrder(ctx context.Context, opt 
 		err := c.productionOrderRepo.Insert(ctx2, productionOrder)
 		if err != nil {
 			return fmt.Errorf("c.productionOrderRepo.Insert: %w", err)
+		}
+		b, _ := json.Marshal(opt)
+		fmt.Println("============>>>>opt.ProductionOrderStage", opt.ProductionOrderStage)
+		fmt.Println("============>>>>", string(b))
+		for _, orderStage := range opt.ProductionOrderStage {
+			err = c.productionOrderStageRepo.Insert(ctx2, &model.ProductionOrderStage{
+				ID:                  idutil.ULIDNow(),
+				ProductionOrderID:   id,
+				StageID:             orderStage.StageID,
+				EstimatedStartAt:    cockroach.Time(orderStage.EstimatedStartAt),
+				EstimatedCompleteAt: cockroach.Time(orderStage.EstimatedCompleteAt),
+				StartedAt:           cockroach.Time(orderStage.StartedAt),
+				CompletedAt:         cockroach.Time(orderStage.CompletedAt),
+				Status:              orderStage.Status,
+				Condition:           cockroach.String(orderStage.Condition),
+				Note:                cockroach.String(orderStage.Note),
+				Data:                orderStage.Data,
+				CreatedAt:           now,
+				UpdatedAt:           now,
+			})
+			if err != nil {
+				return fmt.Errorf("add order stage: %w", err)
+			}
 		}
 
 		return nil
@@ -60,5 +84,18 @@ type CreateProductionOrderOpts struct {
 	DeliveryImage         string
 	Status                enum.ProductionOrderStatus
 	Note                  string
+	ProductionOrderStage  []*ProductionOrderStage
 	CreatedBy             string
+}
+
+type ProductionOrderStage struct {
+	StageID             string
+	EstimatedStartAt    time.Time
+	EstimatedCompleteAt time.Time
+	StartedAt           time.Time
+	CompletedAt         time.Time
+	Status              enum.ProductionOrderStageStatus
+	Condition           string
+	Note                string
+	Data                map[string]interface{}
 }
