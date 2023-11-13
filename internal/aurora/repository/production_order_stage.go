@@ -14,6 +14,7 @@ type ProductionOrderStageRepo interface {
 	Insert(ctx context.Context, e *model.ProductionOrderStage) error
 	Update(ctx context.Context, e *model.ProductionOrderStage) error
 	SoftDelete(ctx context.Context, id string) error
+	SoftDeletes(ctx context.Context, ids []string) error
 	Search(ctx context.Context, s *SearchProductionOrderStagesOpts) ([]*model.ProductionOrderStage, error)
 	Count(ctx context.Context, s *SearchProductionOrderStagesOpts) (*CountResult, error)
 }
@@ -52,6 +53,20 @@ func (r *productionOrderStagesRepo) SoftDelete(ctx context.Context, id string) e
 		return fmt.Errorf("not found any records to delete")
 	}
 
+	return nil
+}
+func (r *productionOrderStagesRepo) SoftDeletes(ctx context.Context, ids []string) error {
+	sql := `UPDATE production_order_stage
+		SET deleted_at = NOW()
+		WHERE id IN ($1)`
+
+	cmd, err := cockroach.Exec(ctx, sql, strings.Join(ids, ","))
+	if err != nil {
+		return fmt.Errorf("cockroach.Exec: %w", err)
+	}
+	if cmd.RowsAffected() == 0 {
+		return fmt.Errorf("not found any records to delete")
+	}
 	return nil
 }
 

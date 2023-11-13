@@ -12,23 +12,24 @@ import (
 
 func (c *productionOrderService) EditProductionOrder(ctx context.Context, opt *EditProductionOrderOpts) error {
 	var err error
-	table := model.ProductionOrder{}
-	updater := cockroach.NewUpdater(table.TableName(), model.ProductionOrderFieldID, opt.ID)
-
-	updater.Set(model.ProductionOrderFieldQtyPaper, opt.QtyPaper)
-	updater.Set(model.ProductionOrderFieldQtyFinished, opt.QtyFinished)
-	updater.Set(model.ProductionOrderFieldQtyDelivered, opt.QtyDelivered)
-	updater.Set(model.ProductionOrderFieldPlannedProductionDate, opt.PlannedProductionDate)
-	updater.Set(model.ProductionOrderFieldStatus, opt.Status)
-	updater.Set(model.ProductionOrderFieldDeliveryDate, opt.DeliveryDate)
-	updater.Set(model.ProductionOrderFieldDeliveryImage, opt.DeliveryImage)
-	updater.Set(model.ProductionOrderFieldNote, opt.Note)
-
-	updater.Set(model.ProductionOrderFieldUpdatedAt, time.Now())
-
-	err = cockroach.UpdateFields(ctx, updater)
-	if err != nil {
-		return fmt.Errorf("update productionOrder failed %w", err)
+	// write code to update production order and production order stage in transaction
+	err2 := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
+		err = c.editProductionOrder(ctx2, opt)
+		if err != nil {
+			return fmt.Errorf("c.editProductionOrder: %w", err)
+		}
+		// write code to update production order stage
+		// if production order stage with id empty then create new production order stage
+		// if production order stage with id not empty then update production order stage
+		// if production order stage with id not in production order stage then delete production order stage
+		err = c.editProductionOrderStage(ctx2, opt)
+		if err != nil {
+			return fmt.Errorf("c.editProductionOrderStage: %w", err)
+		}
+		return nil
+	})
+	if err2 != nil {
+		return fmt.Errorf("cockroach.ExecInTx: %w", err2)
 	}
 	return nil
 }
@@ -43,4 +44,63 @@ type EditProductionOrderOpts struct {
 	DeliveryDate          time.Time
 	DeliveryImage         string
 	Note                  string
+	ProductionOrderStage  []*ProductionOrderStage
+}
+
+func (c *productionOrderService) editProductionOrder(ctx context.Context, opt *EditProductionOrderOpts) error {
+	table := model.ProductionOrder{}
+	updater := cockroach.NewUpdater(table.TableName(), model.ProductionOrderFieldID, opt.ID)
+
+	updater.Set(model.ProductionOrderFieldQtyPaper, opt.QtyPaper)
+	updater.Set(model.ProductionOrderFieldQtyFinished, opt.QtyFinished)
+	updater.Set(model.ProductionOrderFieldQtyDelivered, opt.QtyDelivered)
+	updater.Set(model.ProductionOrderFieldPlannedProductionDate, opt.PlannedProductionDate)
+	updater.Set(model.ProductionOrderFieldStatus, opt.Status)
+	updater.Set(model.ProductionOrderFieldDeliveryDate, opt.DeliveryDate)
+	updater.Set(model.ProductionOrderFieldDeliveryImage, opt.DeliveryImage)
+	updater.Set(model.ProductionOrderFieldNote, opt.Note)
+
+	updater.Set(model.ProductionOrderFieldUpdatedAt, time.Now())
+
+	err := cockroach.UpdateFields(ctx, updater)
+	if err != nil {
+		return fmt.Errorf("update productionOrder failed %w", err)
+	}
+	return nil
+}
+
+func (c *productionOrderService) editProductionOrderStage(ctx context.Context, opt *EditProductionOrderOpts) error {
+	// delete production order stage with id not in production order stage by production order id
+	orderStageIds := make([]string, 0)
+	for _, stage := range opt.ProductionOrderStage {
+		if stage.ID != "" {
+			orderStageIds = append(orderStageIds, stage.ID)
+		}
+	}
+	err := c.deleteProductionOrderStage(ctx, orderStageIds, opt.ID)
+	if err != nil {
+		return fmt.Errorf("c.deleteProductionOrderStage: %w", err)
+	}
+	// update production order stage
+	for _, orderStage := range opt.ProductionOrderStage {
+		table := model.ProductionOrderStage{}
+		updater := cockroach.NewUpdater(table.TableName(), model.ProductionOrderStageFieldID, orderStage.ID)
+
+		updater.Set(model.ProductionOrderStageFieldEstimatedStartAt, orderStage.EstimatedStartAt)
+		updater.Set(model.ProductionOrderStageFieldEstimatedCompleteAt, orderStage.EstimatedCompleteAt)
+		updater.Set(model.ProductionOrderStageFieldStartedAt, orderStage.StartedAt)
+		updater.Set(model.ProductionOrderStageFieldCompletedAt, orderStage.CompletedAt)
+		updater.Set(model.ProductionOrderStageFieldStatus, orderStage.Status)
+		updater.Set(model.ProductionOrderStageFieldCondition, orderStage.Condition)
+		updater.Set(model.ProductionOrderStageFieldNote, orderStage.Note)
+		updater.Set(model.ProductionOrderStageFieldData, orderStage.Data)
+
+		updater.Set(model.ProductionOrderStageFieldUpdatedAt, time.Now())
+
+		err := cockroach.UpdateFields(ctx, updater)
+		if err != nil {
+			return fmt.Errorf("update productionOrderStage failed %w", err)
+		}
+	}
+	return nil
 }

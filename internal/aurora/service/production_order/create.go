@@ -2,7 +2,6 @@ package production_order
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"time"
@@ -39,9 +38,6 @@ func (c *productionOrderService) CreateProductionOrder(ctx context.Context, opt 
 		if err != nil {
 			return fmt.Errorf("c.productionOrderRepo.Insert: %w", err)
 		}
-		b, _ := json.Marshal(opt)
-		fmt.Println("============>>>>opt.ProductionOrderStage", opt.ProductionOrderStage)
-		fmt.Println("============>>>>", string(b))
 		for _, orderStage := range opt.ProductionOrderStage {
 			err = c.productionOrderStageRepo.Insert(ctx2, &model.ProductionOrderStage{
 				ID:                  idutil.ULIDNow(),
@@ -98,4 +94,5 @@ type ProductionOrderStage struct {
 	Condition           string
 	Note                string
 	Data                map[string]interface{}
+	ID                  string
 }

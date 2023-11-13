@@ -80,7 +80,22 @@ func (s productionOrderController) EditProductionOrder(c *gin.Context) {
 		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
 		return
 	}
-
+	// write code to edit production order and production order stage
+	productionOderStage := make([]*production_order.ProductionOrderStage, 0)
+	for _, stage := range req.ProductionOrderStages {
+		productionOderStage = append(productionOderStage, &production_order.ProductionOrderStage{
+			ID:                  stage.ID,
+			StageID:             stage.StageID,
+			EstimatedStartAt:    stage.EstimatedStartAt,
+			EstimatedCompleteAt: stage.EstimatedCompleteAt,
+			StartedAt:           stage.StartedAt,
+			CompletedAt:         stage.CompletedAt,
+			Status:              stage.Status,
+			Condition:           stage.Condition,
+			Note:                stage.Note,
+			Data:                stage.Data,
+		})
+	}
 	err = s.productionOrderService.EditProductionOrder(c, &production_order.EditProductionOrderOpts{
 		ID:                    req.ID,
 		QtyPaper:              req.QtyPaper,
@@ -90,6 +105,7 @@ func (s productionOrderController) EditProductionOrder(c *gin.Context) {
 		Status:                req.Status,
 		DeliveryDate:          req.DeliveryDate,
 		DeliveryImage:         req.DeliveryImage,
+		ProductionOrderStage:  productionOderStage,
 		Note:                  req.Note,
 	})
 	if err != nil {

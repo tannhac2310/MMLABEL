@@ -103,6 +103,19 @@ type EditProductionOrderRequest struct {
 	DeliveryImage         string                     `json:"deliveryImage"`
 	Status                enum.ProductionOrderStatus `json:"status"  binding:"required"`
 	Note                  string                     `json:"note"`
+	ProductionOrderStages []EditOrderStage           `json:"production_order_stages"`
+}
+type EditOrderStage struct {
+	ID                  string                          `json:"id"`
+	StageID             string                          `json:"stageID"`
+	EstimatedStartAt    time.Time                       `json:"estimatedStartAt"`
+	EstimatedCompleteAt time.Time                       `json:"estimatedCompleteAt"`
+	StartedAt           time.Time                       `json:"startedAt"`
+	CompletedAt         time.Time                       `json:"completedAt"`
+	Status              enum.ProductionOrderStageStatus `json:"status"`
+	Condition           string                          `json:"condition"`
+	Note                string                          `json:"note"`
+	Data                map[string]interface{}          `json:"data"`
 }
 
 type EditProductionOrderResponse struct {

@@ -2,9 +2,8 @@ package production_order
 
 import (
 	"context"
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
-
 	"github.com/go-redis/redis"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/configs"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
@@ -22,6 +21,35 @@ type productionOrderService struct {
 	productionOrderStageRepo repository.ProductionOrderStageRepo
 	cfg                      *configs.Config
 	redisDB                  redis.Cmdable
+}
+
+func (c *productionOrderService) deleteProductionOrderStage(ctx context.Context, ids []string, productionId string) interface{} {
+	// find production order stage by production order id
+	productionOrderStages, err := c.productionOrderStageRepo.Search(ctx, &repository.SearchProductionOrderStagesOpts{
+		ProductionOrderID: productionId,
+	})
+	if err != nil {
+		return err
+	}
+	// get production order stage id to delete
+	// find ids not in productionOrderStages.id
+	var idsToDelete []string
+	for _, id := range ids {
+		var found bool
+		for _, productionOrderStage := range productionOrderStages {
+			if id == productionOrderStage.ID {
+				found = true
+				break
+			}
+		}
+		if !found {
+			idsToDelete = append(idsToDelete, id)
+		}
+	}
+	if len(idsToDelete) <= 0 {
+		return nil
+	}
+	return c.productionOrderStageRepo.SoftDeletes(ctx, idsToDelete)
 }
 
 func NewService(
