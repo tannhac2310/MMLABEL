@@ -8,6 +8,7 @@ import (
 
 const (
 	ProductionOrderStageFieldID                  = "id"
+	ProductionOrderStageFieldSorting             = "sorting"
 	ProductionOrderStageFieldProductionOrderID   = "production_order_id"
 	ProductionOrderStageFieldStageID             = "stage_id"
 	ProductionOrderStageFieldEstimatedStartAt    = "estimated_start_at"
@@ -25,6 +26,7 @@ const (
 
 type ProductionOrderStage struct {
 	ID                  string                          `db:"id"`
+	Sorting             int16                           `db:"sorting"`
 	ProductionOrderID   string                          `db:"production_order_id"`
 	StageID             string                          `db:"stage_id"`
 	EstimatedStartAt    sql.NullTime                    `db:"estimated_start_at"`
@@ -43,6 +45,7 @@ type ProductionOrderStage struct {
 func (rcv *ProductionOrderStage) FieldMap() (fields []string, values []interface{}) {
 	fields = []string{
 		ProductionOrderStageFieldID,
+		ProductionOrderStageFieldSorting,
 		ProductionOrderStageFieldProductionOrderID,
 		ProductionOrderStageFieldStageID,
 		ProductionOrderStageFieldEstimatedStartAt,
@@ -60,6 +63,7 @@ func (rcv *ProductionOrderStage) FieldMap() (fields []string, values []interface
 
 	values = []interface{}{
 		&rcv.ID,
+		&rcv.Sorting,
 		&rcv.ProductionOrderID,
 		&rcv.StageID,
 		&rcv.EstimatedStartAt,
@@ -79,5 +83,5 @@ func (rcv *ProductionOrderStage) FieldMap() (fields []string, values []interface
 }
 
 func (*ProductionOrderStage) TableName() string {
-	return "production_order_stage"
+	return "production_order_stages"
 }

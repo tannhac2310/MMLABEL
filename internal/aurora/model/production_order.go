@@ -9,6 +9,7 @@ import (
 
 const (
 	ProductionOrderFieldID                    = "id"
+	ProductionOrderFieldName                  = "name"
 	ProductionOrderFieldProductCode           = "product_code"
 	ProductionOrderFieldProductName           = "product_name"
 	ProductionOrderFieldCustomerID            = "customer_id"
@@ -29,6 +30,7 @@ const (
 
 type ProductionOrder struct {
 	ID                    string                     `db:"id"`
+	Name                  string                     `db:"name"`
 	ProductCode           string                     `db:"product_code"`
 	ProductName           string                     `db:"product_name"`
 	CustomerID            string                     `db:"customer_id"`
@@ -50,6 +52,7 @@ type ProductionOrder struct {
 func (rcv *ProductionOrder) FieldMap() (fields []string, values []interface{}) {
 	fields = []string{
 		ProductionOrderFieldID,
+		ProductionOrderFieldName,
 		ProductionOrderFieldProductCode,
 		ProductionOrderFieldProductName,
 		ProductionOrderFieldCustomerID,
@@ -70,6 +73,7 @@ func (rcv *ProductionOrder) FieldMap() (fields []string, values []interface{}) {
 
 	values = []interface{}{
 		&rcv.ID,
+		&rcv.Name,
 		&rcv.ProductCode,
 		&rcv.ProductName,
 		&rcv.CustomerID,

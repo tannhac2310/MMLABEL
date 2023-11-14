@@ -92,7 +92,7 @@ type CreateProductionOrderResponse struct {
 }
 
 type EditProductionOrderRequest struct {
-	ID                    string                     `json:"id"`
+	ID                    string                     `json:"id" binding:"required"`
 	ProductCode           string                     `json:"productCode"  binding:"required"`
 	ProductName           string                     `json:"productName"  binding:"required"`
 	QtyPaper              int64                      `json:"qtyPaper"`
