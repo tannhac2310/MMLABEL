@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"time"
 )
 
@@ -24,7 +25,7 @@ type Device struct {
 	Code      string                 `db:"code"`
 	OptionID  string                 `db:"option_id"`
 	Data      map[string]interface{} `db:"data"`
-	Status    int16                  `db:"status"`
+	Status    enum.CommonStatus      `db:"status"`
 	CreatedBy string                 `db:"created_by"`
 	CreatedAt time.Time              `db:"created_at"`
 	UpdatedAt time.Time              `db:"updated_at"`

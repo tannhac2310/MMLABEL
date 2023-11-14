@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/department"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/device"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_order"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/stage"
 	"os"
@@ -115,6 +117,8 @@ func Run(ctx context.Context, configPath string) {
 			repository2.NewProductionOrderRepo,
 			repository2.NewProductionOrderStageRepo,
 			repository2.NewStageRepo,
+			repository2.NewDeviceRepo,
+			repository2.NewDepartmentRepo,
 		),
 		// services
 		fx.Provide(
@@ -126,6 +130,8 @@ func Run(ctx context.Context, configPath string) {
 			customer.NewService,
 			production_order.NewService,
 			stage.NewService,
+			device.NewService,
+			department.NewService,
 		),
 		// nats streaming
 		fx.Provide(func(cfg *pkgConfig.BaseConfig, zapLogger *zap.Logger) (nats.BusFactory, error) {
@@ -156,6 +162,8 @@ func Run(ctx context.Context, configPath string) {
 			controller.RegisterCustomerController,
 			controller.RegisterProductionOrderController,
 			controller.RegisterStageController,
+			controller.RegisterDepartmentController,
+			controller.RegisterDeviceController,
 		),
 	}
 
