@@ -1,0 +1,27 @@
+MHDH:
+- API List ds LSX
+- API Tiến trình của từng lệnh sản xuất
+
+MHSX:
+- API List ra các item trong màn hình SX
+- API để thực hiện đc các action update cho LSX đó (Bắt đầu/ Hoàn thành/ Ngưng chuyển PO, Tạm Ngưng)
+
+MHVC:
+- API List ra các item cần vc
+- API tiếp nhận lsx trong vc
+- API phân công cho lsx đã tiếp nhận thành công
+
+MHQCL:
+- API lấy ra ds lỗi
+- API thêm lỗi
+- API lỗi chi tiết
+- API cập nhật lỗi
+
+MHQLDV:
+- API list ra ds đơn vị
+
+MHQLCD:
+- API list ra ds Công đoạn
+
+MHQLTB:
+- API list ra ds Thiết bị

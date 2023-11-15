@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/idutil"
 	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
@@ -18,13 +19,30 @@ func (c *productionOrderService) EditProductionOrder(ctx context.Context, opt *E
 		if err != nil {
 			return fmt.Errorf("c.editProductionOrder: %w", err)
 		}
-		// write code to update production order stage
-		// if production order stage with id empty then create new production order stage
-		// if production order stage with id not empty then update production order stage
-		// if production order stage with id not in production order stage then delete production order stage
+
 		err = c.editProductionOrderStage(ctx2, opt)
 		if err != nil {
 			return fmt.Errorf("c.editProductionOrderStage: %w", err)
+		}
+
+		// write code to edit custom field value
+		// delete all custom field value with entity type is production order and entity id is production order id
+		err := c.customFieldRepo.DeleteByEntity(ctx2, enum.CustomFieldTypeProductionOrder, opt.ID)
+		if err != nil {
+			return fmt.Errorf("c.customFieldRepo.DeleteByEntity: %w", err)
+		}
+		// then insert new custom field value
+		for field, customFieldValue := range opt.CustomData {
+			err = c.customFieldRepo.Insert(ctx2, &model.CustomField{
+				ID:         idutil.ULIDNow(),
+				EntityType: enum.CustomFieldTypeProductionOrder,
+				EntityID:   opt.ID,
+				Field:      field,
+				Value:      customFieldValue,
+			})
+			if err != nil {
+				return fmt.Errorf("c.customFieldRepo.Insert: %w", err)
+			}
 		}
 		return nil
 	})
@@ -45,6 +63,7 @@ type EditProductionOrderOpts struct {
 	DeliveryImage         string
 	Note                  string
 	ProductionOrderStage  []*ProductionOrderStage
+	CustomData            map[string]string
 }
 
 func (c *productionOrderService) editProductionOrder(ctx context.Context, opt *EditProductionOrderOpts) error {
@@ -70,7 +89,9 @@ func (c *productionOrderService) editProductionOrder(ctx context.Context, opt *E
 }
 
 func (c *productionOrderService) editProductionOrderStage(ctx context.Context, opt *EditProductionOrderOpts) error {
-	// delete production order stage with id not in production order stage by production order id
+	// if production order stage with id empty then create new production order stage
+	// if production order stage with id not empty then update production order stage
+	// if production order stage with id not in production order stage then delete production order stage
 	orderStageIds := make([]string, 0)
 	for _, stage := range opt.ProductionOrderStage {
 		if stage.ID != "" {

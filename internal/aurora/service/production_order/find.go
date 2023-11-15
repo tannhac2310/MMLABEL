@@ -39,9 +39,30 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 		if err != nil {
 			return nil, nil, err
 		}
+		// find custom field value
+		customFieldData, err := c.customFieldRepo.Search(ctx, &repository.SearchCustomFieldsOpts{
+			EntityType: enum.CustomFieldTypeProductionOrder,
+			EntityId:   productionOrder.ID,
+			Limit:      1000,
+			Offset:     0,
+		})
+
+		poCustomFields := c.GetCustomField()
+		customFieldMap := make(map[string]string)
+		for _, customField := range poCustomFields {
+			customFieldMap[customField] = ""
+			for _, datum := range customFieldData {
+				if datum.Field == customField {
+					customFieldMap[customField] = datum.Value
+					break
+				}
+			}
+		}
+
 		results = append(results, &Data{
 			ProductionOrderData:  productionOrder,
 			ProductionOrderStage: stages,
+			CustomData:           customFieldMap,
 		})
 	}
 	return results, total, nil

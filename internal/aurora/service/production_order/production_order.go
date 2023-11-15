@@ -17,15 +17,38 @@ type Service interface {
 	EditProductionOrder(ctx context.Context, opt *EditProductionOrderOpts) error
 	FindProductionOrders(ctx context.Context, opts *FindProductionOrdersOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error)
 	Delete(ctx context.Context, id string) error
+	GetCustomField() []string
 }
 
 type productionOrderService struct {
 	productionOrderRepo      repository.ProductionOrderRepo
 	productionOrderStageRepo repository.ProductionOrderStageRepo
+	customFieldRepo          repository.CustomFieldRepo
 	cfg                      *configs.Config
 	redisDB                  redis.Cmdable
 }
 
+func (c *productionOrderService) GetCustomField() []string {
+	return []string{
+		"ma_xuat_film",
+		"ma_dao_be_keo",
+		"ma_dao_thanh_pham",
+		"ma_dao_khuon_dap",
+		"ma_dao_khuon_khiem_thi",
+		"khoi_luong_thanh_pham",
+		"so_mau_in",
+		"so_lan_in",
+		"vat_lieu_chinh",
+		"keo",
+		"mang",
+		"khac",
+		"kho_in",
+		"so_sp_in",
+		"hinh_thuc_in",
+		"so_luong_su_dung",
+		"so_luong_san_xuat",
+	}
+}
 func (c *productionOrderService) deleteProductionOrderStage(ctx context.Context, ids []string, productionId string) interface{} {
 	// find production order stage by production order id
 	productionOrderStages, err := c.productionOrderStageRepo.Search(ctx, &repository.SearchProductionOrderStagesOpts{
@@ -58,12 +81,14 @@ func (c *productionOrderService) deleteProductionOrderStage(ctx context.Context,
 func NewService(
 	productionOrderRepo repository.ProductionOrderRepo,
 	productionOrderStageRepo repository.ProductionOrderStageRepo,
+	customFieldRepo repository.CustomFieldRepo,
 	cfg *configs.Config,
 	redisDB redis.Cmdable,
 ) Service {
 	return &productionOrderService{
 		productionOrderRepo:      productionOrderRepo,
 		productionOrderStageRepo: productionOrderStageRepo,
+		customFieldRepo:          customFieldRepo,
 		cfg:                      cfg,
 		redisDB:                  redisDB,
 	}
@@ -72,4 +97,5 @@ func NewService(
 type Data struct {
 	*repository.ProductionOrderData
 	ProductionOrderStage []*model.ProductionOrderStage
+	CustomData           map[string]string
 }
