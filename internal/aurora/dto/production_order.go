@@ -7,15 +7,16 @@ import (
 )
 
 type ProductionOrderFilter struct {
-	IDs                       []string
-	ProductCode               string                     `json:"productCode"`
-	ProductName               string                     `json:"productName"`
-	CustomerID                string                     `json:"customerID"`
-	Status                    enum.ProductionOrderStatus `json:"status"`
-	PlannedProductionDateFrom time.Time                  `json:"plannedProductionDateFrom"`
-	PlannedProductionDateTo   time.Time                  `json:"plannedProductionDateTo"`
-	DeliveryDateFrom          time.Time                  `json:"deliveryDateFrom"`
-	DeliveryDateTo            time.Time                  `json:"deliveryDateTo"`
+	IDs         []string                   `json:"ids"`
+	Name        string                     `json:"name"`
+	ProductCode string                     `json:"productCode"`
+	ProductName string                     `json:"productName"`
+	CustomerID  string                     `json:"customerID"`
+	Status      enum.ProductionOrderStatus `json:"status"`
+	//PlannedProductionDateFrom time.Time                  `json:"plannedProductionDateFrom"`
+	//PlannedProductionDateTo   time.Time                  `json:"plannedProductionDateTo"`
+	//DeliveryDateFrom          time.Time                  `json:"deliveryDateFrom"`
+	//DeliveryDateTo            time.Time                  `json:"deliveryDateTo"`
 }
 
 type FindProductionOrdersRequest struct {
@@ -29,6 +30,7 @@ type FindProductionOrdersResponse struct {
 }
 type ProductionOrder struct {
 	ID                    string                     `json:"id"`
+	Name                  string                     `json:"name"`
 	ProductCode           string                     `json:"productCode"`
 	ProductName           string                     `json:"productName"`
 	CustomerID            string                     `json:"customerID"`
@@ -48,6 +50,7 @@ type ProductionOrder struct {
 }
 
 type CreateProductionOrderRequest struct {
+	Name                  string                     `json:"name" binding:"required"`
 	ProductCode           string                     `json:"productCode"  binding:"required"`
 	ProductName           string                     `json:"productName"  binding:"required"`
 	CustomerID            string                     `json:"customerID"  binding:"required"`
@@ -77,6 +80,7 @@ type OrderStageDevice struct {
 
 type OrderStage struct {
 	ID                  string                          `json:"id"`
+	Name                string                          `json:"name"`
 	StageID             string                          `json:"stageID"`
 	EstimatedStartAt    time.Time                       `json:"estimatedStartAt"`
 	EstimatedCompleteAt time.Time                       `json:"estimatedCompleteAt"`
@@ -106,6 +110,7 @@ type CreateProductionOrderResponse struct {
 
 type EditProductionOrderRequest struct {
 	ID                    string                     `json:"id" binding:"required"`
+	Name                  string                     `json:"name" binding:"required"`
 	ProductCode           string                     `json:"productCode"  binding:"required"`
 	ProductName           string                     `json:"productName"  binding:"required"`
 	QtyPaper              int64                      `json:"qtyPaper"`

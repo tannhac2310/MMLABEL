@@ -16,6 +16,7 @@ func (c *productionOrderService) CreateProductionOrder(ctx context.Context, opt 
 	id := idutil.ULIDNow()
 	productionOrder := &model.ProductionOrder{
 		ID:                    id,
+		Name:                  opt.Name,
 		ProductCode:           opt.ProductCode,
 		ProductName:           opt.ProductName,
 		CustomerID:            opt.CustomerID,
@@ -77,6 +78,7 @@ func (c *productionOrderService) CreateProductionOrder(ctx context.Context, opt 
 }
 
 type CreateProductionOrderOpts struct {
+	Name                  string
 	ProductCode           string
 	ProductName           string
 	CustomerID            string

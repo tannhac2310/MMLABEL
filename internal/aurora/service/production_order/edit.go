@@ -54,6 +54,7 @@ func (c *productionOrderService) EditProductionOrder(ctx context.Context, opt *E
 
 type EditProductionOrderOpts struct {
 	ID                    string
+	Name                  string
 	QtyPaper              int64
 	QtyFinished           int64
 	QtyDelivered          int64
@@ -70,6 +71,7 @@ func (c *productionOrderService) editProductionOrder(ctx context.Context, opt *E
 	table := model.ProductionOrder{}
 	updater := cockroach.NewUpdater(table.TableName(), model.ProductionOrderFieldID, opt.ID)
 
+	updater.Set(model.ProductionOrderFieldName, opt.Name)
 	updater.Set(model.ProductionOrderFieldQtyPaper, opt.QtyPaper)
 	updater.Set(model.ProductionOrderFieldQtyFinished, opt.QtyFinished)
 	updater.Set(model.ProductionOrderFieldQtyDelivered, opt.QtyDelivered)

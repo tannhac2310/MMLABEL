@@ -48,6 +48,7 @@ func (s productionOrderController) CreateProductionOrder(c *gin.Context) {
 	}
 
 	id, err := s.productionOrderService.CreateProductionOrder(c, &production_order.CreateProductionOrderOpts{
+		Name:                  req.Name,
 		ProductCode:           req.ProductCode,
 		ProductName:           req.ProductName,
 		CustomerID:            req.CustomerID,
@@ -61,6 +62,7 @@ func (s productionOrderController) CreateProductionOrder(c *gin.Context) {
 		Status:                req.Status,
 		Note:                  req.Note,
 		ProductionOrderStage:  orderStage,
+		CustomData:            nil,
 		CreatedBy:             userID,
 	})
 	if err != nil {
@@ -98,6 +100,7 @@ func (s productionOrderController) EditProductionOrder(c *gin.Context) {
 	}
 	err = s.productionOrderService.EditProductionOrder(c, &production_order.EditProductionOrderOpts{
 		ID:                    req.ID,
+		Name:                  req.Name,
 		QtyPaper:              req.QtyPaper,
 		QtyFinished:           req.QtyFinished,
 		QtyDelivered:          req.QtyDelivered,
@@ -105,8 +108,9 @@ func (s productionOrderController) EditProductionOrder(c *gin.Context) {
 		Status:                req.Status,
 		DeliveryDate:          req.DeliveryDate,
 		DeliveryImage:         req.DeliveryImage,
-		ProductionOrderStage:  productionOderStage,
 		Note:                  req.Note,
+		ProductionOrderStage:  productionOderStage,
+		//CustomData:            req.CustomData,
 	})
 	if err != nil {
 		transportutil.Error(c, err)
