@@ -63,6 +63,18 @@ type CreateProductionOrderRequest struct {
 	Note                  string                     `json:"note"`
 }
 
+type OrderStageDevice struct {
+	ID                     string                                `json:"id"`
+	ProductionOrderStageID string                                `json:"productionOrderStageID"`
+	DeviceID               string                                `json:"deviceID"`
+	Quantity               int64                                 `json:"quantity"`
+	ProcessStatus          enum.ProductionOrderStageDeviceStatus `json:"processStatus"`
+	Status                 enum.CommonStatus                     `json:"status"`
+	Responsible            []string                              `json:"responsible"`
+	Settings               map[string]interface{}                `json:"settings"`
+	Note                   string                                `json:"note"`
+}
+
 type OrderStage struct {
 	ID                  string                          `json:"id"`
 	StageID             string                          `json:"stageID"`
@@ -74,6 +86,7 @@ type OrderStage struct {
 	Condition           string                          `json:"condition"`
 	Note                string                          `json:"note"`
 	Data                map[string]interface{}          `json:"data"`
+	OrderStageDevices   []*OrderStageDevice             `json:"order_stage_devices"`
 }
 
 type CreateOrderStage struct {

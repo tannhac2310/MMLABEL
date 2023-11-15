@@ -39,6 +39,23 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 		if err != nil {
 			return nil, nil, err
 		}
+		stageData := make([]*ProductionOrderStageData, 0, len(stages))
+		// find production order stage device for each stage
+		for _, stage := range stages {
+			stageDevices, err := c.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
+				ProductionOrderStageID: stage.ID,
+				Limit:                  1000,
+				Offset:                 0,
+			})
+			if err != nil {
+				return nil, nil, err
+			}
+			stageData = append(stageData, &ProductionOrderStageData{
+				ProductionOrderStage:       stage,
+				ProductionOrderStageDevice: stageDevices,
+			})
+		}
+
 		// find custom field value
 		customFieldData, err := c.customFieldRepo.Search(ctx, &repository.SearchCustomFieldsOpts{
 			EntityType: enum.CustomFieldTypeProductionOrder,
@@ -61,7 +78,7 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 
 		results = append(results, &Data{
 			ProductionOrderData:  productionOrder,
-			ProductionOrderStage: stages,
+			ProductionOrderStage: stageData,
 			CustomData:           customFieldMap,
 		})
 	}

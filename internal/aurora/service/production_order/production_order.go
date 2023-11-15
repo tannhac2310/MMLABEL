@@ -21,11 +21,12 @@ type Service interface {
 }
 
 type productionOrderService struct {
-	productionOrderRepo      repository.ProductionOrderRepo
-	productionOrderStageRepo repository.ProductionOrderStageRepo
-	customFieldRepo          repository.CustomFieldRepo
-	cfg                      *configs.Config
-	redisDB                  redis.Cmdable
+	productionOrderRepo            repository.ProductionOrderRepo
+	productionOrderStageRepo       repository.ProductionOrderStageRepo
+	productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo
+	customFieldRepo                repository.CustomFieldRepo
+	cfg                            *configs.Config
+	redisDB                        redis.Cmdable
 }
 
 func (c *productionOrderService) GetCustomField() []string {
@@ -81,21 +82,28 @@ func (c *productionOrderService) deleteProductionOrderStage(ctx context.Context,
 func NewService(
 	productionOrderRepo repository.ProductionOrderRepo,
 	productionOrderStageRepo repository.ProductionOrderStageRepo,
+	productOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo,
 	customFieldRepo repository.CustomFieldRepo,
 	cfg *configs.Config,
 	redisDB redis.Cmdable,
 ) Service {
 	return &productionOrderService{
-		productionOrderRepo:      productionOrderRepo,
-		productionOrderStageRepo: productionOrderStageRepo,
-		customFieldRepo:          customFieldRepo,
-		cfg:                      cfg,
-		redisDB:                  redisDB,
+		productionOrderRepo:            productionOrderRepo,
+		productionOrderStageRepo:       productionOrderStageRepo,
+		productionOrderStageDeviceRepo: productOrderStageDeviceRepo,
+		customFieldRepo:                customFieldRepo,
+		cfg:                            cfg,
+		redisDB:                        redisDB,
 	}
 }
 
 type Data struct {
 	*repository.ProductionOrderData
-	ProductionOrderStage []*model.ProductionOrderStage
+	ProductionOrderStage []*ProductionOrderStageData
 	CustomData           map[string]string
+}
+
+type ProductionOrderStageData struct {
+	*model.ProductionOrderStage
+	ProductionOrderStageDevice []*repository.ProductionOrderStageDeviceData
 }

@@ -169,7 +169,23 @@ func (s productionOrderController) FindProductionOrders(c *gin.Context) {
 
 func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 	orderStage := make([]*dto.OrderStage, 0)
+
 	for _, item := range f.ProductionOrderStage {
+		productionOrderStageDevice := make([]*dto.OrderStageDevice, 0)
+
+		for _, device := range item.ProductionOrderStageDevice {
+			productionOrderStageDevice = append(productionOrderStageDevice, &dto.OrderStageDevice{
+				ID:                     device.ID,
+				ProductionOrderStageID: device.ProductionOrderStageID,
+				DeviceID:               device.DeviceID,
+				Quantity:               device.Quantity,
+				ProcessStatus:          device.ProcessStatus,
+				Status:                 device.Status,
+				Responsible:            device.Responsible,
+				Settings:               device.Settings,
+				Note:                   device.Note.String,
+			})
+		}
 		orderStage = append(orderStage, &dto.OrderStage{
 			ID:                  item.ID,
 			StageID:             item.StageID,
@@ -181,6 +197,7 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 			Condition:           item.Condition.String,
 			Note:                item.Note.String,
 			Data:                item.Data,
+			OrderStageDevices:   productionOrderStageDevice,
 		})
 	}
 	return &dto.ProductionOrder{
