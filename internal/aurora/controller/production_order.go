@@ -124,7 +124,7 @@ func (s productionOrderController) DeleteProductionOrder(c *gin.Context) {
 		return
 	}
 
-	err = s.productionOrderService.Delete(c, req.ID)
+	err = s.productionOrderService.DeleteProductionOrder(c, req.ID)
 	if err != nil {
 		transportutil.Error(c, err)
 		return

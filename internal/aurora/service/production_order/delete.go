@@ -8,7 +8,7 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 )
 
-func (c *productionOrderService) Delete(ctx context.Context, id string) error {
+func (c *productionOrderService) DeleteProductionOrder(ctx context.Context, id string) error {
 	// exec in transaction
 	return cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
 		err := c.productionOrderRepo.SoftDelete(ctx, id)

@@ -84,7 +84,7 @@ func (s productionOrderStageController) DeleteProductionOrderStage(c *gin.Contex
 		return
 	}
 
-	err = s.productionOrderStageService.Delete(c, req.ID)
+	err = s.productionOrderStageService.DeleteProductionOrderStage(c, req.ID)
 	if err != nil {
 		transportutil.Error(c, err)
 		return

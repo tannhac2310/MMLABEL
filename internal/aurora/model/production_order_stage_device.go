@@ -14,6 +14,7 @@ const (
 	ProductionOrderStageDeviceFieldQuantity               = "quantity"
 	ProductionOrderStageDeviceFieldProcessStatus          = "process_status"
 	ProductionOrderStageDeviceFieldStatus                 = "status"
+	ProductionOrderStageDeviceFieldResponsible            = "responsible"
 	ProductionOrderStageDeviceFieldSettings               = "settings"
 	ProductionOrderStageDeviceFieldNote                   = "note"
 	ProductionOrderStageDeviceFieldCreatedAt              = "created_at"
@@ -28,6 +29,7 @@ type ProductionOrderStageDevice struct {
 	Quantity               int64                                 `db:"quantity"`
 	ProcessStatus          enum.ProductionOrderStageDeviceStatus `db:"process_status"`
 	Status                 enum.CommonStatus                     `db:"status"`
+	Responsible            []string                              `db:"responsible"`
 	Settings               map[string]interface{}                `db:"settings"`
 	Note                   sql.NullString                        `db:"note"`
 	CreatedAt              time.Time                             `db:"created_at"`
@@ -43,6 +45,7 @@ func (rcv *ProductionOrderStageDevice) FieldMap() (fields []string, values []int
 		ProductionOrderStageDeviceFieldQuantity,
 		ProductionOrderStageDeviceFieldProcessStatus,
 		ProductionOrderStageDeviceFieldStatus,
+		ProductionOrderStageDeviceFieldResponsible,
 		ProductionOrderStageDeviceFieldSettings,
 		ProductionOrderStageDeviceFieldNote,
 		ProductionOrderStageDeviceFieldCreatedAt,
@@ -57,6 +60,7 @@ func (rcv *ProductionOrderStageDevice) FieldMap() (fields []string, values []int
 		&rcv.Quantity,
 		&rcv.ProcessStatus,
 		&rcv.Status,
+		&rcv.Responsible,
 		&rcv.Settings,
 		&rcv.Note,
 		&rcv.CreatedAt,

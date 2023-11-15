@@ -27,7 +27,7 @@ func NewProductionOrderStageRepo() ProductionOrderStageRepo {
 	return &productionOrderStagesRepo{}
 }
 func (p *productionOrderStagesRepo) DeleteByProductionOrderID(ctx context.Context, id string) error {
-	sql := `UPDATE production_order_stage
+	sql := `UPDATE production_order_stages
 		SET deleted_at = NOW()
 		WHERE production_order_id = $1`
 
@@ -57,7 +57,7 @@ func (r *productionOrderStagesRepo) Update(ctx context.Context, e *model.Product
 }
 
 func (r *productionOrderStagesRepo) SoftDelete(ctx context.Context, id string) error {
-	sql := `UPDATE production_order_stage
+	sql := `UPDATE production_order_stages
 		SET deleted_at = NOW()
 		WHERE id = $1`
 
@@ -72,7 +72,7 @@ func (r *productionOrderStagesRepo) SoftDelete(ctx context.Context, id string) e
 	return nil
 }
 func (r *productionOrderStagesRepo) SoftDeletes(ctx context.Context, ids []string) error {
-	sql := `UPDATE production_order_stage
+	sql := `UPDATE production_order_stages
 		SET deleted_at = NOW()
 		WHERE id IN ($1)`
 
@@ -135,16 +135,6 @@ func (r *productionOrderStagesRepo) Search(ctx context.Context, s *SearchProduct
 	err := cockroach.Select(ctx, sql, args...).ScanAll(&message)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.Select: %w", err)
-	}
-
-	return message, nil
-}
-func (r *productionOrderStagesRepo) SearchOne(ctx context.Context, s *SearchProductionOrderStagesOpts) (*model.ProductionOrderStage, error) {
-	message := &model.ProductionOrderStage{}
-	sql, args := s.buildQuery(false)
-	err := cockroach.Select(ctx, sql, args...).ScanOne(message)
-	if err != nil {
-		return nil, fmt.Errorf("cockroach.Select1: %w", err)
 	}
 
 	return message, nil
