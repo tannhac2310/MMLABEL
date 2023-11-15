@@ -9,18 +9,18 @@ type ProductionOrderStatus uint8
 
 const (
 	ProductionOrderStatusWaiting ProductionOrderStatus = iota + 1
-	ProductionOrderStatusAccept
-	ProductionOrderStatusReject
-	ProductionOrderStatusFinish
+	ProductionOrderStatusDoing
+	ProductionOrderStatusPause
+	ProductionOrderStatusComplete
 	ProductionOrderStatusCancel
 )
 
 var ProductionOrderStatusName = map[ProductionOrderStatus]string{
-	ProductionOrderStatusWaiting: "waiting",
-	ProductionOrderStatusAccept:  "accept",
-	ProductionOrderStatusReject:  "reject",
-	ProductionOrderStatusFinish:  "finish",
-	ProductionOrderStatusCancel:  "cancel",
+	ProductionOrderStatusWaiting:  "waiting",
+	ProductionOrderStatusDoing:    "doing",
+	ProductionOrderStatusPause:    "pause",
+	ProductionOrderStatusComplete: "complete",
+	ProductionOrderStatusCancel:   "cancel",
 }
 
 var ProductionOrderStatusValue = func() map[string]ProductionOrderStatus {
