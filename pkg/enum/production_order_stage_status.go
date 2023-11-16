@@ -9,20 +9,20 @@ type ProductionOrderStageStatus uint8
 
 const (
 	ProductionOrderStageStatusNone ProductionOrderStageStatus = iota + 1
-	ProductionOrderStageStatusPending
-	ProductionOrderStageStatusStart
 	ProductionOrderStageStatusDoing
 	ProductionOrderStageStatusPausing
 	ProductionOrderStageStatusComplete
+	//ProductionOrderStageStatusPending
+	//ProductionOrderStageStatusStart
 )
 
 var ProductionOrderStageStatusName = map[ProductionOrderStageStatus]string{
 	ProductionOrderStageStatusNone:     "", // chua bat dau
-	ProductionOrderStageStatusPending:  "pending",
-	ProductionOrderStageStatusStart:    "start",
 	ProductionOrderStageStatusDoing:    "doing",
 	ProductionOrderStageStatusPausing:  "pausing",
 	ProductionOrderStageStatusComplete: "complete",
+	//ProductionOrderStageStatusPending:  "pending",
+	//ProductionOrderStageStatusStart:    "start",
 }
 
 var ProductionOrderStageStatusValue = func() map[string]ProductionOrderStageStatus {

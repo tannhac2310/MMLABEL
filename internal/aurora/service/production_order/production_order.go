@@ -13,6 +13,7 @@ type Service interface {
 	CreateProductionOrderStage(ctx context.Context, poId string, opt *ProductionOrderStage) (string, error)
 	EditProductionOrderStage(ctx context.Context, poId string, opt *ProductionOrderStage) error
 	DeleteProductionOrderStage(ctx context.Context, id string) error
+	AcceptAndChangeNextStage(ctx context.Context, id string) error
 	CreateProductionOrder(ctx context.Context, opt *CreateProductionOrderOpts) (string, error)
 	EditProductionOrder(ctx context.Context, opt *EditProductionOrderOpts) error
 	FindProductionOrders(ctx context.Context, opts *FindProductionOrdersOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error)

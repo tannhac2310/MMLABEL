@@ -16,12 +16,28 @@ type ProductionOrderController interface {
 	EditProductionOrder(c *gin.Context)
 	DeleteProductionOrder(c *gin.Context)
 	FindProductionOrders(c *gin.Context)
+	AcceptAndChangeNextStage(c *gin.Context)
 }
 
 type productionOrderController struct {
 	productionOrderService production_order.Service
 }
 
+func (s productionOrderController) AcceptAndChangeNextStage(c *gin.Context) {
+	req := &dto.AcceptAndChangeNextStageRequest{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+	err = s.productionOrderService.AcceptAndChangeNextStage(c, req.ID)
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+
+	transportutil.SendJSONResponse(c, &dto.AcceptAndChangeNextStageResponse{})
+}
 func (s productionOrderController) CreateProductionOrder(c *gin.Context) {
 	req := &dto.CreateProductionOrderRequest{}
 	err := c.ShouldBind(req)
@@ -33,7 +49,7 @@ func (s productionOrderController) CreateProductionOrder(c *gin.Context) {
 	userID := interceptor.UserIDFromCtx(c)
 	orderStage := make([]*production_order.ProductionOrderStage, 0)
 
-	for _, stage := range req.ProductionOrderStages {
+	for idx, stage := range req.ProductionOrderStages {
 		orderStage = append(orderStage, &production_order.ProductionOrderStage{
 			StageID:             stage.StageID,
 			EstimatedStartAt:    stage.EstimatedStartAt,
@@ -44,6 +60,7 @@ func (s productionOrderController) CreateProductionOrder(c *gin.Context) {
 			Condition:           stage.Condition,
 			Note:                stage.Note,
 			Data:                stage.Data,
+			Sorting:             int16(len(req.ProductionOrderStages) - idx),
 		})
 	}
 
@@ -84,7 +101,7 @@ func (s productionOrderController) EditProductionOrder(c *gin.Context) {
 	}
 	// write code to edit production order and production order stage
 	productionOderStage := make([]*production_order.ProductionOrderStage, 0)
-	for _, stage := range req.ProductionOrderStages {
+	for idx, stage := range req.ProductionOrderStages {
 		productionOderStage = append(productionOderStage, &production_order.ProductionOrderStage{
 			ID:                  stage.ID,
 			StageID:             stage.StageID,
@@ -96,6 +113,7 @@ func (s productionOrderController) EditProductionOrder(c *gin.Context) {
 			Condition:           stage.Condition,
 			Note:                stage.Note,
 			Data:                stage.Data,
+			Sorting:             int16(len(req.ProductionOrderStages) - idx),
 		})
 	}
 	err = s.productionOrderService.EditProductionOrder(c, &production_order.EditProductionOrderOpts{
@@ -202,6 +220,7 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 			Note:                item.Note.String,
 			Data:                item.Data,
 			OrderStageDevices:   productionOrderStageDevice,
+			Sorting:             item.Sorting,
 		})
 	}
 	return &dto.ProductionOrder{
@@ -269,5 +288,13 @@ func RegisterProductionOrderController(
 		&dto.FindProductionOrdersRequest{},
 		&dto.FindProductionOrdersResponse{},
 		"Find productionOrders",
+	)
+	routeutil.AddEndpoint(
+		g,
+		"accept-and-change-next-stage",
+		c.AcceptAndChangeNextStage,
+		&dto.AcceptAndChangeNextStageRequest{},
+		&dto.AcceptAndChangeNextStageResponse{},
+		"Accept and change next stage",
 	)
 }

@@ -90,6 +90,7 @@ type OrderStage struct {
 	Condition           string                          `json:"condition"`
 	Note                string                          `json:"note"`
 	Data                map[string]interface{}          `json:"data"`
+	Sorting             int16                           `json:"sorting"`
 	OrderStageDevices   []*OrderStageDevice             `json:"order_stage_devices"`
 }
 
@@ -105,7 +106,12 @@ type CreateOrderStage struct {
 	Data                map[string]interface{}          `json:"data"`
 }
 type CreateProductionOrderResponse struct {
-	ID string `json:"id"`
+	ID string `json:"id"  binding:"required"`
+}
+type AcceptAndChangeNextStageRequest struct {
+	ID string `json:"id"  binding:"required"`
+}
+type AcceptAndChangeNextStageResponse struct {
 }
 
 type EditProductionOrderRequest struct {
@@ -121,7 +127,7 @@ type EditProductionOrderRequest struct {
 	DeliveryImage         string                     `json:"deliveryImage"`
 	Status                enum.ProductionOrderStatus `json:"status"  binding:"required"`
 	Note                  string                     `json:"note"`
-	ProductionOrderStages []EditOrderStage           `json:"production_order_stages"`
+	ProductionOrderStages []EditOrderStage           `json:"production_order_stages" binding:"required"`
 }
 type EditOrderStage struct {
 	ID                  string                          `json:"id"`

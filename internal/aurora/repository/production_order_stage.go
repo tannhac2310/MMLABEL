@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"strings"
 	"time"
 
@@ -88,11 +89,12 @@ func (r *productionOrderStagesRepo) SoftDeletes(ctx context.Context, ids []strin
 
 // SearchProductionOrderStagesOpts all params is options
 type SearchProductionOrderStagesOpts struct {
-	IDs               []string
-	ProductionOrderID string
-	Limit             int64
-	Offset            int64
-	Sort              *Sort
+	IDs                        []string
+	ProductionOrderID          string
+	ProductionOrderStageStatus enum.ProductionOrderStageStatus
+	Limit                      int64
+	Offset                     int64
+	Sort                       *Sort
 }
 
 func (s *SearchProductionOrderStagesOpts) buildQuery(isCount bool) (string, []interface{}) {
@@ -108,6 +110,10 @@ func (s *SearchProductionOrderStagesOpts) buildQuery(isCount bool) (string, []in
 		args = append(args, s.ProductionOrderID)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderStageFieldProductionOrderID, len(args))
 	}
+	if s.ProductionOrderStageStatus > 0 {
+		args = append(args, s.ProductionOrderStageStatus)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderStageFieldStatus, len(args))
+	}
 
 	b := &model.ProductionOrderStage{}
 	fields, _ := b.FieldMap()
@@ -117,7 +123,7 @@ func (s *SearchProductionOrderStagesOpts) buildQuery(isCount bool) (string, []in
 		WHERE TRUE %s AND b.deleted_at IS NULL`, b.TableName(), joins, conds), args
 	}
 
-	order := " ORDER BY b.id DESC "
+	order := " ORDER BY b.sorting DESC "
 	if s.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", s.Sort.By, s.Sort.Order)
 	}

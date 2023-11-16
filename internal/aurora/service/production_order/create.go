@@ -43,6 +43,7 @@ func (c *productionOrderService) CreateProductionOrder(ctx context.Context, opt 
 			err = c.productionOrderStageRepo.Insert(ctx2, &model.ProductionOrderStage{
 				ID:                  idutil.ULIDNow(),
 				ProductionOrderID:   id,
+				Sorting:             orderStage.Sorting,
 				StageID:             orderStage.StageID,
 				EstimatedStartAt:    cockroach.Time(orderStage.EstimatedStartAt),
 				EstimatedCompleteAt: cockroach.Time(orderStage.EstimatedCompleteAt),
@@ -107,4 +108,5 @@ type ProductionOrderStage struct {
 	Note                string
 	Data                map[string]interface{}
 	ID                  string
+	Sorting             int16
 }
