@@ -13,6 +13,7 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 		CustomerID:  opts.CustomerID,
 		ProductCode: opts.ProductCode,
 		ProductName: opts.ProductName,
+		Name:        opts.Name,
 		Status:      opts.Status,
 		Limit:       limit,
 		Offset:      offset,
@@ -89,6 +90,7 @@ type FindProductionOrdersOpts struct {
 	IDs         []string
 	CustomerID  string
 	ProductName string
+	Name        string
 	ProductCode string
 	Status      enum.ProductionOrderStatus
 }

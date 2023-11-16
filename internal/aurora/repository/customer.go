@@ -76,7 +76,7 @@ func (s *SearchCustomersOpts) buildQuery(isCount bool) (string, []interface{}) {
 		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.CustomerFieldID)
 	}
 	if s.Name != "" {
-		args = append(args, s.Name)
+		args = append(args, "%"+s.Name+"%")
 		conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.CustomerFieldName, len(args))
 	}
 	if s.Phone != "" {

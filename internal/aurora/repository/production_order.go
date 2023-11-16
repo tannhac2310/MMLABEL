@@ -62,6 +62,7 @@ type SearchProductionOrdersOpts struct {
 	CustomerID  string
 	ProductCode string
 	ProductName string
+	Name        string
 	Status      enum.ProductionOrderStatus
 	Limit       int64
 	Offset      int64
@@ -76,6 +77,10 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool) (string, []interfa
 	if len(s.IDs) > 0 {
 		args = append(args, s.IDs)
 		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.ProductionOrderFieldID)
+	}
+	if s.Name != "" {
+		args = append(args, "%"+s.Name+"%")
+		conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.ProductionOrderFieldName, len(args))
 	}
 	if s.CustomerID != "" {
 		args = append(args, s.CustomerID)

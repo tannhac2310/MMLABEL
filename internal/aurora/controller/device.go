@@ -127,7 +127,7 @@ func toDeviceResp(f *device.Data) *dto.Device {
 		ID:        f.ID,
 		Name:      f.Name,
 		Code:      f.Code,
-		OptionID:  f.OptionID,
+		OptionID:  f.OptionID.String,
 		Data:      f.Data,
 		Status:    f.Status,
 		CreatedBy: f.CreatedBy,

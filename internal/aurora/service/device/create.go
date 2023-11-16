@@ -18,7 +18,7 @@ func (c *deviceService) CreateDevice(ctx context.Context, opt *CreateDeviceOpts)
 		ID:        idutil.ULIDNow(),
 		Name:      opt.Name,
 		Code:      opt.Code,
-		OptionID:  opt.OptionID,
+		OptionID:  cockroach.String(opt.OptionID),
 		Data:      opt.Data,
 		Status:    opt.Status,
 		CreatedBy: opt.CreatedBy,

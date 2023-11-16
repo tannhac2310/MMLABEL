@@ -23,7 +23,7 @@ type Device struct {
 	ID        string                 `db:"id"`
 	Name      string                 `db:"name"`
 	Code      string                 `db:"code"`
-	OptionID  string                 `db:"option_id"`
+	OptionID  sql.NullString         `db:"option_id"`
 	Data      map[string]interface{} `db:"data"`
 	Status    enum.CommonStatus      `db:"status"`
 	CreatedBy string                 `db:"created_by"`

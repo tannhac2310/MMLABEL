@@ -75,8 +75,8 @@ func (s *SearchDevicesOpts) buildQuery(isCount bool) (string, []interface{}) {
 		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.DeviceFieldID)
 	}
 	if s.Name != "" {
-		args = append(args, s.Name)
-		conds += fmt.Sprintf(" AND (b.%[2]s ILIKE $%[1]d OR b.%[2]s ILIKE $%[1]d)",
+		args = append(args, "%"+s.Name+"%")
+		conds += fmt.Sprintf(" AND (b.%[2]s ILIKE $%[1]d OR b.%[3]s ILIKE $%[1]d)",
 			len(args), model.DeviceFieldName, model.DeviceFieldCode)
 	}
 	if s.Code != "" {

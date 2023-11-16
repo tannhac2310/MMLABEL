@@ -75,8 +75,8 @@ func (s *SearchDepartmentsOpts) buildQuery(isCount bool) (string, []interface{})
 		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.DepartmentFieldID)
 	}
 	if s.Name != "" {
-		args = append(args, s.Name)
-		conds += fmt.Sprintf(" AND (b.%[2]s ILIKE $%[1]d OR b.%[2]s ILIKE $%[1]d OR b.%[3]s ILIKE $%[1]d)",
+		args = append(args, "%"+s.Name+"%")
+		conds += fmt.Sprintf(" AND (b.%[2]s ILIKE $%[1]d OR b.%[3]s ILIKE $%[1]d OR b.%[4]s ILIKE $%[1]d)",
 			len(args), model.DepartmentFieldName, model.DepartmentFieldShortName, model.DepartmentFieldCode)
 	}
 	if s.Code != "" {
