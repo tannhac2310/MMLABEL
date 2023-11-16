@@ -6,6 +6,7 @@ CREATE TABLE custom_fields
     field       VARCHAR(50) NOT NULL,
     value       TEXT        not null default '',
     description TEXT,
+    deleted_at  TIMESTAMPTZ,
     CONSTRAINT pk_custom_fields PRIMARY KEY (id ASC)
 );
 -- Add a unique index to prevent duplicate custom fields

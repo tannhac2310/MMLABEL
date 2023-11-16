@@ -89,7 +89,7 @@ func (s *SearchCustomFieldsOpts) buildQuery(isCount bool) (string, []interface{}
 	if isCount {
 		return fmt.Sprintf(`SELECT count(*) as cnt
 		FROM %s AS b %s
-		WHERE TRUE %s AND b.deleted_at IS NULL`, b.TableName(), joins, conds), args
+		WHERE TRUE %s`, b.TableName(), joins, conds), args
 	}
 
 	order := " ORDER BY b.id DESC "

@@ -225,6 +225,7 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 	}
 	return &dto.ProductionOrder{
 		ID:                    f.ID,
+		Name:                  f.Name,
 		ProductCode:           f.ProductCode,
 		ProductName:           f.ProductName,
 		CustomerID:            f.CustomerID,

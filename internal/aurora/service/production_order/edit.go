@@ -106,8 +106,52 @@ func (c *productionOrderService) editProductionOrderStage(ctx context.Context, o
 	}
 	// update production order stage
 	for _, orderStage := range opt.ProductionOrderStage {
+		if orderStage.ID == "" {
+			// create new production order stage
+			err = c.productionOrderStageRepo.Insert(ctx, &model.ProductionOrderStage{
+				ID:                  idutil.ULIDNow(),
+				ProductionOrderID:   opt.ID,
+				Sorting:             orderStage.Sorting,
+				StageID:             orderStage.StageID,
+				EstimatedStartAt:    cockroach.Time(orderStage.EstimatedStartAt),
+				EstimatedCompleteAt: cockroach.Time(orderStage.EstimatedCompleteAt),
+				StartedAt:           cockroach.Time(orderStage.StartedAt),
+				CompletedAt:         cockroach.Time(orderStage.CompletedAt),
+				Status:              orderStage.Status,
+				Condition:           cockroach.String(orderStage.Condition),
+				Note:                cockroach.String(orderStage.Note),
+				Data:                orderStage.Data,
+				CreatedAt:           time.Now(),
+				UpdatedAt:           time.Now(),
+			})
+			if err != nil {
+				return fmt.Errorf("c.productionOrderStageRepo.Insert: %w", err)
+			}
+			continue
+		}
+		// find production order stage by id
+		orderStageData, err := c.productionOrderStageRepo.FindByID(ctx, orderStage.ID)
+		if err != nil {
+			return fmt.Errorf("c.productionOrderStageRepo.FindByID: %w", err)
+		}
+
 		table := model.ProductionOrderStage{}
 		updater := cockroach.NewUpdater(table.TableName(), model.ProductionOrderStageFieldID, orderStage.ID)
+		// update date follow status of production order stage
+		if orderStageData.Status != orderStage.Status {
+			switch orderStage.Status {
+			case enum.ProductionOrderStageStatusWaiting:
+				updater.Set(model.ProductionOrderStageFieldWaitingAt, time.Now())
+			case enum.ProductionOrderStageStatusReception:
+				updater.Set(model.ProductionOrderStageFieldReceptionAt, time.Now())
+			case enum.ProductionOrderStageStatusProductionStart:
+				updater.Set(model.ProductionOrderStageFieldProductionStartAt, time.Now())
+			case enum.ProductionOrderStageStatusProductionCompletion:
+				updater.Set(model.ProductionOrderStageFieldProductionCompletionAt, time.Now())
+			case enum.ProductionOrderStageStatusProductDelivery:
+				updater.Set(model.ProductionOrderStageFieldProductDeliveryAt, time.Now())
+			}
+		}
 
 		updater.Set(model.ProductionOrderStageFieldEstimatedStartAt, orderStage.EstimatedStartAt)
 		updater.Set(model.ProductionOrderStageFieldEstimatedCompleteAt, orderStage.EstimatedCompleteAt)
@@ -120,7 +164,7 @@ func (c *productionOrderService) editProductionOrderStage(ctx context.Context, o
 
 		updater.Set(model.ProductionOrderStageFieldUpdatedAt, time.Now())
 
-		err := cockroach.UpdateFields(ctx, updater)
+		err = cockroach.UpdateFields(ctx, updater)
 		if err != nil {
 			return fmt.Errorf("update productionOrderStage failed %w", err)
 		}

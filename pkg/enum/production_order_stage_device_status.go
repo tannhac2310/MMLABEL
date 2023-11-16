@@ -9,14 +9,18 @@ type ProductionOrderStageDeviceStatus uint8
 
 const (
 	ProductionOrderStageDeviceStatusNone ProductionOrderStageDeviceStatus = iota + 1
-	ProductionOrderStageDeviceStatusFailed
+	ProductionOrderStageDeviceStatusStart
+	ProductionOrderStageDeviceStatusPause
 	ProductionOrderStageDeviceStatusComplete
+	ProductionOrderStageDeviceStatusFailed
 )
 
 var ProductionOrderStageDeviceStatusName = map[ProductionOrderStageDeviceStatus]string{
-	ProductionOrderStageDeviceStatusNone:     "", // chua bat dau
-	ProductionOrderStageDeviceStatusFailed:   "failed",
-	ProductionOrderStageDeviceStatusComplete: "completed",
+	ProductionOrderStageDeviceStatusNone:     "",          // chua bat dau
+	ProductionOrderStageDeviceStatusStart:    "start",     // bat dau sx
+	ProductionOrderStageDeviceStatusPause:    "pause",     // tam dung sx
+	ProductionOrderStageDeviceStatusComplete: "completed", // hoan thanh sx
+	ProductionOrderStageDeviceStatusFailed:   "failed",    // loi
 }
 
 var ProductionOrderStageDeviceStatusValue = func() map[string]ProductionOrderStageDeviceStatus {

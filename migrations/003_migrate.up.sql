@@ -43,7 +43,7 @@ CREATE TABLE devices
     id         VARCHAR(50)  NOT NULL,
     name       VARCHAR(255) NOT NULL,
     code       VARCHAR(255) NOT NULL,
-    option_id  VARCHAR(50)  NOT NULL,
+    option_id  VARCHAR(50),
     data       JSONB,
     status     SMALLINT              DEFAULT 1,
     created_by VARCHAR(50)  NOT NULL,
@@ -55,39 +55,44 @@ CREATE TABLE devices
 
 CREATE TABLE stages -- công đoạn
 (
-    id         VARCHAR(50)  NOT NULL,
-    parent_id  VARCHAR(50),
-    department_code  VARCHAR(50),
-    name       VARCHAR(255) NOT NULL,
-    short_name VARCHAR(255) NOT NULL,
-    code       VARCHAR(255) NOT NULL,
-    sorting    INT                   DEFAULT 1,
-    error_code TEXT, -- NVL1,NVL2,NVL3
-    data       JSONB,
-    note       TEXT,
-    status     SMALLINT              DEFAULT 1,
-    created_by VARCHAR(50)  NOT NULL,
-    created_at TIMESTAMPTZ  NOT NULL DEFAULT now():::TIMESTAMPTZ,
-    updated_at TIMESTAMPTZ  NOT NULL DEFAULT now():::TIMESTAMPTZ,
-    deleted_at TIMESTAMPTZ,
+    id              VARCHAR(50)  NOT NULL,
+    parent_id       VARCHAR(50),
+    department_code VARCHAR(50),
+    name            VARCHAR(255) NOT NULL,
+    short_name      VARCHAR(255) NOT NULL,
+    code            VARCHAR(255) NOT NULL,
+    sorting         INT                   DEFAULT 1,
+    error_code      TEXT, -- NVL1,NVL2,NVL3
+    data            JSONB,
+    note            TEXT,
+    status          SMALLINT              DEFAULT 1,
+    created_by      VARCHAR(50)  NOT NULL,
+    created_at      TIMESTAMPTZ  NOT NULL DEFAULT now():::TIMESTAMPTZ,
+    updated_at      TIMESTAMPTZ  NOT NULL DEFAULT now():::TIMESTAMPTZ,
+    deleted_at      TIMESTAMPTZ,
     CONSTRAINT pk_stages PRIMARY KEY (id ASC)
 );
 
 
 CREATE TABLE production_order_stages
 (
-    id                  VARCHAR(50)  NOT NULL,
-    production_order_id VARCHAR(50)  NOT NULL,              -- lệnh sx
-    stage_id            VARCHAR(255) NOT NULL,              -- công đoạn
-    started_at          TIMESTAMPTZ,                        -- thời gian bắt đầu start
-    completed_at        TIMESTAMPTZ,                        -- thời gian kết thúc
-    status              SMALLINT              DEFAULT 1,    -- Tạm dừng/Đang chạy
-    condition           VARCHAR(10)           DEFAULT NULL, -- Chờ PC/Chờ SX/Đang Sản xuất/Chuyển PO/Hoàn thành SX/SS Vận chuyển
-    note                TEXT,
-    data                JSONB,                              -- thông tin bổ sung -- luu responsible; phân công của 1 lệnh sx tại công đoạn X
-    created_at          TIMESTAMPTZ  NOT NULL DEFAULT now():::TIMESTAMPTZ,
-    updated_at          TIMESTAMPTZ  NOT NULL DEFAULT now():::TIMESTAMPTZ,
-    deleted_at          TIMESTAMPTZ,
+    id                       VARCHAR(50)  NOT NULL,
+    production_order_id      VARCHAR(50)  NOT NULL,              -- lệnh sx
+    stage_id                 VARCHAR(255) NOT NULL,              -- công đoạn
+    started_at               TIMESTAMPTZ,                        -- thời gian bắt đầu start
+    completed_at             TIMESTAMPTZ,                        -- thời gian kết thúc
+    status                   SMALLINT              DEFAULT 1,    -- Tạm dừng/Đang chạy
+    condition                VARCHAR(10)           DEFAULT NULL, -- Chờ PC/Chờ SX/Đang Sản xuất/Chuyển PO/Hoàn thành SX/SS Vận chuyển
+    note                     TEXT,
+    data                     JSONB,                              -- thông tin bổ sung -- luu responsible; phân công của 1 lệnh sx tại công đoạn X
+    created_at               TIMESTAMPTZ  NOT NULL DEFAULT now():::TIMESTAMPTZ,
+    updated_at               TIMESTAMPTZ  NOT NULL DEFAULT now():::TIMESTAMPTZ,
+    waiting_at               TIMESTAMPTZ,
+    reception_at             TIMESTAMPTZ,
+    production_start_at      TIMESTAMPTZ,
+    production_completion_at TIMESTAMPTZ,
+    product_delivery_at      TIMESTAMPTZ,
+    deleted_at               TIMESTAMPTZ,
     CONSTRAINT pk_production_order_stage PRIMARY KEY (id ASC)
 );
 

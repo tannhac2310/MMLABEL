@@ -6,6 +6,7 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
+	"time"
 )
 
 func (c *productionOrderService) AcceptAndChangeNextStage(ctx context.Context, id string) error {
@@ -13,7 +14,7 @@ func (c *productionOrderService) AcceptAndChangeNextStage(ctx context.Context, i
 	lastDoingStages, err := c.productionOrderStageRepo.Search(ctx, &repository.SearchProductionOrderStagesOpts{
 		IDs:                        nil,
 		ProductionOrderID:          id,
-		ProductionOrderStageStatus: enum.ProductionOrderStageStatusDoing,
+		ProductionOrderStageStatus: enum.ProductionOrderStageStatusProductionCompletion,
 		Limit:                      1,
 		Offset:                     0,
 		Sort: &repository.Sort{
@@ -28,7 +29,7 @@ func (c *productionOrderService) AcceptAndChangeNextStage(ctx context.Context, i
 	firstNoneStages, err := c.productionOrderStageRepo.Search(ctx, &repository.SearchProductionOrderStagesOpts{
 		IDs:                        nil,
 		ProductionOrderID:          id,
-		ProductionOrderStageStatus: enum.ProductionOrderStageStatusNone,
+		ProductionOrderStageStatus: enum.ProductionOrderStageStatusWaiting,
 		Limit:                      1,
 		Offset:                     0,
 		Sort: &repository.Sort{
@@ -45,7 +46,8 @@ func (c *productionOrderService) AcceptAndChangeNextStage(ctx context.Context, i
 	err = cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
 		if len(lastDoingStages) > 0 {
 			model := lastDoingStages[0]
-			model.Status = enum.ProductionOrderStageStatusComplete
+			model.Status = enum.ProductionOrderStageStatusProductDelivery
+			model.ProductionCompletionAt = cockroach.Time(time.Now()) // cap nhat ngay hoan thanh ban giao san pham
 			err = c.productionOrderStageRepo.Update(ctx2, model)
 			if err != nil {
 				return fmt.Errorf("c.productionOrderStageRepo.Update: %w", err)
@@ -53,8 +55,9 @@ func (c *productionOrderService) AcceptAndChangeNextStage(ctx context.Context, i
 		}
 
 		model := firstNoneStages[0]
-		model.Status = enum.ProductionOrderStageStatusDoing
+		model.Status = enum.ProductionOrderStageStatusReception
 		err = c.productionOrderStageRepo.Update(ctx2, model)
+		model.ReceptionAt = cockroach.Time(time.Now()) // cap nhat ngay nhan san pham
 		if err != nil {
 			return fmt.Errorf("c.productionOrderStageRepo.Update: %w", err)
 		}

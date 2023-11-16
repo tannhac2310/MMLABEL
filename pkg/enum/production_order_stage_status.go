@@ -8,21 +8,19 @@ import (
 type ProductionOrderStageStatus uint8
 
 const (
-	ProductionOrderStageStatusNone ProductionOrderStageStatus = iota + 1
-	ProductionOrderStageStatusDoing
-	ProductionOrderStageStatusPausing
-	ProductionOrderStageStatusComplete
-	//ProductionOrderStageStatusPending
-	//ProductionOrderStageStatusStart
+	ProductionOrderStageStatusWaiting ProductionOrderStageStatus = iota + 1
+	ProductionOrderStageStatusReception
+	ProductionOrderStageStatusProductionStart
+	ProductionOrderStageStatusProductionCompletion
+	ProductionOrderStageStatusProductDelivery
 )
 
 var ProductionOrderStageStatusName = map[ProductionOrderStageStatus]string{
-	ProductionOrderStageStatusNone:     "", // chua bat dau
-	ProductionOrderStageStatusDoing:    "doing",
-	ProductionOrderStageStatusPausing:  "pausing",
-	ProductionOrderStageStatusComplete: "complete",
-	//ProductionOrderStageStatusPending:  "pending",
-	//ProductionOrderStageStatusStart:    "start",
+	ProductionOrderStageStatusWaiting:              "waiting",               // Chờ Tiếp Nhận
+	ProductionOrderStageStatusReception:            "reception",             // Tiếp Nhận
+	ProductionOrderStageStatusProductionStart:      "production_start",      // Bắt Đầu Sản Xuất
+	ProductionOrderStageStatusProductionCompletion: "production_completion", // Hoàn Thành Sản Xuất
+	ProductionOrderStageStatusProductDelivery:      "product_delivery",      // Chuyển Giao Bán Thành Phẩm
 }
 
 var ProductionOrderStageStatusValue = func() map[string]ProductionOrderStageStatus {
