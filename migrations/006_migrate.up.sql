@@ -10,3 +10,5 @@ CREATE TABLE custom_fields
 );
 -- Add a unique index to prevent duplicate custom fields
 CREATE UNIQUE INDEX idx_custom_fields_entity_id_entity_type_field ON custom_fields (entity_id, entity_type, field);
+-- Add a unique index to prevent duplicate name production order
+CREATE UNIQUE INDEX idx_production_order_name ON production_orders (name);
