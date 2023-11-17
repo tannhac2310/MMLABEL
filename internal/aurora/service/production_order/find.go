@@ -3,6 +3,7 @@ package production_order
 import (
 	"context"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
+	model2 "mmlabel.gitlab.com/mm-printing-backend/pkg/model"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 )
@@ -49,17 +50,19 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 				Offset:                 0,
 			})
 			// consolidate responsibility information from user table
+			users := make([]*model2.User, 0)
 			for _, stageDevice := range stageDevices {
 				if stageDevice.Responsible == nil {
 					continue
 				}
-				for i, responsible := range stageDevice.Responsible {
+				for _, responsible := range stageDevice.Responsible {
 					user, err := c.userRepo.FindByID(ctx, responsible)
 					if err != nil {
 						return nil, nil, err
 					}
-					stageDevice.ResponsibleObject[i] = user
+					users = append(users, user)
 				}
+				stageDevice.ResponsibleObject = users
 			}
 			if err != nil {
 				return nil, nil, err
