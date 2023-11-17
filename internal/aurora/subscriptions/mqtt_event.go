@@ -1,15 +1,18 @@
 package subscriptions
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
-
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	"go.uber.org/zap"
-
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/service/ws"
+	"time"
 )
 
 type EventMQTTSubscription struct {
@@ -75,11 +78,50 @@ func (p *EventMQTTSubscription) Subscribe() error {
 
 	client.AddRoute("toppic", func(client mqtt.Client, message mqtt.Message) {
 		fmt.Println("============>>> Received message for topic ====", string(message.Payload()))
-		msg, err := json.Marshal(message.Payload())
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
+
+		ctx = ctxzap.ToContext(ctx, p.logger)
+		ctx = cockroach.ContextWithDB(ctx, p.db)
+
+		// parse message.Payload() to data struct
+		var myStruct MyStruct
+		err := json.Unmarshal(message.Payload(), &myStruct)
 		if err != nil {
-			fmt.Println("Error: ", err)
+			fmt.Println("Error parsing JSON:", err)
+			return
 		}
-		fmt.Println("============>>> Received message for topic ====", msg)
+
+		fmt.Println(myStruct.D, myStruct.Ts)
+		// find device in production order stage device
+
+		devices, err := p.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
+			DeviceID:                   myStruct.D[0].Tag,
+			ProductionOrderStageStatus: enum.ProductionOrderStageStatusProductionStart,
+			Limit:                      1,
+			Offset:                     0,
+		})
+		if err != nil {
+			fmt.Println("============>>> Received message for topic ====", err)
+
+		}
+		if len(devices) == 1 {
+			// update first device
+			device := devices[0]
+			p.productionOrderStageDeviceRepo.Update(ctx, &model.ProductionOrderStageDevice{
+				ID:                     device.ID,
+				ProductionOrderStageID: device.ProductionOrderStageID,
+				DeviceID:               device.DeviceID,
+				Quantity:               int64(myStruct.D[0].Value),
+				ProcessStatus:          device.ProcessStatus,
+				Status:                 device.Status,
+				Responsible:            device.Responsible,
+				Settings:               device.Settings,
+				Note:                   device.Note,
+				CreatedAt:              device.CreatedAt,
+				UpdatedAt:              device.UpdatedAt,
+			})
+		}
 		message.Ack()
 	})
 	fmt.Printf("Subscribed to topic '%s'\n", topic)
@@ -87,12 +129,13 @@ func (p *EventMQTTSubscription) Subscribe() error {
 }
 
 // create struct to parse {"d":[{"tag":"B_PR04:CounterTag","value":38.00}],"ts":"2023-11-17T04:13:55+0000"}
-type Data struct {
-	D  []D    `json:"d"`
-	Ts string `json:"ts"`
+
+type MyStruct struct {
+	D  []DataItem `json:"d"`
+	Ts string     `json:"ts"`
 }
 
-type D struct {
+type DataItem struct {
 	Tag   string  `json:"tag"`
 	Value float64 `json:"value"`
 }
