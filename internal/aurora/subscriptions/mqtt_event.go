@@ -12,6 +12,7 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/service/ws"
+	"strings"
 	"time"
 )
 
@@ -96,7 +97,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 		// find device in production order stage device
 
 		devices, err := p.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
-			DeviceID:                   myStruct.D[0].Tag,
+			DeviceID:                   strings.Replace(myStruct.D[0].Tag, ":CounterTag", "", -1),
 			ProductionOrderStageStatus: enum.ProductionOrderStageStatusProductionStart,
 			Limit:                      1,
 			Offset:                     0,
