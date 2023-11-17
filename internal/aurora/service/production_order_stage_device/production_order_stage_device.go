@@ -26,6 +26,8 @@ type CreateProductionOrderStageDeviceOpts struct {
 	ProcessStatus          enum.ProductionOrderStageDeviceStatus
 	Status                 enum.CommonStatus
 	Responsible            []string
+	Settings               map[string]interface{}
+	Note                   string
 }
 
 type FindProductionOrderStageDeviceOpts struct {
@@ -66,12 +68,17 @@ func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditPr
 func (p productionOrderStageDeviceService) Create(ctx context.Context, opt *CreateProductionOrderStageDeviceOpts) (string, error) {
 	id := idutil.ULIDNow()
 	err := p.productionOrderStageDeviceRepo.Insert(ctx, &model.ProductionOrderStageDevice{
+		ID:                     id,
 		ProductionOrderStageID: opt.ProductionOrderStageID,
 		DeviceID:               opt.DeviceID,
 		Quantity:               opt.Quantity,
 		ProcessStatus:          opt.ProcessStatus,
 		Status:                 opt.Status,
 		Responsible:            opt.Responsible,
+		Settings:               opt.Settings,
+		Note:                   cockroach.String(opt.Note),
+		CreatedAt:              time.Now(),
+		UpdatedAt:              time.Now(),
 	})
 	if err != nil {
 		return "", err
