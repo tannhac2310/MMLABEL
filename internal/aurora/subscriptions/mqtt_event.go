@@ -1,7 +1,9 @@
 package subscriptions
 
 import (
+	"encoding/json"
 	"fmt"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"go.uber.org/zap"
@@ -13,21 +15,22 @@ import (
 type EventMQTTSubscription struct {
 	db cockroach.Ext
 	//busFactory nats.BusFactory
-	logger    *zap.Logger
-	wsService ws.WebSocketService
+	productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo
+	logger                         *zap.Logger
+	wsService                      ws.WebSocketService
 }
 
 func NewMQTTSubscription(
 	db cockroach.Ext,
-	//busFactory nats.BusFactory,
+	productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo,
 	logger *zap.Logger,
 	wsService ws.WebSocketService,
 ) *EventMQTTSubscription {
 	return &EventMQTTSubscription{
-		db: db,
-		//busFactory: busFactory,
-		logger:    logger,
-		wsService: wsService,
+		db:                             db,
+		productionOrderStageDeviceRepo: productionOrderStageDeviceRepo,
+		logger:                         logger,
+		wsService:                      wsService,
 	}
 }
 
@@ -62,6 +65,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 	// Subscribe to the desired topic
 	if token := client.Subscribe(topic, 0, nil); token.Wait() && token.Error() != nil {
 		fmt.Printf("Error subscribing to topic '%s': %v\n", topic, token.Error())
+
 		return nil
 	}
 	client.AddRoute("toppic1", func(client mqtt.Client, message mqtt.Message) {
@@ -70,9 +74,25 @@ func (p *EventMQTTSubscription) Subscribe() error {
 	})
 
 	client.AddRoute("toppic", func(client mqtt.Client, message mqtt.Message) {
-		fmt.Println("============>>> Received message for topic", string(message.Payload()))
+		fmt.Println("============>>> Received message for topic ====", string(message.Payload()))
+		msg, err := json.Marshal(message.Payload())
+		if err != nil {
+			fmt.Println("Error: ", err)
+		}
+		fmt.Println("============>>> Received message for topic ====", msg)
 		message.Ack()
 	})
 	fmt.Printf("Subscribed to topic '%s'\n", topic)
 	return nil
+}
+
+// create struct to parse {"d":[{"tag":"B_PR04:CounterTag","value":38.00}],"ts":"2023-11-17T04:13:55+0000"}
+type Data struct {
+	D  []D    `json:"d"`
+	Ts string `json:"ts"`
+}
+
+type D struct {
+	Tag   string  `json:"tag"`
+	Value float64 `json:"value"`
 }

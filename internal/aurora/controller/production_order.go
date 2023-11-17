@@ -196,10 +196,22 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 		productionOrderStageDevice := make([]*dto.OrderStageDevice, 0)
 
 		for _, device := range item.ProductionOrderStageDevice {
+			responsibleObject := make([]*dto.User, 0)
+			for _, r := range device.ResponsibleObject {
+				responsibleObject = append(responsibleObject, &dto.User{
+					ID:      r.ID,
+					Name:    r.Name,
+					Avatar:  r.Avatar,
+					Address: r.Address,
+				})
+			}
+
 			productionOrderStageDevice = append(productionOrderStageDevice, &dto.OrderStageDevice{
 				ID:                     device.ID,
 				ProductionOrderStageID: device.ProductionOrderStageID,
 				DeviceID:               device.DeviceID,
+				DeviceName:             device.DeviceName,
+				ResponsibleObject:      responsibleObject,
 				Quantity:               device.Quantity,
 				ProcessStatus:          device.ProcessStatus,
 				Status:                 device.Status,

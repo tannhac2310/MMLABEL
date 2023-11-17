@@ -70,6 +70,8 @@ type OrderStageDevice struct {
 	ID                     string                                `json:"id"`
 	ProductionOrderStageID string                                `json:"productionOrderStageID"`
 	DeviceID               string                                `json:"deviceID"`
+	DeviceName             string                                `json:"deviceName"`
+	ResponsibleObject      []*User                               `json:"responsibleObject"`
 	Quantity               int64                                 `json:"quantity"`
 	ProcessStatus          enum.ProductionOrderStageDeviceStatus `json:"processStatus"`
 	Status                 enum.CommonStatus                     `json:"status"`
@@ -77,7 +79,12 @@ type OrderStageDevice struct {
 	Settings               map[string]interface{}                `json:"settings"`
 	Note                   string                                `json:"note"`
 }
-
+type User struct {
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Avatar  string `json:"avatar"`
+	Address string `json:"address"`
+}
 type OrderStage struct {
 	ID                  string                          `json:"id"`
 	Name                string                          `json:"name"`

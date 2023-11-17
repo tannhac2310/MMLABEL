@@ -48,6 +48,19 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 				Limit:                  1000,
 				Offset:                 0,
 			})
+			// consolidate responsibility information from user table
+			for _, stageDevice := range stageDevices {
+				if stageDevice.Responsible == nil {
+					continue
+				}
+				for i, responsible := range stageDevice.Responsible {
+					user, err := c.userRepo.FindByID(ctx, responsible)
+					if err != nil {
+						return nil, nil, err
+					}
+					stageDevice.ResponsibleObject[i] = user
+				}
+			}
 			if err != nil {
 				return nil, nil, err
 			}

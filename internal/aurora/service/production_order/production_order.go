@@ -7,6 +7,7 @@ import (
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/configs"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
+	repository2 "mmlabel.gitlab.com/mm-printing-backend/pkg/repository"
 )
 
 type Service interface {
@@ -26,6 +27,7 @@ type productionOrderService struct {
 	productionOrderStageRepo       repository.ProductionOrderStageRepo
 	productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo
 	customFieldRepo                repository.CustomFieldRepo
+	userRepo                       repository2.UserRepo
 	cfg                            *configs.Config
 	redisDB                        redis.Cmdable
 }
@@ -85,6 +87,7 @@ func NewService(
 	productionOrderStageRepo repository.ProductionOrderStageRepo,
 	productOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo,
 	customFieldRepo repository.CustomFieldRepo,
+	userRepo repository2.UserRepo,
 	cfg *configs.Config,
 	redisDB redis.Cmdable,
 ) Service {
@@ -93,6 +96,7 @@ func NewService(
 		productionOrderStageRepo:       productionOrderStageRepo,
 		productionOrderStageDeviceRepo: productOrderStageDeviceRepo,
 		customFieldRepo:                customFieldRepo,
+		userRepo:                       userRepo,
 		cfg:                            cfg,
 		redisDB:                        redisDB,
 	}
