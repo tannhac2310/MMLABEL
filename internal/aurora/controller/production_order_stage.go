@@ -56,9 +56,7 @@ func (s productionOrderStageController) EditProductionOrderStage(c *gin.Context)
 		return
 	}
 
-	err = s.productionOrderStageService.EditProductionOrderStage(c, req.ProductionOrderID, &production_order.ProductionOrderStage{
-		ID:                  req.ID,
-		StageID:             req.StageID,
+	err = s.productionOrderStageService.EditProductionOrderStage(c, &production_order.ProductionOrderStage{
 		EstimatedStartAt:    req.EstimatedStartAt,
 		EstimatedCompleteAt: req.EstimatedCompleteAt,
 		StartedAt:           req.StartedAt,
@@ -67,6 +65,8 @@ func (s productionOrderStageController) EditProductionOrderStage(c *gin.Context)
 		Condition:           req.Condition,
 		Note:                req.Note,
 		Data:                req.Data,
+		ID:                  req.ID,
+		Sorting:             req.Sorting,
 	})
 	if err != nil {
 		transportutil.Error(c, err)

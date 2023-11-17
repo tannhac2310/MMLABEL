@@ -2,6 +2,8 @@ package production_order
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
@@ -28,8 +30,10 @@ func (c *productionOrderService) CreateProductionOrderStage(ctx context.Context,
 	}
 	return id, nil
 }
-func (c *productionOrderService) EditProductionOrderStage(ctx context.Context, poId string, opt *ProductionOrderStage) error {
+func (c *productionOrderService) EditProductionOrderStage(ctx context.Context, opt *ProductionOrderStage) error {
 	table := model.ProductionOrderStage{}
+	b, _ := json.Marshal(opt)
+	fmt.Println("============>>>>>>>>", string(b))
 	updater := cockroach.NewUpdater(table.TableName(), model.ProductionOrderStageFieldID, opt.ID)
 
 	updater.Set(model.ProductionOrderStageFieldEstimatedStartAt, cockroach.Time(opt.EstimatedStartAt))
@@ -40,7 +44,12 @@ func (c *productionOrderService) EditProductionOrderStage(ctx context.Context, p
 	updater.Set(model.ProductionOrderStageFieldCondition, cockroach.String(opt.Condition))
 	updater.Set(model.ProductionOrderStageFieldNote, cockroach.String(opt.Note))
 	updater.Set(model.ProductionOrderStageFieldData, opt.Data)
+	updater.Set(model.ProductionOrderStageFieldSorting, opt.Sorting)
 
+	err := cockroach.UpdateFields(ctx, updater)
+	if err != nil {
+		return fmt.Errorf("update productionOrderStage failed %w", err)
+	}
 	return nil
 }
 func (c *productionOrderService) DeleteProductionOrderStage(ctx context.Context, id string) error {

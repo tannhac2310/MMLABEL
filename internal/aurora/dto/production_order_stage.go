@@ -57,8 +57,6 @@ type CreateProductionOrderStageResponse struct {
 
 type EditProductionOrderStageRequest struct {
 	ID                  string                          `json:"id" binding:"required"`
-	ProductionOrderID   string                          `json:"ProductionOrderID"  binding:"required"`
-	StageID             string                          `json:"StageID"  binding:"required"`
 	EstimatedStartAt    time.Time                       `json:"EstimatedStartAt"`
 	EstimatedCompleteAt time.Time                       `json:"EstimatedCompleteAt"`
 	StartedAt           time.Time                       `json:"StartedAt"`
@@ -67,6 +65,7 @@ type EditProductionOrderStageRequest struct {
 	Condition           string                          `json:"Condition"`
 	Note                string                          `json:"Note"`
 	Data                map[string]interface{}          `json:"Data"`
+	Sorting             int16                           `json:"sorting"`
 	CreatedAt           time.Time                       `json:"CreatedAt"`
 	UpdatedAt           time.Time                       `json:"UpdatedAt"`
 }
