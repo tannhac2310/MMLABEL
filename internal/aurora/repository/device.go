@@ -109,14 +109,14 @@ type DeviceData struct {
 }
 
 func (r *devicesRepo) Search(ctx context.Context, s *SearchDevicesOpts) ([]*DeviceData, error) {
-	message := make([]*DeviceData, 0)
+	devices := make([]*DeviceData, 0)
 	sql, args := s.buildQuery(false)
-	err := cockroach.Select(ctx, sql, args...).ScanAll(&message)
+	err := cockroach.Select(ctx, sql, args...).ScanAll(&devices)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.Select: %w", err)
 	}
 
-	return message, nil
+	return devices, nil
 }
 
 func (r *devicesRepo) Count(ctx context.Context, s *SearchDevicesOpts) (*CountResult, error) {
