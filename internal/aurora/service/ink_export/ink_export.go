@@ -62,7 +62,6 @@ func (p inkExportService) Edit(ctx context.Context, opt *EditInkExportOpts) erro
 }
 
 func (p inkExportService) Create(ctx context.Context, opt *CreateInkExportOpts) (string, error) {
-
 	// write code to insert to ink_export table and insert to ink_export_detail table in transaction
 	exportId := idutil.ULIDNow()
 	now := time.Now()

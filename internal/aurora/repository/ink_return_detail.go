@@ -11,7 +11,10 @@ import (
 )
 
 type SearchInkReturnDetailOpts struct {
-	InkImportID string
+	InkReturnID string
+	InkID       string
+	InkCode     string
+	InkExportID string
 	Limit       int64
 	Offset      int64
 	Sort        *Sort
@@ -65,9 +68,21 @@ func (i *SearchInkReturnDetailOpts) buildQuery(isCount bool) (string, []interfac
 	conds := ""
 	joins := ""
 
-	if i.InkImportID != "" {
-		conds += " AND b.ink_return_id = $1"
-		args = append(args, i.InkImportID)
+	if i.InkReturnID != "" {
+		args = append(args, i.InkReturnID)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkReturnDetailFieldInkReturnID, len(args))
+	}
+	if i.InkID != "" {
+		args = append(args, i.InkID)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkReturnDetailFieldInkID, len(args))
+	}
+	if i.InkCode != "" {
+		args = append(args, i.InkCode)
+		conds += fmt.Sprintf(" AND i.%s = $%d", model.InkFieldCode, len(args))
+	}
+	if i.InkExportID != "" {
+		args = append(args, i.InkExportID)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkReturnDetailFieldInkExportID, len(args))
 	}
 
 	b := &model.InkReturnDetail{}
@@ -84,6 +99,7 @@ func (i *SearchInkReturnDetailOpts) buildQuery(isCount bool) (string, []interfac
 	}
 	return fmt.Sprintf(`SELECT b.%s
 		FROM %s AS b %s
+		JOIN ink AS i ON i.id = b.ink_id
 		WHERE TRUE %s AND b.deleted_at IS NULL
 		%s
 		LIMIT %d

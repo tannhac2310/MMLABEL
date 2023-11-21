@@ -194,3 +194,52 @@ type FindInkExportsResponse struct {
 	InkExport []*InkExport `json:"inkExport"`
 	Total     int64        `json:"total"`
 }
+
+type CreateInkReturnRequest struct {
+	Name            string                       `json:"name"`
+	Code            string                       `json:"code"`
+	Description     string                       `json:"description"`
+	Data            map[string]interface{}       `json:"data"`
+	InkReturnDetail []*CreateInkReturnDetailOpts `json:"inkReturnDetail" binding:"required"`
+}
+type CreateInkReturnDetailOpts struct {
+	InkID       string                 `json:"inkID"`
+	InkExportID string                 `json:"inkExportID"`
+	Quantity    float64                `json:"quantity"`
+	ColorDetail map[string]interface{} `json:"colorDetail"`
+	Description string                 `json:"description"`
+	Data        map[string]interface{} `json:"data"`
+}
+
+type CreateInkReturnResponse struct {
+}
+type InkReturnFilter struct {
+	Name string `json:"name"`
+	ID   string `json:"id"`
+}
+type FindInkReturnsRequest struct {
+	Filter *InkReturnFilter  `json:"filter" binding:"required"`
+	Paging *commondto.Paging `json:"paging" binding:"required"`
+}
+type FindInkReturnsResponse struct {
+	InkReturn []*InkReturn `json:"inkReturn"`
+	Total     int64        `json:"total"`
+}
+type InkReturn struct {
+	ID              string                 `json:"id"`
+	Name            string                 `json:"name"`
+	Code            string                 `json:"code"`
+	Description     string                 `json:"description"`
+	Data            map[string]interface{} `json:"data"`
+	InkReturnDetail []*InkReturnDetail     `json:"inkReturnDetail" binding:"required"`
+}
+
+type InkReturnDetail struct {
+	ID          string                 `json:"id"`
+	InkID       string                 `json:"inkID"`
+	InkExportID string                 `json:"inkExportID"`
+	Quantity    float64                `json:"quantity"`
+	ColorDetail map[string]interface{} `json:"colorDetail"`
+	Description string                 `json:"description"`
+	Data        map[string]interface{} `json:"data"`
+}

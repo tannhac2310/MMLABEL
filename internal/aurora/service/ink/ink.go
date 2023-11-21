@@ -54,10 +54,41 @@ type Service interface {
 	Create(ctx context.Context, opt *CreateInkOpts) (string, error)
 	Delete(ctx context.Context, id string) error
 	Find(ctx context.Context, opt *FindInkOpts, sort *repository.Sort, limit, offset int64) ([]*InkData, *repository.CountResult, error)
+	CalculateInkQuantity(ctx context.Context, inkID string) (float64, float64, float64, error)
 }
 
 type inkService struct {
-	inkRepo repository.InkRepo
+	inkRepo             repository.InkRepo
+	inkReturnRepo       repository.InkReturnRepo
+	inkReturnDetailRepo repository.InkReturnDetailRepo
+	inkExportDetailRepo repository.InkExportDetailRepo
+	inkImportDetailRepo repository.InkImportDetailRepo
+}
+
+func (p inkService) CalculateInkQuantity(ctx context.Context, inkID string) (float64, float64, float64, error) {
+
+	inkData, err := p.inkRepo.FindByID(ctx, inkID)
+	if err != nil {
+		return 0, 0, 0, err
+	}
+	// get ink export quantity
+	exportQuantity, err := p.calculateInkExportQuantity(ctx, inkID)
+	if err != nil {
+		return 0, 0, 0, err
+	}
+	// get ink import quantity
+	importQuantity, err := p.calculateInkImportQuantity(ctx, inkID)
+	if err != nil {
+		return 0, 0, 0, err
+	}
+	// get ink return quantity
+	returnQuantity, err := p.calculateInkReturnQuantity(ctx, inkID)
+	if err != nil {
+		return 0, 0, 0, err
+	}
+	// calculate ink quantity in stock
+	quantityInStock := inkData.Quantity + importQuantity - exportQuantity - returnQuantity
+	return quantityInStock, importQuantity, exportQuantity, nil
 }
 
 func (p inkService) Edit(ctx context.Context, opt *EditInkOpts) error {
@@ -149,9 +180,72 @@ func (p inkService) Find(ctx context.Context, opt *FindInkOpts, sort *repository
 	return results, total, nil
 }
 
-func NewService(inkRepo repository.InkRepo) Service {
+func (p inkService) calculateInkExportQuantity(ctx context.Context, inkID string) (float64, error) {
+	// get ink export detail
+	inkExportDetails, err := p.inkExportDetailRepo.Search(ctx, &repository.SearchInkExportDetailOpts{
+		InkID: inkID,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	// we dont care performance here, so we can use loop to calculate ink export quantity
+	// calculate ink export quantity
+	var exportQuantity float64
+	for _, inkExportDetail := range inkExportDetails {
+		exportQuantity += inkExportDetail.Quantity
+	}
+	return exportQuantity, nil
+}
+
+func (p inkService) calculateInkImportQuantity(ctx context.Context, inkID string) (float64, error) {
+	// get ink import detail
+	inkImportDetails, err := p.inkImportDetailRepo.Search(ctx, &repository.SearchInkImportDetailOpts{
+		ID: inkID, // when importing, I write ink_import_detail.ID = ink.ID
+	})
+	if err != nil {
+		return 0, err
+	}
+	// we dont care performance here, so we can use loop to calculate ink import quantity
+	// calculate ink import quantity
+	var importQuantity float64
+	for _, inkImportDetail := range inkImportDetails {
+		importQuantity += inkImportDetail.Quantity
+	}
+	return importQuantity, nil
+
+}
+
+func (p inkService) calculateInkReturnQuantity(ctx context.Context, inkID string) (float64, error) {
+	// get ink return detail
+	inkReturnDetails, err := p.inkReturnDetailRepo.Search(ctx, &repository.SearchInkReturnDetailOpts{
+		InkID: inkID,
+	})
+	if err != nil {
+		return 0, err
+	}
+	// we dont care performance here, so we can use loop to calculate ink return quantity
+	// calculate ink return quantity
+	var returnQuantity float64
+	for _, inkReturnDetail := range inkReturnDetails {
+		returnQuantity += inkReturnDetail.Quantity
+	}
+	return returnQuantity, nil
+}
+
+func NewService(
+	inkRepo repository.InkRepo,
+	inkReturnRepo repository.InkReturnRepo,
+	inkReturnDetailRepo repository.InkReturnDetailRepo,
+	inkExportDetailRepo repository.InkExportDetailRepo,
+	inkImportDetailRepo repository.InkImportDetailRepo,
+) Service {
 	return &inkService{
-		inkRepo: inkRepo,
+		inkReturnRepo:       inkReturnRepo,
+		inkReturnDetailRepo: inkReturnDetailRepo,
+		inkExportDetailRepo: inkExportDetailRepo,
+		inkImportDetailRepo: inkImportDetailRepo,
+		inkRepo:             inkRepo,
 	}
 
 }

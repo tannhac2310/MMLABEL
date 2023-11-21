@@ -12,12 +12,14 @@ import (
 )
 
 type SearchInkReturnOpts struct {
-	ID     string
-	Name   string
-	Status enum.InventoryCommonStatus
-	Limit  int64
-	Offset int64
-	Sort   *Sort
+	ID                string
+	InkID             string
+	ProductionOrderID string
+	Name              string
+	Status            enum.InventoryCommonStatus
+	Limit             int64
+	Offset            int64
+	Sort              *Sort
 }
 
 type InkReturnData struct {
@@ -80,6 +82,11 @@ func (s *SearchInkReturnOpts) buildQuery(isCount bool) (string, []interface{}) {
 	if s.Status > 0 {
 		args = append(args, s.Status)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkReturnFieldStatus, len(args))
+	}
+
+	if s.ID != "" {
+		args = append(args, s.ID)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkReturnFieldID, len(args))
 	}
 
 	b := &model.InkReturn{}

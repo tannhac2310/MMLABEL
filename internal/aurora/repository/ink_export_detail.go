@@ -12,6 +12,7 @@ import (
 
 type SearchInkExportDetailOpts struct {
 	InkExportID string
+	InkID       string
 	Limit       int64
 	Offset      int64
 	Sort        *Sort
@@ -69,6 +70,10 @@ func (i *SearchInkExportDetailOpts) buildQuery(isCount bool) (string, []interfac
 		conds += " AND b.ink_export_id = $1"
 		args = append(args, i.InkExportID)
 	}
+	if i.InkID != "" {
+		args = append(args, i.InkID)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkExportDetailFieldInkID, len(args))
+	}
 
 	b := &model.InkExportDetail{}
 	fields, _ := b.FieldMap()
@@ -84,6 +89,7 @@ func (i *SearchInkExportDetailOpts) buildQuery(isCount bool) (string, []interfac
 	}
 	return fmt.Sprintf(`SELECT b.%s
 		FROM %s AS b %s
+		JOIN ink AS i ON i.id = b.ink_id 
 		WHERE TRUE %s AND b.deleted_at IS NULL
 		%s
 		LIMIT %d

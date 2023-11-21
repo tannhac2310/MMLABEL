@@ -110,8 +110,9 @@ func (p inkImportService) Create(ctx context.Context, opt *CreateInkImportOpts) 
 		}
 		// write code to insert to ink_import_detail table
 		for _, inkImportDetail := range opt.InkImportDetail {
+			inkID := idutil.ULIDNow()
 			err2 := p.inkImportDetailRepo.Insert(c, &model.InkImportDetail{
-				ID:             idutil.ULIDNow(),
+				ID:             inkID,
 				InkImportID:    importId,
 				Name:           inkImportDetail.Name,
 				Code:           inkImportDetail.Code,
@@ -133,7 +134,7 @@ func (p inkImportService) Create(ctx context.Context, opt *CreateInkImportOpts) 
 			// todo check if import status is completed, insert to ink table
 			// insert into ink table
 			err3 := p.inkRepo.Insert(c, &model.Ink{
-				ID:             idutil.ULIDNow(),
+				ID:             inkID,
 				ImportID:       cockroach.String(importId),
 				Name:           inkImportDetail.Name,
 				Code:           inkImportDetail.Code,

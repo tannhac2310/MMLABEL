@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_export"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_import"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_return"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/interceptor"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
@@ -20,14 +21,101 @@ type InkController interface {
 	FindInkImport(c *gin.Context)
 	ExportInk(c *gin.Context)
 	FindInkExport(c *gin.Context)
+	ReturnInk(c *gin.Context)
+	FindInkReturn(c *gin.Context)
 }
 
 type inkController struct {
 	inkService       ink.Service
 	inkImportService ink_import.Service
 	inkExportService ink_export.Service
+	inkReturnService ink_return.Service
 }
 
+func (s inkController) ReturnInk(c *gin.Context) {
+	req := &dto.CreateInkReturnRequest{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+
+	userID := interceptor.UserIDFromCtx(c)
+	inkReturnDetail := make([]*ink_return.CreateInkReturnDetailOpts, 0, len(req.InkReturnDetail))
+	for _, f := range req.InkReturnDetail {
+		inkReturnDetail = append(inkReturnDetail, &ink_return.CreateInkReturnDetailOpts{
+			InkID:       f.InkID,
+			InkExportID: f.InkExportID,
+			Quantity:    f.Quantity,
+			Description: f.Description,
+			Data:        f.Data,
+		})
+	}
+	id, err := s.inkReturnService.Create(c, &ink_return.CreateInkReturnOpts{
+		Name:            req.Name,
+		Code:            req.Code,
+		Description:     req.Description,
+		Data:            req.Data,
+		InkReturnDetail: inkReturnDetail,
+		CreatedBy:       userID,
+	})
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+	transportutil.SendJSONResponse(c, &dto.CreateInkExportResponse{
+		ID: id,
+	})
+}
+
+func (s inkController) FindInkReturn(c *gin.Context) {
+	req := &dto.FindInkReturnsRequest{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+	inkReturns, cnt, err := s.inkReturnService.Find(c, &ink_return.FindInkReturnOpts{
+		Name: req.Filter.Name,
+	}, &repository.Sort{
+		Order: repository.SortOrderASC,
+		By:    "ID",
+	}, req.Paging.Limit, req.Paging.Offset)
+
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+	inkReturnResp := make([]*dto.InkReturn, 0, len(inkReturns))
+	for _, f := range inkReturns {
+		inkReturnResp = append(inkReturnResp, toInkReturnResp(f))
+	}
+	transportutil.SendJSONResponse(c, &dto.FindInkReturnsResponse{
+		InkReturn: inkReturnResp,
+		Total:     cnt.Count,
+	})
+}
+func toInkReturnResp(f *ink_return.InkReturnData) *dto.InkReturn {
+	inkReturnDetail := make([]*dto.InkReturnDetail, 0, len(f.InkReturnDetail))
+	for _, k := range f.InkReturnDetail {
+		inkReturnDetail = append(inkReturnDetail, &dto.InkReturnDetail{
+			ID:          k.ID,
+			InkID:       k.InkID,
+			InkExportID: k.InkExportID,
+			Quantity:    k.Quantity,
+			Description: k.Description,
+			Data:        k.Data,
+		})
+	}
+	return &dto.InkReturn{
+		ID:              f.ID,
+		Name:            f.Name,
+		Code:            f.Code,
+		Description:     f.Description,
+		Data:            f.Data,
+		InkReturnDetail: inkReturnDetail,
+	}
+}
 func (s inkController) FindInkExport(c *gin.Context) {
 	req := &dto.FindInkExportsRequest{}
 	err := c.ShouldBind(req)
@@ -68,6 +156,7 @@ func toInkExportResp(f *ink_export.InkExportData) *dto.InkExport {
 			Manufacturer: d.Manufacturer,
 			ColorDetail:  d.ColorDetail,
 		}
+
 		inkExportDetail = append(inkExportDetail, &dto.InkExportDetail{
 			ID:          k.ID,
 			InkID:       k.InkID,
@@ -296,12 +385,14 @@ func RegisterInkController(
 	r *gin.RouterGroup,
 	inkService ink.Service,
 	inkImportService ink_import.Service,
+	inkReturnService ink_return.Service,
 	inkExportService ink_export.Service,
 ) {
 	g := r.Group("ink")
 
 	var c InkController = &inkController{
 		inkService:       inkService,
+		inkReturnService: inkReturnService,
 		inkImportService: inkImportService,
 		inkExportService: inkExportService,
 	}
@@ -349,5 +440,23 @@ func RegisterInkController(
 		&dto.FindInkExportsRequest{},
 		&dto.FindInkExportsResponse{},
 		"Find export ink",
+	)
+
+	routeutil.AddEndpoint(
+		g,
+		"return",
+		c.ReturnInk,
+		&dto.CreateInkReturnRequest{},
+		&dto.CreateInkReturnResponse{},
+		"return ink",
+	)
+
+	routeutil.AddEndpoint(
+		g,
+		"find-ink-return",
+		c.FindInkReturn,
+		&dto.FindInkReturnsRequest{},
+		&dto.FindInkReturnsResponse{},
+		"Find return ink",
 	)
 }

@@ -12,7 +12,9 @@ import (
 
 type SearchInkImportDetailOpts struct {
 	InkImportID string
-	Code        string
+	InkID       string
+	InkCode     string
+	ID          string
 	Limit       int64
 	Offset      int64
 	Sort        *Sort
@@ -71,9 +73,19 @@ func (i *SearchInkImportDetailOpts) buildQuery(isCount bool) (string, []interfac
 		args = append(args, i.InkImportID)
 	}
 
-	if i.Code != "" {
-		conds += " AND b.code ILIKE $1"
-		args = append(args, "%"+i.Code+"%")
+	if i.ID != "" {
+		args = append(args, i.ID)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkImportDetailFieldID, len(args))
+	}
+
+	if i.InkID != "" {
+		args = append(args, i.InkID)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkImportDetailFieldID, len(args)) // write ink.ID = ink_import.ID
+	}
+
+	if i.InkCode != "" {
+		args = append(args, i.InkCode)
+		conds += fmt.Sprintf(" AND i.%s = $%d", model.InkFieldCode, len(args))
 	}
 
 	b := &model.InkImportDetail{}
@@ -88,8 +100,10 @@ func (i *SearchInkImportDetailOpts) buildQuery(isCount bool) (string, []interfac
 	if i.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", i.Sort.By, i.Sort.Order)
 	}
+	// JOIN ink AS i ON i.id = b.id when importing, I write ink.ID = ink_import.ID
 	return fmt.Sprintf(`SELECT b.%s
 		FROM %s AS b %s
+		JOIN ink AS i ON i.id = b.id 
 		WHERE TRUE %s AND b.deleted_at IS NULL
 		%s
 		LIMIT %d

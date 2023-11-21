@@ -119,6 +119,7 @@ CREATE TABLE ink_return_detail
     id            VARCHAR(50) NOT NULL,
     ink_return_id VARCHAR(50) NOT NULL,
     ink_id        VARCHAR(50) NOT NULL, -- id mực
+    ink_export_id VARCHAR(50) NOT NULL, -- id phiếu xuất kho
     quantity      FLOAT       NOT NULL,
     color_detail  JSONB,                -- chi tiết màu sắc
     description   TEXT,

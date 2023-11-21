@@ -4,14 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/department"
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/device"
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink"
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_export"
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_import"
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_order"
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_order_stage_device"
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/stage"
 	"os"
 
 	"github.com/casbin/casbin/v2"
@@ -22,12 +14,23 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/department"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/device"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_export"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_import"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_return"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_order"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_order_stage_device"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/stage"
+
+	repository2 "mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
+	pkgConfig "mmlabel.gitlab.com/mm-printing-backend/pkg/configs"
+
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/configs"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/controller"
-	repository2 "mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/customer"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/subscriptions"
-	pkgConfig "mmlabel.gitlab.com/mm-printing-backend/pkg/configs"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/jwtutil"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/logger"
@@ -130,6 +133,8 @@ func Run(ctx context.Context, configPath string) {
 			repository2.NewInkImportDetailRepo,
 			repository2.NewInkExportRepo,
 			repository2.NewInkExportDetailRepo,
+			repository2.NewInkReturnRepo,
+			repository2.NewInkReturnDetailRepo,
 		),
 		// services
 		fx.Provide(
@@ -147,6 +152,7 @@ func Run(ctx context.Context, configPath string) {
 			ink.NewService,
 			ink_import.NewService,
 			ink_export.NewService,
+			ink_return.NewService,
 		),
 		// nats streaming
 		fx.Provide(func(cfg *pkgConfig.BaseConfig, zapLogger *zap.Logger) (nats.BusFactory, error) {
