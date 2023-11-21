@@ -243,3 +243,12 @@ type InkReturnDetail struct {
 	Description string                 `json:"description"`
 	Data        map[string]interface{} `json:"data"`
 }
+
+// dto for ink_export.find_by_po
+
+type FindInkExportByPORequest struct {
+	ProductionOrderID string `json:"productionOrderID" binding:"required"`
+}
+type FindInkExportByPOResponse struct {
+	InkExportDetail []*InkExportDetail `json:"inkExportDetail"`
+}

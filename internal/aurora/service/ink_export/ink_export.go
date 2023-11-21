@@ -48,12 +48,41 @@ type Service interface {
 	Create(ctx context.Context, opt *CreateInkExportOpts) (string, error)
 	Delete(ctx context.Context, id string) error
 	Find(ctx context.Context, opt *FindInkExportOpts, sort *repository.Sort, limit, offset int64) ([]*InkExportData, *repository.CountResult, error)
+	FindImportDetailByPOID(ctx context.Context, poID string) ([]*InkExportDetail, error)
 }
 
 type inkExportService struct {
 	inkExportRepo       repository.InkExportRepo
 	inkExportDetailRepo repository.InkExportDetailRepo
 	inkRepo             repository.InkRepo
+}
+
+func (p inkExportService) FindImportDetailByPOID(ctx context.Context, poID string) ([]*InkExportDetail, error) {
+	inkExportDetails, err := p.inkExportDetailRepo.Search(ctx, &repository.SearchInkExportDetailOpts{
+		ProductionOrderID: poID,
+		Limit:             10000,
+	})
+	if err != nil {
+		return nil, err
+	}
+	results := make([]*InkExportDetail, 0)
+	for _, inkExportDetail := range inkExportDetails {
+		inkData, _ := p.inkRepo.FindByID(ctx, inkExportDetail.InkID)
+		dataDetail := &InkExportDetail{
+			ID:          inkExportDetail.ID,
+			InkExportID: inkExportDetail.InkExportID,
+			InkID:       inkExportDetail.InkID,
+			InkData:     inkData,
+			Quantity:    inkData.Quantity,
+			ColorDetail: inkData.ColorDetail,
+			Description: inkExportDetail.Description.String,
+			Data:        inkExportDetail.Data,
+			CreatedAt:   inkExportDetail.CreatedAt,
+			UpdatedAt:   inkExportDetail.UpdatedAt,
+		}
+		results = append(results, dataDetail)
+	}
+	return results, nil
 }
 
 func (p inkExportService) Edit(ctx context.Context, opt *EditInkExportOpts) error {

@@ -20,6 +20,7 @@ type InkController interface {
 	ImportInk(c *gin.Context)
 	FindInkImport(c *gin.Context)
 	ExportInk(c *gin.Context)
+	FindInkExportByPO(c *gin.Context)
 	FindInkExport(c *gin.Context)
 	ReturnInk(c *gin.Context)
 	FindInkReturn(c *gin.Context)
@@ -214,6 +215,44 @@ func (s inkController) ExportInk(c *gin.Context) {
 	}
 	transportutil.SendJSONResponse(c, &dto.CreateInkExportResponse{
 		ID: id,
+	})
+}
+
+func (s inkController) FindInkExportByPO(c *gin.Context) {
+	req := &dto.FindInkExportByPORequest{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+	exportDetails, err := s.inkExportService.FindImportDetailByPOID(c, req.ProductionOrderID)
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+	exportDetailResp := make([]*dto.InkExportDetail, 0, len(exportDetails))
+	for _, f := range exportDetails {
+		d := f.InkData
+		inkData := &dto.InkDataExportDetail{
+			Name:         d.Name,
+			Code:         d.Code,
+			ProductCodes: d.ProductCodes,
+			Position:     d.Position,
+			Location:     d.Location,
+			Manufacturer: d.Manufacturer,
+			ColorDetail:  d.ColorDetail,
+		}
+		exportDetailResp = append(exportDetailResp, &dto.InkExportDetail{
+			ID:          f.ID,
+			InkID:       f.InkID,
+			InkData:     inkData,
+			Quantity:    f.Quantity,
+			Description: f.Description,
+			Data:        f.Data,
+		})
+	}
+	transportutil.SendJSONResponse(c, &dto.FindInkExportByPOResponse{
+		InkExportDetail: exportDetailResp,
 	})
 }
 
@@ -440,6 +479,14 @@ func RegisterInkController(
 		&dto.FindInkExportsRequest{},
 		&dto.FindInkExportsResponse{},
 		"Find export ink",
+	)
+	routeutil.AddEndpoint(
+		g,
+		"find-ink-export-detail-by-po",
+		c.FindInkExportByPO,
+		&dto.FindInkExportByPORequest{},
+		&dto.FindInkExportByPOResponse{},
+		"Find export detail ink by production order",
 	)
 
 	routeutil.AddEndpoint(
