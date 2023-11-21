@@ -3,10 +3,12 @@ package repository
 import (
 	"context"
 	"fmt"
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"strings"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
 type SearchInkExportOpts struct {
@@ -14,6 +16,7 @@ type SearchInkExportOpts struct {
 	Name              string
 	ProductionOrderID string
 	Code              string
+	Status            enum.InventoryCommonStatus
 	Limit             int64
 	Offset            int64
 	Sort              *Sort
@@ -50,7 +53,7 @@ func (i *inkExportRepo) Update(ctx context.Context, e *model.InkExport) error {
 }
 
 func (i *inkExportRepo) SoftDelete(ctx context.Context, id string) error {
-	sql := `UPDATE inkExport SET deleted_at = NOW() WHERE id = $1`
+	sql := `UPDATE ink_export SET deleted_at = NOW() WHERE id = $1`
 	cmd, err := cockroach.Exec(ctx, sql, id)
 	if err != nil {
 		return fmt.Errorf("cockroach.Exec: %w", err)
@@ -83,6 +86,10 @@ func (i *SearchInkExportOpts) buildQuery(isCount bool) (string, []interface{}) {
 	if i.Code != "" {
 		conds += " AND b.code ILIKE $1"
 		args = append(args, "%"+i.Code+"%")
+	}
+	if i.Status > 0 {
+		conds += " AND b.status = $1"
+		args = append(args, i.Status)
 	}
 
 	b := &model.InkExport{}

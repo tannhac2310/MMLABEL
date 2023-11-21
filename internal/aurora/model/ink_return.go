@@ -15,23 +15,27 @@ const (
 	InkReturnFieldDescription     = "description"
 	InkReturnFieldStatus          = "status"
 	InkReturnFieldData            = "data"
+	InkReturnFieldCreatedBy       = "created_by"
+	InkReturnFieldUpdatedBy       = "updated_by"
 	InkReturnFieldCreatedAt       = "created_at"
 	InkReturnFieldUpdatedAt       = "updated_at"
 	InkReturnFieldDeletedAt       = "deleted_at"
 )
 
 type InkReturn struct {
-	ID              string                           `db:"id"`
-	Code            string                           `db:"code"`
-	ReturnDate      time.Time                        `db:"return_date"`
-	ReturnUser      string                           `db:"return_user"`
-	ReturnWarehouse string                           `db:"return_warehouse"`
-	Description     sql.NullString                   `db:"description"`
-	Status          enum.InventoryCommonStatusStatus `db:"status"`
-	Data            map[string]interface{}           `db:"data"`
-	CreatedAt       time.Time                        `db:"created_at"`
-	UpdatedAt       time.Time                        `db:"updated_at"`
-	DeletedAt       sql.NullTime                     `db:"deleted_at"`
+	ID              string                     `db:"id"`
+	Code            string                     `db:"code"`
+	ReturnDate      time.Time                  `db:"return_date"`
+	ReturnUser      string                     `db:"return_user"`
+	ReturnWarehouse string                     `db:"return_warehouse"`
+	Description     sql.NullString             `db:"description"`
+	Status          enum.InventoryCommonStatus `db:"status"`
+	Data            map[string]interface{}     `db:"data"`
+	CreatedBy       string                     `db:"created_by"`
+	UpdatedBy       string                     `db:"updated_by"`
+	CreatedAt       time.Time                  `db:"created_at"`
+	UpdatedAt       time.Time                  `db:"updated_at"`
+	DeletedAt       sql.NullTime               `db:"deleted_at"`
 }
 
 func (rcv *InkReturn) FieldMap() (fields []string, values []interface{}) {
@@ -44,6 +48,8 @@ func (rcv *InkReturn) FieldMap() (fields []string, values []interface{}) {
 		InkReturnFieldDescription,
 		InkReturnFieldStatus,
 		InkReturnFieldData,
+		InkReturnFieldCreatedBy,
+		InkReturnFieldUpdatedBy,
 		InkReturnFieldCreatedAt,
 		InkReturnFieldUpdatedAt,
 		InkReturnFieldDeletedAt,
@@ -58,6 +64,8 @@ func (rcv *InkReturn) FieldMap() (fields []string, values []interface{}) {
 		&rcv.Description,
 		&rcv.Status,
 		&rcv.Data,
+		&rcv.CreatedBy,
+		&rcv.UpdatedBy,
 		&rcv.CreatedAt,
 		&rcv.UpdatedAt,
 		&rcv.DeletedAt,

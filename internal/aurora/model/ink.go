@@ -20,28 +20,32 @@ const (
 	InkFieldDescription    = "description"
 	InkFieldData           = "data"
 	InkFieldStatus         = "status"
+	InkFieldCreatedBy      = "created_by"
+	InkFieldUpdatedBy      = "updated_by"
 	InkFieldCreatedAt      = "created_at"
 	InkFieldUpdatedAt      = "updated_at"
 	InkFieldDeletedAt      = "deleted_at"
 )
 
 type Ink struct {
-	ID             string                           `db:"id"`
-	Name           string                           `db:"name"`
-	Code           string                           `db:"code"`
-	ProductCodes   string                           `db:"product_codes"`
-	Position       string                           `db:"position"`
-	Location       string                           `db:"location"`
-	Manufacturer   string                           `db:"manufacturer"`
-	ColorDetail    map[string]interface{}           `db:"color_detail"`
-	Quantity       float64                          `db:"quantity"`
-	ExpirationDate time.Time                        `db:"expiration_date"`
-	Description    sql.NullString                   `db:"description"`
-	Data           map[string]interface{}           `db:"data"`
-	Status         enum.InventoryCommonStatusStatus `db:"status"`
-	CreatedAt      time.Time                        `db:"created_at"`
-	UpdatedAt      time.Time                        `db:"updated_at"`
-	DeletedAt      sql.NullTime                     `db:"deleted_at"`
+	ID             string                     `db:"id"`
+	Name           string                     `db:"name"`
+	Code           string                     `db:"code"`
+	ProductCodes   []string                   `db:"product_codes"`
+	Position       string                     `db:"position"`
+	Location       string                     `db:"location"`
+	Manufacturer   string                     `db:"manufacturer"`
+	ColorDetail    map[string]interface{}     `db:"color_detail"`
+	Quantity       float64                    `db:"quantity"`
+	ExpirationDate time.Time                  `db:"expiration_date"`
+	Description    sql.NullString             `db:"description"`
+	Data           map[string]interface{}     `db:"data"`
+	Status         enum.InventoryCommonStatus `db:"status"`
+	CreatedBy      string                     `db:"created_by"`
+	UpdatedBy      string                     `db:"updated_by"`
+	CreatedAt      time.Time                  `db:"created_at"`
+	UpdatedAt      time.Time                  `db:"updated_at"`
+	DeletedAt      sql.NullTime               `db:"deleted_at"`
 }
 
 func (rcv *Ink) FieldMap() (fields []string, values []interface{}) {
@@ -59,6 +63,8 @@ func (rcv *Ink) FieldMap() (fields []string, values []interface{}) {
 		InkFieldDescription,
 		InkFieldData,
 		InkFieldStatus,
+		InkFieldCreatedBy,
+		InkFieldUpdatedBy,
 		InkFieldCreatedAt,
 		InkFieldUpdatedAt,
 		InkFieldDeletedAt,
@@ -78,6 +84,8 @@ func (rcv *Ink) FieldMap() (fields []string, values []interface{}) {
 		&rcv.Description,
 		&rcv.Data,
 		&rcv.Status,
+		&rcv.CreatedBy,
+		&rcv.UpdatedBy,
 		&rcv.CreatedAt,
 		&rcv.UpdatedAt,
 		&rcv.DeletedAt,

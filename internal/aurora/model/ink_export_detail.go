@@ -19,8 +19,7 @@ const (
 
 type InkExportDetail struct {
 	ID          string                 `db:"id"`
-	Code        string                 `db:"code"`
-	InkCode     string                 `db:"ink_code"`
+	InkExportID string                 `db:"ink_export_id"`
 	Quantity    float64                `db:"quantity"`
 	ColorDetail map[string]interface{} `db:"color_detail"`
 	Description sql.NullString         `db:"description"`
@@ -45,8 +44,7 @@ func (rcv *InkExportDetail) FieldMap() (fields []string, values []interface{}) {
 
 	values = []interface{}{
 		&rcv.ID,
-		&rcv.Code,
-		&rcv.InkCode,
+		&rcv.InkExportID,
 		&rcv.Quantity,
 		&rcv.ColorDetail,
 		&rcv.Description,

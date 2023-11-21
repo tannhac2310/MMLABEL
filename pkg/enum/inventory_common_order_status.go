@@ -5,20 +5,20 @@ import (
 	"fmt"
 )
 
-type InventoryCommonStatusStatus uint8
+type InventoryCommonStatus uint8
 
 const (
-	InventoryCommonStatusStatusNew InventoryCommonStatusStatus = iota + 1
+	InventoryCommonStatusStatusNew InventoryCommonStatus = iota + 1
 	InventoryCommonStatusStatusCompleted
 )
 
-var InventoryCommonStatusStatusName = map[InventoryCommonStatusStatus]string{
+var InventoryCommonStatusStatusName = map[InventoryCommonStatus]string{
 	InventoryCommonStatusStatusNew:       "new",
 	InventoryCommonStatusStatusCompleted: "completed",
 }
 
-var InventoryCommonStatusStatusValue = func() map[string]InventoryCommonStatusStatus {
-	value := map[string]InventoryCommonStatusStatus{}
+var InventoryCommonStatusStatusValue = func() map[string]InventoryCommonStatus {
+	value := map[string]InventoryCommonStatus{}
 	for k, v := range InventoryCommonStatusStatusName {
 		value[v] = k
 		value[fmt.Sprintf("%v", k)] = k
@@ -27,10 +27,10 @@ var InventoryCommonStatusStatusValue = func() map[string]InventoryCommonStatusSt
 	return value
 }()
 
-func (e InventoryCommonStatusStatus) MarshalJSON() ([]byte, error) {
+func (e InventoryCommonStatus) MarshalJSON() ([]byte, error) {
 	v, ok := InventoryCommonStatusStatusName[e]
 	if !ok {
-		return nil, fmt.Errorf("invalid values of InventoryCommonStatusStatus")
+		return nil, fmt.Errorf("invalid values of InventoryCommonStatus")
 	}
 
 	buffer := bytes.NewBufferString(`"`)
@@ -39,7 +39,7 @@ func (e InventoryCommonStatusStatus) MarshalJSON() ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func (e *InventoryCommonStatusStatus) UnmarshalJSON(data []byte) error {
+func (e *InventoryCommonStatus) UnmarshalJSON(data []byte) error {
 	data = bytes.Trim(data, "\"")
 	v, ok := InventoryCommonStatusStatusValue[string(data)]
 	if !ok {
@@ -51,7 +51,7 @@ func (e *InventoryCommonStatusStatus) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (*InventoryCommonStatusStatus) EnumDescriptions() []string {
+func (*InventoryCommonStatus) EnumDescriptions() []string {
 	vals := []string{}
 
 	for _, name := range InventoryCommonStatusStatusName {

@@ -16,24 +16,28 @@ const (
 	InkImportFieldDescription     = "description"
 	InkImportFieldStatus          = "status"
 	InkImportFieldData            = "data"
+	InkImportFieldCreatedBy       = "created_by"
+	InkImportFieldUpdatedBy       = "updated_by"
 	InkImportFieldCreatedAt       = "created_at"
 	InkImportFieldUpdatedAt       = "updated_at"
 	InkImportFieldDeletedAt       = "deleted_at"
 )
 
 type InkImport struct {
-	ID              string                           `db:"id"`
-	Code            string                           `db:"code"`
-	ImportDate      time.Time                        `db:"import_date"`
-	ImportUser      string                           `db:"import_user"`
-	ImportWarehouse string                           `db:"import_warehouse"`
-	ExportWarehouse string                           `db:"export_warehouse"`
-	Description     sql.NullString                   `db:"description"`
-	Status          enum.InventoryCommonStatusStatus `db:"status"`
-	Data            map[string]interface{}           `db:"data"`
-	CreatedAt       time.Time                        `db:"created_at"`
-	UpdatedAt       time.Time                        `db:"updated_at"`
-	DeletedAt       sql.NullTime                     `db:"deleted_at"`
+	ID              string                     `db:"id"`
+	Code            string                     `db:"code"`
+	ImportDate      time.Time                  `db:"import_date"`
+	ImportUser      string                     `db:"import_user"`
+	ImportWarehouse string                     `db:"import_warehouse"`
+	ExportWarehouse string                     `db:"export_warehouse"`
+	Description     sql.NullString             `db:"description"`
+	Status          enum.InventoryCommonStatus `db:"status"`
+	Data            map[string]interface{}     `db:"data"`
+	CreatedBy       string                     `db:"created_by"`
+	UpdatedBy       string                     `db:"updated_by"`
+	CreatedAt       time.Time                  `db:"created_at"`
+	UpdatedAt       time.Time                  `db:"updated_at"`
+	DeletedAt       sql.NullTime               `db:"deleted_at"`
 }
 
 func (rcv *InkImport) FieldMap() (fields []string, values []interface{}) {
@@ -47,6 +51,8 @@ func (rcv *InkImport) FieldMap() (fields []string, values []interface{}) {
 		InkImportFieldDescription,
 		InkImportFieldStatus,
 		InkImportFieldData,
+		InkImportFieldCreatedBy,
+		InkImportFieldUpdatedBy,
 		InkImportFieldCreatedAt,
 		InkImportFieldUpdatedAt,
 		InkImportFieldDeletedAt,
@@ -62,6 +68,8 @@ func (rcv *InkImport) FieldMap() (fields []string, values []interface{}) {
 		&rcv.Description,
 		&rcv.Status,
 		&rcv.Data,
+		&rcv.CreatedBy,
+		&rcv.UpdatedBy,
 		&rcv.CreatedAt,
 		&rcv.UpdatedAt,
 		&rcv.DeletedAt,

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"strings"
 	"time"
 )
@@ -13,6 +14,7 @@ type SearchInkOpts struct {
 	Name   string
 	ID     string
 	Code   string
+	Status enum.InventoryCommonStatus
 	Limit  int64
 	Offset int64
 	Sort   *Sort
@@ -77,6 +79,10 @@ func (i *SearchInkOpts) buildQuery(isCount bool) (string, []interface{}) {
 	if i.Code != "" {
 		conds += " AND b.code ILIKE $1"
 		args = append(args, "%"+i.Code+"%")
+	}
+	if i.Status > 0 {
+		conds += " AND b.status = $1"
+		args = append(args, i.Status)
 	}
 
 	b := &model.Ink{}

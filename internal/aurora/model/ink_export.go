@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"time"
 )
 
@@ -15,24 +16,28 @@ const (
 	InkExportFieldDescription       = "description"
 	InkExportFieldStatus            = "status"
 	InkExportFieldData              = "data"
+	InkExportFieldCreatedBy         = "created_by"
+	InkExportFieldUpdatedBy         = "updated_by"
 	InkExportFieldCreatedAt         = "created_at"
 	InkExportFieldUpdatedAt         = "updated_at"
 	InkExportFieldDeletedAt         = "deleted_at"
 )
 
 type InkExport struct {
-	ID                string                 `db:"id"`
-	Code              string                 `db:"code"`
-	ProductionOrderID string                 `db:"production_order_id"`
-	ExportDate        time.Time              `db:"export_date"`
-	ExportUser        string                 `db:"export_user"`
-	ExportWarehouse   string                 `db:"export_warehouse"`
-	Description       sql.NullString         `db:"description"`
-	Status            int16                  `db:"status"`
-	Data              map[string]interface{} `db:"data"`
-	CreatedAt         time.Time              `db:"created_at"`
-	UpdatedAt         time.Time              `db:"updated_at"`
-	DeletedAt         sql.NullTime           `db:"deleted_at"`
+	ID                string                     `db:"id"`
+	Code              string                     `db:"code"`
+	ProductionOrderID string                     `db:"production_order_id"`
+	ExportDate        time.Time                  `db:"export_date"`
+	ExportUser        string                     `db:"export_user"`
+	ExportWarehouse   string                     `db:"export_warehouse"`
+	Description       sql.NullString             `db:"description"`
+	Status            enum.InventoryCommonStatus `db:"status"`
+	Data              map[string]interface{}     `db:"data"`
+	CreatedBy         string                     `db:"created_by"`
+	UpdatedBy         string                     `db:"updated_by"`
+	CreatedAt         time.Time                  `db:"created_at"`
+	UpdatedAt         time.Time                  `db:"updated_at"`
+	DeletedAt         sql.NullTime               `db:"deleted_at"`
 }
 
 func (rcv *InkExport) FieldMap() (fields []string, values []interface{}) {
@@ -46,6 +51,8 @@ func (rcv *InkExport) FieldMap() (fields []string, values []interface{}) {
 		InkExportFieldDescription,
 		InkExportFieldStatus,
 		InkExportFieldData,
+		InkExportFieldCreatedBy,
+		InkExportFieldUpdatedBy,
 		InkExportFieldCreatedAt,
 		InkExportFieldUpdatedAt,
 		InkExportFieldDeletedAt,
@@ -61,6 +68,8 @@ func (rcv *InkExport) FieldMap() (fields []string, values []interface{}) {
 		&rcv.Description,
 		&rcv.Status,
 		&rcv.Data,
+		&rcv.CreatedBy,
+		&rcv.UpdatedBy,
 		&rcv.CreatedAt,
 		&rcv.UpdatedAt,
 		&rcv.DeletedAt,

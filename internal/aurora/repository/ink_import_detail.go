@@ -10,32 +10,32 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 )
 
-type SearchInkExportDetailOpts struct {
-	InkExportID string
+type SearchInkImportDetailOpts struct {
+	InkImportID string
 	Code        string
 	Limit       int64
 	Offset      int64
 	Sort        *Sort
 }
 
-type InkExportDetailData struct {
-	*model.InkExportDetail
+type InkImportDetailData struct {
+	*model.InkImportDetail
 }
 
-// InkExportDetailRepo is a repository interface for inkExportDetail
-type InkExportDetailRepo interface {
-	Insert(ctx context.Context, e *model.InkExportDetail) error
-	Update(ctx context.Context, e *model.InkExportDetail) error
+// InkImportDetailRepo is a repository interface for inkImportDetail
+type InkImportDetailRepo interface {
+	Insert(ctx context.Context, e *model.InkImportDetail) error
+	Update(ctx context.Context, e *model.InkImportDetail) error
 	SoftDelete(ctx context.Context, id string) error
-	Search(ctx context.Context, s *SearchInkExportDetailOpts) ([]*InkExportDetailData, error)
-	Count(ctx context.Context, s *SearchInkExportDetailOpts) (*CountResult, error)
+	Search(ctx context.Context, s *SearchInkImportDetailOpts) ([]*InkImportDetailData, error)
+	Count(ctx context.Context, s *SearchInkImportDetailOpts) (*CountResult, error)
 }
 
-type inkExportDetailRepo struct {
+type inkImportDetailRepo struct {
 }
 
-func (i *inkExportDetailRepo) Insert(ctx context.Context, e *model.InkExportDetail) error {
-	// insert to inkExportDetail
+func (i *inkImportDetailRepo) Insert(ctx context.Context, e *model.InkImportDetail) error {
+	// insert to inkImportDetail
 	err := cockroach.Create(ctx, e)
 	if err != nil {
 		return fmt.Errorf("r.baseRepo.Create: %w", err)
@@ -43,13 +43,13 @@ func (i *inkExportDetailRepo) Insert(ctx context.Context, e *model.InkExportDeta
 	return nil
 }
 
-func (i *inkExportDetailRepo) Update(ctx context.Context, e *model.InkExportDetail) error {
+func (i *inkImportDetailRepo) Update(ctx context.Context, e *model.InkImportDetail) error {
 	e.UpdatedAt = time.Now()
 	return cockroach.Update(ctx, e)
 }
 
-func (i *inkExportDetailRepo) SoftDelete(ctx context.Context, id string) error {
-	sql := `UPDATE inK_export_detail SET deleted_at = NOW() WHERE id = $1`
+func (i *inkImportDetailRepo) SoftDelete(ctx context.Context, id string) error {
+	sql := `UPDATE ink_import_detail SET deleted_at = NOW() WHERE id = $1`
 	cmd, err := cockroach.Exec(ctx, sql, id)
 	if err != nil {
 		return fmt.Errorf("cockroach.Exec: %w", err)
@@ -60,15 +60,15 @@ func (i *inkExportDetailRepo) SoftDelete(ctx context.Context, id string) error {
 	return nil
 }
 
-// buildSearchInkExportDetailQuery is a helper function to build query for search inkExportDetails
-func (i *SearchInkExportDetailOpts) buildQuery(isCount bool) (string, []interface{}) {
+// buildSearchInkImportDetailQuery is a helper function to build query for search inkImportDetails
+func (i *SearchInkImportDetailOpts) buildQuery(isCount bool) (string, []interface{}) {
 	var args []interface{}
 	conds := ""
 	joins := ""
 
-	if i.InkExportID != "" {
+	if i.InkImportID != "" {
 		conds += " AND b.ink_export_id = $1"
-		args = append(args, i.InkExportID)
+		args = append(args, i.InkImportID)
 	}
 
 	if i.Code != "" {
@@ -76,7 +76,7 @@ func (i *SearchInkExportDetailOpts) buildQuery(isCount bool) (string, []interfac
 		args = append(args, "%"+i.Code+"%")
 	}
 
-	b := &model.InkExportDetail{}
+	b := &model.InkImportDetail{}
 	fields, _ := b.FieldMap()
 	if isCount {
 		return fmt.Sprintf(`SELECT count(*) as cnt
@@ -96,18 +96,18 @@ func (i *SearchInkExportDetailOpts) buildQuery(isCount bool) (string, []interfac
 		OFFSET %d`, strings.Join(fields, ", b."), b.TableName(), joins, conds, order, i.Limit, i.Offset), args
 }
 
-func (i *inkExportDetailRepo) Search(ctx context.Context, s *SearchInkExportDetailOpts) ([]*InkExportDetailData, error) {
-	inkExportDetailData := make([]*InkExportDetailData, 0)
+func (i *inkImportDetailRepo) Search(ctx context.Context, s *SearchInkImportDetailOpts) ([]*InkImportDetailData, error) {
+	inkImportDetailData := make([]*InkImportDetailData, 0)
 	sql, args := s.buildQuery(false)
-	err := cockroach.Select(ctx, sql, args...).ScanAll(&inkExportDetailData)
+	err := cockroach.Select(ctx, sql, args...).ScanAll(&inkImportDetailData)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.Select: %w", err)
 	}
 
-	return inkExportDetailData, nil
+	return inkImportDetailData, nil
 }
 
-func (i *inkExportDetailRepo) Count(ctx context.Context, s *SearchInkExportDetailOpts) (*CountResult, error) {
+func (i *inkImportDetailRepo) Count(ctx context.Context, s *SearchInkImportDetailOpts) (*CountResult, error) {
 	countResult := &CountResult{}
 	sql, args := s.buildQuery(true)
 	err := cockroach.Select(ctx, sql, args...).ScanOne(countResult)
@@ -118,7 +118,7 @@ func (i *inkExportDetailRepo) Count(ctx context.Context, s *SearchInkExportDetai
 	return countResult, nil
 }
 
-// NewInkExportDetailRepo is a constructor for inkExportDetail repository
-func NewInkExportDetailRepo() InkExportDetailRepo {
-	return &inkExportDetailRepo{}
+// NewInkImportDetailRepo is a constructor for inkImportDetail repository
+func NewInkImportDetailRepo() InkImportDetailRepo {
+	return &inkImportDetailRepo{}
 }
