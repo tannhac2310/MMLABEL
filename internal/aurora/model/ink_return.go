@@ -8,9 +8,9 @@ import (
 
 const (
 	InkReturnFieldID              = "id"
+	InkReturnFieldName            = "name"
 	InkReturnFieldCode            = "code"
 	InkReturnFieldReturnDate      = "return_date"
-	InkReturnFieldReturnUser      = "return_user"
 	InkReturnFieldReturnWarehouse = "return_warehouse"
 	InkReturnFieldDescription     = "description"
 	InkReturnFieldStatus          = "status"
@@ -24,10 +24,10 @@ const (
 
 type InkReturn struct {
 	ID              string                     `db:"id"`
+	Name            string                     `db:"name"`
 	Code            string                     `db:"code"`
-	ReturnDate      time.Time                  `db:"return_date"`
-	ReturnUser      string                     `db:"return_user"`
-	ReturnWarehouse string                     `db:"return_warehouse"`
+	ReturnDate      sql.NullTime               `db:"return_date"`
+	ReturnWarehouse sql.NullString             `db:"return_warehouse"`
 	Description     sql.NullString             `db:"description"`
 	Status          enum.InventoryCommonStatus `db:"status"`
 	Data            map[string]interface{}     `db:"data"`
@@ -41,9 +41,9 @@ type InkReturn struct {
 func (rcv *InkReturn) FieldMap() (fields []string, values []interface{}) {
 	fields = []string{
 		InkReturnFieldID,
+		InkReturnFieldName,
 		InkReturnFieldCode,
 		InkReturnFieldReturnDate,
-		InkReturnFieldReturnUser,
 		InkReturnFieldReturnWarehouse,
 		InkReturnFieldDescription,
 		InkReturnFieldStatus,
@@ -57,9 +57,9 @@ func (rcv *InkReturn) FieldMap() (fields []string, values []interface{}) {
 
 	values = []interface{}{
 		&rcv.ID,
+		&rcv.Name,
 		&rcv.Code,
 		&rcv.ReturnDate,
-		&rcv.ReturnUser,
 		&rcv.ReturnWarehouse,
 		&rcv.Description,
 		&rcv.Status,

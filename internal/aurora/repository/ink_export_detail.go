@@ -12,7 +12,6 @@ import (
 
 type SearchInkExportDetailOpts struct {
 	InkExportID string
-	Code        string
 	Limit       int64
 	Offset      int64
 	Sort        *Sort
@@ -69,11 +68,6 @@ func (i *SearchInkExportDetailOpts) buildQuery(isCount bool) (string, []interfac
 	if i.InkExportID != "" {
 		conds += " AND b.ink_export_id = $1"
 		args = append(args, i.InkExportID)
-	}
-
-	if i.Code != "" {
-		conds += " AND b.code ILIKE $1"
-		args = append(args, "%"+i.Code+"%")
 	}
 
 	b := &model.InkExportDetail{}

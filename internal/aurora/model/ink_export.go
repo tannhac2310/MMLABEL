@@ -8,11 +8,10 @@ import (
 
 const (
 	InkExportFieldID                = "id"
+	InkExportFieldName              = "name"
 	InkExportFieldCode              = "code"
 	InkExportFieldProductionOrderID = "production_order_id"
 	InkExportFieldExportDate        = "export_date"
-	InkExportFieldExportUser        = "export_user"
-	InkExportFieldExportWarehouse   = "export_warehouse"
 	InkExportFieldDescription       = "description"
 	InkExportFieldStatus            = "status"
 	InkExportFieldData              = "data"
@@ -25,11 +24,10 @@ const (
 
 type InkExport struct {
 	ID                string                     `db:"id"`
+	Name              string                     `db:"name"`
 	Code              string                     `db:"code"`
 	ProductionOrderID string                     `db:"production_order_id"`
-	ExportDate        time.Time                  `db:"export_date"`
-	ExportUser        string                     `db:"export_user"`
-	ExportWarehouse   string                     `db:"export_warehouse"`
+	ExportDate        sql.NullTime               `db:"export_date"`
 	Description       sql.NullString             `db:"description"`
 	Status            enum.InventoryCommonStatus `db:"status"`
 	Data              map[string]interface{}     `db:"data"`
@@ -43,11 +41,10 @@ type InkExport struct {
 func (rcv *InkExport) FieldMap() (fields []string, values []interface{}) {
 	fields = []string{
 		InkExportFieldID,
+		InkExportFieldName,
 		InkExportFieldCode,
 		InkExportFieldProductionOrderID,
 		InkExportFieldExportDate,
-		InkExportFieldExportUser,
-		InkExportFieldExportWarehouse,
 		InkExportFieldDescription,
 		InkExportFieldStatus,
 		InkExportFieldData,
@@ -60,11 +57,10 @@ func (rcv *InkExport) FieldMap() (fields []string, values []interface{}) {
 
 	values = []interface{}{
 		&rcv.ID,
+		&rcv.Name,
 		&rcv.Code,
 		&rcv.ProductionOrderID,
 		&rcv.ExportDate,
-		&rcv.ExportUser,
-		&rcv.ExportWarehouse,
 		&rcv.Description,
 		&rcv.Status,
 		&rcv.Data,

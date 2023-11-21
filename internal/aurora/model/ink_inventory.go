@@ -8,6 +8,7 @@ import (
 
 const (
 	InkInventoryFieldID                 = "id"
+	InkInventoryFieldName               = "name"
 	InkInventoryFieldCode               = "code"
 	InkInventoryFieldInventoryDate      = "inventory_date"
 	InkInventoryFieldInventoryUser      = "inventory_user"
@@ -24,10 +25,11 @@ const (
 
 type InkInventory struct {
 	ID                 string                     `db:"id"`
+	Name               string                     `db:"name"`
 	Code               string                     `db:"code"`
-	InventoryDate      time.Time                  `db:"inventory_date"`
+	InventoryDate      sql.NullTime               `db:"inventory_date"`
 	InventoryUser      string                     `db:"inventory_user"`
-	InventoryWarehouse string                     `db:"inventory_warehouse"`
+	InventoryWarehouse sql.NullString             `db:"inventory_warehouse"`
 	Description        sql.NullString             `db:"description"`
 	Status             enum.InventoryCommonStatus `db:"status"`
 	Data               map[string]interface{}     `db:"data"`
@@ -41,6 +43,7 @@ type InkInventory struct {
 func (rcv *InkInventory) FieldMap() (fields []string, values []interface{}) {
 	fields = []string{
 		InkInventoryFieldID,
+		InkInventoryFieldName,
 		InkInventoryFieldCode,
 		InkInventoryFieldInventoryDate,
 		InkInventoryFieldInventoryUser,
@@ -57,6 +60,7 @@ func (rcv *InkInventory) FieldMap() (fields []string, values []interface{}) {
 
 	values = []interface{}{
 		&rcv.ID,
+		&rcv.Name,
 		&rcv.Code,
 		&rcv.InventoryDate,
 		&rcv.InventoryUser,

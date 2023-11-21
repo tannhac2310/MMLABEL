@@ -12,7 +12,6 @@ import (
 
 type SearchInkReturnDetailOpts struct {
 	InkImportID string
-	Code        string
 	Limit       int64
 	Offset      int64
 	Sort        *Sort
@@ -69,11 +68,6 @@ func (i *SearchInkReturnDetailOpts) buildQuery(isCount bool) (string, []interfac
 	if i.InkImportID != "" {
 		conds += " AND b.ink_return_id = $1"
 		args = append(args, i.InkImportID)
-	}
-
-	if i.Code != "" {
-		conds += " AND b.code ILIKE $1"
-		args = append(args, "%"+i.Code+"%")
 	}
 
 	b := &model.InkReturnDetail{}

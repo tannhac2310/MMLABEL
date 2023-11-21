@@ -1,0 +1,196 @@
+package dto
+
+import (
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/commondto"
+	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
+)
+
+type Ink struct {
+	ID             string                     `json:"id"`
+	ImportID       string                     `json:"importID"`
+	Name           string                     `json:"name"`
+	Code           string                     `json:"code"`
+	ProductCodes   []string                   `json:"productCodes"`
+	Position       string                     `json:"position"`
+	Location       string                     `json:"location"`
+	Manufacturer   string                     `json:"manufacturer"`
+	ColorDetail    map[string]interface{}     `json:"colorDetail"`
+	Quantity       float64                    `json:"quantity"`
+	ExpirationDate string                     `json:"expirationDate"`
+	Description    string                     `json:"description"`
+	Data           map[string]interface{}     `json:"data"`
+	Status         enum.InventoryCommonStatus `json:"status"`
+	CreatedBy      string                     `json:"createdBy"`
+	UpdatedBy      string                     `json:"updatedBy"`
+	CreatedAt      time.Time                  `json:"createdAt"`
+	UpdatedAt      time.Time                  `json:"updatedAt"`
+}
+
+type InkFilter struct {
+	Name   string                     `json:"name"`
+	ID     string                     `json:"id"`
+	Status enum.InventoryCommonStatus `json:"status"`
+}
+type FindInkRequest struct {
+	Filter *InkFilter        `json:"filter" binding:"required"`
+	Paging *commondto.Paging `json:"paging" binding:"required"`
+}
+type FindInksResponse struct {
+	Ink   []*Ink `json:"ink"`
+	Total int64  `json:"total"`
+}
+
+// dto for ink.edit
+
+type EditInkRequest struct {
+	ID             string                 `json:"id" binding:"required"`
+	Name           string                 `json:"name"`
+	Code           string                 `json:"code"`
+	ProductCodes   []string               `json:"productCodes"`
+	Position       string                 `json:"position"`
+	Location       string                 `json:"location"`
+	Manufacturer   string                 `json:"manufacturer"`
+	ColorDetail    map[string]interface{} `json:"colorDetail"`
+	ExpirationDate string                 `json:"expirationDate"`
+	Description    string                 `json:"description"`
+	Data           map[string]interface{} `json:"data"`
+	Status         string                 `json:"status"`
+}
+type EditInkResponse struct{}
+
+// dto for ink_import.create
+type CreateInkImportRequest struct {
+	Name            string                   `json:"name" binding:"required"`
+	Code            string                   `json:"code" binding:"required"`
+	Description     string                   `json:"description"`
+	Data            map[string]interface{}   `json:"data"`
+	InkImportDetail []*CreateInkImportDetail `json:"inkImportDetail" binding:"required"`
+}
+
+type CreateInkImportDetail struct {
+	ID             string                 `json:"id"`
+	Name           string                 `json:"name" binding:"required"`
+	Code           string                 `json:"code" binding:"required"`
+	ProductCodes   []string               `json:"productCodes"`
+	Position       string                 `json:"position"`
+	Location       string                 `json:"location"`
+	Manufacturer   string                 `json:"manufacturer"`
+	ColorDetail    map[string]interface{} `json:"colorDetail"`
+	Quantity       float64                `json:"quantity"`
+	ExpirationDate string                 `json:"expirationDate"` // DD-MM-YYYY
+	Description    string                 `json:"description"`
+	Data           map[string]interface{} `json:"data"`
+}
+
+type InkImportDetail struct {
+	ID             string                 `json:"id"`
+	Name           string                 `json:"name" binding:"required"`
+	Code           string                 `json:"code" binding:"required"`
+	ProductCodes   []string               `json:"productCodes"`
+	Position       string                 `json:"position"`
+	Location       string                 `json:"location"`
+	Manufacturer   string                 `json:"manufacturer"`
+	ColorDetail    map[string]interface{} `json:"colorDetail"`
+	Quantity       float64                `json:"quantity"`
+	ExpirationDate string                 `json:"expirationDate"` // DD-MM-YYYY
+	Description    string                 `json:"description"`
+	Data           map[string]interface{} `json:"data"`
+}
+
+type CreateInkImportResponse struct {
+	ID string `json:"id"`
+}
+
+// dto for ink_import.find
+type FindInkImportsRequest struct {
+	Filter *InkImportFilter  `json:"filter" binding:"required"`
+	Paging *commondto.Paging `json:"paging" binding:"required"`
+}
+type InkImportFilter struct {
+	Name   string                     `json:"name"`
+	Code   string                     `json:"code"`
+	ID     string                     `json:"id"`
+	Status enum.InventoryCommonStatus `json:"status"`
+}
+type InkImport struct {
+	ID              string                     `json:"id"`
+	Name            string                     `json:"name"`
+	Code            string                     `json:"code"`
+	Description     string                     `json:"description"`
+	Data            map[string]interface{}     `json:"data"`
+	Status          enum.InventoryCommonStatus `json:"status"`
+	InkImportDetail []*InkImportDetail         `json:"inkImportDetail"`
+	CreatedBy       string                     `json:"createdBy"`
+	CreatedAt       time.Time                  `json:"createdAt"`
+}
+type FindInkImportsResponse struct {
+	InkImport []*InkImport `json:"inkImport"`
+	Total     int64        `json:"total"`
+}
+
+// dto for in_export.create
+type CreateInkExportRequest struct {
+	Name              string                   `json:"name" binding:"required"`
+	Code              string                   `json:"code" binding:"required"`
+	ProductionOrderID string                   `json:"productionOrderID" binding:"required"`
+	ExportDate        string                   `json:"exportDate"` // DD-MM-YYYY
+	Description       string                   `json:"description"`
+	Data              map[string]interface{}   `json:"data"`
+	InkExportDetail   []*CreateInkExportDetail `json:"inkExportDetail" binding:"required"`
+}
+
+type CreateInkExportDetail struct {
+	InkID       string                 `json:"inkID" binding:"required"`
+	Quantity    float64                `json:"quantity" binding:"required"`
+	Description string                 `json:"description"`
+	Data        map[string]interface{} `json:"data"`
+}
+type InkDataExportDetail struct {
+	Name         string                 `json:"name"`
+	Code         string                 `json:"code"`
+	ProductCodes []string               `json:"productCodes"`
+	Position     string                 `json:"position"`
+	Location     string                 `json:"location"`
+	Manufacturer string                 `json:"manufacturer"`
+	ColorDetail  map[string]interface{} `json:"colorDetail"`
+}
+type InkExportDetail struct {
+	ID          string                 `json:"id"`
+	InkID       string                 `json:"inkID"`
+	InkData     *InkDataExportDetail   `json:"inkData"`
+	Quantity    float64                `json:"quantity"`
+	Description string                 `json:"description"`
+	Data        map[string]interface{} `json:"data"`
+}
+
+type CreateInkExportResponse struct {
+	ID string `json:"id"`
+}
+
+// dto for ink_export.find
+type FindInkExportsRequest struct {
+	Filter *InkExportFilter  `json:"filter" binding:"required"`
+	Paging *commondto.Paging `json:"paging" binding:"required"`
+}
+type InkExportFilter struct {
+	Name string `json:"name"`
+	ID   string `json:"id"`
+}
+type InkExport struct {
+	ID                string                     `json:"id"`
+	Name              string                     `json:"name"`
+	Code              string                     `json:"code"`
+	ProductionOrderID string                     `json:"productionOrderID"`
+	Description       string                     `json:"description"`
+	Data              map[string]interface{}     `json:"data"`
+	Status            enum.InventoryCommonStatus `json:"status"`
+	CreatedBy         string                     `json:"createdBy"`
+	CreatedAt         time.Time                  `json:"createdAt"`
+	InkExportDetail   []*InkExportDetail         `json:"inkExportDetail"`
+}
+type FindInkExportsResponse struct {
+	InkExport []*InkExport `json:"inkExport"`
+	Total     int64        `json:"total"`
+}

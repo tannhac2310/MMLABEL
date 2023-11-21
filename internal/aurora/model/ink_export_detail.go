@@ -8,6 +8,7 @@ import (
 const (
 	InkExportDetailFieldID          = "id"
 	InkExportDetailFieldInkExportID = "ink_export_id"
+	InkExportDetailFieldInkID       = "ink_id"
 	InkExportDetailFieldQuantity    = "quantity"
 	InkExportDetailFieldColorDetail = "color_detail"
 	InkExportDetailFieldDescription = "description"
@@ -20,6 +21,7 @@ const (
 type InkExportDetail struct {
 	ID          string                 `db:"id"`
 	InkExportID string                 `db:"ink_export_id"`
+	InkID       string                 `db:"ink_id"`
 	Quantity    float64                `db:"quantity"`
 	ColorDetail map[string]interface{} `db:"color_detail"`
 	Description sql.NullString         `db:"description"`
@@ -33,6 +35,7 @@ func (rcv *InkExportDetail) FieldMap() (fields []string, values []interface{}) {
 	fields = []string{
 		InkExportDetailFieldID,
 		InkExportDetailFieldInkExportID,
+		InkExportDetailFieldInkID,
 		InkExportDetailFieldQuantity,
 		InkExportDetailFieldColorDetail,
 		InkExportDetailFieldDescription,
@@ -45,6 +48,7 @@ func (rcv *InkExportDetail) FieldMap() (fields []string, values []interface{}) {
 	values = []interface{}{
 		&rcv.ID,
 		&rcv.InkExportID,
+		&rcv.InkID,
 		&rcv.Quantity,
 		&rcv.ColorDetail,
 		&rcv.Description,

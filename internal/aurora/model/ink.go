@@ -8,6 +8,7 @@ import (
 
 const (
 	InkFieldID             = "id"
+	InkFieldImportID       = "import_id"
 	InkFieldName           = "name"
 	InkFieldCode           = "code"
 	InkFieldProductCodes   = "product_codes"
@@ -29,6 +30,7 @@ const (
 
 type Ink struct {
 	ID             string                     `db:"id"`
+	ImportID       sql.NullString             `db:"import_id"`
 	Name           string                     `db:"name"`
 	Code           string                     `db:"code"`
 	ProductCodes   []string                   `db:"product_codes"`
@@ -37,7 +39,7 @@ type Ink struct {
 	Manufacturer   string                     `db:"manufacturer"`
 	ColorDetail    map[string]interface{}     `db:"color_detail"`
 	Quantity       float64                    `db:"quantity"`
-	ExpirationDate time.Time                  `db:"expiration_date"`
+	ExpirationDate string                     `db:"expiration_date"` // DD-MM-YYYY
 	Description    sql.NullString             `db:"description"`
 	Data           map[string]interface{}     `db:"data"`
 	Status         enum.InventoryCommonStatus `db:"status"`
@@ -51,6 +53,7 @@ type Ink struct {
 func (rcv *Ink) FieldMap() (fields []string, values []interface{}) {
 	fields = []string{
 		InkFieldID,
+		InkFieldImportID,
 		InkFieldName,
 		InkFieldCode,
 		InkFieldProductCodes,
@@ -72,6 +75,7 @@ func (rcv *Ink) FieldMap() (fields []string, values []interface{}) {
 
 	values = []interface{}{
 		&rcv.ID,
+		&rcv.ImportID,
 		&rcv.Name,
 		&rcv.Code,
 		&rcv.ProductCodes,

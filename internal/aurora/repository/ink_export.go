@@ -15,7 +15,6 @@ type SearchInkExportOpts struct {
 	ID                string
 	Name              string
 	ProductionOrderID string
-	Code              string
 	Status            enum.InventoryCommonStatus
 	Limit             int64
 	Offset            int64
@@ -75,21 +74,18 @@ func (i *SearchInkExportOpts) buildQuery(isCount bool) (string, []interface{}) {
 		args = append(args, i.ID)
 	}
 	if i.ProductionOrderID != "" {
-		conds += " AND b.production_order_id = $1"
 		args = append(args, i.ProductionOrderID)
-	}
-	if i.Name != "" {
-		conds += " AND b.name ILIKE $1"
-		args = append(args, "%"+i.Name+"%")
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkExportFieldProductionOrderID, len(args))
 	}
 
-	if i.Code != "" {
-		conds += " AND b.code ILIKE $1"
-		args = append(args, "%"+i.Code+"%")
+	if i.Name != "" {
+		args = append(args, "%"+i.Name+"%")
+		conds += fmt.Sprintf(" AND( b.%[1]s ILIKE $%[3]d OR  b.%[2]s ILIKE $%[3]d)", model.InkExportFieldName, model.InkExportFieldCode, len(args))
 	}
+
 	if i.Status > 0 {
-		conds += " AND b.status = $1"
 		args = append(args, i.Status)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkExportFieldStatus, len(args))
 	}
 
 	b := &model.InkExport{}

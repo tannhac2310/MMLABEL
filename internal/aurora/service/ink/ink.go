@@ -20,8 +20,7 @@ type EditInkOpts struct {
 	Location       string
 	Manufacturer   string
 	ColorDetail    map[string]interface{}
-	Quantity       float64
-	ExpirationDate time.Time
+	ExpirationDate string // DD-MM-YYYY
 	Description    string
 	Data           map[string]interface{}
 	Status         enum.InventoryCommonStatus
@@ -37,7 +36,7 @@ type CreateInkOpts struct {
 	Manufacturer   string
 	ColorDetail    map[string]interface{}
 	Quantity       float64
-	ExpirationDate time.Time
+	ExpirationDate string // DD-MM-YYYY
 	Description    string
 	Data           map[string]interface{}
 	Status         enum.InventoryCommonStatus
@@ -46,7 +45,6 @@ type CreateInkOpts struct {
 
 type FindInkOpts struct {
 	Name   string
-	Code   string
 	ID     string
 	Status enum.InventoryCommonStatus
 }
@@ -55,7 +53,7 @@ type Service interface {
 	Edit(ctx context.Context, opt *EditInkOpts) error
 	Create(ctx context.Context, opt *CreateInkOpts) (string, error)
 	Delete(ctx context.Context, id string) error
-	Find(ctx context.Context, opt *FindInkOpts, sort *repository.Sort, limit, offset int64) ([]*repository.InkData, error)
+	Find(ctx context.Context, opt *FindInkOpts, sort *repository.Sort, limit, offset int64) ([]*InkData, *repository.CountResult, error)
 }
 
 type inkService struct {
@@ -67,10 +65,15 @@ func (p inkService) Edit(ctx context.Context, opt *EditInkOpts) error {
 
 	updater := cockroach.NewUpdater(table.TableName(), model.InkFieldID, opt.ID)
 
+	updater.Set(model.InkFieldName, opt.Name)
 	updater.Set(model.InkFieldCode, opt.Code)
 	updater.Set(model.InkFieldProductCodes, opt.ProductCodes)
-	updater.Set(model.InkFieldStatus, opt.Status)
+	updater.Set(model.InkFieldPosition, opt.Position)
+	updater.Set(model.InkFieldLocation, opt.Location)
+	updater.Set(model.InkFieldManufacturer, opt.Manufacturer)
 	updater.Set(model.InkFieldColorDetail, opt.ColorDetail)
+	updater.Set(model.InkFieldExpirationDate, opt.ExpirationDate)
+	updater.Set(model.InkFieldStatus, opt.Status)
 	updater.Set(model.InkFieldDescription, opt.Description)
 	updater.Set(model.InkFieldData, opt.Data)
 	updater.Set(model.InkFieldUpdatedBy, opt.UpdatedBy)
@@ -115,20 +118,35 @@ func (p inkService) Delete(ctx context.Context, id string) error {
 	return p.inkRepo.SoftDelete(ctx, id)
 }
 
-func (p inkService) Find(ctx context.Context, opt *FindInkOpts, sort *repository.Sort, limit, offset int64) ([]*repository.InkData, error) {
-	inks, err := p.inkRepo.Search(ctx, &repository.SearchInkOpts{
+type InkData struct {
+	*repository.InkData
+}
+
+func (p inkService) Find(ctx context.Context, opt *FindInkOpts, sort *repository.Sort, limit, offset int64) ([]*InkData, *repository.CountResult, error) {
+	filter := &repository.SearchInkOpts{
 		Name:   opt.Name,
-		Code:   opt.Code,
 		Status: opt.Status,
 		ID:     opt.ID,
 		Limit:  limit,
 		Offset: offset,
 		Sort:   sort,
-	})
-	if err != nil {
-		return nil, err
 	}
-	return inks, nil
+
+	inks, err := p.inkRepo.Search(ctx, filter)
+	if err != nil {
+		return nil, nil, err
+	}
+	results := make([]*InkData, 0)
+	for _, ink := range inks {
+		results = append(results, &InkData{ink})
+	}
+
+	total, err := p.inkRepo.Count(ctx, filter)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return results, total, nil
 }
 
 func NewService(inkRepo repository.InkRepo) Service {

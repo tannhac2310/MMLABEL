@@ -6,6 +6,9 @@ import (
 	"log"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/department"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/device"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_export"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_import"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_order"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_order_stage_device"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/stage"
@@ -122,6 +125,11 @@ func Run(ctx context.Context, configPath string) {
 			repository2.NewDepartmentRepo,
 			repository2.NewProductionOrderStageDeviceRepo,
 			repository2.NewCustomFieldRepo,
+			repository2.NewInkRepo,
+			repository2.NewInkImportRepo,
+			repository2.NewInkImportDetailRepo,
+			repository2.NewInkExportRepo,
+			repository2.NewInkExportDetailRepo,
 		),
 		// services
 		fx.Provide(
@@ -136,6 +144,9 @@ func Run(ctx context.Context, configPath string) {
 			device.NewService,
 			department.NewService,
 			production_order_stage_device.NewService,
+			ink.NewService,
+			ink_import.NewService,
+			ink_export.NewService,
 		),
 		// nats streaming
 		fx.Provide(func(cfg *pkgConfig.BaseConfig, zapLogger *zap.Logger) (nats.BusFactory, error) {
@@ -170,6 +181,7 @@ func Run(ctx context.Context, configPath string) {
 			controller.RegisterDeviceController,
 			controller.RegisterProductionOrderStageController,
 			controller.RegisterProductionOrderStageDeviceController,
+			controller.RegisterInkController,
 		),
 	}
 

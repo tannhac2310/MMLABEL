@@ -14,7 +14,6 @@ import (
 type SearchInkReturnOpts struct {
 	ID     string
 	Name   string
-	Code   string
 	Status enum.InventoryCommonStatus
 	Limit  int64
 	Offset int64
@@ -74,17 +73,13 @@ func (s *SearchInkReturnOpts) buildQuery(isCount bool) (string, []interface{}) {
 	}
 
 	if s.Name != "" {
-		conds += " AND b.name ILIKE $1"
 		args = append(args, "%"+s.Name+"%")
+		conds += fmt.Sprintf(" AND( b.%[1]s ILIKE $%[3]d OR  b.%[2]s ILIKE $%[3]d)", model.InkReturnFieldName, model.InkReturnFieldCode, len(args))
 	}
 
-	if s.Code != "" {
-		conds += " AND b.code ILIKE $1"
-		args = append(args, "%"+s.Code+"%")
-	}
 	if s.Status > 0 {
-		conds += " AND b.status = $1"
 		args = append(args, s.Status)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkReturnFieldStatus, len(args))
 	}
 
 	b := &model.InkReturn{}

@@ -7,12 +7,16 @@ import (
 
 const (
 	InkImportDetailFieldID             = "id"
-	InkImportDetailFieldCode           = "code"
-	InkImportDetailFieldManufacturer   = "manufacturer"
-	InkImportDetailFieldExpirationDate = "expiration_date"
 	InkImportDetailFieldInkImportID    = "ink_import_id"
-	InkImportDetailFieldQuantity       = "quantity"
+	InkImportDetailFieldName           = "name"
+	InkImportDetailFieldCode           = "code"
+	InkImportDetailFieldProductCodes   = "product_codes"
+	InkImportDetailFieldPosition       = "position"
+	InkImportDetailFieldLocation       = "location"
+	InkImportDetailFieldManufacturer   = "manufacturer"
 	InkImportDetailFieldColorDetail    = "color_detail"
+	InkImportDetailFieldQuantity       = "quantity"
+	InkImportDetailFieldExpirationDate = "expiration_date"
 	InkImportDetailFieldDescription    = "description"
 	InkImportDetailFieldData           = "data"
 	InkImportDetailFieldCreatedAt      = "created_at"
@@ -22,12 +26,16 @@ const (
 
 type InkImportDetail struct {
 	ID             string                 `db:"id"`
-	Code           string                 `db:"code"`
-	Manufacturer   string                 `db:"manufacturer"`
-	ExpirationDate time.Time              `db:"expiration_date"`
 	InkImportID    string                 `db:"ink_import_id"`
-	Quantity       float64                `db:"quantity"`
+	Name           string                 `db:"name"`
+	Code           string                 `db:"code"`
+	ProductCodes   []string               `db:"product_codes"`
+	Position       string                 `db:"position"`
+	Location       string                 `db:"location"`
+	Manufacturer   string                 `db:"manufacturer"`
 	ColorDetail    map[string]interface{} `db:"color_detail"`
+	Quantity       float64                `db:"quantity"`
+	ExpirationDate string                 `db:"expiration_date"` // DD-MM-YYYY
 	Description    sql.NullString         `db:"description"`
 	Data           map[string]interface{} `db:"data"`
 	CreatedAt      time.Time              `db:"created_at"`
@@ -38,12 +46,16 @@ type InkImportDetail struct {
 func (rcv *InkImportDetail) FieldMap() (fields []string, values []interface{}) {
 	fields = []string{
 		InkImportDetailFieldID,
-		InkImportDetailFieldCode,
-		InkImportDetailFieldManufacturer,
-		InkImportDetailFieldExpirationDate,
 		InkImportDetailFieldInkImportID,
-		InkImportDetailFieldQuantity,
+		InkImportDetailFieldName,
+		InkImportDetailFieldCode,
+		InkImportDetailFieldProductCodes,
+		InkImportDetailFieldPosition,
+		InkImportDetailFieldLocation,
+		InkImportDetailFieldManufacturer,
 		InkImportDetailFieldColorDetail,
+		InkImportDetailFieldQuantity,
+		InkImportDetailFieldExpirationDate,
 		InkImportDetailFieldDescription,
 		InkImportDetailFieldData,
 		InkImportDetailFieldCreatedAt,
@@ -53,12 +65,16 @@ func (rcv *InkImportDetail) FieldMap() (fields []string, values []interface{}) {
 
 	values = []interface{}{
 		&rcv.ID,
-		&rcv.Code,
-		&rcv.Manufacturer,
-		&rcv.ExpirationDate,
 		&rcv.InkImportID,
-		&rcv.Quantity,
+		&rcv.Name,
+		&rcv.Code,
+		&rcv.ProductCodes,
+		&rcv.Position,
+		&rcv.Location,
+		&rcv.Manufacturer,
 		&rcv.ColorDetail,
+		&rcv.Quantity,
+		&rcv.ExpirationDate,
 		&rcv.Description,
 		&rcv.Data,
 		&rcv.CreatedAt,

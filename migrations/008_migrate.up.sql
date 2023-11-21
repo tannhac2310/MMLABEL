@@ -1,8 +1,8 @@
 -- create table quản lý khoa mực
--- column: id, name, code, mã sản phẩm áp dụng, Vị trí kệ, vị trí, Nhà sản xuât, số lượng tồn, ngày hết hạn, data  description, created_at, updated_at
 CREATE TABLE ink
 (
     id              VARCHAR(50)  NOT NULL,
+    import_id       VARCHAR(50),
     name            VARCHAR(255) NOT NULL,
     code            VARCHAR(255) NOT NULL,
     product_codes   STRING[] NOT NULL, -- mã sản phẩm áp dụng
@@ -11,7 +11,7 @@ CREATE TABLE ink
     manufacturer    VARCHAR(255) NOT NULL,
     color_detail    JSONB,             -- chi tiết màu sắc
     quantity        FLOAT        NOT NULL,
-    expiration_date DATE         NOT NULL,
+    expiration_date VARCHAR(50)  NOT NULL, -- DD-MM-YYYY
     description     TEXT,
     data            JSONB,
     status          SMALLINT              DEFAULT 1,
@@ -28,7 +28,7 @@ CREATE TABLE ink_import
     id          VARCHAR(50)  NOT NULL,
     name        VARCHAR(255) NOT NULL, -- tên phiếu nhập
     code        VARCHAR(255) NOT NULL, -- mã phiếu nhập
-    import_date TIMESTAMPTZ, -- ngày nhập
+    import_date TIMESTAMPTZ,           -- ngày nhập
     description TEXT,
     status      SMALLINT              DEFAULT 1,
     data        JSONB,
@@ -43,15 +43,16 @@ CREATE TABLE ink_import
 CREATE TABLE ink_import_detail
 (
     id              VARCHAR(50)  NOT NULL,
+    ink_import_id   VARCHAR(50)  NOT NULL,
     name            VARCHAR(255) NOT NULL, -- tên màu mực
     code            VARCHAR(255) NOT NULL, -- mã màu mực
-    product_codes   STRING[] NOT NULL, -- mã sản phẩm áp dụng
+    product_codes   STRING[] NOT NULL,     -- mã sản phẩm áp dụng
     position        VARCHAR(255) NOT NULL,
     location        VARCHAR(255) NOT NULL,
     manufacturer    VARCHAR(255) NOT NULL,
-    color_detail    JSONB,             -- chi tiết màu sắc
+    color_detail    JSONB,                 -- chi tiết màu sắc
     quantity        FLOAT        NOT NULL,
-    expiration_date TIMESTAMPTZ  NOT NULL,
+    expiration_date VARCHAR(50)  NOT NULL,
     description     TEXT,
     data            JSONB,
     created_at      TIMESTAMPTZ  NOT NULL DEFAULT now():::TIMESTAMPTZ,

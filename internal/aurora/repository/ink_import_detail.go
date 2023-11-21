@@ -67,7 +67,7 @@ func (i *SearchInkImportDetailOpts) buildQuery(isCount bool) (string, []interfac
 	joins := ""
 
 	if i.InkImportID != "" {
-		conds += " AND b.ink_export_id = $1"
+		conds += " AND b.ink_import_id = $1"
 		args = append(args, i.InkImportID)
 	}
 

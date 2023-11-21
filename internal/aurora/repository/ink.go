@@ -13,7 +13,6 @@ import (
 type SearchInkOpts struct {
 	Name   string
 	ID     string
-	Code   string
 	Status enum.InventoryCommonStatus
 	Limit  int64
 	Offset int64
@@ -29,6 +28,7 @@ type InkRepo interface {
 	Insert(ctx context.Context, e *model.Ink) error
 	Update(ctx context.Context, e *model.Ink) error
 	SoftDelete(ctx context.Context, id string) error
+	FindByID(ctx context.Context, id string) (*InkData, error)
 	Search(ctx context.Context, s *SearchInkOpts) ([]*InkData, error)
 	Count(ctx context.Context, s *SearchInkOpts) (*CountResult, error)
 }
@@ -48,6 +48,15 @@ func (i *inkRepo) Insert(ctx context.Context, e *model.Ink) error {
 func (i *inkRepo) Update(ctx context.Context, e *model.Ink) error {
 	e.UpdatedAt = time.Now()
 	return cockroach.Update(ctx, e)
+}
+func (i *inkRepo) FindByID(ctx context.Context, id string) (*InkData, error) {
+	inkData := &InkData{}
+	sql := `SELECT b.* FROM ink AS b WHERE b.id = $1 AND b.deleted_at IS NULL`
+	err := cockroach.Select(ctx, sql, id).ScanOne(inkData)
+	if err != nil {
+		return nil, fmt.Errorf("cockroach.Select: %w", err)
+	}
+	return inkData, nil
 }
 
 func (i *inkRepo) SoftDelete(ctx context.Context, id string) error {
@@ -72,17 +81,14 @@ func (i *SearchInkOpts) buildQuery(isCount bool) (string, []interface{}) {
 		conds += " AND b.id ILIKE $1"
 		args = append(args, "%"+i.ID+"%")
 	}
+
 	if i.Name != "" {
-		conds += " AND b.name ILIKE $1"
 		args = append(args, "%"+i.Name+"%")
-	}
-	if i.Code != "" {
-		conds += " AND b.code ILIKE $1"
-		args = append(args, "%"+i.Code+"%")
+		conds += fmt.Sprintf(" AND( b.%[1]s ILIKE $%[3]d OR  b.%[2]s ILIKE $%[3]d)", model.InkFieldName, model.InkFieldCode, len(args))
 	}
 	if i.Status > 0 {
-		conds += " AND b.status = $1"
 		args = append(args, i.Status)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkFieldStatus, len(args))
 	}
 
 	b := &model.Ink{}

@@ -8,8 +8,8 @@ import (
 const (
 	InkInventoryDetailFieldID             = "id"
 	InkInventoryDetailFieldInkInventoryID = "ink_inventory_id"
+	InkInventoryDetailFieldInkID          = "ink_id"
 	InkInventoryDetailFieldQuantity       = "quantity"
-	InkInventoryDetailFieldColorDetail    = "color_detail"
 	InkInventoryDetailFieldDescription    = "description"
 	InkInventoryDetailFieldData           = "data"
 	InkInventoryDetailFieldCreatedAt      = "created_at"
@@ -20,8 +20,8 @@ const (
 type InkInventoryDetail struct {
 	ID             string                 `db:"id"`
 	InkInventoryID string                 `db:"ink_inventory_id"`
+	InkID          string                 `db:"ink_id"`
 	Quantity       float64                `db:"quantity"`
-	ColorDetail    map[string]interface{} `db:"color_detail"`
 	Description    sql.NullString         `db:"description"`
 	Data           map[string]interface{} `db:"data"`
 	CreatedAt      time.Time              `db:"created_at"`
@@ -33,8 +33,8 @@ func (rcv *InkInventoryDetail) FieldMap() (fields []string, values []interface{}
 	fields = []string{
 		InkInventoryDetailFieldID,
 		InkInventoryDetailFieldInkInventoryID,
+		InkInventoryDetailFieldInkID,
 		InkInventoryDetailFieldQuantity,
-		InkInventoryDetailFieldColorDetail,
 		InkInventoryDetailFieldDescription,
 		InkInventoryDetailFieldData,
 		InkInventoryDetailFieldCreatedAt,
@@ -45,8 +45,8 @@ func (rcv *InkInventoryDetail) FieldMap() (fields []string, values []interface{}
 	values = []interface{}{
 		&rcv.ID,
 		&rcv.InkInventoryID,
+		&rcv.InkID,
 		&rcv.Quantity,
-		&rcv.ColorDetail,
 		&rcv.Description,
 		&rcv.Data,
 		&rcv.CreatedAt,

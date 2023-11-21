@@ -7,47 +7,41 @@ import (
 )
 
 const (
-	InkImportFieldID              = "id"
-	InkImportFieldCode            = "code"
-	InkImportFieldImportDate      = "import_date"
-	InkImportFieldImportUser      = "import_user"
-	InkImportFieldImportWarehouse = "import_warehouse"
-	InkImportFieldExportWarehouse = "export_warehouse"
-	InkImportFieldDescription     = "description"
-	InkImportFieldStatus          = "status"
-	InkImportFieldData            = "data"
-	InkImportFieldCreatedBy       = "created_by"
-	InkImportFieldUpdatedBy       = "updated_by"
-	InkImportFieldCreatedAt       = "created_at"
-	InkImportFieldUpdatedAt       = "updated_at"
-	InkImportFieldDeletedAt       = "deleted_at"
+	InkImportFieldID          = "id"
+	InkImportFieldName        = "name"
+	InkImportFieldCode        = "code"
+	InkImportFieldImportDate  = "import_date"
+	InkImportFieldDescription = "description"
+	InkImportFieldStatus      = "status"
+	InkImportFieldData        = "data"
+	InkImportFieldCreatedBy   = "created_by"
+	InkImportFieldUpdatedBy   = "updated_by"
+	InkImportFieldCreatedAt   = "created_at"
+	InkImportFieldUpdatedAt   = "updated_at"
+	InkImportFieldDeletedAt   = "deleted_at"
 )
 
 type InkImport struct {
-	ID              string                     `db:"id"`
-	Code            string                     `db:"code"`
-	ImportDate      time.Time                  `db:"import_date"`
-	ImportUser      string                     `db:"import_user"`
-	ImportWarehouse string                     `db:"import_warehouse"`
-	ExportWarehouse string                     `db:"export_warehouse"`
-	Description     sql.NullString             `db:"description"`
-	Status          enum.InventoryCommonStatus `db:"status"`
-	Data            map[string]interface{}     `db:"data"`
-	CreatedBy       string                     `db:"created_by"`
-	UpdatedBy       string                     `db:"updated_by"`
-	CreatedAt       time.Time                  `db:"created_at"`
-	UpdatedAt       time.Time                  `db:"updated_at"`
-	DeletedAt       sql.NullTime               `db:"deleted_at"`
+	ID          string                     `db:"id"`
+	Name        string                     `db:"name"`
+	Code        string                     `db:"code"`
+	ImportDate  sql.NullTime               `db:"import_date"`
+	Description sql.NullString             `db:"description"`
+	Status      enum.InventoryCommonStatus `db:"status"`
+	Data        map[string]interface{}     `db:"data"`
+	CreatedBy   string                     `db:"created_by"`
+	UpdatedBy   string                     `db:"updated_by"`
+	CreatedAt   time.Time                  `db:"created_at"`
+	UpdatedAt   time.Time                  `db:"updated_at"`
+	DeletedAt   sql.NullTime               `db:"deleted_at"`
 }
 
 func (rcv *InkImport) FieldMap() (fields []string, values []interface{}) {
 	fields = []string{
 		InkImportFieldID,
+		InkImportFieldName,
 		InkImportFieldCode,
 		InkImportFieldImportDate,
-		InkImportFieldImportUser,
-		InkImportFieldImportWarehouse,
-		InkImportFieldExportWarehouse,
 		InkImportFieldDescription,
 		InkImportFieldStatus,
 		InkImportFieldData,
@@ -60,11 +54,9 @@ func (rcv *InkImport) FieldMap() (fields []string, values []interface{}) {
 
 	values = []interface{}{
 		&rcv.ID,
+		&rcv.Name,
 		&rcv.Code,
 		&rcv.ImportDate,
-		&rcv.ImportUser,
-		&rcv.ImportWarehouse,
-		&rcv.ExportWarehouse,
 		&rcv.Description,
 		&rcv.Status,
 		&rcv.Data,
