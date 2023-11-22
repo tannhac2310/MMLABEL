@@ -147,7 +147,7 @@ func (p inkImportService) Create(ctx context.Context, opt *CreateInkImportOpts) 
 				ExpirationDate: inkImportDetail.ExpirationDate,
 				Description:    cockroach.String(inkImportDetail.Description),
 				Data:           inkImportDetail.Data,
-				Status:         enum.InventoryCommonStatusStatusCompleted,
+				Status:         enum.CommonStatusActive,
 				CreatedBy:      opt.CreatedBy,
 				UpdatedBy:      opt.CreatedBy,
 				CreatedAt:      now,

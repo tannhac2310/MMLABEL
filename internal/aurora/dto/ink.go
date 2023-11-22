@@ -8,30 +8,30 @@ import (
 )
 
 type Ink struct {
-	ID             string                     `json:"id"`
-	ImportID       string                     `json:"importID"`
-	Name           string                     `json:"name"`
-	Code           string                     `json:"code"`
-	ProductCodes   []string                   `json:"productCodes"`
-	Position       string                     `json:"position"`
-	Location       string                     `json:"location"`
-	Manufacturer   string                     `json:"manufacturer"`
-	ColorDetail    map[string]interface{}     `json:"colorDetail"`
-	Quantity       float64                    `json:"quantity"`
-	ExpirationDate string                     `json:"expirationDate"`
-	Description    string                     `json:"description"`
-	Data           map[string]interface{}     `json:"data"`
-	Status         enum.InventoryCommonStatus `json:"status"`
-	CreatedBy      string                     `json:"createdBy"`
-	UpdatedBy      string                     `json:"updatedBy"`
-	CreatedAt      time.Time                  `json:"createdAt"`
-	UpdatedAt      time.Time                  `json:"updatedAt"`
+	ID             string                 `json:"id"`
+	ImportID       string                 `json:"importID"`
+	Name           string                 `json:"name"`
+	Code           string                 `json:"code"`
+	ProductCodes   []string               `json:"productCodes"`
+	Position       string                 `json:"position"`
+	Location       string                 `json:"location"`
+	Manufacturer   string                 `json:"manufacturer"`
+	ColorDetail    map[string]interface{} `json:"colorDetail"`
+	Quantity       float64                `json:"quantity"`
+	ExpirationDate string                 `json:"expirationDate"`
+	Description    string                 `json:"description"`
+	Data           map[string]interface{} `json:"data"`
+	Status         enum.CommonStatus      `json:"status"`
+	CreatedBy      string                 `json:"createdBy"`
+	UpdatedBy      string                 `json:"updatedBy"`
+	CreatedAt      time.Time              `json:"createdAt"`
+	UpdatedAt      time.Time              `json:"updatedAt"`
 }
 
 type InkFilter struct {
-	Name   string                     `json:"name"`
-	ID     string                     `json:"id"`
-	Status enum.InventoryCommonStatus `json:"status"`
+	Name   string            `json:"name"`
+	ID     string            `json:"id"`
+	Status enum.CommonStatus `json:"status"`
 }
 type FindInkRequest struct {
 	Filter *InkFilter        `json:"filter" binding:"required"`
@@ -45,19 +45,19 @@ type FindInksResponse struct {
 // dto for ink.edit
 
 type EditInkRequest struct {
-	ID             string                     `json:"id" binding:"required"`
-	Name           string                     `json:"name"`
-	Code           string                     `json:"code"`
-	ProductCodes   []string                   `json:"productCodes"`
-	Position       string                     `json:"position"`
-	Location       string                     `json:"location"`
-	Manufacturer   string                     `json:"manufacturer"`
-	ColorDetail    map[string]interface{}     `json:"colorDetail"`
-	ExpirationDate string                     `json:"expirationDate"`
-	Description    string                     `json:"description"`
-	Data           map[string]interface{}     `json:"data"`
-	Status         enum.InventoryCommonStatus `json:"status"`
-	Quantity       int64                      `json:"quantity"`
+	ID             string                 `json:"id" binding:"required"`
+	Name           string                 `json:"name"`
+	Code           string                 `json:"code"`
+	ProductCodes   []string               `json:"productCodes"`
+	Position       string                 `json:"position"`
+	Location       string                 `json:"location"`
+	Manufacturer   string                 `json:"manufacturer"`
+	ColorDetail    map[string]interface{} `json:"colorDetail"`
+	ExpirationDate string                 `json:"expirationDate"`
+	Description    string                 `json:"description"`
+	Data           map[string]interface{} `json:"data"`
+	Status         enum.CommonStatus      `json:"status"`
+	Quantity       int64                  `json:"quantity"`
 }
 type EditInkResponse struct{}
 

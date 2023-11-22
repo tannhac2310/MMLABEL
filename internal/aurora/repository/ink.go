@@ -13,7 +13,7 @@ import (
 type SearchInkOpts struct {
 	Name   string
 	ID     string
-	Status enum.InventoryCommonStatus
+	Status enum.CommonStatus
 	Limit  int64
 	Offset int64
 	Sort   *Sort

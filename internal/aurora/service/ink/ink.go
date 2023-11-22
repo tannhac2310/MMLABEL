@@ -26,7 +26,7 @@ type EditInkOpts struct {
 	ExpirationDate string // DD-MM-YYYY
 	Description    string
 	Data           map[string]interface{}
-	Status         enum.InventoryCommonStatus
+	Status         enum.CommonStatus
 	UpdatedBy      string
 }
 
@@ -42,14 +42,14 @@ type CreateInkOpts struct {
 	ExpirationDate string // DD-MM-YYYY
 	Description    string
 	Data           map[string]interface{}
-	Status         enum.InventoryCommonStatus
+	Status         enum.CommonStatus
 	CreatedBy      string
 }
 
 type FindInkOpts struct {
 	Name   string
 	ID     string
-	Status enum.InventoryCommonStatus
+	Status enum.CommonStatus
 }
 
 type Service interface {
