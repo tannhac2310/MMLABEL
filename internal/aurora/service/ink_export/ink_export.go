@@ -179,6 +179,7 @@ type InkExportDetail struct {
 	InkID       string
 	InkData     *repository.InkData
 	Quantity    float64
+	ColorDetail map[string]interface{}
 	Description string
 	Data        map[string]interface{}
 	CreatedAt   time.Time
@@ -230,6 +231,7 @@ func (p inkExportService) Find(ctx context.Context, opt *FindInkExportOpts, sort
 				InkID:       inkExportDetail.InkID,
 				InkData:     inkData,
 				Quantity:    inkExportDetail.Quantity,
+				//ColorDetail: inkExportDetail.ColorDetail,
 				Description: inkExportDetail.Description.String,
 				Data:        inkExportDetail.Data,
 				CreatedAt:   inkExportDetail.CreatedAt,
