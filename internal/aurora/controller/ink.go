@@ -298,6 +298,7 @@ func toInkImportDetailResp(f []*ink_import.InkImportDetail) []*dto.InkImportDeta
 	for _, f := range f {
 		importDetailResp = append(importDetailResp, &dto.InkImportDetail{
 			ID:             f.ID,
+			InkID:          f.InkID,
 			Name:           f.Name,
 			Code:           f.Code,
 			ProductCodes:   f.ProductCodes,

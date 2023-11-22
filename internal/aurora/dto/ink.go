@@ -87,6 +87,7 @@ type CreateInkImportDetail struct {
 
 type InkImportDetail struct {
 	ID             string                 `json:"id"`
+	InkID          string                 `json:"inkID"`
 	Name           string                 `json:"name" binding:"required"`
 	Code           string                 `json:"code" binding:"required"`
 	ProductCodes   []string               `json:"productCodes"`

@@ -80,7 +80,7 @@ func (i *SearchInkImportDetailOpts) buildQuery(isCount bool) (string, []interfac
 
 	if i.InkID != "" {
 		args = append(args, i.InkID)
-		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkImportDetailFieldID, len(args)) // write ink.ID = ink_import.ID
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkImportDetailFieldInkID, len(args))
 	}
 
 	if i.InkCode != "" {
@@ -100,10 +100,9 @@ func (i *SearchInkImportDetailOpts) buildQuery(isCount bool) (string, []interfac
 	if i.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", i.Sort.By, i.Sort.Order)
 	}
-	// JOIN ink AS i ON i.id = b.id when importing, I write ink.ID = ink_import.ID
 	return fmt.Sprintf(`SELECT b.%s
 		FROM %s AS b %s
-		JOIN ink AS i ON i.id = b.id 
+		JOIN ink AS i ON i.id = b.ink_id 
 		WHERE TRUE %s AND b.deleted_at IS NULL
 		%s
 		LIMIT %d

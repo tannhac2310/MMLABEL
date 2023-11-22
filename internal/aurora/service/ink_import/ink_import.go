@@ -111,8 +111,54 @@ func (p inkImportService) Create(ctx context.Context, opt *CreateInkImportOpts) 
 		// write code to insert to ink_import_detail table
 		for _, inkImportDetail := range opt.InkImportDetail {
 			inkID := idutil.ULIDNow()
+			// find ink by code, manufacturer, expiration_date
+			ink, _ := p.inkRepo.Search(ctx, &repository.SearchInkOpts{
+				Code:         inkImportDetail.Code,
+				Manufacturer: inkImportDetail.Manufacturer,
+				Expiration:   inkImportDetail.ExpirationDate,
+				Limit:        1,
+			})
+
+			if len(ink) > 0 {
+				inkData := ink[0].Ink
+				inkID = inkData.ID
+				inkData.Quantity = inkData.Quantity + inkImportDetail.Quantity
+				inkData.UpdatedAt = now
+				inkData.UpdatedBy = opt.CreatedBy
+				err := p.inkRepo.Update(ctx, inkData)
+				if err != nil {
+					return fmt.Errorf("error when update ink: %w", err)
+				}
+			} else {
+				// todo check if import status is completed, insert to ink table
+				// insert into ink table
+				err3 := p.inkRepo.Insert(c, &model.Ink{
+					ID:             idutil.ULIDNow(),
+					ImportID:       cockroach.String(importId),
+					Name:           inkImportDetail.Name,
+					Code:           inkImportDetail.Code,
+					ProductCodes:   inkImportDetail.ProductCodes,
+					Position:       inkImportDetail.Position,
+					Location:       inkImportDetail.Location,
+					Manufacturer:   inkImportDetail.Manufacturer,
+					ColorDetail:    inkImportDetail.ColorDetail,
+					Quantity:       inkImportDetail.Quantity,
+					ExpirationDate: inkImportDetail.ExpirationDate,
+					Description:    cockroach.String(inkImportDetail.Description),
+					Data:           inkImportDetail.Data,
+					Status:         enum.CommonStatusActive,
+					CreatedBy:      opt.CreatedBy,
+					UpdatedBy:      opt.CreatedBy,
+					CreatedAt:      now,
+					UpdatedAt:      now,
+				})
+				if err3 != nil {
+					return fmt.Errorf("error when insert ink: %w", err3)
+				}
+			}
 			err2 := p.inkImportDetailRepo.Insert(c, &model.InkImportDetail{
-				ID:             inkID,
+				ID:             idutil.ULIDNow(),
+				InkID:          inkID,
 				InkImportID:    importId,
 				Name:           inkImportDetail.Name,
 				Code:           inkImportDetail.Code,
@@ -131,31 +177,7 @@ func (p inkImportService) Create(ctx context.Context, opt *CreateInkImportOpts) 
 			if err2 != nil {
 				return fmt.Errorf("error when insert ink import detail: %w", err2)
 			}
-			// todo check if import status is completed, insert to ink table
-			// insert into ink table
-			err3 := p.inkRepo.Insert(c, &model.Ink{
-				ID:             inkID,
-				ImportID:       cockroach.String(importId),
-				Name:           inkImportDetail.Name,
-				Code:           inkImportDetail.Code,
-				ProductCodes:   inkImportDetail.ProductCodes,
-				Position:       inkImportDetail.Position,
-				Location:       inkImportDetail.Location,
-				Manufacturer:   inkImportDetail.Manufacturer,
-				ColorDetail:    inkImportDetail.ColorDetail,
-				Quantity:       inkImportDetail.Quantity,
-				ExpirationDate: inkImportDetail.ExpirationDate,
-				Description:    cockroach.String(inkImportDetail.Description),
-				Data:           inkImportDetail.Data,
-				Status:         enum.CommonStatusActive,
-				CreatedBy:      opt.CreatedBy,
-				UpdatedBy:      opt.CreatedBy,
-				CreatedAt:      now,
-				UpdatedAt:      now,
-			})
-			if err3 != nil {
-				return fmt.Errorf("error when insert ink: %w", err3)
-			}
+
 		}
 
 		return nil
@@ -186,6 +208,7 @@ type InkImportData struct {
 
 type InkImportDetail struct {
 	ID             string
+	InkID          string
 	Name           string
 	Code           string
 	ProductCodes   []string
@@ -227,7 +250,6 @@ func (p inkImportService) Find(ctx context.Context, opt *FindInkImportOpts, sort
 			CreatedBy:       inkImport.CreatedBy,
 			InkImportDetail: nil,
 		}
-		fmt.Println("==========>>>", inkImport.ID)
 		inkImportDetails, err := p.inkImportDetailRepo.Search(ctx, &repository.SearchInkImportDetailOpts{
 			InkImportID: inkImport.ID,
 			Limit:       10000,
@@ -239,6 +261,7 @@ func (p inkImportService) Find(ctx context.Context, opt *FindInkImportOpts, sort
 		for _, inkImportDetail := range inkImportDetails {
 			dataDetail := &InkImportDetail{
 				ID:             inkImportDetail.ID,
+				InkID:          inkImportDetail.InkID,
 				Name:           inkImportDetail.Name,
 				Code:           inkImportDetail.Code,
 				ProductCodes:   inkImportDetail.ProductCodes,

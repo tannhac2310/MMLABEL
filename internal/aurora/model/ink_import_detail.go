@@ -7,6 +7,7 @@ import (
 
 const (
 	InkImportDetailFieldID             = "id"
+	InkImportDetailFieldInkID          = "ink_id"
 	InkImportDetailFieldInkImportID    = "ink_import_id"
 	InkImportDetailFieldName           = "name"
 	InkImportDetailFieldCode           = "code"
@@ -26,6 +27,7 @@ const (
 
 type InkImportDetail struct {
 	ID             string                 `db:"id"`
+	InkID          string                 `db:"ink_id"`
 	InkImportID    string                 `db:"ink_import_id"`
 	Name           string                 `db:"name"`
 	Code           string                 `db:"code"`
@@ -46,6 +48,7 @@ type InkImportDetail struct {
 func (rcv *InkImportDetail) FieldMap() (fields []string, values []interface{}) {
 	fields = []string{
 		InkImportDetailFieldID,
+		InkImportDetailFieldInkID,
 		InkImportDetailFieldInkImportID,
 		InkImportDetailFieldName,
 		InkImportDetailFieldCode,
@@ -65,6 +68,7 @@ func (rcv *InkImportDetail) FieldMap() (fields []string, values []interface{}) {
 
 	values = []interface{}{
 		&rcv.ID,
+		&rcv.InkID,
 		&rcv.InkImportID,
 		&rcv.Name,
 		&rcv.Code,

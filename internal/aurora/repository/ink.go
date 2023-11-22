@@ -11,12 +11,15 @@ import (
 )
 
 type SearchInkOpts struct {
-	Name   string
-	ID     string
-	Status enum.CommonStatus
-	Limit  int64
-	Offset int64
-	Sort   *Sort
+	ID           string
+	Name         string
+	Code         string
+	Manufacturer string
+	Expiration   string
+	Status       enum.CommonStatus
+	Limit        int64
+	Offset       int64
+	Sort         *Sort
 }
 
 type InkData struct {
@@ -78,14 +81,30 @@ func (i *SearchInkOpts) buildQuery(isCount bool) (string, []interface{}) {
 	joins := ""
 
 	if i.ID != "" {
-		conds += " AND b.id ILIKE $1"
-		args = append(args, "%"+i.ID+"%")
+		conds += " AND b.id = $1"
+		args = append(args, i.ID)
 	}
 
 	if i.Name != "" {
 		args = append(args, "%"+i.Name+"%")
 		conds += fmt.Sprintf(" AND( b.%[1]s ILIKE $%[3]d OR  b.%[2]s ILIKE $%[3]d)", model.InkFieldName, model.InkFieldCode, len(args))
 	}
+
+	if i.Code != "" {
+		args = append(args, i.Code)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkFieldCode, len(args))
+	}
+
+	if i.Manufacturer != "" {
+		args = append(args, i.Manufacturer)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkFieldManufacturer, len(args))
+	}
+
+	if i.Expiration != "" {
+		args = append(args, i.Expiration)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkFieldExpirationDate, len(args))
+	}
+
 	if i.Status > 0 {
 		args = append(args, i.Status)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkFieldStatus, len(args))
