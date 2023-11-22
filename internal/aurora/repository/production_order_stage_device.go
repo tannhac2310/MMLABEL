@@ -166,7 +166,7 @@ func (s *SearchProductionOrderStageDevicesOpts) buildQuery(isCount bool) (string
 	if s.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", s.Sort.By, s.Sort.Order)
 	}
-	return fmt.Sprintf(`SELECT b.%s, pos.production_order_id as production_order_id, d.name as device_name
+	return fmt.Sprintf(`SELECT b.%s, pos.production_order_id as production_order_id, COALESCE (d.name,'N/A') as device_name
 		FROM %s AS b %s
 		JOIN devices d ON d.id = b.device_id
 		JOIN production_order_stages AS pos ON pos.id = b.production_order_stage_id
@@ -209,7 +209,7 @@ func (s *SearchEventLogOpts) buildQuery(isCount bool) (string, []interface{}) {
 	}
 
 	order := " ORDER BY el.id DESC "
-	return fmt.Sprintf(`SELECT el.%s, d.name as device_name
+	return fmt.Sprintf(`SELECT el.%s, COALESCE (d.name,'N/A') as device_name
 		FROM %s AS el %s
 		LEFT JOIN devices d ON d.id = el.device_id
 		WHERE TRUE %s
