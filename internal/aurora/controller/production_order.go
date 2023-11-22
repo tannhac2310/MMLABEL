@@ -164,11 +164,10 @@ func (s productionOrderController) FindProductionOrders(c *gin.Context) {
 	}
 
 	productionOrders, cnt, err := s.productionOrderService.FindProductionOrders(c, &production_order.FindProductionOrdersOpts{
-		IDs:         req.Filter.IDs,
-		CustomerID:  req.Filter.CustomerID,
-		ProductName: req.Filter.ProductName,
-		ProductCode: req.Filter.ProductCode,
-		Status:      req.Filter.Status,
+		IDs:        req.Filter.IDs,
+		Name:       req.Filter.Name,
+		CustomerID: req.Filter.CustomerID,
+		Status:     req.Filter.Status,
 	}, &repository.Sort{
 		Order: repository.SortOrderASC,
 		By:    "ID",

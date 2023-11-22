@@ -87,6 +87,11 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool) (string, []interfa
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderFieldCustomerID, len(args))
 	}
 
+	if s.Status > 0 {
+		args = append(args, s.Status)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderFieldStatus, len(args))
+	}
+
 	b := &model.ProductionOrder{}
 	fields, _ := b.FieldMap()
 	if isCount {
