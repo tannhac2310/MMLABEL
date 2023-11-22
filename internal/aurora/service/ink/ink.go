@@ -2,6 +2,8 @@ package ink
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
@@ -18,6 +20,7 @@ type EditInkOpts struct {
 	ProductCodes   []string
 	Position       string
 	Location       string
+	Quantity       int64
 	Manufacturer   string
 	ColorDetail    map[string]interface{}
 	ExpirationDate string // DD-MM-YYYY
@@ -63,6 +66,7 @@ type inkService struct {
 	inkReturnDetailRepo repository.InkReturnDetailRepo
 	inkExportDetailRepo repository.InkExportDetailRepo
 	inkImportDetailRepo repository.InkImportDetailRepo
+	historyRepo         repository.HistoryRepo
 }
 
 func (p inkService) CalculateInkQuantity(ctx context.Context, inkID string) (float64, float64, float64, error) {
@@ -93,6 +97,32 @@ func (p inkService) CalculateInkQuantity(ctx context.Context, inkID string) (flo
 
 func (p inkService) Edit(ctx context.Context, opt *EditInkOpts) error {
 	table := model.Ink{}
+	// find ink by id
+	ink, err := p.inkRepo.FindByID(ctx, opt.ID)
+	if err != nil {
+		return err
+	}
+	fmt.Println(ink)
+	// write history
+	// old value
+	b, _ := json.Marshal(ink)
+	oldValue := map[string]interface{}{}
+	b, _ = json.Marshal(opt)
+	newValue := map[string]interface{}{}
+	_ = json.Unmarshal(b, &newValue)
+	err = json.Unmarshal(b, &oldValue)
+
+	err = p.historyRepo.Insert(ctx, &model.History{
+		ID:        time.Now().UnixNano(),
+		Table:     table.TableName(),
+		RowID:     opt.ID,
+		OldValue:  oldValue,
+		NewValue:  newValue,
+		CreatedAt: time.Now(),
+	})
+	if err != nil {
+		return fmt.Errorf("p.historyRepo.Insert: %w", err)
+	}
 
 	updater := cockroach.NewUpdater(table.TableName(), model.InkFieldID, opt.ID)
 
@@ -101,6 +131,7 @@ func (p inkService) Edit(ctx context.Context, opt *EditInkOpts) error {
 	updater.Set(model.InkFieldProductCodes, opt.ProductCodes)
 	updater.Set(model.InkFieldPosition, opt.Position)
 	updater.Set(model.InkFieldLocation, opt.Location)
+	updater.Set(model.InkFieldQuantity, opt.Quantity)
 	updater.Set(model.InkFieldManufacturer, opt.Manufacturer)
 	updater.Set(model.InkFieldColorDetail, opt.ColorDetail)
 	updater.Set(model.InkFieldExpirationDate, opt.ExpirationDate)
@@ -111,7 +142,7 @@ func (p inkService) Edit(ctx context.Context, opt *EditInkOpts) error {
 
 	updater.Set(model.InkFieldUpdatedAt, time.Now())
 
-	err := cockroach.UpdateFields(ctx, updater)
+	err = cockroach.UpdateFields(ctx, updater)
 	if err != nil {
 		return err
 	}
@@ -239,6 +270,7 @@ func NewService(
 	inkReturnDetailRepo repository.InkReturnDetailRepo,
 	inkExportDetailRepo repository.InkExportDetailRepo,
 	inkImportDetailRepo repository.InkImportDetailRepo,
+	historyRepo repository.HistoryRepo,
 ) Service {
 	return &inkService{
 		inkReturnRepo:       inkReturnRepo,
@@ -246,6 +278,7 @@ func NewService(
 		inkExportDetailRepo: inkExportDetailRepo,
 		inkImportDetailRepo: inkImportDetailRepo,
 		inkRepo:             inkRepo,
+		historyRepo:         historyRepo,
 	}
 
 }

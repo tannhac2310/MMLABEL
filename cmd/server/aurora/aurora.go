@@ -135,6 +135,7 @@ func Run(ctx context.Context, configPath string) {
 			repository2.NewInkExportDetailRepo,
 			repository2.NewInkReturnRepo,
 			repository2.NewInkReturnDetailRepo,
+			repository2.NewHistoryRepo,
 		),
 		// services
 		fx.Provide(

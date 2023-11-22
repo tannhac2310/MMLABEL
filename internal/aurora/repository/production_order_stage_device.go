@@ -20,6 +20,16 @@ type ProductionOrderStageDeviceRepo interface {
 	Search(ctx context.Context, s *SearchProductionOrderStageDevicesOpts) ([]*ProductionOrderStageDeviceData, error)
 	Count(ctx context.Context, s *SearchProductionOrderStageDevicesOpts) (*CountResult, error)
 	DeleteByProductionOrderStageID(ctx context.Context, poStageID string) error
+	InsertEventLog(ctx context.Context, e *model.EventLog) error
+	FindEventLog(ctx context.Context, s *SearchEventLogOpts) ([]*EventLogData, error)
+}
+type SearchEventLogOpts struct {
+	DeviceID string
+	Date     string
+}
+type EventLogData struct {
+	*model.EventLog
+	DeviceName string `db:"device_name"`
 }
 type ProductionOrderStageDeviceData struct {
 	*model.ProductionOrderStageDevice
@@ -33,6 +43,15 @@ type productionOrderStageDevicesRepo struct {
 
 func NewProductionOrderStageDeviceRepo() ProductionOrderStageDeviceRepo {
 	return &productionOrderStageDevicesRepo{}
+}
+
+func (p *productionOrderStageDevicesRepo) InsertEventLog(ctx context.Context, e *model.EventLog) error {
+	err := cockroach.Create(ctx, e)
+	if err != nil {
+		return fmt.Errorf("r.baseRepo.Create: %w", err)
+	}
+
+	return nil
 }
 func (p *productionOrderStageDevicesRepo) DeleteByProductionOrderStageID(ctx context.Context, poStageID string) error {
 	sql := `UPDATE production_order_stage_devices
@@ -159,6 +178,48 @@ func (s *SearchProductionOrderStageDevicesOpts) buildQuery(isCount bool) (string
 
 func (r *productionOrderStageDevicesRepo) Search(ctx context.Context, s *SearchProductionOrderStageDevicesOpts) ([]*ProductionOrderStageDeviceData, error) {
 	message := make([]*ProductionOrderStageDeviceData, 0)
+	sql, args := s.buildQuery(false)
+	err := cockroach.Select(ctx, sql, args...).ScanAll(&message)
+	if err != nil {
+		return nil, fmt.Errorf("cockroach.Select: %w", err)
+	}
+
+	return message, nil
+}
+func (s *SearchEventLogOpts) buildQuery(isCount bool) (string, []interface{}) {
+	var args []interface{}
+	conds := ""
+	joins := ""
+
+	if s.DeviceID != "" {
+		args = append(args, s.DeviceID)
+		conds += fmt.Sprintf(" AND el.device_id = $%d", len(args))
+	}
+	if s.Date != "" {
+		args = append(args, s.Date)
+		conds += fmt.Sprintf(" AND el.date = $%d", len(args))
+	}
+
+	b := &model.EventLog{}
+	fields, _ := b.FieldMap()
+	if isCount {
+		return fmt.Sprintf(`SELECT count(*) as cnt
+		FROM %s AS el %s
+		WHERE TRUE %s AND el.deleted_at IS NULL`, b.TableName(), joins, conds), args
+	}
+
+	order := " ORDER BY el.id DESC "
+	return fmt.Sprintf(`SELECT el.%s, d.name as device_name
+		FROM %s AS el %s
+		LEFT JOIN devices d ON d.id = el.device_id
+		WHERE TRUE %s
+		%s
+		LIMIT %d
+		OFFSET %d`, strings.Join(fields, ", el."), b.TableName(), joins, conds, order, 1000, 0), args
+
+}
+func (r *productionOrderStageDevicesRepo) FindEventLog(ctx context.Context, s *SearchEventLogOpts) ([]*EventLogData, error) {
+	message := make([]*EventLogData, 0)
 	sql, args := s.buildQuery(false)
 	err := cockroach.Select(ctx, sql, args...).ScanAll(&message)
 	if err != nil {

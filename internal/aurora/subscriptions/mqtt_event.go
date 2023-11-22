@@ -95,21 +95,24 @@ func (p *EventMQTTSubscription) Subscribe() error {
 
 		fmt.Println(myStruct.D, myStruct.Ts)
 		// find device in production order stage device
+		deviceID := strings.Replace(myStruct.D[0].Tag, ":CounterTag", "", -1)
 
 		devices, err := p.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
-			DeviceID:                   strings.Replace(myStruct.D[0].Tag, ":CounterTag", "", -1),
+			DeviceID:                   deviceID,
 			ProductionOrderStageStatus: enum.ProductionOrderStageStatusProductionStart,
 			Limit:                      1,
 			Offset:                     0,
 		})
+
 		if err != nil {
 			fmt.Println("============>>> Received message for topic ====", err)
-
 		}
-		if len(devices) == 1 {
+		activeStageID := ""
+		if len(devices) == 1 && int64(myStruct.D[0].Value) > 0 && int64(myStruct.D[0].Value) > devices[0].Quantity {
 			// update first device
 			device := devices[0]
-			p.productionOrderStageDeviceRepo.Update(ctx, &model.ProductionOrderStageDevice{
+			activeStageID = device.ProductionOrderStageID
+			_ = p.productionOrderStageDeviceRepo.Update(ctx, &model.ProductionOrderStageDevice{
 				ID:                     device.ID,
 				ProductionOrderStageID: device.ProductionOrderStageID,
 				DeviceID:               device.DeviceID,
@@ -123,6 +126,18 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				UpdatedAt:              device.UpdatedAt,
 			})
 		}
+		now := time.Now()
+		date := now.Format("2006-01-02")
+		// insert event log
+		_ = p.productionOrderStageDeviceRepo.InsertEventLog(ctx, &model.EventLog{
+			ID:        time.Now().UnixNano(),
+			DeviceID:  deviceID,
+			StageID:   cockroach.String(activeStageID),
+			Quantity:  float64(myStruct.D[0].Value),
+			Msg:       cockroach.String(string(message.Payload())),
+			Date:      cockroach.String(date),
+			CreatedAt: now,
+		})
 		message.Ack()
 	})
 	fmt.Printf("Subscribed to topic '%s'\n", topic)

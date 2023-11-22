@@ -22,7 +22,7 @@ cockroachdb:
   uri: "cG9zdGdyZXM6Ly9yb290QGRiOjI2MjU3L3Bvc3RncmVzP3NzbG1vZGU9ZGlzYWJsZSZwb29sX21heF9jb25ucz01MCZwb29sX21heF9jb25uX2xpZmV0aW1lPTVtJnBvb2xfaGVhbHRoX2NoZWNrX3BlcmlvZD0zMHM="
   migrationPath: "file://./migrations"
 jwt:
-  expiry: 1h
+  expiry: 10000h
   encryptionKey: "KJAfbaiufbcHCVBAHDc"
   audience: "mm-printing"
   issuer: "hydra"

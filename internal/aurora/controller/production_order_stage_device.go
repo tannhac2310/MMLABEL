@@ -14,10 +14,46 @@ type ProductionOrderStageDeviceController interface {
 	CreateProductionOrderStageDevice(c *gin.Context)
 	EditProductionOrderStageDevice(c *gin.Context)
 	DeleteProductionOrderStageDevice(c *gin.Context)
+	FindEventLog(c *gin.Context)
 }
 
 type productionOrderStageDeviceController struct {
 	productionOrderStageDeviceService production_order_stage_device.Service
+}
+
+func (s productionOrderStageDeviceController) FindEventLog(c *gin.Context) {
+	req := &dto.FindEvenLogRequest{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+
+	eventLogs, err := s.productionOrderStageDeviceService.FindEventLog(c, &production_order_stage_device.FindEventLogOpts{
+		DeviceID: req.DeviceID,
+		Date:     req.Date,
+	})
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+
+	eventLogResponses := make([]*dto.FindEventLog, 0, len(eventLogs))
+	for _, eventLog := range eventLogs {
+		eventLogResponses = append(eventLogResponses, &dto.FindEventLog{
+			ID:        eventLog.ID,
+			DeviceID:  eventLog.DeviceID,
+			StageID:   eventLog.StageID.String,
+			Quantity:  eventLog.Quantity,
+			Msg:       eventLog.Msg.String,
+			Date:      eventLog.Date.String,
+			CreatedAt: eventLog.CreatedAt,
+		})
+	}
+
+	transportutil.SendJSONResponse(c, &dto.FindEventLogResponse{
+		EventLogs: eventLogResponses,
+	})
 }
 
 func (s productionOrderStageDeviceController) CreateProductionOrderStageDevice(c *gin.Context) {
@@ -98,6 +134,14 @@ func RegisterProductionOrderStageDeviceController(
 		productionOrderStageDeviceService: productionOrderStageDeviceService,
 	}
 
+	routeutil.AddEndpoint(
+		g,
+		"find-event-log",
+		c.FindEventLog,
+		&dto.FindEvenLogRequest{},
+		&dto.FindEventLogResponse{},
+		"Find event log",
+	)
 	routeutil.AddEndpoint(
 		g,
 		"create",

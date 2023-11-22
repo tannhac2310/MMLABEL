@@ -45,18 +45,19 @@ type FindInksResponse struct {
 // dto for ink.edit
 
 type EditInkRequest struct {
-	ID             string                 `json:"id" binding:"required"`
-	Name           string                 `json:"name"`
-	Code           string                 `json:"code"`
-	ProductCodes   []string               `json:"productCodes"`
-	Position       string                 `json:"position"`
-	Location       string                 `json:"location"`
-	Manufacturer   string                 `json:"manufacturer"`
-	ColorDetail    map[string]interface{} `json:"colorDetail"`
-	ExpirationDate string                 `json:"expirationDate"`
-	Description    string                 `json:"description"`
-	Data           map[string]interface{} `json:"data"`
-	Status         string                 `json:"status"`
+	ID             string                     `json:"id" binding:"required"`
+	Name           string                     `json:"name"`
+	Code           string                     `json:"code"`
+	ProductCodes   []string                   `json:"productCodes"`
+	Position       string                     `json:"position"`
+	Location       string                     `json:"location"`
+	Manufacturer   string                     `json:"manufacturer"`
+	ColorDetail    map[string]interface{}     `json:"colorDetail"`
+	ExpirationDate string                     `json:"expirationDate"`
+	Description    string                     `json:"description"`
+	Data           map[string]interface{}     `json:"data"`
+	Status         enum.InventoryCommonStatus `json:"status"`
+	Quantity       int64                      `json:"quantity"`
 }
 type EditInkResponse struct{}
 

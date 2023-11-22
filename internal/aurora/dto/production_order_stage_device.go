@@ -3,6 +3,7 @@ package dto
 import (
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/commondto"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
+	"time"
 )
 
 type ProductionOrderStageDeviceFilter struct {
@@ -65,4 +66,23 @@ type DeleteProductionOrderStageDeviceRequest struct {
 }
 
 type DeleteProductionOrderStageDeviceResponse struct {
+}
+
+type FindEvenLogRequest struct {
+	DeviceID string `json:"name" `
+	Date     string `json:"date"`
+}
+
+type FindEventLog struct {
+	ID         int64     `json:"id"`
+	DeviceID   string    `json:"deviceID"`
+	DeviceName string    `json:"deviceName"`
+	StageID    string    `json:"stageID"`
+	Quantity   float64   `json:"quantity"`
+	Msg        string    `json:"msg"`
+	Date       string    `json:"date"`
+	CreatedAt  time.Time `json:"createdAt"`
+}
+type FindEventLogResponse struct {
+	EventLogs []*FindEventLog `json:"eventLogs"`
 }

@@ -17,6 +17,7 @@ import (
 
 type InkController interface {
 	FindInk(c *gin.Context)
+	EditInk(c *gin.Context)
 	ImportInk(c *gin.Context)
 	FindInkImport(c *gin.Context)
 	ExportInk(c *gin.Context)
@@ -96,6 +97,7 @@ func (s inkController) FindInkReturn(c *gin.Context) {
 		Total:     cnt.Count,
 	})
 }
+
 func toInkReturnResp(f *ink_return.InkReturnData) *dto.InkReturn {
 	inkReturnDetail := make([]*dto.InkReturnDetail, 0, len(f.InkReturnDetail))
 	for _, k := range f.InkReturnDetail {
@@ -117,6 +119,7 @@ func toInkReturnResp(f *ink_return.InkReturnData) *dto.InkReturn {
 		InkReturnDetail: inkReturnDetail,
 	}
 }
+
 func (s inkController) FindInkExport(c *gin.Context) {
 	req := &dto.FindInkExportsRequest{}
 	err := c.ShouldBind(req)
@@ -144,6 +147,7 @@ func (s inkController) FindInkExport(c *gin.Context) {
 		Total:     cnt.Count,
 	})
 }
+
 func toInkExportResp(f *ink_export.InkExportData) *dto.InkExport {
 	inkExportDetail := make([]*dto.InkExportDetail, 0, len(f.InkExportDetail))
 	for _, k := range f.InkExportDetail {
@@ -288,6 +292,7 @@ func (s inkController) FindInkImport(c *gin.Context) {
 		Total:     cnt.Count,
 	})
 }
+
 func toInkImportDetailResp(f []*ink_import.InkImportDetail) []*dto.InkImportDetail {
 	importDetailResp := make([]*dto.InkImportDetail, 0, len(f))
 	for _, f := range f {
@@ -308,6 +313,7 @@ func toInkImportDetailResp(f []*ink_import.InkImportDetail) []*dto.InkImportDeta
 	}
 	return importDetailResp
 }
+
 func toInkImportResp(f *ink_import.InkImportData) *dto.InkImport {
 	return &dto.InkImport{
 		ID:              f.ID,
@@ -321,6 +327,7 @@ func toInkImportResp(f *ink_import.InkImportData) *dto.InkImport {
 		CreatedAt:       f.CreatedAt,
 	}
 }
+
 func (s inkController) ImportInk(c *gin.Context) {
 	req := &dto.CreateInkImportRequest{}
 	err := c.ShouldBind(req)
@@ -396,6 +403,36 @@ func (s inkController) FindInk(c *gin.Context) {
 		Total: cnt.Count,
 	})
 }
+func (s inkController) EditInk(c *gin.Context) {
+	req := &dto.EditInkRequest{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+	userId := interceptor.UserIDFromCtx(c)
+	err = s.inkService.Edit(c, &ink.EditInkOpts{
+		ID:             req.ID,
+		Name:           req.Name,
+		Code:           req.Code,
+		ProductCodes:   req.ProductCodes,
+		Position:       req.Position,
+		Location:       req.Location,
+		Manufacturer:   req.Manufacturer,
+		ColorDetail:    req.ColorDetail,
+		ExpirationDate: req.ExpirationDate,
+		Description:    req.Description,
+		Data:           req.Data,
+		Status:         req.Status,
+		Quantity:       req.Quantity,
+		UpdatedBy:      userId,
+	})
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+	transportutil.SendJSONResponse(c, &dto.EditInkResponse{})
+}
 
 func toInkResp(f *ink.InkData) *dto.Ink {
 	return &dto.Ink{
@@ -443,6 +480,15 @@ func RegisterInkController(
 		&dto.FindInkRequest{},
 		&dto.FindInksResponse{},
 		"Find ink",
+	)
+
+	routeutil.AddEndpoint(
+		g,
+		"edit",
+		c.EditInk,
+		&dto.EditInkRequest{},
+		&dto.EditInkRequest{},
+		"Edit ink",
 	)
 
 	routeutil.AddEndpoint(

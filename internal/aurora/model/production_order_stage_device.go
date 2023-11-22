@@ -14,12 +14,14 @@ const (
 	ProductionOrderStageDeviceFieldQuantity               = "quantity"
 	ProductionOrderStageDeviceFieldProcessStatus          = "process_status"
 	ProductionOrderStageDeviceFieldStatus                 = "status"
-	ProductionOrderStageDeviceFieldResponsible            = "responsible"
 	ProductionOrderStageDeviceFieldSettings               = "settings"
 	ProductionOrderStageDeviceFieldNote                   = "note"
 	ProductionOrderStageDeviceFieldCreatedAt              = "created_at"
 	ProductionOrderStageDeviceFieldUpdatedAt              = "updated_at"
 	ProductionOrderStageDeviceFieldDeletedAt              = "deleted_at"
+	ProductionOrderStageDeviceFieldResponsible            = "responsible"
+	ProductionOrderStageDeviceFieldEstimatedCompleteAt    = "estimated_complete_at"
+	ProductionOrderStageDeviceFieldAssignedQuantity       = "assigned_quantity"
 )
 
 type ProductionOrderStageDevice struct {
@@ -29,12 +31,14 @@ type ProductionOrderStageDevice struct {
 	Quantity               int64                                 `db:"quantity"`
 	ProcessStatus          enum.ProductionOrderStageDeviceStatus `db:"process_status"`
 	Status                 enum.CommonStatus                     `db:"status"`
-	Responsible            []string                              `db:"responsible"`
 	Settings               map[string]interface{}                `db:"settings"`
 	Note                   sql.NullString                        `db:"note"`
 	CreatedAt              time.Time                             `db:"created_at"`
 	UpdatedAt              time.Time                             `db:"updated_at"`
 	DeletedAt              sql.NullTime                          `db:"deleted_at"`
+	Responsible            []string                              `db:"responsible"`
+	EstimatedCompleteAt    sql.NullTime                          `db:"estimated_complete_at"`
+	AssignedQuantity       int64                                 `db:"assigned_quantity"`
 }
 
 func (rcv *ProductionOrderStageDevice) FieldMap() (fields []string, values []interface{}) {
@@ -45,12 +49,14 @@ func (rcv *ProductionOrderStageDevice) FieldMap() (fields []string, values []int
 		ProductionOrderStageDeviceFieldQuantity,
 		ProductionOrderStageDeviceFieldProcessStatus,
 		ProductionOrderStageDeviceFieldStatus,
-		ProductionOrderStageDeviceFieldResponsible,
 		ProductionOrderStageDeviceFieldSettings,
 		ProductionOrderStageDeviceFieldNote,
 		ProductionOrderStageDeviceFieldCreatedAt,
 		ProductionOrderStageDeviceFieldUpdatedAt,
 		ProductionOrderStageDeviceFieldDeletedAt,
+		ProductionOrderStageDeviceFieldResponsible,
+		ProductionOrderStageDeviceFieldEstimatedCompleteAt,
+		ProductionOrderStageDeviceFieldAssignedQuantity,
 	}
 
 	values = []interface{}{
@@ -60,12 +66,14 @@ func (rcv *ProductionOrderStageDevice) FieldMap() (fields []string, values []int
 		&rcv.Quantity,
 		&rcv.ProcessStatus,
 		&rcv.Status,
-		&rcv.Responsible,
 		&rcv.Settings,
 		&rcv.Note,
 		&rcv.CreatedAt,
 		&rcv.UpdatedAt,
 		&rcv.DeletedAt,
+		&rcv.Responsible,
+		&rcv.EstimatedCompleteAt,
+		&rcv.AssignedQuantity,
 	}
 
 	return

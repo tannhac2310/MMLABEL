@@ -40,8 +40,8 @@ type Service interface {
 	Create(ctx context.Context, opt *CreateProductionOrderStageDeviceOpts) (string, error)
 	Deletes(ctx context.Context, ids []string) error
 	Find(ctx context.Context, opt *FindProductionOrderStageDeviceOpts) ([]*repository.ProductionOrderStageDeviceData, error)
+	FindEventLog(ctx context.Context, opt *FindEventLogOpts) ([]*repository.EventLogData, error)
 }
-
 type productionOrderStageDeviceService struct {
 	productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo
 }

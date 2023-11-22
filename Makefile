@@ -40,6 +40,8 @@ run-init-bucket:
 test-unit:
 	go test ./pkg/... -cover -covermode=count -coverprofile=cover.out -coverpkg=./pkg/...
 	go tool cover -func=cover.out
+db:
+	 make run-clean-db && make run-migrate && go run tools/gen-model.go
 
 TEST_FILE=.
 test:
