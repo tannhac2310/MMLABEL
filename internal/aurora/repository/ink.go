@@ -3,11 +3,12 @@ package repository
 import (
 	"context"
 	"fmt"
+	"strings"
+	"time"
+
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
-	"strings"
-	"time"
 )
 
 type SearchInkOpts struct {
@@ -118,7 +119,7 @@ func (i *SearchInkOpts) buildQuery(isCount bool) (string, []interface{}) {
 		WHERE TRUE %s AND b.deleted_at IS NULL`, b.TableName(), joins, conds), args
 	}
 
-	order := " ORDER BY b.id DESC "
+	order := " ORDER BY b.created_at DESC "
 	if i.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", i.Sort.By, i.Sort.Order)
 	}
