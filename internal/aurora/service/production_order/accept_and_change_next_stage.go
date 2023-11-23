@@ -53,14 +53,16 @@ func (c *productionOrderService) AcceptAndChangeNextStage(ctx context.Context, i
 				return fmt.Errorf("c.productionOrderStageRepo.Update: %w", err)
 			}
 		}
-
-		model := firstNoneStages[0]
-		model.Status = enum.ProductionOrderStageStatusReception
-		err = c.productionOrderStageRepo.Update(ctx2, model)
-		model.ReceptionAt = cockroach.Time(time.Now()) // cap nhat ngay nhan san pham
-		if err != nil {
-			return fmt.Errorf("c.productionOrderStageRepo.Update: %w", err)
+		if len(firstNoneStages) > 0 {
+			model := firstNoneStages[0]
+			model.Status = enum.ProductionOrderStageStatusReception
+			err = c.productionOrderStageRepo.Update(ctx2, model)
+			model.ReceptionAt = cockroach.Time(time.Now()) // cap nhat ngay nhan san pham
+			if err != nil {
+				return fmt.Errorf("c.productionOrderStageRepo.Update: %w", err)
+			}
 		}
+
 		return nil
 	})
 	if err != nil {
