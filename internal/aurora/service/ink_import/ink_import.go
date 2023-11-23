@@ -133,7 +133,7 @@ func (p inkImportService) Create(ctx context.Context, opt *CreateInkImportOpts) 
 				// todo check if import status is completed, insert to ink table
 				// insert into ink table
 				err3 := p.inkRepo.Insert(c, &model.Ink{
-					ID:             idutil.ULIDNow(),
+					ID:             inkID,
 					ImportID:       cockroach.String(importId),
 					Name:           inkImportDetail.Name,
 					Code:           inkImportDetail.Code,
@@ -250,6 +250,7 @@ func (p inkImportService) Find(ctx context.Context, opt *FindInkImportOpts, sort
 			CreatedBy:       inkImport.CreatedBy,
 			InkImportDetail: nil,
 		}
+		fmt.Println("=======================>>>>>>", inkImport.ID)
 		inkImportDetails, err := p.inkImportDetailRepo.Search(ctx, &repository.SearchInkImportDetailOpts{
 			InkImportID: inkImport.ID,
 			Limit:       10000,
