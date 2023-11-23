@@ -90,7 +90,7 @@ func (r *productionOrderStagesRepo) SoftDeletes(ctx context.Context, ids []strin
 
 	cmd, err := cockroach.Exec(ctx, sql, strings.Join(ids, ","))
 	if err != nil {
-		return fmt.Errorf("cockroach.Exec: %w", err)
+		return fmt.Errorf("production_order_stages: cockroach.Exec: %w", err)
 	}
 	if cmd.RowsAffected() == 0 {
 		return fmt.Errorf("not found any records to delete")

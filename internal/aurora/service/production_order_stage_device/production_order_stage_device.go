@@ -94,6 +94,7 @@ func (p productionOrderStageDeviceService) Find(ctx context.Context, opt *FindPr
 	productionOrderStageDevices, err := p.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
 		ProductionOrderStageID: opt.ProductionOrderStageID,
 		ProductionOrderID:      opt.ProductionOrderID,
+		Limit:                  10000,
 	})
 	if err != nil {
 		return nil, err

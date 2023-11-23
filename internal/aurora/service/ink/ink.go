@@ -215,6 +215,7 @@ func (p inkService) calculateInkExportQuantity(ctx context.Context, inkID string
 	// get ink export detail
 	inkExportDetails, err := p.inkExportDetailRepo.Search(ctx, &repository.SearchInkExportDetailOpts{
 		InkID: inkID,
+		Limit: 10000,
 	})
 	if err != nil {
 		return 0, err
@@ -232,7 +233,8 @@ func (p inkService) calculateInkExportQuantity(ctx context.Context, inkID string
 func (p inkService) calculateInkImportQuantity(ctx context.Context, inkID string) (float64, error) {
 	// get ink import detail
 	inkImportDetails, err := p.inkImportDetailRepo.Search(ctx, &repository.SearchInkImportDetailOpts{
-		ID: inkID, // when importing, I write ink_import_detail.ID = ink.ID
+		ID:    inkID, // when importing, I write ink_import_detail.ID = ink.ID
+		Limit: 10000,
 	})
 	if err != nil {
 		return 0, err
@@ -251,6 +253,7 @@ func (p inkService) calculateInkReturnQuantity(ctx context.Context, inkID string
 	// get ink return detail
 	inkReturnDetails, err := p.inkReturnDetailRepo.Search(ctx, &repository.SearchInkReturnDetailOpts{
 		InkID: inkID,
+		Limit: 10000,
 	})
 	if err != nil {
 		return 0, err

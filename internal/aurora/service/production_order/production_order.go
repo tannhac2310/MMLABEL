@@ -57,6 +57,7 @@ func (c *productionOrderService) deleteProductionOrderStage(ctx context.Context,
 	// find production order stage by production order id
 	productionOrderStages, err := c.productionOrderStageRepo.Search(ctx, &repository.SearchProductionOrderStagesOpts{
 		ProductionOrderID: productionId,
+		Limit:             10000,
 	})
 	if err != nil {
 		return err
