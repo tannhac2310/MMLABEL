@@ -109,6 +109,7 @@ func (p inkReturnService) Create(ctx context.Context, opt *CreateInkReturnOpts) 
 			inkExportDetail, err := p.inkExportDetailRepo.Search(c, &repository.SearchInkExportDetailOpts{
 				InkExportID: inkReturnDetail.InkExportID,
 				InkID:       inkReturnDetail.InkID,
+				Limit:       1000,
 			})
 			if err != nil {
 				return fmt.Errorf("phiếu xuất kho và màu mực không tồn tại: %w", err)
