@@ -27,10 +27,8 @@ func (c *productionOrderService) EditProductionOrder(ctx context.Context, opt *E
 
 		// write code to edit custom field value
 		// delete all custom field value with entity type is production order and entity id is production order id
-		err := c.customFieldRepo.DeleteByEntity(ctx2, enum.CustomFieldTypeProductionOrder, opt.ID)
-		if err != nil {
-			return fmt.Errorf("c.customFieldRepo.DeleteByEntity: %w", err)
-		}
+		_ = c.customFieldRepo.DeleteByEntity(ctx2, enum.CustomFieldTypeProductionOrder, opt.ID)
+
 		// then insert new custom field value
 		for field, customFieldValue := range opt.CustomData {
 			err = c.customFieldRepo.Insert(ctx2, &model.CustomField{
