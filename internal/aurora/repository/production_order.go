@@ -80,7 +80,10 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool) (string, []interfa
 	}
 	if s.Name != "" {
 		args = append(args, "%"+s.Name+"%")
-		conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.ProductionOrderFieldName, len(args))
+		conds += fmt.Sprintf(" AND ( b.%[2]s ILIKE $%[1]d OR  b.%[3]s ILIKE $%[1]d OR b.%[4]s ILIKE $%[1]d OR b.%[5]s ILIKE $%[1]d OR b.%[6]s ILIKE $%[1]d) ",
+			len(args), model.ProductionOrderFieldName, model.ProductionOrderFieldProductCode, model.ProductionOrderFieldProductName, model.ProductionOrderFieldCustomerID,
+			model.ProductionOrderFieldSalesID,
+		)
 	}
 	if s.CustomerID != "" {
 		args = append(args, s.CustomerID)

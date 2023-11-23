@@ -76,7 +76,7 @@ func (s *SearchInkReturnOpts) buildQuery(isCount bool) (string, []interface{}) {
 
 	if s.Name != "" {
 		args = append(args, "%"+s.Name+"%")
-		conds += fmt.Sprintf(" AND( b.%[1]s ILIKE $%[3]d OR  b.%[2]s ILIKE $%[3]d)", model.InkReturnFieldName, model.InkReturnFieldCode, len(args))
+		conds += fmt.Sprintf(" AND ( b.%[1]s ILIKE $%[3]d OR  b.%[2]s ILIKE $%[3]d)", model.InkReturnFieldName, model.InkReturnFieldCode, len(args))
 	}
 
 	if s.Status > 0 {

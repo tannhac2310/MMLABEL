@@ -74,7 +74,7 @@ func (s *SearchInkImportOpts) buildQuery(isCount bool) (string, []interface{}) {
 
 	if s.Name != "" {
 		args = append(args, "%"+s.Name+"%")
-		conds += fmt.Sprintf(" AND( b.%[1]s ILIKE $%[3]d OR  b.%[2]s ILIKE $%[3]d)", model.InkImportFieldName, model.InkImportFieldCode, len(args))
+		conds += fmt.Sprintf(" AND ( b.%[1]s ILIKE $%[3]d OR  b.%[2]s ILIKE $%[3]d)", model.InkImportFieldName, model.InkImportFieldCode, len(args))
 	}
 
 	if s.Status > 0 {
