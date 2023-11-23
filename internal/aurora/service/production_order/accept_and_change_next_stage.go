@@ -12,7 +12,6 @@ import (
 func (c *productionOrderService) AcceptAndChangeNextStage(ctx context.Context, id string) error {
 	// find all stage of
 	lastDoingStages, err := c.productionOrderStageRepo.Search(ctx, &repository.SearchProductionOrderStagesOpts{
-		IDs:                        nil,
 		ProductionOrderID:          id,
 		ProductionOrderStageStatus: enum.ProductionOrderStageStatusProductionCompletion,
 		Limit:                      1,
@@ -27,7 +26,6 @@ func (c *productionOrderService) AcceptAndChangeNextStage(ctx context.Context, i
 	}
 
 	firstNoneStages, err := c.productionOrderStageRepo.Search(ctx, &repository.SearchProductionOrderStagesOpts{
-		IDs:                        nil,
 		ProductionOrderID:          id,
 		ProductionOrderStageStatus: enum.ProductionOrderStageStatusWaiting,
 		Limit:                      1,
