@@ -1,11 +1,11 @@
 name: "Aurora"
 port: ":5100"
 env: "staging"
-debug: true
+debug: false
 logger:
-  logLvl: "debug"
-  logReq: true
-  logResp: true
+  logLvl: "info"
+  logReq: false
+  logResp: false
 statsEnabled: true
 remoteProfiler:
   enabled: true
