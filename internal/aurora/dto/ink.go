@@ -240,6 +240,7 @@ type InkReturn struct {
 type InkReturnDetail struct {
 	ID          string                 `json:"id"`
 	InkID       string                 `json:"inkID"`
+	InkData     *InkDataExportDetail   `json:"inkData"`
 	InkExportID string                 `json:"inkExportID"`
 	Quantity    float64                `json:"quantity"`
 	ColorDetail map[string]interface{} `json:"colorDetail"`

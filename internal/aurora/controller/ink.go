@@ -101,9 +101,21 @@ func (s inkController) FindInkReturn(c *gin.Context) {
 func toInkReturnResp(f *ink_return.InkReturnData) *dto.InkReturn {
 	inkReturnDetail := make([]*dto.InkReturnDetail, 0, len(f.InkReturnDetail))
 	for _, k := range f.InkReturnDetail {
+		d := k.InkData
+		inkData := &dto.InkDataExportDetail{
+			Name:         d.Name,
+			Code:         d.Code,
+			ProductCodes: d.ProductCodes,
+			Position:     d.Position,
+			Location:     d.Location,
+			Manufacturer: d.Manufacturer,
+			ColorDetail:  d.ColorDetail,
+		}
+
 		inkReturnDetail = append(inkReturnDetail, &dto.InkReturnDetail{
 			ID:          k.ID,
 			InkID:       k.InkID,
+			InkData:     inkData,
 			InkExportID: k.InkExportID,
 			Quantity:    k.Quantity,
 			Description: k.Description,

@@ -164,6 +164,7 @@ type InkReturnDetail struct {
 	ID          string
 	InkReturnID string
 	InkID       string
+	InkData     *repository.InkData
 	InkExportID string
 	Quantity    float64
 	ColorDetail map[string]interface{}
@@ -189,6 +190,7 @@ func (p inkReturnService) Find(ctx context.Context, opt *FindInkReturnOpts, sort
 	results := make([]*InkReturnData, 0)
 	// write code to get ink_import_detail
 	for _, inkReturn := range inkReturns {
+
 		data := &InkReturnData{
 			ID:              inkReturn.ID,
 			Name:            inkReturn.Name,
@@ -211,8 +213,11 @@ func (p inkReturnService) Find(ctx context.Context, opt *FindInkReturnOpts, sort
 		}
 		inkReturnDetailResults := make([]*InkReturnDetail, 0)
 		for _, inkReturnDetail := range inkReturnDetails {
+			// find inkdata
+			inkData, _ := p.inkRepo.FindByID(ctx, inkReturnDetail.InkID)
 			dataDetail := &InkReturnDetail{
 				ID:          inkReturnDetail.ID,
+				InkData:     inkData,
 				InkReturnID: inkReturnDetail.InkReturnID,
 				InkID:       inkReturnDetail.InkID,
 				InkExportID: inkReturnDetail.InkExportID,
