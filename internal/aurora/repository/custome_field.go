@@ -40,7 +40,7 @@ func (r *customFieldsRepo) Update(ctx context.Context, e *model.CustomField) err
 func (r *customFieldsRepo) DeleteByEntity(ctx context.Context, entityType enum.CustomFieldType, entityId string) error {
 	sql := `UPDATE custom_fields
 		SET deleted_at = NOW()
-		WHERE entity_type = $1 AND entity_id = $2 AND field = $3`
+		WHERE entity_type = $1 AND entity_id = $2`
 
 	cmd, err := cockroach.Exec(ctx, sql, entityType, entityId)
 	if err != nil {
