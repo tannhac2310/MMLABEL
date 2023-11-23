@@ -249,6 +249,7 @@ func (s inkController) FindInkExportByPO(c *gin.Context) {
 		exportDetailResp = append(exportDetailResp, &dto.InkExportDetail{
 			ID:          f.ID,
 			InkID:       f.InkID,
+			InkExportID: f.InkExportID,
 			InkData:     inkData,
 			Quantity:    f.Quantity,
 			Description: f.Description,

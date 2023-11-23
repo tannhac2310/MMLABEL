@@ -161,6 +161,7 @@ type InkDataExportDetail struct {
 type InkExportDetail struct {
 	ID          string                 `json:"id"`
 	InkID       string                 `json:"inkID"`
+	InkExportID string                 `json:"inkExportID"`
 	InkData     *InkDataExportDetail   `json:"inkData"`
 	Quantity    float64                `json:"quantity"`
 	Description string                 `json:"description"`
