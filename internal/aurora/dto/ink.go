@@ -181,17 +181,25 @@ type InkExportFilter struct {
 	Name string `json:"name"`
 	ID   string `json:"id"`
 }
+
+type ProductionOrderData struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	ProductCode string `json:"productCode"`
+	ProductName string `json:"productName"`
+}
 type InkExport struct {
-	ID                string                     `json:"id"`
-	Name              string                     `json:"name"`
-	Code              string                     `json:"code"`
-	ProductionOrderID string                     `json:"productionOrderID"`
-	Description       string                     `json:"description"`
-	Data              map[string]interface{}     `json:"data"`
-	Status            enum.InventoryCommonStatus `json:"status"`
-	CreatedBy         string                     `json:"createdBy"`
-	CreatedAt         time.Time                  `json:"createdAt"`
-	InkExportDetail   []*InkExportDetail         `json:"inkExportDetail"`
+	ID                  string                     `json:"id"`
+	Name                string                     `json:"name"`
+	Code                string                     `json:"code"`
+	ProductionOrderID   string                     `json:"productionOrderID"`
+	ProductionOrderData *ProductionOrderData       `json:"productionOrderData"`
+	Description         string                     `json:"description"`
+	Data                map[string]interface{}     `json:"data"`
+	Status              enum.InventoryCommonStatus `json:"status"`
+	CreatedBy           string                     `json:"createdBy"`
+	CreatedAt           time.Time                  `json:"createdAt"`
+	InkExportDetail     []*InkExportDetail         `json:"inkExportDetail"`
 }
 type FindInkExportsResponse struct {
 	InkExport []*InkExport `json:"inkExport"`

@@ -55,6 +55,7 @@ type inkExportService struct {
 	inkExportRepo       repository.InkExportRepo
 	inkExportDetailRepo repository.InkExportDetailRepo
 	inkRepo             repository.InkRepo
+	productionOrderRepo repository.ProductionOrderRepo
 }
 
 func (p inkExportService) FindImportDetailByPOID(ctx context.Context, poID string) ([]*InkExportDetail, error) {
@@ -160,17 +161,18 @@ func (p inkExportService) Delete(ctx context.Context, id string) error {
 }
 
 type InkExportData struct {
-	ID                string
-	ProductionOrderID string
-	Code              string
-	Name              string
-	Status            enum.InventoryCommonStatus
-	Description       string
-	Data              map[string]interface{}
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
-	CreatedBy         string
-	InkExportDetail   []*InkExportDetail
+	ID                  string
+	ProductionOrderID   string
+	Code                string
+	Name                string
+	Status              enum.InventoryCommonStatus
+	Description         string
+	Data                map[string]interface{}
+	CreatedAt           time.Time
+	UpdatedAt           time.Time
+	CreatedBy           string
+	InkExportDetail     []*InkExportDetail
+	ProductionOrderData *repository.ProductionOrderData
 }
 
 type InkExportDetail struct {
@@ -203,17 +205,18 @@ func (p inkExportService) Find(ctx context.Context, opt *FindInkExportOpts, sort
 	// write code to get ink_export_detail
 	for _, inkExport := range inkExports {
 		data := &InkExportData{
-			ID:                inkExport.ID,
-			ProductionOrderID: inkExport.ProductionOrderID,
-			Code:              inkExport.Code,
-			Name:              inkExport.Name,
-			Status:            inkExport.Status,
-			Description:       inkExport.Description.String,
-			Data:              inkExport.Data,
-			CreatedAt:         inkExport.CreatedAt,
-			UpdatedAt:         inkExport.UpdatedAt,
-			CreatedBy:         inkExport.CreatedBy,
-			InkExportDetail:   nil,
+			ID:                  inkExport.ID,
+			ProductionOrderID:   inkExport.ProductionOrderID,
+			Code:                inkExport.Code,
+			Name:                inkExport.Name,
+			Status:              inkExport.Status,
+			Description:         inkExport.Description.String,
+			Data:                inkExport.Data,
+			CreatedAt:           inkExport.CreatedAt,
+			UpdatedAt:           inkExport.UpdatedAt,
+			CreatedBy:           inkExport.CreatedBy,
+			InkExportDetail:     nil,
+			ProductionOrderData: nil,
 		}
 		inkExportDetails, err := p.inkExportDetailRepo.Search(ctx, &repository.SearchInkExportDetailOpts{
 			InkExportID: inkExport.ID,
@@ -240,17 +243,36 @@ func (p inkExportService) Find(ctx context.Context, opt *FindInkExportOpts, sort
 			inkExportDetailResults = append(inkExportDetailResults, dataDetail)
 		}
 		data.InkExportDetail = inkExportDetailResults
+
+		// find production order data
+		productionOrderData, err := p.productionOrderRepo.Search(ctx, &repository.SearchProductionOrdersOpts{
+			IDs:    []string{inkExport.ProductionOrderID},
+			Limit:  1,
+			Offset: 0,
+		})
+		if err != nil {
+			return nil, nil, err
+		}
+		if len(productionOrderData) == 1 {
+			data.ProductionOrderData = productionOrderData[0]
+		}
 		results = append(results, data)
 	}
 	total, err := p.inkExportRepo.Count(ctx, filter)
 	return results, total, nil
 }
 
-func NewService(inkExportRepo repository.InkExportRepo, inkExportDetailRepo repository.InkExportDetailRepo, inkRepo repository.InkRepo) Service {
+func NewService(
+	inkExportRepo repository.InkExportRepo,
+	inkExportDetailRepo repository.InkExportDetailRepo,
+	inkRepo repository.InkRepo,
+	productionOrderRepo repository.ProductionOrderRepo,
+) Service {
 	return &inkExportService{
 		inkExportRepo:       inkExportRepo,
 		inkExportDetailRepo: inkExportDetailRepo,
 		inkRepo:             inkRepo,
+		productionOrderRepo: productionOrderRepo,
 	}
 
 }

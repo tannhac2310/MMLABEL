@@ -142,7 +142,7 @@ func (s inkController) FindInkExport(c *gin.Context) {
 	inkExports, cnt, err := s.inkExportService.Find(c, &ink_export.FindInkExportOpts{
 		Name: req.Filter.Name,
 	}, &repository.Sort{
-		Order: repository.SortOrderASC,
+		Order: repository.SortOrderDESC,
 		By:    "ID",
 	}, req.Paging.Limit, req.Paging.Offset)
 
@@ -183,17 +183,26 @@ func toInkExportResp(f *ink_export.InkExportData) *dto.InkExport {
 			Data:        k.Data,
 		})
 	}
+
+	po := f.ProductionOrderData
+	productionOrderData := &dto.ProductionOrderData{
+		ID:          po.ID,
+		Name:        po.Name,
+		ProductCode: po.ProductCode,
+		ProductName: po.ProductName,
+	}
 	return &dto.InkExport{
-		ID:                f.ID,
-		Name:              f.Name,
-		Code:              f.Code,
-		ProductionOrderID: f.ProductionOrderID,
-		Description:       f.Description,
-		Data:              f.Data,
-		Status:            f.Status,
-		CreatedBy:         f.CreatedBy,
-		CreatedAt:         f.CreatedAt,
-		InkExportDetail:   inkExportDetail,
+		ID:                  f.ID,
+		Name:                f.Name,
+		Code:                f.Code,
+		ProductionOrderID:   f.ProductionOrderID,
+		Description:         f.Description,
+		Data:                f.Data,
+		Status:              f.Status,
+		CreatedBy:           f.CreatedBy,
+		CreatedAt:           f.CreatedAt,
+		InkExportDetail:     inkExportDetail,
+		ProductionOrderData: productionOrderData,
 	}
 
 }
