@@ -79,8 +79,10 @@ func (i *SearchInkExportOpts) buildQuery(isCount bool) (string, []interface{}) {
 	}
 
 	if i.Name != "" {
+		joins += fmt.Sprintf(" LEFT JOIN production_orders AS po ON po.id = b.%s", model.InkExportFieldProductionOrderID)
 		args = append(args, "%"+i.Name+"%")
-		conds += fmt.Sprintf(" AND( b.%[1]s ILIKE $%[3]d OR  b.%[2]s ILIKE $%[3]d)", model.InkExportFieldName, model.InkExportFieldCode, len(args))
+		conds += fmt.Sprintf(" AND( b.%[2]s ILIKE $%[1]d OR  b.%[3]s ILIKE $%[1]d OR po.%[4]s ILIKE $%[1]d OR  po.%[5]s ILIKE $%[1]d )", len(args),
+			model.InkExportFieldName, model.InkExportFieldCode, model.ProductionOrderFieldName, model.ProductionOrderFieldProductName)
 	}
 
 	if i.Status > 0 {
