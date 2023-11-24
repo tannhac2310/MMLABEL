@@ -11,12 +11,13 @@ import (
 )
 
 type EditProductionOrderStageDeviceOpts struct {
-	ID            string
-	DeviceID      string
-	Quantity      int64
-	ProcessStatus enum.ProductionOrderStageDeviceStatus
-	Status        enum.CommonStatus
-	Responsible   []string
+	ID                string
+	DeviceID          string
+	Quantity          int64
+	ProcessStatus     enum.ProductionOrderStageDeviceStatus
+	Status            enum.CommonStatus
+	Responsible       []string
+	NotUpdateQuantity bool
 }
 
 type CreateProductionOrderStageDeviceOpts struct {
@@ -51,7 +52,10 @@ func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditPr
 
 	updater := cockroach.NewUpdater(table.TableName(), model.ProductionOrderStageFieldID, opt.ID)
 	updater.Set(model.ProductionOrderStageDeviceFieldDeviceID, opt.DeviceID)
-	updater.Set(model.ProductionOrderStageDeviceFieldQuantity, opt.Quantity)
+	if !opt.NotUpdateQuantity {
+		updater.Set(model.ProductionOrderStageDeviceFieldQuantity, opt.Quantity)
+	}
+
 	updater.Set(model.ProductionOrderStageDeviceFieldProcessStatus, opt.ProcessStatus)
 	updater.Set(model.ProductionOrderStageDeviceFieldStatus, opt.Status)
 	updater.Set(model.ProductionOrderStageDeviceFieldResponsible, opt.Responsible)

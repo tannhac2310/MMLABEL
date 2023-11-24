@@ -92,12 +92,13 @@ func (s productionOrderStageDeviceController) EditProductionOrderStageDevice(c *
 	}
 
 	err = s.productionOrderStageDeviceService.Edit(c, &production_order_stage_device.EditProductionOrderStageDeviceOpts{
-		ID:            req.ID,
-		DeviceID:      req.DeviceID,
-		Quantity:      req.Quantity,
-		ProcessStatus: req.ProcessStatus,
-		Status:        req.Status,
-		Responsible:   req.Responsible,
+		ID:                req.ID,
+		DeviceID:          req.DeviceID,
+		Quantity:          req.Quantity,
+		ProcessStatus:     req.ProcessStatus,
+		Status:            req.Status,
+		Responsible:       req.Responsible,
+		NotUpdateQuantity: req.NotUpdateQuantity,
 	})
 	if err != nil {
 		transportutil.Error(c, err)
