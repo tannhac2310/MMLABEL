@@ -13,14 +13,18 @@ const (
 	ProductionOrderStageDeviceStatusPause
 	ProductionOrderStageDeviceStatusComplete
 	ProductionOrderStageDeviceStatusFailed
+	ProductionOrderStageDeviceStatusTestProduce
+	ProductionOrderStageDeviceStatusCompleteTestProduce
 )
 
 var ProductionOrderStageDeviceStatusName = map[ProductionOrderStageDeviceStatus]string{
-	ProductionOrderStageDeviceStatusNone:     "",          // chua bat dau
-	ProductionOrderStageDeviceStatusStart:    "start",     // bat dau sx
-	ProductionOrderStageDeviceStatusPause:    "pause",     // tam dung sx
-	ProductionOrderStageDeviceStatusComplete: "completed", // hoan thanh sx
-	ProductionOrderStageDeviceStatusFailed:   "failed",    // loi
+	ProductionOrderStageDeviceStatusNone:                "",                      // chua bat dau
+	ProductionOrderStageDeviceStatusStart:               "start",                 // bat dau sx
+	ProductionOrderStageDeviceStatusPause:               "pause",                 // tam dung sx
+	ProductionOrderStageDeviceStatusComplete:            "completed",             // hoan thanh sx
+	ProductionOrderStageDeviceStatusFailed:              "failed",                // loi
+	ProductionOrderStageDeviceStatusTestProduce:         "test_produce",          // test_produce
+	ProductionOrderStageDeviceStatusCompleteTestProduce: "complete_test_produce", // complete_test_produce
 }
 
 var ProductionOrderStageDeviceStatusValue = func() map[string]ProductionOrderStageDeviceStatus {
