@@ -103,7 +103,7 @@ func (s departmentController) FindDepartments(c *gin.Context) {
 	departments, cnt, err := s.departmentService.FindDepartments(c, &department.FindDepartmentsOpts{
 		Name: req.Filter.Name,
 	}, &repository.Sort{
-		Order: repository.SortOrderASC,
+		Order: repository.SortOrderDESC,
 		By:    "ID",
 	}, req.Paging.Limit, req.Paging.Offset)
 	if err != nil {

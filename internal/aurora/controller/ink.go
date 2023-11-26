@@ -80,7 +80,7 @@ func (s inkController) FindInkReturn(c *gin.Context) {
 	inkReturns, cnt, err := s.inkReturnService.Find(c, &ink_return.FindInkReturnOpts{
 		Name: req.Filter.Name,
 	}, &repository.Sort{
-		Order: repository.SortOrderASC,
+		Order: repository.SortOrderDESC,
 		By:    "ID",
 	}, req.Paging.Limit, req.Paging.Offset)
 
@@ -295,7 +295,7 @@ func (s inkController) FindInkImport(c *gin.Context) {
 		ID:     req.Filter.ID,
 		Status: req.Filter.Status,
 	}, &repository.Sort{
-		Order: repository.SortOrderASC,
+		Order: repository.SortOrderDESC,
 		By:    "ID",
 	}, req.Paging.Limit, req.Paging.Offset)
 
@@ -407,7 +407,7 @@ func (s inkController) FindInk(c *gin.Context) {
 		ID:     req.Filter.ID,
 		Status: req.Filter.Status,
 	}, &repository.Sort{
-		Order: repository.SortOrderASC,
+		Order: repository.SortOrderDESC,
 		By:    "ID",
 	}, req.Paging.Limit, req.Paging.Offset)
 

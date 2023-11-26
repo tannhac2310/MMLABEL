@@ -103,7 +103,7 @@ func (s deviceController) FindDevices(c *gin.Context) {
 	devices, cnt, err := s.deviceService.FindDevices(c, &device.FindDevicesOpts{
 		Name: req.Filter.Name,
 	}, &repository.Sort{
-		Order: repository.SortOrderASC,
+		Order: repository.SortOrderDESC,
 		By:    "ID",
 	}, req.Paging.Limit, req.Paging.Offset)
 	if err != nil {

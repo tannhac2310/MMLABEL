@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/product_quality"
 	"os"
 
 	"github.com/casbin/casbin/v2"
@@ -136,6 +137,7 @@ func Run(ctx context.Context, configPath string) {
 			repository2.NewInkReturnRepo,
 			repository2.NewInkReturnDetailRepo,
 			repository2.NewHistoryRepo,
+			repository2.NewProductQualityRepo,
 		),
 		// services
 		fx.Provide(
@@ -154,6 +156,7 @@ func Run(ctx context.Context, configPath string) {
 			ink_import.NewService,
 			ink_export.NewService,
 			ink_return.NewService,
+			product_quality.NewService,
 		),
 		// nats streaming
 		fx.Provide(func(cfg *pkgConfig.BaseConfig, zapLogger *zap.Logger) (nats.BusFactory, error) {
@@ -189,6 +192,7 @@ func Run(ctx context.Context, configPath string) {
 			controller.RegisterProductionOrderStageController,
 			controller.RegisterProductionOrderStageDeviceController,
 			controller.RegisterInkController,
+			controller.RegisterProductQualityController,
 		),
 	}
 

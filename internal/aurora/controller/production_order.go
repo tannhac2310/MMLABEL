@@ -171,7 +171,7 @@ func (s productionOrderController) FindProductionOrders(c *gin.Context) {
 		PlannedDateFrom: req.Filter.PlannedDateFrom,
 		PlannedDateTo:   req.Filter.PlannedDateTo,
 	}, &repository.Sort{
-		Order: repository.SortOrderASC,
+		Order: repository.SortOrderDESC,
 		By:    "ID",
 	}, req.Paging.Limit, req.Paging.Offset)
 	if err != nil {

@@ -113,7 +113,7 @@ func (s stageController) FindStages(c *gin.Context) {
 	stages, cnt, err := s.stageService.FindStages(c, &stage.FindStagesOpts{
 		Name: req.Filter.Name,
 	}, &repository.Sort{
-		Order: repository.SortOrderASC,
+		Order: repository.SortOrderDESC,
 		By:    "ID",
 	}, req.Paging.Limit, req.Paging.Offset)
 	if err != nil {
