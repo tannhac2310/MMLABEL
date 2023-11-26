@@ -230,19 +230,28 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 				Note:                   device.Note.String,
 			})
 		}
+
 		orderStage = append(orderStage, &dto.OrderStage{
-			ID:                  item.ID,
-			StageID:             item.StageID,
-			EstimatedStartAt:    item.EstimatedStartAt.Time,
-			EstimatedCompleteAt: item.EstimatedCompleteAt.Time,
-			StartedAt:           item.StartedAt.Time,
-			CompletedAt:         item.CompletedAt.Time,
-			Status:              item.Status,
-			Condition:           item.Condition.String,
-			Note:                item.Note.String,
-			Data:                item.Data,
-			OrderStageDevices:   productionOrderStageDevice,
-			Sorting:             item.Sorting,
+			ID:                     item.ID,
+			ProductionOrderID:      item.ProductionOrderID,
+			StageID:                item.StageID,
+			StartedAt:              item.StartedAt.Time,
+			CompletedAt:            item.CompletedAt.Time,
+			Status:                 item.Status,
+			Condition:              item.Condition.String,
+			Note:                   item.Note.String,
+			Data:                   item.Data,
+			CreatedAt:              item.CreatedAt,
+			UpdatedAt:              item.UpdatedAt,
+			WaitingAt:              item.WaitingAt.Time,
+			ReceptionAt:            item.ReceptionAt.Time,
+			ProductionStartAt:      item.ProductionStartAt.Time,
+			ProductionCompletionAt: item.ProductionCompletionAt.Time,
+			ProductDeliveryAt:      item.ProductDeliveryAt.Time,
+			EstimatedStartAt:       item.EstimatedStartAt.Time,
+			EstimatedCompleteAt:    item.EstimatedCompleteAt.Time,
+			Sorting:                item.Sorting,
+			OrderStageDevices:      productionOrderStageDevice,
 		})
 	}
 	return &dto.ProductionOrder{

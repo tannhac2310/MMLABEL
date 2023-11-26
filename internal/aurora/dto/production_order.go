@@ -91,19 +91,26 @@ type User struct {
 	Address string `json:"address"`
 }
 type OrderStage struct {
-	ID                  string                          `json:"id"`
-	Name                string                          `json:"name"`
-	StageID             string                          `json:"stageID"`
-	EstimatedStartAt    time.Time                       `json:"estimatedStartAt"`
-	EstimatedCompleteAt time.Time                       `json:"estimatedCompleteAt"`
-	StartedAt           time.Time                       `json:"startedAt"`
-	CompletedAt         time.Time                       `json:"completedAt"`
-	Status              enum.ProductionOrderStageStatus `json:"status"`
-	Condition           string                          `json:"condition"`
-	Note                string                          `json:"note"`
-	Data                map[string]interface{}          `json:"data"`
-	Sorting             int16                           `json:"sorting"`
-	OrderStageDevices   []*OrderStageDevice             `json:"order_stage_devices"`
+	ID                     string                          `json:"ID"`
+	ProductionOrderID      string                          `json:"productionOrderID"`
+	StageID                string                          `json:"stageID"`
+	StartedAt              time.Time                       `json:"startedAt"`
+	CompletedAt            time.Time                       `json:"completedAt"`
+	Status                 enum.ProductionOrderStageStatus `json:"status"`
+	Condition              string                          `json:"condition"`
+	Note                   string                          `json:"note"`
+	Data                   map[string]interface{}          `json:"data"`
+	CreatedAt              time.Time                       `json:"createdAt"`
+	UpdatedAt              time.Time                       `json:"updatedAt"`
+	WaitingAt              time.Time                       `json:"waitingAt"`
+	ReceptionAt            time.Time                       `json:"receptionAt"`
+	ProductionStartAt      time.Time                       `json:"productionStartAt"`
+	ProductionCompletionAt time.Time                       `json:"productionCompletionAt"`
+	ProductDeliveryAt      time.Time                       `json:"productDeliveryAt"`
+	EstimatedStartAt       time.Time                       `json:"estimatedStartAt"`
+	EstimatedCompleteAt    time.Time                       `json:"estimatedCompleteAt"`
+	Sorting                int16                           `json:"sorting"`
+	OrderStageDevices      []*OrderStageDevice             `json:"orderStageDevices"`
 }
 
 type CreateOrderStage struct {
