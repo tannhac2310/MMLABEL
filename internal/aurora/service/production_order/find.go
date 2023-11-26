@@ -8,7 +8,12 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 )
 
-func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts *FindProductionOrdersOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error) {
+type Analysis struct {
+	Status enum.ProductionOrderStatus `json:"status"`
+	Count  int64                      `json:"count"`
+}
+
+func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts *FindProductionOrdersOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, []*Analysis, error) {
 	filter := &repository.SearchProductionOrdersOpts{
 		IDs:         opts.IDs,
 		CustomerID:  opts.CustomerID,
@@ -22,12 +27,12 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 	}
 	productionOrders, err := c.productionOrderRepo.Search(ctx, filter)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	total, err := c.productionOrderRepo.Count(ctx, filter)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	results := make([]*Data, 0, len(productionOrders))
@@ -39,7 +44,7 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 			Offset:            0,
 		})
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, err
 		}
 		stageData := make([]*ProductionOrderStageData, 0, len(stages))
 		// find production order stage device for each stage
@@ -58,14 +63,14 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 				for _, responsible := range stageDevice.Responsible {
 					user, err := c.userRepo.FindByID(ctx, responsible)
 					if err != nil {
-						return nil, nil, err
+						return nil, nil, nil, err
 					}
 					users = append(users, user)
 				}
 				stageDevice.ResponsibleObject = users
 			}
 			if err != nil {
-				return nil, nil, err
+				return nil, nil, nil, err
 			}
 			stageData = append(stageData, &ProductionOrderStageData{
 				ProductionOrderStage:       stage,
@@ -99,7 +104,18 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 			CustomData:           customFieldMap,
 		})
 	}
-	return results, total, nil
+
+	// analysis
+	analysis := make([]*Analysis, 0)
+	analysisData, err := c.productionOrderRepo.Analysis(ctx, filter)
+	for _, status := range analysisData {
+		analysis = append(analysis, &Analysis{
+			Status: status.Status,
+			Count:  status.Count,
+		})
+	}
+
+	return results, total, analysis, nil
 }
 
 type FindProductionOrdersOpts struct {

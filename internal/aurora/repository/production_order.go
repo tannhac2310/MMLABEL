@@ -16,6 +16,7 @@ type ProductionOrderRepo interface {
 	Update(ctx context.Context, e *model.ProductionOrder) error
 	SoftDelete(ctx context.Context, id string) error
 	Search(ctx context.Context, s *SearchProductionOrdersOpts) ([]*ProductionOrderData, error)
+	Analysis(ctx context.Context, s *SearchProductionOrdersOpts) ([]*Analysis, error)
 	Count(ctx context.Context, s *SearchProductionOrdersOpts) (*CountResult, error)
 }
 
@@ -24,6 +25,22 @@ type productionOrdersRepo struct {
 
 func NewProductionOrderRepo() ProductionOrderRepo {
 	return &productionOrdersRepo{}
+}
+
+type Analysis struct {
+	Status enum.ProductionOrderStatus `db:"status"`
+	Count  int64                      `db:"count"`
+}
+
+func (r *productionOrdersRepo) Analysis(ctx context.Context, s *SearchProductionOrdersOpts) ([]*Analysis, error) {
+	data := make([]*Analysis, 0)
+	sql, args := s.buildQuery(false, true)
+	err := cockroach.Select(ctx, sql, args...).ScanAll(&data)
+	if err != nil {
+		return nil, fmt.Errorf("cockroach.Analysis: %w", err)
+	}
+
+	return data, nil
 }
 
 func (r *productionOrdersRepo) Insert(ctx context.Context, e *model.ProductionOrder) error {
@@ -58,18 +75,20 @@ func (r *productionOrdersRepo) SoftDelete(ctx context.Context, id string) error 
 
 // SearchProductionOrdersOpts all params is options
 type SearchProductionOrdersOpts struct {
-	IDs         []string
-	CustomerID  string
-	ProductCode string
-	ProductName string
-	Name        string
-	Status      enum.ProductionOrderStatus
-	Limit       int64
-	Offset      int64
-	Sort        *Sort
+	IDs             []string
+	CustomerID      string
+	ProductCode     string
+	ProductName     string
+	Name            string
+	PlannedDateFrom time.Time //planned_production_date
+	PlannedDateTo   time.Time //planned_production_date
+	Status          enum.ProductionOrderStatus
+	Limit           int64
+	Offset          int64
+	Sort            *Sort
 }
 
-func (s *SearchProductionOrdersOpts) buildQuery(isCount bool) (string, []interface{}) {
+func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (string, []interface{}) {
 	var args []interface{}
 	conds := ""
 	joins := ""
@@ -90,12 +109,24 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool) (string, []interfa
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderFieldCustomerID, len(args))
 	}
 
-	if s.Status > 0 {
+	if s.Status > 0 && !isAnalysis {
 		args = append(args, s.Status)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderFieldStatus, len(args))
 	}
-
+	if !s.PlannedDateFrom.IsZero() {
+		args = []interface{}{s.PlannedDateFrom}
+		conds += fmt.Sprintf(" AND b.%s >= $%d", model.ProductionOrderFieldPlannedProductionDate, len(args))
+	}
+	if !s.PlannedDateTo.IsZero() {
+		args = []interface{}{s.PlannedDateFrom}
+		conds += fmt.Sprintf(" AND b.%s < $%d", model.ProductionOrderFieldPlannedProductionDate, len(args))
+	}
 	b := &model.ProductionOrder{}
+	if isAnalysis {
+		return fmt.Sprintf(`SELECT status, count(*) as count
+		FROM %s AS b %s
+		WHERE TRUE %s AND b.deleted_at IS NULL GROUP BY b.status`, b.TableName(), joins, conds), args
+	}
 	fields, _ := b.FieldMap()
 	if isCount {
 		return fmt.Sprintf(`SELECT count(*) as cnt
@@ -121,7 +152,7 @@ type ProductionOrderData struct {
 
 func (r *productionOrdersRepo) Search(ctx context.Context, s *SearchProductionOrdersOpts) ([]*ProductionOrderData, error) {
 	message := make([]*ProductionOrderData, 0)
-	sql, args := s.buildQuery(false)
+	sql, args := s.buildQuery(false, false)
 	err := cockroach.Select(ctx, sql, args...).ScanAll(&message)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.Select: %w", err)
@@ -132,7 +163,7 @@ func (r *productionOrdersRepo) Search(ctx context.Context, s *SearchProductionOr
 
 func (r *productionOrdersRepo) Count(ctx context.Context, s *SearchProductionOrdersOpts) (*CountResult, error) {
 	countResult := &CountResult{}
-	sql, args := s.buildQuery(true)
+	sql, args := s.buildQuery(true, false)
 	err := cockroach.Select(ctx, sql, args...).ScanOne(countResult)
 	if err != nil {
 		return nil, fmt.Errorf("chat.Count: %w", err)

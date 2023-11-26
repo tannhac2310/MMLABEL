@@ -26,7 +26,12 @@ type FindProductionOrdersRequest struct {
 
 type FindProductionOrdersResponse struct {
 	ProductionOrders []*ProductionOrder `json:"production_orders"`
+	Analysis         []*Analysis        `json:"analysis"`
 	Total            int64              `json:"total"`
+}
+type Analysis struct {
+	Status enum.ProductionOrderStatus `json:"status"`
+	Count  int64                      `json:"count"`
 }
 type ProductionOrder struct {
 	ID                    string                     `json:"id"`

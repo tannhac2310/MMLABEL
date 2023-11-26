@@ -163,7 +163,7 @@ func (s productionOrderController) FindProductionOrders(c *gin.Context) {
 		return
 	}
 
-	productionOrders, cnt, err := s.productionOrderService.FindProductionOrders(c, &production_order.FindProductionOrdersOpts{
+	productionOrders, cnt, analysis, err := s.productionOrderService.FindProductionOrders(c, &production_order.FindProductionOrdersOpts{
 		IDs:        req.Filter.IDs,
 		Name:       req.Filter.Name,
 		CustomerID: req.Filter.CustomerID,
@@ -181,10 +181,19 @@ func (s productionOrderController) FindProductionOrders(c *gin.Context) {
 	for _, f := range productionOrders {
 		productionOrderResp = append(productionOrderResp, toProductionOrderResp(f))
 	}
+	// analysis
+	analysisResp := make([]*dto.Analysis, 0, len(analysis))
+	for _, a := range analysis {
+		analysisResp = append(analysisResp, &dto.Analysis{
+			Status: a.Status,
+			Count:  a.Count,
+		})
+	}
 
 	transportutil.SendJSONResponse(c, &dto.FindProductionOrdersResponse{
 		ProductionOrders: productionOrderResp,
 		Total:            cnt.Count,
+		Analysis:         analysisResp,
 	})
 }
 

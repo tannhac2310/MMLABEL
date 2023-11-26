@@ -17,7 +17,7 @@ type Service interface {
 	AcceptAndChangeNextStage(ctx context.Context, id string) error
 	CreateProductionOrder(ctx context.Context, opt *CreateProductionOrderOpts) (string, error)
 	EditProductionOrder(ctx context.Context, opt *EditProductionOrderOpts) error
-	FindProductionOrders(ctx context.Context, opts *FindProductionOrdersOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error)
+	FindProductionOrders(ctx context.Context, opts *FindProductionOrdersOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, []*Analysis, error)
 	DeleteProductionOrder(ctx context.Context, id string) error
 	GetCustomField() []string
 }
