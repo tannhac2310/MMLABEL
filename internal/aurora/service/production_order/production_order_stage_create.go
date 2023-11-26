@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
+	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
@@ -45,6 +47,25 @@ func (c *productionOrderService) EditProductionOrderStage(ctx context.Context, o
 	updater.Set(model.ProductionOrderStageFieldNote, cockroach.String(opt.Note))
 	updater.Set(model.ProductionOrderStageFieldData, opt.Data)
 	updater.Set(model.ProductionOrderStageFieldSorting, opt.Sorting)
+	/*
+		ProductionOrderStageStatusWaiting:              "waiting",               // Chờ Tiếp Nhận
+		ProductionOrderStageStatusReception:            "reception",             // Tiếp Nhận
+		ProductionOrderStageStatusProductionStart:      "production_start",      // Bắt Đầu Sản Xuất
+		ProductionOrderStageStatusProductionCompletion: "production_completion", // Hoàn Thành Sản Xuất
+		ProductionOrderStageStatusProductDelivery:      "product_delivery",      // Chuyển Giao Bán Thành Phẩm
+	*/
+	//if opt.Status == enum.ProductionOrderStageStatusReception {
+	//	updater.Set(model.ProductionOrderStageFieldReceptionAt, cockroach.Time(time.Now()))
+	//} // accept and change next stage
+	if opt.Status == enum.ProductionOrderStageStatusProductionStart {
+		updater.Set(model.ProductionOrderStageFieldProductionStartAt, cockroach.Time(time.Now()))
+	}
+	if opt.Status == enum.ProductionOrderStageStatusProductionCompletion {
+		updater.Set(model.ProductionOrderStageFieldProductionCompletionAt, cockroach.Time(time.Now()))
+	}
+	//if opt.Status == enum.ProductionOrderStageStatusProductDelivery {
+	//	updater.Set(model.ProductionOrderStageFieldProductDeliveryAt, cockroach.Time(time.Now()))
+	//} // accept and change next stage
 
 	err := cockroach.UpdateFields(ctx, updater)
 	if err != nil {

@@ -10,7 +10,7 @@ import (
 )
 
 func (c *productionOrderService) AcceptAndChangeNextStage(ctx context.Context, id string) error {
-	// find all stage of
+	// find last doing stage
 	lastDoingStages, err := c.productionOrderStageRepo.Search(ctx, &repository.SearchProductionOrderStagesOpts{
 		ProductionOrderID:          id,
 		ProductionOrderStageStatus: enum.ProductionOrderStageStatusProductionCompletion,
@@ -39,13 +39,13 @@ func (c *productionOrderService) AcceptAndChangeNextStage(ctx context.Context, i
 		return err
 	}
 
-	// update doing stage to done
-	// update none stage to doing
+	// update complete stage to delivery
+	// update none stage to reception
 	err = cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
 		if len(lastDoingStages) > 0 {
 			model := lastDoingStages[0]
 			model.Status = enum.ProductionOrderStageStatusProductDelivery
-			model.ProductionCompletionAt = cockroach.Time(time.Now()) // cap nhat ngay hoan thanh ban giao san pham
+			model.ProductDeliveryAt = cockroach.Time(time.Now()) // cap nhat ngay giao san pham
 			err = c.productionOrderStageRepo.Update(ctx2, model)
 			if err != nil {
 				return fmt.Errorf("c.productionOrderStageRepo.Update: %w", err)
@@ -53,6 +53,7 @@ func (c *productionOrderService) AcceptAndChangeNextStage(ctx context.Context, i
 		}
 		if len(firstNoneStages) > 0 {
 			model := firstNoneStages[0]
+			model.ReceptionAt = cockroach.Time(time.Now()) // cap nhat ngay nhan san pham
 			model.Status = enum.ProductionOrderStageStatusReception
 			err = c.productionOrderStageRepo.Update(ctx2, model)
 			model.ReceptionAt = cockroach.Time(time.Now()) // cap nhat ngay nhan san pham
