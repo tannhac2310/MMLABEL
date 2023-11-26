@@ -124,7 +124,7 @@ func (s *SearchProductQualitysOpts) buildQuery(isCount bool, isAnalysis bool) (s
 
 type ProductQualityData struct {
 	*model.ProductQuality
-	ProductionOrderName string `json:"production_order_name"`
+	ProductionOrderName string `db:"production_order_name"`
 }
 
 func (r *productQualitysRepo) Search(ctx context.Context, s *SearchProductQualitysOpts) ([]*ProductQualityData, error) {
