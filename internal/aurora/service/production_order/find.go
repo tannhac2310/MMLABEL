@@ -4,6 +4,7 @@ import (
 	"context"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	model2 "mmlabel.gitlab.com/mm-printing-backend/pkg/model"
+	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 )
@@ -15,15 +16,17 @@ type Analysis struct {
 
 func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts *FindProductionOrdersOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, []*Analysis, error) {
 	filter := &repository.SearchProductionOrdersOpts{
-		IDs:         opts.IDs,
-		CustomerID:  opts.CustomerID,
-		ProductCode: opts.ProductCode,
-		ProductName: opts.ProductName,
-		Name:        opts.Name,
-		Status:      opts.Status,
-		Limit:       limit,
-		Offset:      offset,
-		Sort:        sort,
+		IDs:             opts.IDs,
+		CustomerID:      opts.CustomerID,
+		ProductCode:     opts.ProductCode,
+		ProductName:     opts.ProductName,
+		Name:            opts.Name,
+		PlannedDateFrom: opts.PlannedDateFrom,
+		PlannedDateTo:   opts.PlannedDateTo,
+		Status:          opts.Status,
+		Limit:           limit,
+		Offset:          offset,
+		Sort:            sort,
 	}
 	productionOrders, err := c.productionOrderRepo.Search(ctx, filter)
 	if err != nil {
@@ -119,10 +122,12 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 }
 
 type FindProductionOrdersOpts struct {
-	IDs         []string
-	CustomerID  string
-	ProductName string
-	Name        string
-	ProductCode string
-	Status      enum.ProductionOrderStatus
+	IDs             []string
+	CustomerID      string
+	ProductName     string
+	Name            string
+	ProductCode     string
+	Status          enum.ProductionOrderStatus
+	PlannedDateFrom time.Time
+	PlannedDateTo   time.Time
 }

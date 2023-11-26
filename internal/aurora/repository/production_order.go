@@ -114,11 +114,11 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderFieldStatus, len(args))
 	}
 	if !s.PlannedDateFrom.IsZero() {
-		args = []interface{}{s.PlannedDateFrom}
+		args = append(args, s.PlannedDateFrom)
 		conds += fmt.Sprintf(" AND b.%s >= $%d", model.ProductionOrderFieldPlannedProductionDate, len(args))
 	}
 	if !s.PlannedDateTo.IsZero() {
-		args = []interface{}{s.PlannedDateFrom}
+		args = append(args, s.PlannedDateTo)
 		conds += fmt.Sprintf(" AND b.%s < $%d", model.ProductionOrderFieldPlannedProductionDate, len(args))
 	}
 	b := &model.ProductionOrder{}

@@ -7,14 +7,14 @@ import (
 )
 
 type ProductionOrderFilter struct {
-	IDs        []string                   `json:"ids"`
-	Name       string                     `json:"name"`
-	CustomerID string                     `json:"customerID"`
-	Status     enum.ProductionOrderStatus `json:"status"`
+	IDs             []string                   `json:"ids"`
+	Name            string                     `json:"name"`
+	CustomerID      string                     `json:"customerID"`
+	Status          enum.ProductionOrderStatus `json:"status"`
+	PlannedDateTo   time.Time                  `json:"plannedDateTo"`
+	PlannedDateFrom time.Time                  `json:"plannedDateFrom"`
 	//ProductCode string                     `json:"productCode"`
 	//ProductName string                     `json:"productName"`
-	//PlannedProductionDateFrom time.Time                  `json:"plannedProductionDateFrom"`
-	//PlannedProductionDateTo   time.Time                  `json:"plannedProductionDateTo"`
 	//DeliveryDateFrom          time.Time                  `json:"deliveryDateFrom"`
 	//DeliveryDateTo            time.Time                  `json:"deliveryDateTo"`
 }
