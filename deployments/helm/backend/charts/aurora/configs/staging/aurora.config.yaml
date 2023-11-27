@@ -31,7 +31,7 @@ iotHub:
   connectTimeout: 5
 jwt:
   expiry: 365h
-  encryptionKey : "NsdXN0dZXIubG9jYWw6Mjcw"
+  encryptionKey : "NsdXN0dZXIubG9jYWw6Mjcww"
   audience: "mmprinting"
   issuer: "hydra"
 redis:
