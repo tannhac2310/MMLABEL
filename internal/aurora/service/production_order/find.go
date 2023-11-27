@@ -24,6 +24,7 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 		PlannedDateFrom: opts.PlannedDateFrom,
 		PlannedDateTo:   opts.PlannedDateTo,
 		Status:          opts.Status,
+		Responsible:     opts.Responsible,
 		Limit:           limit,
 		Offset:          offset,
 		Sort:            sort,
@@ -130,4 +131,5 @@ type FindProductionOrdersOpts struct {
 	Status          enum.ProductionOrderStatus
 	PlannedDateFrom time.Time
 	PlannedDateTo   time.Time
+	Responsible     []string
 }

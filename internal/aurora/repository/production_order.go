@@ -83,6 +83,8 @@ type SearchProductionOrdersOpts struct {
 	PlannedDateFrom time.Time //planned_production_date
 	PlannedDateTo   time.Time //planned_production_date
 	Status          enum.ProductionOrderStatus
+	Responsible     []string
+	StageIDs        []string
 	Limit           int64
 	Offset          int64
 	Sort            *Sort
@@ -117,9 +119,26 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (
 		args = append(args, s.PlannedDateFrom)
 		conds += fmt.Sprintf(" AND b.%s >= $%d", model.ProductionOrderFieldPlannedProductionDate, len(args))
 	}
+
 	if !s.PlannedDateTo.IsZero() {
 		args = append(args, s.PlannedDateTo)
 		conds += fmt.Sprintf(" AND b.%s < $%d", model.ProductionOrderFieldPlannedProductionDate, len(args))
+	}
+
+	if len(s.StageIDs) > 0 {
+		args = append(args, s.Responsible)
+		joins += fmt.Sprintf(` INNER JOIN production_order_stages AS pos ON pos.production_order_id = b.id AND pos.deleted_at IS NULL`)
+		conds += fmt.Sprintf(" AND pos.stage_id = ANY($%d)", len(args))
+	}
+
+	if len(s.Responsible) > 0 {
+		args = append(args, s.Responsible)
+
+		joins += fmt.Sprintf(` INNER JOIN production_order_stages AS pos ON pos.production_order_id = b.id AND pos.deleted_at IS NULL 
+			INNER JOIN production_order_stage_devices AS posd ON posd.production_order_stage_id = pos.id AND posd.deleted_at IS NULL`,
+		)
+		conds += fmt.Sprintf(" AND posd.%s && $%d", model.ProductionOrderStageDeviceFieldResponsible, len(args))
+
 	}
 	b := &model.ProductionOrder{}
 	if isAnalysis {

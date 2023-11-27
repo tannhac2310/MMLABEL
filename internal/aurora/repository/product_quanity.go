@@ -103,7 +103,7 @@ func (s *SearchProductQualitysOpts) buildQuery(isCount bool, isAnalysis bool) (s
 	}
 
 	if isAnalysis {
-		return fmt.Sprintf(`SELECT b.%s, count(*) as count
+		return fmt.Sprintf(`SELECT b.%s, sum(b.defective_quantity) as count
 		FROM %s AS b %s
 		WHERE TRUE %s AND b.deleted_at IS NULL
 		GROUP BY b.%s`, model.ProductQualityFieldDefectType, b.TableName(), joins, conds, model.ProductQualityFieldDefectType), args

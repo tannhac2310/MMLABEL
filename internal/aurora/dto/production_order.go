@@ -13,6 +13,7 @@ type ProductionOrderFilter struct {
 	Status          enum.ProductionOrderStatus `json:"status"`
 	PlannedDateTo   time.Time                  `json:"plannedDateTo"`
 	PlannedDateFrom time.Time                  `json:"plannedDateFrom"`
+	Responsible     []string                   `json:"responsible"`
 	//ProductCode string                     `json:"productCode"`
 	//ProductName string                     `json:"productName"`
 	//DeliveryDateFrom          time.Time                  `json:"deliveryDateFrom"`
@@ -83,6 +84,8 @@ type OrderStageDevice struct {
 	Responsible            []string                              `json:"responsible"`
 	Settings               map[string]interface{}                `json:"settings"`
 	Note                   string                                `json:"note"`
+	EstimatedCompleteAt    time.Time                             `json:"estimatedCompleteAt"`
+	AssignedQuantity       int64                                 `json:"assignedQuantity"`
 }
 type User struct {
 	ID      string `json:"id"`

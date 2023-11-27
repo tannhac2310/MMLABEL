@@ -170,6 +170,7 @@ func (s productionOrderController) FindProductionOrders(c *gin.Context) {
 		Status:          req.Filter.Status,
 		PlannedDateFrom: req.Filter.PlannedDateFrom,
 		PlannedDateTo:   req.Filter.PlannedDateTo,
+		Responsible:     req.Filter.Responsible,
 	}, &repository.Sort{
 		Order: repository.SortOrderDESC,
 		By:    "ID",
@@ -228,6 +229,8 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 				Responsible:            device.Responsible,
 				Settings:               device.Settings,
 				Note:                   device.Note.String,
+				EstimatedCompleteAt:    device.EstimatedCompleteAt.Time,
+				AssignedQuantity:       device.AssignedQuantity,
 			})
 		}
 
