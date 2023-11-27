@@ -25,6 +25,7 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 		PlannedDateTo:   opts.PlannedDateTo,
 		Status:          opts.Status,
 		Responsible:     opts.Responsible,
+		StageIDs:        opts.StageIDs,
 		Limit:           limit,
 		Offset:          offset,
 		Sort:            sort,
@@ -132,4 +133,5 @@ type FindProductionOrdersOpts struct {
 	PlannedDateFrom time.Time
 	PlannedDateTo   time.Time
 	Responsible     []string
+	StageIDs        []string
 }

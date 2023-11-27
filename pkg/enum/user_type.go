@@ -8,13 +8,25 @@ import (
 type UserType uint8
 
 const (
-	UserTypeCustomer UserType = iota + 1
+	UserTypeManagerLevel1 UserType = iota + 1
+	UserTypeManagerLevel2
+	UserTypeManagerLevel3
+	UserTypeManagerLevel4
+	UserTypeManagerLevel5
+	UserTypeManagerLevel6
+	UserTypeManagerLevel7
 	UserTypeEmployee
 )
 
 var UserTypeName = map[UserType]string{
-	UserTypeCustomer: "customer",
-	UserTypeEmployee: "employee",
+	UserTypeManagerLevel1: "manager_level_1",
+	UserTypeManagerLevel2: "manager_level_2",
+	UserTypeManagerLevel3: "manager_level_3",
+	UserTypeManagerLevel4: "manager_level_4",
+	UserTypeManagerLevel5: "manager_level_5",
+	UserTypeManagerLevel6: "manager_level_6",
+	UserTypeManagerLevel7: "manager_level_7",
+	UserTypeEmployee:      "employee",
 }
 
 var UserTypeValue = func() map[string]UserType {

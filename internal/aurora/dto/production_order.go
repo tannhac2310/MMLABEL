@@ -14,6 +14,7 @@ type ProductionOrderFilter struct {
 	PlannedDateTo   time.Time                  `json:"plannedDateTo"`
 	PlannedDateFrom time.Time                  `json:"plannedDateFrom"`
 	Responsible     []string                   `json:"responsible"`
+	StageIDs        []string                   `json:"stageIDs"`
 	//ProductCode string                     `json:"productCode"`
 	//ProductName string                     `json:"productName"`
 	//DeliveryDateFrom          time.Time                  `json:"deliveryDateFrom"`

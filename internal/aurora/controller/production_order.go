@@ -171,6 +171,7 @@ func (s productionOrderController) FindProductionOrders(c *gin.Context) {
 		PlannedDateFrom: req.Filter.PlannedDateFrom,
 		PlannedDateTo:   req.Filter.PlannedDateTo,
 		Responsible:     req.Filter.Responsible,
+		StageIDs:        req.Filter.StageIDs,
 	}, &repository.Sort{
 		Order: repository.SortOrderDESC,
 		By:    "ID",

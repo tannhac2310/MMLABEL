@@ -51,6 +51,7 @@ func (a *authController) toLoginResponse(c context.Context, r *auth.LoginResult)
 			Avatar:      u.Avatar,
 			PhoneNumber: u.PhoneNumber,
 			Email:       u.Email,
+			Type:        u.Type,
 		},
 		ACL:  r.ACL,
 		Role: r.MainRole.Name,
