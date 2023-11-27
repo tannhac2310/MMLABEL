@@ -22,8 +22,11 @@ func (u *userController) GetCurrentProfile(c *gin.Context) {
 	transportutil.SendJSONResponse(c, &dto.GetCurrentProfileResponse{
 		ID:          user.ID,
 		Name:        user.Name,
+		Code:        user.Code,
+		Departments: user.Departments.String,
 		Avatar:      user.Avatar,
 		PhoneNumber: user.PhoneNumber,
 		Email:       user.Email,
+		Type:        user.Type,
 	})
 }
