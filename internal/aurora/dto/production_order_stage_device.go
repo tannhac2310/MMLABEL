@@ -33,11 +33,11 @@ type ProductionOrderStageDevice struct {
 }
 
 type CreateProductionOrderStageDeviceRequest struct {
-	ProductionOrderStageID string                                `json:"productionOrderStageID"`
-	DeviceID               string                                `json:"deviceID"`
+	ProductionOrderStageID string                                `json:"productionOrderStageID" binding:"required"`
+	DeviceID               string                                `json:"deviceID" binding:"required"`
 	Quantity               int64                                 `json:"quantity"`
 	ProcessStatus          enum.ProductionOrderStageDeviceStatus `json:"processStatus"`
-	Status                 enum.CommonStatus                     `json:"status"`
+	Status                 enum.CommonStatus                     `json:"status" binding:"required"`
 	Responsible            []string                              `json:"responsible"`
 	Settings               map[string]interface{}                `json:"settings"`
 	Note                   string                                `json:"note"`
