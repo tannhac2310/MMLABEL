@@ -77,11 +77,11 @@ func (s *SearchProductQualitysOpts) buildQuery(isCount bool, isAnalysis bool) (s
 		args = append(args, s.ProductionOrderID)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductQualityFieldProductionOrderID, len(args))
 	}
-	if s.DefectType != "" {
+	if s.DefectType != "" && !isAnalysis {
 		args = append(args, s.DefectType)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductQualityFieldDefectType, len(args))
 	}
-	if s.DefectCode != "" {
+	if s.DefectCode != "" && !isAnalysis {
 		args = append(args, s.DefectCode)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductQualityFieldDefectCode, len(args))
 	}
