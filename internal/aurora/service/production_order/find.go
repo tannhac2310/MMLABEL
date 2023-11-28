@@ -16,19 +16,19 @@ type Analysis struct {
 
 func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts *FindProductionOrdersOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, []*Analysis, error) {
 	filter := &repository.SearchProductionOrdersOpts{
-		IDs:             opts.IDs,
-		CustomerID:      opts.CustomerID,
-		ProductCode:     opts.ProductCode,
-		ProductName:     opts.ProductName,
-		Name:            opts.Name,
-		PlannedDateFrom: opts.PlannedDateFrom,
-		PlannedDateTo:   opts.PlannedDateTo,
-		Status:          opts.Status,
-		Responsible:     opts.Responsible,
-		StageIDs:        opts.StageIDs,
-		Limit:           limit,
-		Offset:          offset,
-		Sort:            sort,
+		IDs:                  opts.IDs,
+		CustomerID:           opts.CustomerID,
+		ProductCode:          opts.ProductCode,
+		ProductName:          opts.ProductName,
+		Name:                 opts.Name,
+		EstimatedStartAtFrom: opts.EstimatedStartAtFrom,
+		EstimatedStartAtTo:   opts.EstimatedStartAtTo,
+		Status:               opts.Status,
+		Responsible:          opts.Responsible,
+		StageIDs:             opts.StageIDs,
+		Limit:                limit,
+		Offset:               offset,
+		Sort:                 sort,
 	}
 	productionOrders, err := c.productionOrderRepo.Search(ctx, filter)
 	if err != nil {
@@ -124,14 +124,15 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 }
 
 type FindProductionOrdersOpts struct {
-	IDs             []string
-	CustomerID      string
-	ProductName     string
-	Name            string
-	ProductCode     string
-	Status          enum.ProductionOrderStatus
-	PlannedDateFrom time.Time
-	PlannedDateTo   time.Time
-	Responsible     []string
-	StageIDs        []string
+	IDs                  []string
+	CustomerID           string
+	ProductName          string
+	Name                 string
+	ProductCode          string
+	Status               enum.ProductionOrderStatus
+	EstimatedStartAtFrom time.Time
+	EstimatedStartAtTo   time.Time
+	OrderStageStatus     enum.ProductionOrderStageStatus
+	Responsible          []string
+	StageIDs             []string
 }

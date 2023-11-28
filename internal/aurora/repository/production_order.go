@@ -75,19 +75,20 @@ func (r *productionOrdersRepo) SoftDelete(ctx context.Context, id string) error 
 
 // SearchProductionOrdersOpts all params is options
 type SearchProductionOrdersOpts struct {
-	IDs             []string
-	CustomerID      string
-	ProductCode     string
-	ProductName     string
-	Name            string
-	PlannedDateFrom time.Time //planned_production_date
-	PlannedDateTo   time.Time //planned_production_date
-	Status          enum.ProductionOrderStatus
-	Responsible     []string
-	StageIDs        []string
-	Limit           int64
-	Offset          int64
-	Sort            *Sort
+	IDs                  []string
+	CustomerID           string
+	ProductCode          string
+	ProductName          string
+	Name                 string
+	EstimatedStartAtFrom time.Time //planned_production_date
+	EstimatedStartAtTo   time.Time //planned_production_date
+	Status               enum.ProductionOrderStatus
+	OrderStageStatus     enum.ProductionOrderStageStatus
+	Responsible          []string
+	StageIDs             []string
+	Limit                int64
+	Offset               int64
+	Sort                 *Sort
 }
 
 func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (string, []interface{}) {
@@ -115,20 +116,27 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (
 		args = append(args, s.Status)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderFieldStatus, len(args))
 	}
-	if !s.PlannedDateFrom.IsZero() {
-		args = append(args, s.PlannedDateFrom)
-		conds += fmt.Sprintf(" AND b.%s >= $%d", model.ProductionOrderFieldPlannedProductionDate, len(args))
+	if !s.EstimatedStartAtFrom.IsZero() {
+		args = append(args, s.EstimatedStartAtFrom)
+		conds += fmt.Sprintf(" AND b.%s >= $%d", model.ProductionOrderFieldEstimatedStartAt, len(args))
 	}
 
-	if !s.PlannedDateTo.IsZero() {
-		args = append(args, s.PlannedDateTo)
-		conds += fmt.Sprintf(" AND b.%s < $%d", model.ProductionOrderFieldPlannedProductionDate, len(args))
+	if !s.EstimatedStartAtTo.IsZero() {
+		args = append(args, s.EstimatedStartAtTo)
+		conds += fmt.Sprintf(" AND b.%s < $%d", model.ProductionOrderFieldEstimatedStartAt, len(args))
 	}
 
 	if len(s.StageIDs) > 0 {
 		args = append(args, s.StageIDs)
 		joins += fmt.Sprintf(` INNER JOIN production_order_stages AS pos ON pos.production_order_id = b.id AND pos.deleted_at IS NULL`)
 		conds += fmt.Sprintf("  AND pos.stage_id = ANY($%d)", len(args))
+	}
+
+	if s.OrderStageStatus > 0 {
+		args = append(args, s.OrderStageStatus)
+		joins += fmt.Sprintf(` INNER JOIN production_order_stages AS pos ON pos.production_order_id = b.id AND pos.deleted_at IS NULL`)
+		conds += fmt.Sprintf(" AND pos.%s = $%d", model.ProductionOrderStageFieldStatus, len(args))
+
 	}
 
 	if len(s.Responsible) > 0 {

@@ -166,14 +166,15 @@ func (s productionOrderController) FindProductionOrders(c *gin.Context) {
 	}
 
 	productionOrders, cnt, analysis, err := s.productionOrderService.FindProductionOrders(c, &production_order.FindProductionOrdersOpts{
-		IDs:             req.Filter.IDs,
-		CustomerID:      req.Filter.CustomerID,
-		Name:            req.Filter.Name,
-		Status:          req.Filter.Status,
-		PlannedDateFrom: req.Filter.PlannedDateFrom,
-		PlannedDateTo:   req.Filter.PlannedDateTo,
-		Responsible:     req.Filter.Responsible,
-		StageIDs:        req.Filter.StageIDs,
+		IDs:                  req.Filter.IDs,
+		CustomerID:           req.Filter.CustomerID,
+		Name:                 req.Filter.Name,
+		Status:               req.Filter.Status,
+		EstimatedStartAtFrom: req.Filter.EstimatedStartAtFrom,
+		EstimatedStartAtTo:   req.Filter.EstimatedStartAtTo,
+		OrderStageStatus:     req.Filter.OrderStageStatus,
+		Responsible:          req.Filter.Responsible,
+		StageIDs:             req.Filter.StageIDs,
 	}, &repository.Sort{
 		Order: repository.SortOrderDESC,
 		By:    "ID",
