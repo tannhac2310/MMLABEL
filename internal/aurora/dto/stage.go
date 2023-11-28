@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"database/sql"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/commondto"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"time"
@@ -29,7 +28,7 @@ type Stage struct {
 	ShortName      string                 `json:"shortName"`
 	Code           string                 `json:"code"`
 	Sorting        int16                  `json:"sorting"`
-	ErrorCode      sql.NullString         `json:"errorCode"`
+	ErrorCode      string                 `json:"errorCode"`
 	Data           map[string]interface{} `json:"data"`
 	Note           string                 `json:"note"`
 	Status         enum.StageStatus       `json:"status"`

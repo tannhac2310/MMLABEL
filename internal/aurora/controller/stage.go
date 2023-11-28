@@ -141,7 +141,7 @@ func toStageResp(f *stage.Data) *dto.Stage {
 		ShortName:      f.ShortName,
 		Code:           f.Code,
 		Sorting:        f.Sorting,
-		ErrorCode:      f.ErrorCode,
+		ErrorCode:      f.ErrorCode.String,
 		Data:           f.Data,
 		Note:           f.Note.String,
 		Status:         f.Status,
