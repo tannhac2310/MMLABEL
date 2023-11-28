@@ -126,16 +126,16 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (
 		conds += fmt.Sprintf(" AND b.%s < $%d", model.ProductionOrderFieldEstimatedStartAt, len(args))
 	}
 
-	if len(s.StageIDs) > 0 {
-		args = append(args, s.StageIDs)
-		joins += fmt.Sprintf(` INNER JOIN production_order_stages AS pos ON pos.production_order_id = b.id AND pos.deleted_at IS NULL`)
-		conds += fmt.Sprintf("  AND pos.stage_id = ANY($%d)", len(args))
-	}
-
-	if s.OrderStageStatus > 0 {
+	if s.OrderStageStatus > 0 && len(s.StageIDs) > 0 {
 		args = append(args, s.OrderStageStatus)
 		joins += fmt.Sprintf(` INNER JOIN production_order_stages AS pos ON pos.production_order_id = b.id AND pos.deleted_at IS NULL`)
-		conds += fmt.Sprintf(" AND pos.%s = $%d", model.ProductionOrderStageFieldStatus, len(args))
+		conds += fmt.Sprintf(" AND pos.status = $%[1]d and pos.stage_id = = ANY($%[1]d) ", len(args))
+	} else {
+		if len(s.StageIDs) > 0 {
+			args = append(args, s.StageIDs)
+			joins += fmt.Sprintf(` INNER JOIN production_order_stages AS pos ON pos.production_order_id = b.id AND pos.deleted_at IS NULL`)
+			conds += fmt.Sprintf("  AND pos.stage_id = ANY($%d)", len(args))
+		}
 
 	}
 
@@ -165,7 +165,7 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (
 	if s.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", s.Sort.By, s.Sort.Order)
 	}
-	return fmt.Sprintf(`SELECT b.%s
+	return fmt.Sprintf(`SELECT DISTINCT b.id , b.%s
 		FROM %s AS b %s
 		WHERE TRUE %s AND b.deleted_at IS NULL
 		%s
