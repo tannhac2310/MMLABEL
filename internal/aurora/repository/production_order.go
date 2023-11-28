@@ -165,7 +165,7 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (
 	if s.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", s.Sort.By, s.Sort.Order)
 	}
-	return fmt.Sprintf(`SELECT DISTINCT b.id , b.%s
+	return fmt.Sprintf(`SELECT b.%s
 		FROM %s AS b %s
 		WHERE TRUE %s AND b.deleted_at IS NULL
 		%s
