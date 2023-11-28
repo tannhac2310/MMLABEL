@@ -26,6 +26,7 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 		Status:               opts.Status,
 		Responsible:          opts.Responsible,
 		StageIDs:             opts.StageIDs,
+		OrderStageStatus:     opts.OrderStageStatus,
 		Limit:                limit,
 		Offset:               offset,
 		Sort:                 sort,
