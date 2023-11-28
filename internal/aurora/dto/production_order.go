@@ -97,7 +97,7 @@ type User struct {
 	Address string `json:"address"`
 }
 type OrderStage struct {
-	ID                     string                          `json:"ID"`
+	ID                     string                          `json:"id"`
 	ProductionOrderID      string                          `json:"productionOrderID"`
 	StageID                string                          `json:"stageID"`
 	StartedAt              time.Time                       `json:"startedAt"`

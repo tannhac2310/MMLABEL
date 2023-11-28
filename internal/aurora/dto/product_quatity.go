@@ -28,7 +28,7 @@ type ProductQualityAnalysis struct {
 	Count      int64  `json:"count"`
 }
 type ProductQuality struct {
-	ID                  string    `json:"ID"`
+	ID                  string    `json:"id"`
 	ProductionOrderID   string    `json:"productionOrderID"`
 	ProductionOrderName string    `json:"productionOrderName"`
 	ProductID           string    `json:"productID"`

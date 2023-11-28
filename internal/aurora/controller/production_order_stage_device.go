@@ -71,6 +71,7 @@ func (s productionOrderStageDeviceController) CreateProductionOrderStageDevice(c
 		ProcessStatus:          req.ProcessStatus,
 		Status:                 req.Status,
 		Responsible:            req.Responsible,
+		AssignedQuantity:       req.AssignedQuantity,
 	})
 
 	if err != nil {

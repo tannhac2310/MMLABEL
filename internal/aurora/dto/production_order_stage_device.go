@@ -41,6 +41,7 @@ type CreateProductionOrderStageDeviceRequest struct {
 	Responsible            []string                              `json:"responsible"`
 	Settings               map[string]interface{}                `json:"settings"`
 	Note                   string                                `json:"note"`
+	AssignedQuantity       int64                                 `json:"assignedQuantity"`
 }
 
 type CreateProductionOrderStageDeviceResponse struct {

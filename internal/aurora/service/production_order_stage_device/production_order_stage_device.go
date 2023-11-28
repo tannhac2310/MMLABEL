@@ -18,6 +18,7 @@ type EditProductionOrderStageDeviceOpts struct {
 	Status            enum.CommonStatus
 	Responsible       []string
 	NotUpdateQuantity bool
+	AssignedQuantity  int64
 }
 
 type CreateProductionOrderStageDeviceOpts struct {
@@ -29,6 +30,7 @@ type CreateProductionOrderStageDeviceOpts struct {
 	Responsible            []string
 	Settings               map[string]interface{}
 	Note                   string
+	AssignedQuantity       int64
 }
 
 type FindProductionOrderStageDeviceOpts struct {
@@ -59,6 +61,7 @@ func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditPr
 	updater.Set(model.ProductionOrderStageDeviceFieldProcessStatus, opt.ProcessStatus)
 	updater.Set(model.ProductionOrderStageDeviceFieldStatus, opt.Status)
 	updater.Set(model.ProductionOrderStageDeviceFieldResponsible, opt.Responsible)
+	updater.Set(model.ProductionOrderStageDeviceFieldAssignedQuantity, opt.AssignedQuantity)
 
 	updater.Set(model.ProductionOrderStageDeviceFieldUpdatedAt, time.Now())
 
@@ -78,11 +81,12 @@ func (p productionOrderStageDeviceService) Create(ctx context.Context, opt *Crea
 		Quantity:               opt.Quantity,
 		ProcessStatus:          opt.ProcessStatus,
 		Status:                 opt.Status,
-		Responsible:            opt.Responsible,
 		Settings:               opt.Settings,
 		Note:                   cockroach.String(opt.Note),
 		CreatedAt:              time.Now(),
 		UpdatedAt:              time.Now(),
+		Responsible:            opt.Responsible,
+		AssignedQuantity:       opt.AssignedQuantity,
 	})
 	if err != nil {
 		return "", err

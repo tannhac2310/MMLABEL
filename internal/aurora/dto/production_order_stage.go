@@ -21,34 +21,32 @@ type FindProductionOrderStagesResponse struct {
 	Total                 int64                   `json:"total"`
 }
 type ProductionOrderStage struct {
-	ID                  string                          `json:"ID"`
-	ProductionOrderID   string                          `json:"ProductionOrderID"`
-	StageID             string                          `json:"StageID"`
-	EstimatedStartAt    time.Time                       `json:"EstimatedStartAt"`
-	EstimatedCompleteAt time.Time                       `json:"EstimatedCompleteAt"`
-	StartedAt           time.Time                       `json:"StartedAt"`
-	CompletedAt         time.Time                       `json:"CompletedAt"`
-	Status              enum.ProductionOrderStageStatus `json:"Status"`
-	Condition           string                          `json:"Condition"`
-	Note                string                          `json:"Note"`
-	Data                map[string]interface{}          `json:"Data"`
-	CreatedAt           time.Time                       `json:"CreatedAt"`
-	UpdatedAt           time.Time                       `json:"UpdatedAt"`
+	ID                  string                          `json:"id"`
+	ProductionOrderID   string                          `json:"productionOrderID"`
+	StageID             string                          `json:"stageID"`
+	EstimatedStartAt    time.Time                       `json:"estimatedStartAt"`
+	EstimatedCompleteAt time.Time                       `json:"estimatedCompleteAt"`
+	StartedAt           time.Time                       `json:"startedAt"`
+	CompletedAt         time.Time                       `json:"completedAt"`
+	Status              enum.ProductionOrderStageStatus `json:"status"`
+	Condition           string                          `json:"condition"`
+	Note                string                          `json:"note"`
+	Data                map[string]interface{}          `json:"data"`
+	CreatedAt           time.Time                       `json:"createdAt"`
+	UpdatedAt           time.Time                       `json:"updatedAt"`
 }
 
 type CreateProductionOrderStageRequest struct {
-	ProductionOrderID   string                          `json:"ProductionOrderID"  binding:"required"`
-	StageID             string                          `json:"StageID"  binding:"required"`
-	EstimatedStartAt    time.Time                       `json:"EstimatedStartAt"`
-	EstimatedCompleteAt time.Time                       `json:"EstimatedCompleteAt"`
-	StartedAt           time.Time                       `json:"StartedAt"`
-	CompletedAt         time.Time                       `json:"CompletedAt"`
-	Status              enum.ProductionOrderStageStatus `json:"Status"  binding:"required"`
-	Condition           string                          `json:"Condition"`
-	Note                string                          `json:"Note"`
-	Data                map[string]interface{}          `json:"Data"`
-	CreatedAt           time.Time                       `json:"CreatedAt"`
-	UpdatedAt           time.Time                       `json:"UpdatedAt"`
+	ProductionOrderID   string                          `json:"productionOrderID"  binding:"required"`
+	StageID             string                          `json:"stageID" binding:"required"`
+	EstimatedStartAt    time.Time                       `json:"estimatedStartAt"`
+	EstimatedCompleteAt time.Time                       `json:"estimatedCompleteAt"`
+	StartedAt           time.Time                       `json:"startedAt"`
+	CompletedAt         time.Time                       `json:"completedAt"`
+	Status              enum.ProductionOrderStageStatus `json:"status"`
+	Condition           string                          `json:"condition"`
+	Note                string                          `json:"note"`
+	Data                map[string]interface{}          `json:"data"`
 }
 
 type CreateProductionOrderStageResponse struct {
@@ -57,17 +55,15 @@ type CreateProductionOrderStageResponse struct {
 
 type EditProductionOrderStageRequest struct {
 	ID                  string                          `json:"id" binding:"required"`
-	EstimatedStartAt    time.Time                       `json:"EstimatedStartAt"`
-	EstimatedCompleteAt time.Time                       `json:"EstimatedCompleteAt"`
-	StartedAt           time.Time                       `json:"StartedAt"`
-	CompletedAt         time.Time                       `json:"CompletedAt"`
-	Status              enum.ProductionOrderStageStatus `json:"Status"  binding:"required"`
-	Condition           string                          `json:"Condition"`
-	Note                string                          `json:"Note"`
-	Data                map[string]interface{}          `json:"Data"`
+	EstimatedStartAt    time.Time                       `json:"estimatedStartAt"`
+	EstimatedCompleteAt time.Time                       `json:"estimatedCompleteAt"`
+	StartedAt           time.Time                       `json:"startedAt"`
+	CompletedAt         time.Time                       `json:"completedAt"`
+	Status              enum.ProductionOrderStageStatus `json:"status" binding:"required"`
+	Condition           string                          `json:"condition"`
+	Note                string                          `json:"note"`
+	Data                map[string]interface{}          `json:"data"`
 	Sorting             int16                           `json:"sorting"`
-	CreatedAt           time.Time                       `json:"CreatedAt"`
-	UpdatedAt           time.Time                       `json:"UpdatedAt"`
 }
 
 type EditProductionOrderStageResponse struct {
