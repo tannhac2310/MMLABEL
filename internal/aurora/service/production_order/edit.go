@@ -51,18 +51,19 @@ func (c *productionOrderService) EditProductionOrder(ctx context.Context, opt *E
 }
 
 type EditProductionOrderOpts struct {
-	ID                    string
-	Name                  string
-	QtyPaper              int64
-	QtyFinished           int64
-	QtyDelivered          int64
-	PlannedProductionDate time.Time
-	Status                enum.ProductionOrderStatus
-	DeliveryDate          time.Time
-	DeliveryImage         string
-	Note                  string
-	ProductionOrderStage  []*ProductionOrderStage
-	CustomData            map[string]string
+	ID                   string
+	Name                 string
+	QtyPaper             int64
+	QtyFinished          int64
+	QtyDelivered         int64
+	EstimatedStartAt     time.Time
+	EstimatedCompleteAt  time.Time
+	Status               enum.ProductionOrderStatus
+	DeliveryDate         time.Time
+	DeliveryImage        string
+	Note                 string
+	ProductionOrderStage []*ProductionOrderStage
+	CustomData           map[string]string
 }
 
 func (c *productionOrderService) editProductionOrder(ctx context.Context, opt *EditProductionOrderOpts) error {
@@ -73,7 +74,8 @@ func (c *productionOrderService) editProductionOrder(ctx context.Context, opt *E
 	updater.Set(model.ProductionOrderFieldQtyPaper, opt.QtyPaper)
 	updater.Set(model.ProductionOrderFieldQtyFinished, opt.QtyFinished)
 	updater.Set(model.ProductionOrderFieldQtyDelivered, opt.QtyDelivered)
-	updater.Set(model.ProductionOrderFieldPlannedProductionDate, opt.PlannedProductionDate)
+	updater.Set(model.ProductionOrderFieldEstimatedCompleteAt, opt.EstimatedCompleteAt)
+	updater.Set(model.ProductionOrderFieldEstimatedStartAt, opt.EstimatedStartAt)
 	updater.Set(model.ProductionOrderFieldStatus, opt.Status)
 	updater.Set(model.ProductionOrderFieldDeliveryDate, opt.DeliveryDate)
 	updater.Set(model.ProductionOrderFieldDeliveryImage, opt.DeliveryImage)

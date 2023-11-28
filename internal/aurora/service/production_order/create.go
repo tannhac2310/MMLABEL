@@ -15,23 +15,24 @@ func (c *productionOrderService) CreateProductionOrder(ctx context.Context, opt 
 	now := time.Now()
 	id := idutil.ULIDNow()
 	productionOrder := &model.ProductionOrder{
-		ID:                    id,
-		Name:                  opt.Name,
-		ProductCode:           opt.ProductCode,
-		ProductName:           opt.ProductName,
-		CustomerID:            opt.CustomerID,
-		SalesID:               opt.SalesID,
-		QtyPaper:              opt.QtyPaper,
-		QtyFinished:           opt.QtyFinished,
-		QtyDelivered:          opt.QtyDelivered,
-		PlannedProductionDate: opt.PlannedProductionDate,
-		DeliveryDate:          opt.DeliveryDate,
-		DeliveryImage:         cockroach.String(opt.DeliveryImage),
-		Status:                opt.Status,
-		Note:                  cockroach.String(opt.Note),
-		CreatedBy:             opt.CreatedBy,
-		CreatedAt:             now,
-		UpdatedAt:             now,
+		ID:                  id,
+		ProductCode:         opt.ProductCode,
+		ProductName:         opt.ProductName,
+		CustomerID:          opt.CustomerID,
+		SalesID:             opt.SalesID,
+		QtyPaper:            opt.QtyPaper,
+		QtyFinished:         opt.QtyFinished,
+		QtyDelivered:        opt.QtyDelivered,
+		DeliveryDate:        opt.DeliveryDate,
+		DeliveryImage:       cockroach.String(opt.DeliveryImage),
+		Status:              opt.Status,
+		Note:                cockroach.String(opt.Note),
+		CreatedBy:           opt.CreatedBy,
+		CreatedAt:           now,
+		UpdatedAt:           now,
+		Name:                opt.Name,
+		EstimatedStartAt:    cockroach.Time(opt.EstimatedStartAt),
+		EstimatedCompleteAt: cockroach.Time(opt.EstimatedCompleteAt),
 	}
 
 	errTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
@@ -79,22 +80,23 @@ func (c *productionOrderService) CreateProductionOrder(ctx context.Context, opt 
 }
 
 type CreateProductionOrderOpts struct {
-	Name                  string
-	ProductCode           string
-	ProductName           string
-	CustomerID            string
-	SalesID               string
-	QtyPaper              int64
-	QtyFinished           int64
-	QtyDelivered          int64
-	PlannedProductionDate time.Time
-	DeliveryDate          time.Time
-	DeliveryImage         string
-	Status                enum.ProductionOrderStatus
-	Note                  string
-	ProductionOrderStage  []*ProductionOrderStage
-	CustomData            map[string]string
-	CreatedBy             string
+	Name                 string
+	ProductCode          string
+	ProductName          string
+	CustomerID           string
+	SalesID              string
+	QtyPaper             int64
+	QtyFinished          int64
+	QtyDelivered         int64
+	EstimatedStartAt     time.Time
+	EstimatedCompleteAt  time.Time
+	DeliveryDate         time.Time
+	DeliveryImage        string
+	Status               enum.ProductionOrderStatus
+	Note                 string
+	ProductionOrderStage []*ProductionOrderStage
+	CustomData           map[string]string
+	CreatedBy            string
 }
 
 type ProductionOrderStage struct {

@@ -45,7 +45,8 @@ type ProductionOrder struct {
 	QtyPaper              int64                      `json:"qtyPaper"`
 	QtyFinished           int64                      `json:"qtyFinished"`
 	QtyDelivered          int64                      `json:"qtyDelivered"`
-	PlannedProductionDate time.Time                  `json:"plannedProductionDate"`
+	EstimatedStartAt      time.Time                  `json:"estimatedStartAt"`
+	EstimatedCompleteAt   time.Time                  `json:"estimatedCompleteAt"`
 	DeliveryDate          time.Time                  `json:"deliveryDate"`
 	DeliveryImage         string                     `json:"deliveredImage"`
 	Status                enum.ProductionOrderStatus `json:"status"`
@@ -65,7 +66,8 @@ type CreateProductionOrderRequest struct {
 	QtyPaper              int64                      `json:"qtyPaper"`
 	QtyFinished           int64                      `json:"qtyFinished"`
 	QtyDelivered          int64                      `json:"qtyDelivered"`
-	PlannedProductionDate time.Time                  `json:"plannedProductionDate"`
+	EstimatedStartAt      time.Time                  `json:"estimatedStartAt"`
+	EstimatedCompleteAt   time.Time                  `json:"estimatedCompleteAt"`
 	DeliveryDate          time.Time                  `json:"deliveryDate"`
 	DeliveryImage         string                     `json:"deliveredImage"`
 	ProductionOrderStages []CreateOrderStage         `json:"production_order_stages"`
@@ -145,7 +147,8 @@ type EditProductionOrderRequest struct {
 	QtyPaper              int64                      `json:"qtyPaper"`
 	QtyFinished           int64                      `json:"qtyFinished"`
 	QtyDelivered          int64                      `json:"qtyDelivered"`
-	PlannedProductionDate time.Time                  `json:"plannedProductionDate"`
+	EstimatedStartAt      time.Time                  `json:"estimatedStartAt"`
+	EstimatedCompleteAt   time.Time                  `json:"estimatedCompleteAt"`
 	DeliveryDate          time.Time                  `json:"deliveryDate"`
 	DeliveryImage         string                     `json:"deliveryImage"`
 	Status                enum.ProductionOrderStatus `json:"status"  binding:"required"`

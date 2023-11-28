@@ -2,14 +2,12 @@ package model
 
 import (
 	"database/sql"
-	"time"
-
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
+	"time"
 )
 
 const (
 	ProductionOrderFieldID                    = "id"
-	ProductionOrderFieldName                  = "name"
 	ProductionOrderFieldProductCode           = "product_code"
 	ProductionOrderFieldProductName           = "product_name"
 	ProductionOrderFieldCustomerID            = "customer_id"
@@ -26,11 +24,13 @@ const (
 	ProductionOrderFieldCreatedAt             = "created_at"
 	ProductionOrderFieldUpdatedAt             = "updated_at"
 	ProductionOrderFieldDeletedAt             = "deleted_at"
+	ProductionOrderFieldName                  = "name"
+	ProductionOrderFieldEstimatedStartAt      = "estimated_start_at"
+	ProductionOrderFieldEstimatedCompleteAt   = "estimated_complete_at"
 )
 
 type ProductionOrder struct {
 	ID                    string                     `db:"id"`
-	Name                  string                     `db:"name"`
 	ProductCode           string                     `db:"product_code"`
 	ProductName           string                     `db:"product_name"`
 	CustomerID            string                     `db:"customer_id"`
@@ -47,12 +47,14 @@ type ProductionOrder struct {
 	CreatedAt             time.Time                  `db:"created_at"`
 	UpdatedAt             time.Time                  `db:"updated_at"`
 	DeletedAt             sql.NullTime               `db:"deleted_at"`
+	Name                  string                     `db:"name"`
+	EstimatedStartAt      sql.NullTime               `db:"estimated_start_at"`
+	EstimatedCompleteAt   sql.NullTime               `db:"estimated_complete_at"`
 }
 
 func (rcv *ProductionOrder) FieldMap() (fields []string, values []interface{}) {
 	fields = []string{
 		ProductionOrderFieldID,
-		ProductionOrderFieldName,
 		ProductionOrderFieldProductCode,
 		ProductionOrderFieldProductName,
 		ProductionOrderFieldCustomerID,
@@ -69,11 +71,13 @@ func (rcv *ProductionOrder) FieldMap() (fields []string, values []interface{}) {
 		ProductionOrderFieldCreatedAt,
 		ProductionOrderFieldUpdatedAt,
 		ProductionOrderFieldDeletedAt,
+		ProductionOrderFieldName,
+		ProductionOrderFieldEstimatedStartAt,
+		ProductionOrderFieldEstimatedCompleteAt,
 	}
 
 	values = []interface{}{
 		&rcv.ID,
-		&rcv.Name,
 		&rcv.ProductCode,
 		&rcv.ProductName,
 		&rcv.CustomerID,
@@ -90,6 +94,9 @@ func (rcv *ProductionOrder) FieldMap() (fields []string, values []interface{}) {
 		&rcv.CreatedAt,
 		&rcv.UpdatedAt,
 		&rcv.DeletedAt,
+		&rcv.Name,
+		&rcv.EstimatedStartAt,
+		&rcv.EstimatedCompleteAt,
 	}
 
 	return
