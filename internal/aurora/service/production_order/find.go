@@ -42,7 +42,13 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 	}
 
 	results := make([]*Data, 0, len(productionOrders))
+	idMap := make(map[string]bool)
+
 	for _, productionOrder := range productionOrders {
+		if _, ok := idMap[productionOrder.ID]; ok {
+			continue
+		}
+		idMap[productionOrder.ID] = true
 		//find stage
 		stages, err := c.productionOrderStageRepo.Search(ctx, &repository.SearchProductionOrderStagesOpts{
 			ProductionOrderID: productionOrder.ID,
