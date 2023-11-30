@@ -25,7 +25,7 @@ var (
 
 func init() {
 	flag.StringVar(&pkgName, "pkg", "repository", "pkgName")
-	flag.StringVar(&outDir, "o", "internal/aurora/repository/", "output dir")
+	flag.StringVar(&outDir, "o", "internal/aurora/service/", "output dir")
 	flag.StringVar(&connectionUri, "db", "postgres://root@localhost:26257/postgres?sslmode=disable", "db connection")
 	flag.Parse()
 
@@ -185,7 +185,7 @@ func genRepository(db *pgx.ConnPool, tableName pgtype.Text) {
 		panic(err)
 	}
 
-	fileName := outDir + singularName + ".go"
+	fileName := outDir + "/" + singularName + "/" + singularName + ".go"
 	if _, err := os.Stat(fileName); err == nil {
 		fmt.Printf("file %s existed, skip\n", fileName)
 		return

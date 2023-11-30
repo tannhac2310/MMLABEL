@@ -12,7 +12,7 @@ services:
     image: redis:5.0
     command: sh -c 'exec redis-server --requirepass "${REDIS_PASSWORD}"'
   db:
-    image: cockroachdb/cockroach:v20.2.7
+    image: cockroachdb/cockroach:v23.1.11
     command: start-single-node --insecure
     restart: always
     volumes:
