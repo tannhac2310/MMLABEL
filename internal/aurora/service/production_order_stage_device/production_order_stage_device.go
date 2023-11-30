@@ -62,8 +62,10 @@ func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditPr
 	updater.Set(model.ProductionOrderStageDeviceFieldProcessStatus, opt.ProcessStatus)
 	updater.Set(model.ProductionOrderStageDeviceFieldStatus, opt.Status)
 	updater.Set(model.ProductionOrderStageDeviceFieldResponsible, opt.Responsible)
-	updater.Set(model.ProductionOrderStageDeviceFieldAssignedQuantity, opt.AssignedQuantity)
-
+	if opt.AssignedQuantity > 0 {
+		updater.Set(model.ProductionOrderStageDeviceFieldAssignedQuantity, opt.AssignedQuantity)
+	}
+	
 	updater.Set(model.ProductionOrderStageDeviceFieldUpdatedAt, time.Now())
 
 	err := cockroach.UpdateFields(ctx, updater)
