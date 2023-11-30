@@ -2,18 +2,19 @@ package production_order_stage_device
 
 import (
 	"context"
+	"time"
+
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/idutil"
-	"time"
 )
 
 type EditProductionOrderStageDeviceOpts struct {
 	ID                string
 	DeviceID          string
-	Quantity          int64
+	Quantity          int64	
 	ProcessStatus     enum.ProductionOrderStageDeviceStatus
 	Status            enum.CommonStatus
 	Responsible       []string

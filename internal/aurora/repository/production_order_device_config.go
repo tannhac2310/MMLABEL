@@ -57,6 +57,7 @@ func (r *sProductionOrderDeviceConfigRepo) SoftDelete(ctx context.Context, id st
 type SearchProductionOrderDeviceConfigOpts struct {
 	IDs    []string
 	Search string
+	ProductionOrderID string
 	// todo add more search options
 	Limit  int64
 	Offset int64
@@ -68,6 +69,10 @@ func (s *SearchProductionOrderDeviceConfigOpts) buildQuery(isCount bool) (string
 	conds := ""
 	joins := " JOIN production_orders AS po ON po.id = b.production_order_id"
 
+	if s.ProductionOrderID != "" {
+		args = append(args, s.ProductionOrderID)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductQualityFieldProductionOrderID, len(args))
+	}
 	if len(s.IDs) > 0 {
 		args = append(args, s.IDs)
 		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.ProductionOrderDeviceConfigFieldID)
