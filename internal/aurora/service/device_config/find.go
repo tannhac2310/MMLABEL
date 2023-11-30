@@ -10,6 +10,7 @@ func (c *deviceConfigService) FindDeviceConfigs(ctx context.Context, opts *FindD
 	filter := &repository.SearchProductionOrderDeviceConfigOpts{
 		Search: opts.Search,
 		Limit:  limit,
+		ProductionOrderID: opts.ProductionOrderID,
 		Offset: offset,
 		Sort:   sort,
 	}
@@ -38,4 +39,5 @@ func (c *deviceConfigService) FindDeviceConfigs(ctx context.Context, opts *FindD
 
 type FindDeviceConfigsOpts struct {
 	Search string
+	ProductionOrderID string
 }

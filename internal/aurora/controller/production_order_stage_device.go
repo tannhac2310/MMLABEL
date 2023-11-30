@@ -96,6 +96,7 @@ func (s productionOrderStageDeviceController) EditProductionOrderStageDevice(c *
 		ID:                req.ID,
 		DeviceID:          req.DeviceID,
 		Quantity:          req.Quantity,
+		AssignedQuantity:  req.AssignedQuantity,
 		ProcessStatus:     req.ProcessStatus,
 		Status:            req.Status,
 		Responsible:       req.Responsible,
