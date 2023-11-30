@@ -3,6 +3,8 @@ package model
 import (
 	"database/sql"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
 const (
@@ -24,7 +26,7 @@ type Option struct {
 	Code      string                 `db:"code"`
 	Name      string                 `db:"name"`
 	Data      map[string]interface{} `db:"data"`
-	Status    int16                  `db:"status"`
+	Status    enum.CommonStatus      `db:"status"`
 	CreatedBy string                 `db:"created_by"`
 	CreatedAt time.Time              `db:"created_at"`
 	UpdatedAt time.Time              `db:"updated_at"`
