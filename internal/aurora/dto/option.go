@@ -12,12 +12,12 @@ type OptionFilter struct {
 	Entity string `json:"entity"`
 }
 
-type FindOptionsRequest struct {
+type FindOptionRequest struct {
 	Filter *OptionFilter     `json:"filter" binding:"required"`
 	Paging *commondto.Paging `json:"paging" binding:"required"`
 }
 
-type FindOptionsResponse struct {
+type FindOptionResponse struct {
 	Options []*Option `json:"options"`
 	Total   int64     `json:"total"`
 }

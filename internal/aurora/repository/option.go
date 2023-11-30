@@ -16,18 +16,14 @@ type OptionRepo interface {
 	Update(ctx context.Context, e *model.Option) error
 	SoftDelete(ctx context.Context, id string) error
 	Search(ctx context.Context, s *SearchOptionsOpts) ([]*OptionData, error)
-	// Count(ctx context.Context, s *SearchOptionsOpts) (*CountResult, error)
+	Count(ctx context.Context, s *SearchOptionsOpts) (*CountResult, error)
 	FindByID(ctx context.Context, id string) (*OptionData, error)
 }
 
-type optionsRepo struct {
+type optionRepo struct {
 }
 
-func NewOptionRepo() OptionRepo {
-	return &optionsRepo{}
-}
-
-func (r *optionsRepo) Insert(ctx context.Context, e *model.Option) error {
+func (r *optionRepo) Insert(ctx context.Context, e *model.Option) error {
 	err := cockroach.Create(ctx, e)
 	if err != nil {
 		return fmt.Errorf("r.baseRepo.Create: %w", err)
@@ -36,12 +32,12 @@ func (r *optionsRepo) Insert(ctx context.Context, e *model.Option) error {
 	return nil
 }
 
-func (r *optionsRepo) Update(ctx context.Context, e *model.Option) error {
+func (r *optionRepo) Update(ctx context.Context, e *model.Option) error {
 	e.UpdatedAt = time.Now()
 	return cockroach.Update(ctx, e)
 }
 
-func (r *optionsRepo) SoftDelete(ctx context.Context, id string) error {
+func (r *optionRepo) SoftDelete(ctx context.Context, id string) error {
 	sql := `UPDATE options
 		SET deleted_at = NOW()
 		WHERE id = $1`
@@ -56,7 +52,7 @@ func (r *optionsRepo) SoftDelete(ctx context.Context, id string) error {
 
 	return nil
 }
-func (i *optionsRepo) FindByID(ctx context.Context, id string) (*OptionData, error) {
+func (i *optionRepo) FindByID(ctx context.Context, id string) (*OptionData, error) {
 	optionData := &OptionData{}
 	sql := `SELECT b.* FROM options AS b WHERE b.id = $1 AND b.deleted_at IS NULL`
 	err := cockroach.Select(ctx, sql, id).ScanOne(optionData)
@@ -124,7 +120,7 @@ type OptionData struct {
 	*model.Option
 }
 
-func (r *optionsRepo) Search(ctx context.Context, s *SearchOptionsOpts) ([]*OptionData, error) {
+func (r *optionRepo) Search(ctx context.Context, s *SearchOptionsOpts) ([]*OptionData, error) {
 	options := make([]*OptionData, 0)
 	sql, args := s.buildQuery(false)
 	err := cockroach.Select(ctx, sql, args...).ScanAll(&options)
@@ -135,7 +131,7 @@ func (r *optionsRepo) Search(ctx context.Context, s *SearchOptionsOpts) ([]*Opti
 	return options, nil
 }
 
-func (r *optionsRepo) Count(ctx context.Context, s *SearchOptionsOpts) (*CountResult, error) {
+func (r *optionRepo) Count(ctx context.Context, s *SearchOptionsOpts) (*CountResult, error) {
 	countResult := &CountResult{}
 	sql, args := s.buildQuery(true)
 	err := cockroach.Select(ctx, sql, args...).ScanOne(countResult)
@@ -144,4 +140,8 @@ func (r *optionsRepo) Count(ctx context.Context, s *SearchOptionsOpts) (*CountRe
 	}
 
 	return countResult, nil
+}
+
+func NewOptionRepo() OptionRepo {
+	return &optionRepo{}
 }
