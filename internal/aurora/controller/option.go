@@ -125,6 +125,7 @@ func toOptionResp(f *option.OptionData) *dto.Option {
 	return &dto.Option{
 		ID:        f.ID,
 		Name:      f.Name,
+		Entity:      f.Entity,
 		Code:      f.Code,
 		Data:      f.Data,
 		Status:    f.Status,
