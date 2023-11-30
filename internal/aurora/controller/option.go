@@ -92,7 +92,7 @@ func (s optionController) DeleteOption(c *gin.Context) {
 }
 
 func (s optionController) FindOptions(c *gin.Context) {
-	req := &dto.FindOptionsRequest{}
+	req := &dto.FindOptionRequest{}
 	err := c.ShouldBind(req)
 	if err != nil {
 		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
@@ -115,7 +115,7 @@ func (s optionController) FindOptions(c *gin.Context) {
 		optionResp = append(optionResp, toOptionResp(f))
 	}
 
-	transportutil.SendJSONResponse(c, &dto.FindOptionsResponse{
+	transportutil.SendJSONResponse(c, &dto.FindOptionResponse{
 		Options: optionResp,
 		Total:   cnt.Count,
 	})
@@ -175,8 +175,8 @@ func RegisterOptionController(
 		g,
 		"find",
 		c.FindOptions,
-		&dto.FindOptionsRequest{},
-		&dto.FindOptionsResponse{},
+		&dto.FindOptionRequest{},
+		&dto.FindOptionResponse{},
 		"Find options",
 	)
 }
