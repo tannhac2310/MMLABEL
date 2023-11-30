@@ -16,11 +16,17 @@ func (c *deviceConfigService) CreateDeviceConfig(ctx context.Context, opt *Creat
 	deviceConfig := &model.ProductionOrderDeviceConfig{
 		ID:                idutil.ULIDNow(),
 		ProductionOrderID: opt.ProductionOrderID,
-		DeviceID:          opt.DeviceID,
+		DeviceID:          cockroach.String(opt.DeviceID),
+		Color:             cockroach.String(opt.Color),
+		Description:       cockroach.String(opt.Description),
+		Search:            cockroach.String(opt.Search),
 		DeviceConfig:      opt.DeviceConfig,
+		CreatedBy:         opt.CreatedBy,
 		CreatedAt:         now,
+		UpdatedBy:         opt.CreatedBy,
 		UpdatedAt:         now,
 	}
+	fmt.Printf("deviceConfig: %+v\n", deviceConfig)
 
 	errTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
 		err := c.deviceConfigRepo.Insert(ctx2, deviceConfig)
@@ -40,4 +46,8 @@ type CreateDeviceConfigOpts struct {
 	ProductionOrderID string
 	DeviceID          string
 	DeviceConfig      map[string]interface{}
+	Color             string
+	Description       string
+	Search            string
+	CreatedBy         string
 }

@@ -55,7 +55,8 @@ func (r *sProductionOrderDeviceConfigRepo) SoftDelete(ctx context.Context, id st
 
 // SearchProductionOrderDeviceConfigOpts all params is options
 type SearchProductionOrderDeviceConfigOpts struct {
-	IDs []string
+	IDs    []string
+	Search string
 	// todo add more search options
 	Limit  int64
 	Offset int64
@@ -65,22 +66,18 @@ type SearchProductionOrderDeviceConfigOpts struct {
 func (s *SearchProductionOrderDeviceConfigOpts) buildQuery(isCount bool) (string, []interface{}) {
 	var args []interface{}
 	conds := ""
-	joins := ""
+	joins := " JOIN production_orders AS po ON po.id = b.production_order_id"
 
 	if len(s.IDs) > 0 {
 		args = append(args, s.IDs)
 		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.ProductionOrderDeviceConfigFieldID)
 	}
 	// todo add more search options example:
-	//if s.Name != "" {
-	//	args = append(args, "%"+s.Name+"%")
-	//	conds += fmt.Sprintf(" AND (b.%[2]s ILIKE $%[1]d OR b.%[3]s ILIKE $%[1]d)",
-	//		len(args), model.ProductionOrderDeviceConfigFieldName, model.ProductionOrderDeviceConfigFieldCode)
-	//}
-	//if s.Code != "" {
-	//	args = append(args, s.Code)
-	//	conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.ProductionOrderDeviceConfigFieldCode, len(args))
-	//}
+	if s.Search != "" {
+		args = append(args, "%"+s.Search+"%")
+		conds += fmt.Sprintf(" AND (b.%[2]s ILIKE $%[1]d OR b.%[3]s ILIKE $%[1]d OR po.name ILIKE $%[1]d)",
+			len(args), model.ProductionOrderDeviceConfigFieldSearch, model.ProductionOrderDeviceConfigFieldColor)
+	}
 
 	b := &model.ProductionOrderDeviceConfig{}
 	fields, _ := b.FieldMap()
@@ -92,11 +89,14 @@ func (s *SearchProductionOrderDeviceConfigOpts) buildQuery(isCount bool) (string
 	if s.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", s.Sort.By, s.Sort.Order)
 	}
-	return fmt.Sprintf("SELECT b.%s FROM %s AS b %s WHERE TRUE %s AND b.deleted_at IS NULL %s LIMIT %d OFFSET %d", strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
+
+	return fmt.Sprintf(`SELECT b.%s, po.name as production_order_name 
+FROM %s AS b %s WHERE TRUE %s AND b.deleted_at IS NULL %s LIMIT %d OFFSET %d`, strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
 }
 
 type ProductionOrderDeviceConfigData struct {
 	*model.ProductionOrderDeviceConfig
+	ProductionOrderName string `db:"production_order_name"`
 }
 
 func (r *sProductionOrderDeviceConfigRepo) Search(ctx context.Context, s *SearchProductionOrderDeviceConfigOpts) ([]*ProductionOrderDeviceConfigData, error) {

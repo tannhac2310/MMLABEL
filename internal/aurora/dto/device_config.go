@@ -6,7 +6,7 @@ import (
 )
 
 type DeviceConfigFilter struct {
-	Name string `json:"name"`
+	Search string `json:"search"`
 }
 
 type FindDeviceConfigsRequest struct {
@@ -19,18 +19,25 @@ type FindDeviceConfigsResponse struct {
 	Total         int64           `json:"total"`
 }
 type DeviceConfig struct {
-	ID                string                 `json:"id"`
-	ProductionOrderID string                 `json:"productionOrderID"`
-	DeviceID          string                 `json:"deviceID"`
-	DeviceConfig      map[string]interface{} `json:"deviceConfig"`
-	CreatedAt         time.Time              `json:"createdAt"`
-	UpdatedAt         time.Time              `json:"updatedAt"`
+	ID                  string                 `json:"id"`
+	ProductionOrderID   string                 `json:"productionOrderID"`
+	ProductionOrderName string                 `json:"productionOrderName"`
+	DeviceID            string                 `json:"deviceID"`
+	DeviceConfig        map[string]interface{} `json:"deviceConfig"`
+	Color               string                 `json:"color"`
+	Description         string                 `json:"description"`
+	CreatedBy           string                 `json:"createdBy"`
+	CreatedAt           time.Time              `json:"createdAt"`
+	UpdatedAt           time.Time              `json:"updatedAt"`
 }
 
 type CreateDeviceConfigRequest struct {
 	ProductionOrderID string                 `json:"productionOrderID" binding:"required"`
 	DeviceID          string                 `json:"deviceID"`
 	DeviceConfig      map[string]interface{} `json:"deviceConfig" binding:"required"`
+	Color             string                 `json:"color" binding:"required"`
+	Description       string                 `json:"description" binding:"required"`
+	Search            string                 `json:"search"`
 }
 
 type CreateDeviceConfigResponse struct {
@@ -42,6 +49,9 @@ type EditDeviceConfigRequest struct {
 	ProductionOrderID string                 `json:"productionOrderID" binding:"required"`
 	DeviceID          string                 `json:"deviceID"`
 	DeviceConfig      map[string]interface{} `json:"deviceConfig" binding:"required"`
+	Color             string                 `json:"color" binding:"required"`
+	Description       string                 `json:"description" binding:"required"`
+	Search            string                 `json:"search"`
 }
 
 type EditDeviceConfigResponse struct {

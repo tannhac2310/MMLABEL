@@ -2,11 +2,11 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/device_config"
-
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/device_config"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/apperror"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/interceptor"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/routeutil"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/transportutil"
 )
@@ -29,11 +29,15 @@ func (s deviceConfigController) CreateDeviceConfig(c *gin.Context) {
 		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
 		return
 	}
-
+	userId := interceptor.UserIDFromCtx(c)
 	id, err := s.deviceConfigService.CreateDeviceConfig(c, &device_config.CreateDeviceConfigOpts{
 		ProductionOrderID: req.ProductionOrderID,
 		DeviceID:          req.DeviceID,
 		DeviceConfig:      req.DeviceConfig,
+		Color:             req.Color,
+		Description:       req.Description,
+		Search:            req.Search,
+		CreatedBy:         userId,
 	})
 	if err != nil {
 		transportutil.Error(c, err)
@@ -58,6 +62,10 @@ func (s deviceConfigController) EditDeviceConfig(c *gin.Context) {
 		ProductionOrderID: req.ProductionOrderID,
 		DeviceID:          req.DeviceID,
 		DeviceConfig:      req.DeviceConfig,
+		Color:             req.Color,
+		Description:       req.Description,
+		Search:            req.Search,
+		UpdatedBy:         interceptor.UserIDFromCtx(c),
 	})
 	if err != nil {
 		transportutil.Error(c, err)
@@ -93,7 +101,7 @@ func (s deviceConfigController) FindDeviceConfigs(c *gin.Context) {
 	}
 
 	deviceConfigs, cnt, err := s.deviceConfigService.FindDeviceConfigs(c, &device_config.FindDeviceConfigsOpts{
-		Name: req.Filter.Name,
+		Search: req.Filter.Search,
 	}, &repository.Sort{
 		Order: repository.SortOrderDESC,
 		By:    "ID",
@@ -116,12 +124,16 @@ func (s deviceConfigController) FindDeviceConfigs(c *gin.Context) {
 
 func toDeviceConfigResp(f *device_config.Data) *dto.DeviceConfig {
 	return &dto.DeviceConfig{
-		ID:                f.ID,
-		ProductionOrderID: f.ProductionOrderID,
-		DeviceID:          f.DeviceID,
-		DeviceConfig:      f.DeviceConfig,
-		CreatedAt:         f.CreatedAt,
-		UpdatedAt:         f.UpdatedAt,
+		ID:                  f.ID,
+		ProductionOrderID:   f.ProductionOrderID,
+		ProductionOrderName: f.ProductionOrderName,
+		DeviceID:            f.DeviceID.String,
+		DeviceConfig:        f.DeviceConfig,
+		Color:               f.Color.String,
+		Description:         f.Description.String,
+		CreatedBy:           f.CreatedBy,
+		CreatedAt:           f.CreatedAt,
+		UpdatedAt:           f.UpdatedAt,
 	}
 }
 

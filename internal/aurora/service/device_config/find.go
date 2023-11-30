@@ -8,6 +8,7 @@ import (
 
 func (c *deviceConfigService) FindDeviceConfigs(ctx context.Context, opts *FindDeviceConfigsOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error) {
 	filter := &repository.SearchProductionOrderDeviceConfigOpts{
+		Search: opts.Search,
 		Limit:  limit,
 		Offset: offset,
 		Sort:   sort,
@@ -27,6 +28,7 @@ func (c *deviceConfigService) FindDeviceConfigs(ctx context.Context, opts *FindD
 		if err != nil {
 			return nil, nil, err
 		}
+
 		results = append(results, &Data{
 			ProductionOrderDeviceConfigData: deviceConfig,
 		})
@@ -35,5 +37,5 @@ func (c *deviceConfigService) FindDeviceConfigs(ctx context.Context, opts *FindD
 }
 
 type FindDeviceConfigsOpts struct {
-	Name string
+	Search string
 }

@@ -17,8 +17,12 @@ func (c *deviceConfigService) EditDeviceConfig(ctx context.Context, opt *EditDev
 	updater.Set(model.ProductionOrderDeviceConfigFieldProductionOrderID, opt.ProductionOrderID)
 	updater.Set(model.ProductionOrderDeviceConfigFieldDeviceID, opt.DeviceID)
 	updater.Set(model.ProductionOrderDeviceConfigFieldDeviceConfig, opt.DeviceConfig)
+	updater.Set(model.ProductionOrderDeviceConfigFieldColor, opt.Color)
+	updater.Set(model.ProductionOrderDeviceConfigFieldDescription, opt.Description)
+	updater.Set(model.ProductionOrderDeviceConfigFieldSearch, opt.Search)
 
 	updater.Set(model.ProductionOrderDeviceConfigFieldUpdatedAt, time.Now())
+	updater.Set(model.ProductionOrderDeviceConfigFieldUpdatedBy, opt.UpdatedBy)
 
 	err = cockroach.UpdateFields(ctx, updater)
 	if err != nil {
@@ -32,4 +36,8 @@ type EditDeviceConfigOpts struct {
 	ProductionOrderID string
 	DeviceID          string
 	DeviceConfig      map[string]interface{}
+	Color             string
+	Description       string
+	Search            string
+	UpdatedBy         string
 }
