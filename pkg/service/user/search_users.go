@@ -27,6 +27,7 @@ func (u *userService) SearchUsers(ctx context.Context, opts *SearchUsersOpts, li
 		IDs:         opts.IDs,
 		NotIDs:      opts.NotIDs,
 		NotRoleIDs:  opts.NotRoleIDs,
+		Department:  opts.Department,
 		Name:        opts.Name,
 		Search:      opts.Search,
 		PhoneNumber: opts.PhoneNumber,
