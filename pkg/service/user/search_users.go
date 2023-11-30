@@ -13,6 +13,7 @@ type SearchUsersOpts struct {
 	NotIDs      []string
 	NotRoleIDs  []string
 	Name        string
+	Department	string
 	Search      string
 	PhoneNumber string
 	Email       string
@@ -24,10 +25,10 @@ type SearchUsersOpts struct {
 func (u *userService) SearchUsers(ctx context.Context, opts *SearchUsersOpts, limit, offset int64) ([]*repository.UserData, *repository.CountResult, error) {
 	filter := &repository.SearchUsersOpts{
 		IDs:         opts.IDs,
-		Name:        opts.Name,
-		Search:      opts.Search,
 		NotIDs:      opts.NotIDs,
 		NotRoleIDs:  opts.NotRoleIDs,
+		Name:        opts.Name,
+		Search:      opts.Search,
 		PhoneNumber: opts.PhoneNumber,
 		Email:       opts.Email,
 		GroupID:     opts.GroupID,
