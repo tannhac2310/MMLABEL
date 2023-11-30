@@ -185,12 +185,16 @@ func toInkExportResp(f *ink_export.InkExportData) *dto.InkExport {
 	}
 
 	po := f.ProductionOrderData
-	productionOrderData := &dto.ProductionOrderData{
-		ID:          po.ID,
-		Name:        po.Name,
-		ProductCode: po.ProductCode,
-		ProductName: po.ProductName,
+	productionOrderData := &dto.ProductionOrderData{}
+	if po != nil {
+		productionOrderData = &dto.ProductionOrderData{
+			ID:          po.ID,
+			Name:        po.Name,
+			ProductCode: po.ProductCode,
+			ProductName: po.ProductName,
+		}
 	}
+
 	return &dto.InkExport{
 		ID:                  f.ID,
 		Name:                f.Name,
