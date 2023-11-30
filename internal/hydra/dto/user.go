@@ -101,6 +101,7 @@ type (
 	UserFilter struct {
 		IDs         []string      `json:"ids"`
 		Name        string        `json:"name"`
+		Department  string		  `json:"department"`			
 		NotIDs      []string      `json:"notIds"`
 		NotRoleIDs  []string      `json:"notRoleIDs"`
 		Search      string        `json:"search"`

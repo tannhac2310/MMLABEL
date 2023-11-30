@@ -19,16 +19,17 @@ func (u *userController) FindUsers(c *gin.Context) {
 	}
 
 	users, total, err := u.userService.SearchUsers(c, &user.SearchUsersOpts{
-		IDs:         req.Filter.IDs,
-		Name:        req.Filter.Name,
-		NotIDs:      req.Filter.NotIDs,
-		NotRoleIDs:  req.Filter.NotRoleIDs,
-		Search:      req.Filter.Search,
-		Type:        req.Filter.Type,
-		PhoneNumber: req.Filter.PhoneNumber,
-		Email:       req.Filter.Email,
-		GroupID:     req.Filter.GroupID,
-		RoleID:      req.Filter.RoleID,
+		IDs:         		req.Filter.IDs,
+		Name:        		req.Filter.Name,
+		Department:        	req.Filter.Department,
+		NotIDs:      		req.Filter.NotIDs,
+		NotRoleIDs:  		req.Filter.NotRoleIDs,
+		Search:      		req.Filter.Search,
+		Type:        		req.Filter.Type,
+		PhoneNumber: 		req.Filter.PhoneNumber,
+		Email:       		req.Filter.Email,
+		GroupID:     		req.Filter.GroupID,
+		RoleID:      		req.Filter.RoleID,
 	}, req.Paging.Limit, req.Paging.Offset)
 	if err != nil {
 		transportutil.Error(c, err)

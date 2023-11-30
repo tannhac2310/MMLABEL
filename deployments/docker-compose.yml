@@ -1,4 +1,4 @@
-version: '3.4'
+version: "3.4"
 
 services:
   nats_streaming:
@@ -28,7 +28,7 @@ services:
       MINIO_ACCESS_KEY: access_key
       MINIO_SECRET_KEY: secret_key
       MINIO_REGION: us-east-1
-    command: [ "server", "/data" ]
+    command: ["server", "/data"]
   migrate:
     depends_on:
       - db
@@ -59,7 +59,7 @@ services:
       - 14268:14268
       - 14250:14250
       - 9411:9411
-    command: [ "--log-level", "debug" ]
+    command: ["--log-level", "debug"]
   pyroscope:
     image: "pyroscope/pyroscope:latest"
     ports:

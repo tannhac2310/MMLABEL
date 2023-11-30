@@ -76,6 +76,7 @@ type SearchUsersOpts struct {
 	NotIDs      []string
 	NotRoleIDs  []string
 	Name        string
+	Department  string
 	Search      string
 	PhoneNumber string
 	Email       string
@@ -117,6 +118,11 @@ func (s *SearchUsersOpts) buildQuery(isCount bool) (string, []interface{}) {
 		args = append(args, "%"+s.Name+"%")
 		conds += fmt.Sprintf(" AND u.%s ILIKE $%d", model.UserFieldName, len(args))
 	}
+	if s.Department != "" {
+		args = append(args, "%"+s.Department+"%")
+		conds += fmt.Sprintf(" AND u.%s ILIKE $%d", model.UserFieldDepartments, len(args))
+	}
+	fmt.Println("Minh:", s.Department)
 	if s.Search != "" {
 		args = append(args, "%"+s.Search+"%")
 		conds += fmt.Sprintf(" AND (u.%s ILIKE $%d", model.UserFieldName, len(args))
@@ -157,7 +163,7 @@ func (s *SearchUsersOpts) buildQuery(isCount bool) (string, []interface{}) {
 
 		joins += fmt.Sprintf(" INNER JOIN %[1]s AS %[1]s ON %[1]s.%[2]s = u.id AND %[1]s.deleted_at IS NULL", tableName, model.UserGroupFieldUserID)
 	}
-
+	
 	u := &model.User{}
 	fields, _ := u.FieldMap()
 	if isCount {
@@ -176,6 +182,7 @@ func (s *SearchUsersOpts) buildQuery(isCount bool) (string, []interface{}) {
 func (r *userRepo) Search(ctx context.Context, s *SearchUsersOpts) ([]*UserData, error) {
 	users := make([]*UserData, 0)
 	sql, args := s.buildQuery(false)
+	fmt.Println(sql)
 	err := cockroach.Select(ctx, sql, args...).ScanAll(&users)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.Select: %w", err)
@@ -201,7 +208,6 @@ func (r *userRepo) FindByPhoneOrEmail(ctx context.Context, k string) (*UserData,
 func (r *userRepo) Count(ctx context.Context, s *SearchUsersOpts) (*CountResult, error) {
 	countResult := &CountResult{}
 	sql, args := s.buildQuery(true)
-	fmt.Println(sql)
 	err := cockroach.Select(ctx, sql, args...).ScanOne(countResult)
 	if err != nil {
 		return nil, fmt.Errorf("syllabus.Count: %w", err)
