@@ -2,8 +2,9 @@ package model
 
 import (
 	"database/sql"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
 const (
