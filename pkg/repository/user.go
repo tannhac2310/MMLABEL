@@ -119,8 +119,17 @@ func (s *SearchUsersOpts) buildQuery(isCount bool) (string, []interface{}) {
 		conds += fmt.Sprintf(" AND u.%s ILIKE $%d", model.UserFieldName, len(args))
 	}
 	if s.Department != "" {
-		args = append(args, "%"+s.Department+"%")
-		conds += fmt.Sprintf(" AND u.%s ILIKE $%d", model.UserFieldDepartments, len(args))
+		var departs = []string{s.Department}
+		if s.Department == "CBD" {
+			departs = []string{
+				"CBD", "CA", "NLC", "NLT", "CLD", "CLM", "CTP",
+				"CTAY", "CVT", "BE", "BCD", "BCM","PCN", "BTD", "BTM",
+				"BKE", "DA", "DD", "DM", "DNN", "DNKT", "UDE"}
+		}
+		args = append(args, departs)
+		conds += fmt.Sprintf(" AND NOT u.%s = ANY($1)", model.UserFieldDepartments)
+		// args = append(args, "%"+s.Department+"%")
+		// conds += fmt.Sprintf(" AND u.%s ILIKE $%d", model.UserFieldDepartments, len(args))
 	}
 	fmt.Println("Minh:", s.Department)
 	if s.Search != "" {

@@ -102,6 +102,7 @@ func (s deviceConfigController) FindDeviceConfigs(c *gin.Context) {
 
 	deviceConfigs, cnt, err := s.deviceConfigService.FindDeviceConfigs(c, &device_config.FindDeviceConfigsOpts{
 		Search: req.Filter.Search,
+		ProductionOrderID: req.Filter.ProductionOrderID,
 	}, &repository.Sort{
 		Order: repository.SortOrderDESC,
 		By:    "ID",

@@ -1,12 +1,14 @@
 package dto
 
 import (
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/commondto"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/commondto"
 )
 
 type DeviceConfigFilter struct {
 	Search string `json:"search"`
+	ProductionOrderID   string     `json:"productionOrderID"`
 }
 
 type FindDeviceConfigsRequest struct {
