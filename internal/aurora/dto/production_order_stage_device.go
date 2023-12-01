@@ -53,7 +53,7 @@ type EditProductionOrderStageDeviceRequest struct {
 	ID                string                                `json:"id" binding:"required"`
 	DeviceID          string                                `json:"deviceID" binding:"required"`
 	Quantity          int64                                 `json:"quantity"`
-	AssignedQuantity          int64                          `json:"assignedQuantity"`
+	AssignedQuantity  int64                          		`json:"assignedQuantity"`
 	ProcessStatus     enum.ProductionOrderStageDeviceStatus `json:"processStatus" binding:"required"`
 	Status            enum.CommonStatus                     `json:"status" binding:"required"`
 	Responsible       []string                              `json:"responsible"`

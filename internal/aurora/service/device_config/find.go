@@ -9,8 +9,8 @@ import (
 func (c *deviceConfigService) FindDeviceConfigs(ctx context.Context, opts *FindDeviceConfigsOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error) {
 	filter := &repository.SearchProductionOrderDeviceConfigOpts{
 		Search: opts.Search,
-		Limit:  limit,
 		ProductionOrderID: opts.ProductionOrderID,
+		Limit:  limit,
 		Offset: offset,
 		Sort:   sort,
 	}
