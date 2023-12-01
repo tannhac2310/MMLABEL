@@ -2,7 +2,6 @@ package tracingutil
 
 import (
 	"context"
-
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"go.opentelemetry.io/otel"

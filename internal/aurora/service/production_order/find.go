@@ -59,13 +59,18 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 			return nil, nil, nil, err
 		}
 		stageData := make([]*ProductionOrderStageData, 0, len(stages))
+		stageDevicesOfPO, err := c.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
+			ProductionOrderID: productionOrder.ID,
+			Limit:             1000,
+			Offset:            0,
+		})
+		mapStageDevices := make(map[string][]*repository.ProductionOrderStageDeviceData)
+		for _, stageDevice := range stageDevicesOfPO {
+			mapStageDevices[stageDevice.ProductionOrderStageID] = append(mapStageDevices[stageDevice.ProductionOrderStageID], stageDevice)
+		}
 		// find production order stage device for each stage
 		for _, stage := range stages {
-			stageDevices, err := c.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
-				ProductionOrderStageID: stage.ID,
-				Limit:                  1000,
-				Offset:                 0,
-			})
+			stageDevices := mapStageDevices[stage.ID]
 			// consolidate responsibility information from user table
 			users := make([]*model2.User, 0)
 			for _, stageDevice := range stageDevices {
