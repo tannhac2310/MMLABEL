@@ -38,6 +38,7 @@ func (s productionOrderController) AcceptAndChangeNextStage(c *gin.Context) {
 
 	transportutil.SendJSONResponse(c, &dto.AcceptAndChangeNextStageResponse{})
 }
+
 func (s productionOrderController) CreateProductionOrder(c *gin.Context) {
 	req := &dto.CreateProductionOrderRequest{}
 	err := c.ShouldBind(req)
@@ -64,6 +65,13 @@ func (s productionOrderController) CreateProductionOrder(c *gin.Context) {
 		})
 	}
 
+	customField := make([]*production_order.CustomField, 0)
+	for _, field := range req.CustomField {
+		customField = append(customField, &production_order.CustomField{
+			Field: field.Key,
+			Value: field.Value,
+		})
+	}
 	id, err := s.productionOrderService.CreateProductionOrder(c, &production_order.CreateProductionOrderOpts{
 		Name:                 req.Name,
 		ProductCode:          req.ProductCode,
@@ -80,7 +88,7 @@ func (s productionOrderController) CreateProductionOrder(c *gin.Context) {
 		Status:               req.Status,
 		Note:                 req.Note,
 		ProductionOrderStage: orderStage,
-		CustomData:           nil,
+		CustomField:          customField,
 		CreatedBy:            userID,
 	})
 	if err != nil {
@@ -278,6 +286,7 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 		Status:                f.Status,
 		Note:                  f.Note.String,
 		ProductionOrderStages: orderStage,
+		CustomData:            f.CustomData,
 		CreatedBy:             f.CreatedBy,
 		CreatedAt:             f.CreatedAt,
 		UpdatedAt:             f.UpdatedAt,

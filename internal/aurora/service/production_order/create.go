@@ -61,15 +61,18 @@ func (c *productionOrderService) CreateProductionOrder(ctx context.Context, opt 
 				return fmt.Errorf("add order stage: %w", err)
 			}
 		}
-		for key, val := range opt.CustomData {
+		for _, val := range opt.CustomField {
 			// add custom field table
 			err = c.customFieldRepo.Insert(ctx2, &model.CustomField{
 				ID:         idutil.ULIDNow(),
 				EntityType: enum.CustomFieldTypeProductionOrder,
 				EntityID:   id,
-				Field:      key,
-				Value:      val,
+				Field:      val.Field,
+				Value:      val.Value,
 			})
+			if err != nil {
+				return fmt.Errorf("c.customFieldRepo.Insert: %w", err)
+			}
 		}
 		return nil
 	})
@@ -95,7 +98,7 @@ type CreateProductionOrderOpts struct {
 	Status               enum.ProductionOrderStatus
 	Note                 string
 	ProductionOrderStage []*ProductionOrderStage
-	CustomData           map[string]string
+	CustomField          []*CustomField
 	CreatedBy            string
 }
 
@@ -111,4 +114,9 @@ type ProductionOrderStage struct {
 	Data                map[string]interface{}
 	ID                  string
 	Sorting             int16
+}
+
+type CustomField struct {
+	Field string
+	Value string
 }

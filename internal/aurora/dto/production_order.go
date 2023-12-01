@@ -49,6 +49,7 @@ type ProductionOrder struct {
 	Status                enum.ProductionOrderStatus `json:"status"`
 	Note                  string                     `json:"note"`
 	ProductionOrderStages []*OrderStage              `json:"production_order_stages"`
+	CustomData            map[string]string          `json:"customData"`
 	CreatedBy             string                     `json:"createdBy"`
 	CreatedAt             time.Time                  `json:"createdAt"`
 	UpdatedAt             time.Time                  `json:"updatedAt"`
@@ -70,6 +71,11 @@ type CreateProductionOrderRequest struct {
 	ProductionOrderStages []CreateOrderStage         `json:"production_order_stages"`
 	Status                enum.ProductionOrderStatus `json:"status"  binding:"required"`
 	Note                  string                     `json:"note"`
+	CustomField           []*CustomField             `json:"customField"`
+}
+type CustomField struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }
 
 type OrderStageDevice struct {

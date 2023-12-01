@@ -2,6 +2,7 @@ package production_order_stage_device
 
 import (
 	"context"
+	"fmt"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
@@ -46,11 +47,30 @@ type Service interface {
 	FindEventLog(ctx context.Context, opt *FindEventLogOpts) ([]*repository.EventLogData, error)
 }
 type productionOrderStageDeviceService struct {
-	productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo
+	productionOrderStageDeviceRepo   repository.ProductionOrderStageDeviceRepo
+	sDeviceProgressStatusHistoryRepo repository.DeviceProgressStatusHistoryRepo
 }
 
 func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditProductionOrderStageDeviceOpts) error {
 	table := model.ProductionOrderStageDevice{}
+	// find by id and check if it is existed
+	data, _ := p.productionOrderStageDeviceRepo.FindByID(ctx, opt.ID)
+	// todo check error != notfound
+
+	if data.ProcessStatus != opt.ProcessStatus {
+		//  insert DeviceProgressStatusHistory
+		err := p.sDeviceProgressStatusHistoryRepo.Insert(ctx, &model.DeviceProgressStatusHistory{
+			ID:                           idutil.ULIDNow(),
+			ProductionOrderStageDeviceID: data.ProductionOrderStageID,
+			DeviceID:                     data.DeviceID,
+			ProcessStatus:                opt.ProcessStatus,
+			CreatedAt:                    time.Now(),
+		})
+
+		if err != nil {
+			return fmt.Errorf("p.sDeviceProgressStatusHistoryRepo.Insert: %w", err)
+		}
+	}
 
 	updater := cockroach.NewUpdater(table.TableName(), model.ProductionOrderStageFieldID, opt.ID)
 	updater.Set(model.ProductionOrderStageDeviceFieldDeviceID, opt.DeviceID)
@@ -110,9 +130,13 @@ func (p productionOrderStageDeviceService) Find(ctx context.Context, opt *FindPr
 	return productionOrderStageDevices, nil
 }
 
-func NewService(productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo) Service {
+func NewService(
+	productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo,
+	sDeviceProgressStatusHistoryRepo repository.DeviceProgressStatusHistoryRepo,
+) Service {
 	return &productionOrderStageDeviceService{
-		productionOrderStageDeviceRepo: productionOrderStageDeviceRepo,
+		productionOrderStageDeviceRepo:   productionOrderStageDeviceRepo,
+		sDeviceProgressStatusHistoryRepo: sDeviceProgressStatusHistoryRepo,
 	}
 
 }

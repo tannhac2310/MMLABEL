@@ -22,6 +22,7 @@ type ProductionOrderStageDeviceRepo interface {
 	DeleteByProductionOrderStageID(ctx context.Context, poStageID string) error
 	InsertEventLog(ctx context.Context, e *model.EventLog) error
 	FindEventLog(ctx context.Context, s *SearchEventLogOpts) ([]*EventLogData, error)
+	FindByID(ctx context.Context, id string) (*model.ProductionOrderStageDevice, error)
 }
 type SearchEventLogOpts struct {
 	DeviceID string
@@ -45,6 +46,15 @@ func NewProductionOrderStageDeviceRepo() ProductionOrderStageDeviceRepo {
 	return &productionOrderStageDevicesRepo{}
 }
 
+func (p *productionOrderStageDevicesRepo) FindByID(ctx context.Context, id string) (*model.ProductionOrderStageDevice, error) {
+	e := &model.ProductionOrderStageDevice{}
+	err := cockroach.FindOne(ctx, e, "id = $1", id)
+	if err != nil {
+		return nil, fmt.Errorf("cockroach.FindOne: %w", err)
+	}
+
+	return e, nil
+}
 func (p *productionOrderStageDevicesRepo) InsertEventLog(ctx context.Context, e *model.EventLog) error {
 	err := cockroach.Create(ctx, e)
 	if err != nil {
@@ -115,6 +125,7 @@ func (r *productionOrderStageDevicesRepo) SoftDeletes(ctx context.Context, ids [
 
 // SearchProductionOrderStageDevicesOpts all params is options
 type SearchProductionOrderStageDevicesOpts struct {
+	IDs                        []string
 	ProductionOrderStageID     string
 	ProductionOrderID          string
 	DeviceID                   string
@@ -129,6 +140,11 @@ func (s *SearchProductionOrderStageDevicesOpts) buildQuery(isCount bool) (string
 	var args []interface{}
 	conds := ""
 	joins := ""
+
+	if len(s.IDs) > 0 {
+		args = append(args, s.IDs)
+		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.ProductionOrderStageDeviceFieldID)
+	}
 
 	if s.ProductionOrderID != "" {
 		args = append(args, s.ProductionOrderID)
