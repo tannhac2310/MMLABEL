@@ -1,13 +1,15 @@
 package dto
 
 import (
+	"time"
+
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/commondto"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
-	"time"
 )
 
 type DeviceFilter struct {
 	Name string `json:"name"`
+	Step string `json:"department"`
 }
 
 type FindDevicesRequest struct {
@@ -23,6 +25,7 @@ type Device struct {
 	ID        string                 `json:"id"`
 	Name      string                 `json:"name"`
 	Code      string                 `json:"code"`
+	Step 	  string                 `json:"Step"`
 	OptionID  string                 `json:"optionID"`
 	Data      map[string]interface{} `json:"data"`
 	Status    enum.CommonStatus      `json:"status"`
@@ -34,6 +37,7 @@ type Device struct {
 type CreateDeviceRequest struct {
 	Name     string                 `json:"name"`
 	Code     string                 `json:"code"`
+	Step     string                 `json:"step"`
 	OptionID string                 `json:"optionID"`
 	Data     map[string]interface{} `json:"data"`
 	Status   enum.CommonStatus      `json:"status"`
@@ -47,6 +51,7 @@ type EditDeviceRequest struct {
 	ID       string                 `json:"id" binding:"required"`
 	Name     string                 `json:"name"`
 	Code     string                 `json:"code"`
+	Step     string                 `json:"step"`
 	OptionID string                 `json:"optionID"`
 	Data     map[string]interface{} `json:"data"`
 	Status   enum.CommonStatus      `json:"status"`
