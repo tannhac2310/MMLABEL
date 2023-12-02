@@ -129,7 +129,7 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (
 	if s.OrderStageStatus > 0 && len(s.StageIDs) > 0 {
 		args = append(args, s.OrderStageStatus)
 		joins += fmt.Sprintf(` INNER JOIN production_order_stages AS pos ON pos.production_order_id = b.id AND pos.deleted_at IS NULL`)
-		conds += fmt.Sprintf(" AND pos.status = $%[1]d and pos.stage_id = = ANY($%[1]d) ", len(args))
+		conds += fmt.Sprintf(" AND pos.status = $%[1]d and pos.stage_id = ANY($%[1]d) ", len(args))
 	} else {
 		if len(s.StageIDs) > 0 {
 			args = append(args, s.StageIDs)
