@@ -59,6 +59,7 @@ func (r *devicesRepo) SoftDelete(ctx context.Context, id string) error {
 type SearchDevicesOpts struct {
 	IDs    []string
 	Name   string
+	Step   string
 	Code   string
 	Limit  int64
 	Offset int64
@@ -79,11 +80,15 @@ func (s *SearchDevicesOpts) buildQuery(isCount bool) (string, []interface{}) {
 		conds += fmt.Sprintf(" AND (b.%[2]s ILIKE $%[1]d OR b.%[3]s ILIKE $%[1]d)",
 			len(args), model.DeviceFieldName, model.DeviceFieldCode)
 	}
+	if s.Step != "" {
+		args = append(args, s.Step)
+		conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.DeviceFieldStep, len(args))
+	}
 	if s.Code != "" {
 		args = append(args, s.Code)
 		conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.DeviceFieldCode, len(args))
 	}
-
+	
 	b := &model.Device{}
 	fields, _ := b.FieldMap()
 	if isCount {

@@ -2,13 +2,15 @@ package model
 
 import (
 	"database/sql"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
 const (
 	DeviceFieldID        = "id"
 	DeviceFieldName      = "name"
+	DeviceFieldStep      = "step"
 	DeviceFieldCode      = "code"
 	DeviceFieldOptionID  = "option_id"
 	DeviceFieldData      = "data"
@@ -23,6 +25,7 @@ type Device struct {
 	ID        string                 `db:"id"`
 	Name      string                 `db:"name"`
 	Code      string                 `db:"code"`
+	Step      string           		 `db:"step"`
 	OptionID  sql.NullString         `db:"option_id"`
 	Data      map[string]interface{} `db:"data"`
 	Status    enum.CommonStatus      `db:"status"`
@@ -37,6 +40,7 @@ func (rcv *Device) FieldMap() (fields []string, values []interface{}) {
 		DeviceFieldID,
 		DeviceFieldName,
 		DeviceFieldCode,
+		DeviceFieldStep,
 		DeviceFieldOptionID,
 		DeviceFieldData,
 		DeviceFieldStatus,
@@ -50,6 +54,7 @@ func (rcv *Device) FieldMap() (fields []string, values []interface{}) {
 		&rcv.ID,
 		&rcv.Name,
 		&rcv.Code,
+		&rcv.Step,
 		&rcv.OptionID,
 		&rcv.Data,
 		&rcv.Status,
