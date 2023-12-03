@@ -19,29 +19,29 @@ func (c *productionOrderService) EditProductionOrder(ctx context.Context, opt *E
 		if err != nil {
 			return fmt.Errorf("c.editProductionOrder: %w", err)
 		}
-
-		err = c.editProductionOrderStage(ctx2, opt)
-		if err != nil {
-			return fmt.Errorf("c.editProductionOrderStage: %w", err)
-		}
-
-		// write code to edit custom field value
-		// delete all custom field value with entity type is production order and entity id is production order id
-		_ = c.customFieldRepo.DeleteByEntity(ctx2, enum.CustomFieldTypeProductionOrder, opt.ID)
-
-		// then insert new custom field value
-		for field, customFieldValue := range opt.CustomData {
-			err = c.customFieldRepo.Insert(ctx2, &model.CustomField{
-				ID:         idutil.ULIDNow(),
-				EntityType: enum.CustomFieldTypeProductionOrder,
-				EntityID:   opt.ID,
-				Field:      field,
-				Value:      customFieldValue,
-			})
-			if err != nil {
-				return fmt.Errorf("c.customFieldRepo.Insert: %w", err)
-			}
-		}
+		//todo edit production order stage later
+		//err = c.editProductionOrderStage(ctx2, opt)
+		//if err != nil {
+		//	return fmt.Errorf("c.editProductionOrderStage: %w", err)
+		//}
+		//
+		//// write code to edit custom field value
+		//// delete all custom field value with entity type is production order and entity id is production order id
+		//_ = c.customFieldRepo.DeleteByEntity(ctx2, enum.CustomFieldTypeProductionOrder, opt.ID)
+		//
+		//// then insert new custom field value
+		//for field, customFieldValue := range opt.CustomData {
+		//	err = c.customFieldRepo.Insert(ctx2, &model.CustomField{
+		//		ID:         idutil.ULIDNow(),
+		//		EntityType: enum.CustomFieldTypeProductionOrder,
+		//		EntityID:   opt.ID,
+		//		Field:      field,
+		//		Value:      customFieldValue,
+		//	})
+		//	if err != nil {
+		//		return fmt.Errorf("c.customFieldRepo.Insert: %w", err)
+		//	}
+		//}
 		return nil
 	})
 	if err2 != nil {
