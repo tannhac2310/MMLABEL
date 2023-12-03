@@ -96,7 +96,11 @@ func (p *EventMQTTSubscription) Subscribe() error {
 		fmt.Println(iotData.D, iotData.Ts)
 		for _, item := range iotData.D {
 			// find device in production order stage device
-			deviceID := strings.Replace(item.Tag, ":Counter", "", -1)
+			s := strings.Split(item.Tag, ":")
+			if len(s) != 2 {
+				continue
+			}
+			deviceID := s[0]
 			orderStageDevices, err := p.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
 				DeviceID:                   deviceID,
 				ProductionOrderStageStatus: enum.ProductionOrderStageStatusProductionStart,
