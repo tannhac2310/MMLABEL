@@ -86,58 +86,61 @@ func (p *EventMQTTSubscription) Subscribe() error {
 		ctx = cockroach.ContextWithDB(ctx, p.db)
 
 		// parse message.Payload() to data struct
-		var myStruct MyStruct
-		err := json.Unmarshal(message.Payload(), &myStruct)
+		var iotData MyStruct
+		err := json.Unmarshal(message.Payload(), &iotData)
 		if err != nil {
 			fmt.Println("Error parsing JSON:", err)
 			return
 		}
 
-		fmt.Println(myStruct.D, myStruct.Ts)
-		// find device in production order stage device
-		deviceID := strings.Replace(myStruct.D[0].Tag, ":CounterTag", "", -1)
+		fmt.Println(iotData.D, iotData.Ts)
+		for _, item := range iotData.D {
+			// find device in production order stage device
+			deviceID := strings.Replace(item.Tag, ":Counter", "", -1)
+			orderStageDevices, err := p.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
+				DeviceID:                   deviceID,
+				ProductionOrderStageStatus: enum.ProductionOrderStageStatusProductionStart,
+				Limit:                      1,
+				Offset:                     0,
+			})
 
-		devices, err := p.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
-			DeviceID:                   deviceID,
-			ProductionOrderStageStatus: enum.ProductionOrderStageStatusProductionStart,
-			Limit:                      1,
-			Offset:                     0,
-		})
+			if err != nil {
+				fmt.Println("============>>> Received message for topic ====", err)
+			}
+			activeStageID := ""
+			if len(orderStageDevices) == 1 && int64(item.Value) > 0 && int64(item.Value) > orderStageDevices[0].Quantity {
+				// update first device
+				device := orderStageDevices[0]
+				activeStageID = device.ProductionOrderStageID
+				_ = p.productionOrderStageDeviceRepo.Update(ctx, &model.ProductionOrderStageDevice{
+					ID:                     device.ID,
+					ProductionOrderStageID: device.ProductionOrderStageID,
+					DeviceID:               device.DeviceID,
+					Quantity:               int64(item.Value),
+					ProcessStatus:          device.ProcessStatus,
+					Status:                 device.Status,
+					Responsible:            device.Responsible,
+					Settings:               device.Settings,
+					Note:                   device.Note,
+					CreatedAt:              device.CreatedAt,
+					UpdatedAt:              device.UpdatedAt,
+				})
+			}
 
-		if err != nil {
-			fmt.Println("============>>> Received message for topic ====", err)
-		}
-		activeStageID := ""
-		if len(devices) == 1 && int64(myStruct.D[0].Value) > 0 && int64(myStruct.D[0].Value) > devices[0].Quantity {
-			// update first device
-			device := devices[0]
-			activeStageID = device.ProductionOrderStageID
-			_ = p.productionOrderStageDeviceRepo.Update(ctx, &model.ProductionOrderStageDevice{
-				ID:                     device.ID,
-				ProductionOrderStageID: device.ProductionOrderStageID,
-				DeviceID:               device.DeviceID,
-				Quantity:               int64(myStruct.D[0].Value),
-				ProcessStatus:          device.ProcessStatus,
-				Status:                 device.Status,
-				Responsible:            device.Responsible,
-				Settings:               device.Settings,
-				Note:                   device.Note,
-				CreatedAt:              device.CreatedAt,
-				UpdatedAt:              device.UpdatedAt,
+			now := time.Now()
+			date := now.Format("2006-01-02")
+			// insert event log
+			_ = p.productionOrderStageDeviceRepo.InsertEventLog(ctx, &model.EventLog{
+				ID:        time.Now().UnixNano(),
+				DeviceID:  deviceID,
+				StageID:   cockroach.String(activeStageID),
+				Quantity:  item.Value,
+				Msg:       cockroach.String(string(message.Payload())),
+				Date:      cockroach.String(date),
+				CreatedAt: now,
 			})
 		}
-		now := time.Now()
-		date := now.Format("2006-01-02")
-		// insert event log
-		_ = p.productionOrderStageDeviceRepo.InsertEventLog(ctx, &model.EventLog{
-			ID:        time.Now().UnixNano(),
-			DeviceID:  deviceID,
-			StageID:   cockroach.String(activeStageID),
-			Quantity:  float64(myStruct.D[0].Value),
-			Msg:       cockroach.String(string(message.Payload())),
-			Date:      cockroach.String(date),
-			CreatedAt: now,
-		})
+
 		message.Ack()
 	})
 	fmt.Printf("Subscribed to topic '%s'\n", topic)
