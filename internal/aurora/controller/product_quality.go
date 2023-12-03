@@ -110,6 +110,8 @@ func (s productQualityController) FindProductQuality(c *gin.Context) {
 		ProductionOrderID: req.Filter.ProductionOrderID,
 		DefectType:        req.Filter.DefectType,
 		DefectCode:        req.Filter.DefectCode,
+		CreatedAtFrom:     req.Filter.CreatedAtFrom,
+		CreatedAtTo:       req.Filter.CreatedAtTo,
 	}, &repository.Sort{
 		Order: repository.SortOrderDESC,
 		By:    "ID",
