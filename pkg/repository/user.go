@@ -127,7 +127,7 @@ func (s *SearchUsersOpts) buildQuery(isCount bool) (string, []interface{}) {
 				"BKE", "DA", "DD", "DM", "DNN", "DNKT", "UDE"}
 		}
 		args = append(args, departs)
-		conds += fmt.Sprintf(" AND NOT u.%s = ANY($1)", model.UserFieldDepartments)
+		conds += fmt.Sprintf(" AND u.%s = ANY($1)", model.UserFieldDepartments)
 		// args = append(args, "%"+s.Department+"%")
 		// conds += fmt.Sprintf(" AND u.%s ILIKE $%d", model.UserFieldDepartments, len(args))
 	}
