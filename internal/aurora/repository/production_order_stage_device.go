@@ -180,7 +180,7 @@ func (s *SearchProductionOrderStageDevicesOpts) buildQuery(isCount bool) (string
 
 	order := " ORDER BY b.id DESC "
 	if s.Sort != nil {
-		order = fmt.Sprintf(" ORDER BY b.%s %s", s.Sort.By, s.Sort.Order)
+		order = fmt.Sprintf(" ORDER BY b.%s %s ", s.Sort.By, s.Sort.Order)
 	}
 	return fmt.Sprintf(`SELECT b.%s, pos.production_order_id as production_order_id, COALESCE (d.name,'N/A') as device_name
 		FROM %s AS b %s
