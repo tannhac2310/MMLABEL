@@ -24,6 +24,7 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 		EstimatedStartAtFrom: opts.EstimatedStartAtFrom,
 		EstimatedStartAtTo:   opts.EstimatedStartAtTo,
 		Status:               opts.Status,
+		Statuses:             opts.Statuses,
 		Responsible:          opts.Responsible,
 		StageIDs:             opts.StageIDs,
 		OrderStageStatus:     opts.OrderStageStatus,
@@ -142,6 +143,7 @@ type FindProductionOrdersOpts struct {
 	Name                 string
 	ProductCode          string
 	Status               enum.ProductionOrderStatus
+	Statuses             []enum.ProductionOrderStatus
 	EstimatedStartAtFrom time.Time
 	EstimatedStartAtTo   time.Time
 	OrderStageStatus     enum.ProductionOrderStageStatus

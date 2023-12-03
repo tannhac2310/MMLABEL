@@ -11,6 +11,7 @@ type ProductionOrderFilter struct {
 	Name                 string                          `json:"name"`
 	CustomerID           string                          `json:"customerID"`
 	Status               enum.ProductionOrderStatus      `json:"status"`
+	Statuses             []enum.ProductionOrderStatus    `json:"statuses"`
 	OrderStageStatus     enum.ProductionOrderStageStatus `json:"orderStageStatus"`
 	EstimatedStartAtTo   time.Time                       `json:"estimatedStartAtTo"`
 	EstimatedStartAtFrom time.Time                       `json:"estimatedStartAtFrom"`

@@ -188,6 +188,7 @@ func (s productionOrderController) FindProductionOrders(c *gin.Context) {
 		CustomerID:           req.Filter.CustomerID,
 		Name:                 req.Filter.Name,
 		Status:               req.Filter.Status,
+		Statuses:             req.Filter.Statuses,
 		EstimatedStartAtFrom: req.Filter.EstimatedStartAtFrom,
 		EstimatedStartAtTo:   req.Filter.EstimatedStartAtTo,
 		OrderStageStatus:     req.Filter.OrderStageStatus,
