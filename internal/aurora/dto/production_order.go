@@ -145,20 +145,20 @@ type AcceptAndChangeNextStageResponse struct {
 }
 
 type EditProductionOrderRequest struct {
-	ID                    string                     `json:"id" binding:"required"`
-	Name                  string                     `json:"name" binding:"required"`
-	ProductCode           string                     `json:"productCode"  binding:"required"`
-	ProductName           string                     `json:"productName"  binding:"required"`
-	QtyPaper              int64                      `json:"qtyPaper"`
-	QtyFinished           int64                      `json:"qtyFinished"`
-	QtyDelivered          int64                      `json:"qtyDelivered"`
-	EstimatedStartAt      time.Time                  `json:"estimatedStartAt"`
-	EstimatedCompleteAt   time.Time                  `json:"estimatedCompleteAt"`
-	DeliveryDate          time.Time                  `json:"deliveryDate"`
-	DeliveryImage         string                     `json:"deliveryImage"`
-	Status                enum.ProductionOrderStatus `json:"status"  binding:"required"`
-	Note                  string                     `json:"note"`
-	ProductionOrderStages []EditOrderStage           `json:"production_order_stages" binding:"required"`
+	ID                  string                     `json:"id" binding:"required"`
+	Name                string                     `json:"name" binding:"required"`
+	ProductCode         string                     `json:"productCode"  binding:"required"`
+	ProductName         string                     `json:"productName"  binding:"required"`
+	QtyPaper            int64                      `json:"qtyPaper"`
+	QtyFinished         int64                      `json:"qtyFinished"`
+	QtyDelivered        int64                      `json:"qtyDelivered"`
+	EstimatedStartAt    time.Time                  `json:"estimatedStartAt"`
+	EstimatedCompleteAt time.Time                  `json:"estimatedCompleteAt"`
+	DeliveryDate        time.Time                  `json:"deliveryDate"`
+	DeliveryImage       string                     `json:"deliveryImage"`
+	Status              enum.ProductionOrderStatus `json:"status"  binding:"required"`
+	Note                string                     `json:"note"`
+	//ProductionOrderStages []EditOrderStage           `json:"production_order_stages" binding:"required"`
 }
 type EditOrderStage struct {
 	ID                  string                          `json:"id"`

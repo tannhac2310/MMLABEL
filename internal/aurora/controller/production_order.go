@@ -109,36 +109,37 @@ func (s productionOrderController) EditProductionOrder(c *gin.Context) {
 		return
 	}
 	// write code to edit production order and production order stage
-	productionOderStage := make([]*production_order.ProductionOrderStage, 0)
-	for idx, stage := range req.ProductionOrderStages {
-		productionOderStage = append(productionOderStage, &production_order.ProductionOrderStage{
-			ID:                  stage.ID,
-			StageID:             stage.StageID,
-			EstimatedStartAt:    stage.EstimatedStartAt,
-			EstimatedCompleteAt: stage.EstimatedCompleteAt,
-			StartedAt:           stage.StartedAt,
-			CompletedAt:         stage.CompletedAt,
-			Status:              stage.Status,
-			Condition:           stage.Condition,
-			Note:                stage.Note,
-			Data:                stage.Data,
-			Sorting:             int16(len(req.ProductionOrderStages) - idx),
-		})
-	}
+	// todo implement later
+	//productionOderStage := make([]*production_order.ProductionOrderStage, 0)
+	//for idx, stage := range req.ProductionOrderStages {
+	//	productionOderStage = append(productionOderStage, &production_order.ProductionOrderStage{
+	//		ID:                  stage.ID,
+	//		StageID:             stage.StageID,
+	//		EstimatedStartAt:    stage.EstimatedStartAt,
+	//		EstimatedCompleteAt: stage.EstimatedCompleteAt,
+	//		StartedAt:           stage.StartedAt,
+	//		CompletedAt:         stage.CompletedAt,
+	//		Status:              stage.Status,
+	//		Condition:           stage.Condition,
+	//		Note:                stage.Note,
+	//		Data:                stage.Data,
+	//		Sorting:             int16(len(req.ProductionOrderStages) - idx),
+	//	})
+	//}
 	err = s.productionOrderService.EditProductionOrder(c, &production_order.EditProductionOrderOpts{
-		ID:                   req.ID,
-		Name:                 req.Name,
-		QtyPaper:             req.QtyPaper,
-		QtyFinished:          req.QtyFinished,
-		QtyDelivered:         req.QtyDelivered,
-		EstimatedStartAt:     req.EstimatedStartAt,
-		EstimatedCompleteAt:  req.EstimatedCompleteAt,
-		Status:               req.Status,
-		DeliveryDate:         req.DeliveryDate,
-		DeliveryImage:        req.DeliveryImage,
-		Note:                 req.Note,
-		ProductionOrderStage: productionOderStage,
-		CustomData:           nil,
+		ID:                  req.ID,
+		Name:                req.Name,
+		QtyPaper:            req.QtyPaper,
+		QtyFinished:         req.QtyFinished,
+		QtyDelivered:        req.QtyDelivered,
+		EstimatedStartAt:    req.EstimatedStartAt,
+		EstimatedCompleteAt: req.EstimatedCompleteAt,
+		Status:              req.Status,
+		DeliveryDate:        req.DeliveryDate,
+		DeliveryImage:       req.DeliveryImage,
+		Note:                req.Note,
+		//ProductionOrderStage: productionOderStage,
+		//CustomData: nil,
 	})
 	if err != nil {
 		transportutil.Error(c, err)
