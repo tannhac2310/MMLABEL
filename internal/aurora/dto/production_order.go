@@ -21,6 +21,7 @@ type ProductionOrderFilter struct {
 type FindProductionOrdersRequest struct {
 	Filter *ProductionOrderFilter `json:"filter" binding:"required"`
 	Paging *commondto.Paging      `json:"paging" binding:"required"`
+	Sort   *commondto.Sort        `json:"sort"`
 }
 
 type FindProductionOrdersResponse struct {

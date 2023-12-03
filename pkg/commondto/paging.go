@@ -8,6 +8,10 @@ type Paging struct {
 	Limit  int64 `json:"limit"`
 	Offset int64 `json:"offset"`
 }
+type Sort struct {
+	Order string `json:"order"`
+	By    string `json:"by"`
+}
 type RespPaging struct {
 	Limit  int64 `json:"limit"`
 	Offset int64 `json:"offset"`

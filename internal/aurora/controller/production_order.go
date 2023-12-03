@@ -173,6 +173,16 @@ func (s productionOrderController) FindProductionOrders(c *gin.Context) {
 		return
 	}
 
+	sort := &repository.Sort{
+		Order: repository.SortOrderDESC,
+		By:    "ID",
+	}
+	if req.Sort != nil {
+		sort = &repository.Sort{
+			Order: repository.SortOrder(req.Sort.Order),
+			By:    req.Sort.By,
+		}
+	}
 	productionOrders, cnt, analysis, err := s.productionOrderService.FindProductionOrders(c, &production_order.FindProductionOrdersOpts{
 		IDs:                  req.Filter.IDs,
 		CustomerID:           req.Filter.CustomerID,
@@ -183,10 +193,7 @@ func (s productionOrderController) FindProductionOrders(c *gin.Context) {
 		OrderStageStatus:     req.Filter.OrderStageStatus,
 		Responsible:          req.Filter.Responsible,
 		StageIDs:             req.Filter.StageIDs,
-	}, &repository.Sort{
-		Order: repository.SortOrderDESC,
-		By:    "ID",
-	}, req.Paging.Limit, req.Paging.Offset)
+	}, sort, req.Paging.Limit, req.Paging.Offset)
 	if err != nil {
 		transportutil.Error(c, err)
 		return
