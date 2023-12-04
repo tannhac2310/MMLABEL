@@ -101,6 +101,7 @@ func (s optionController) FindOptions(c *gin.Context) {
 
 	options, cnt, err := s.optionService.Find(c, &option.FindOptionOpts{
 		Name: req.Filter.Name,
+		Entity: req.Filter.Entity,
 	}, &repository.Sort{
 		Order: repository.SortOrderDESC,
 		By:    "ID",
