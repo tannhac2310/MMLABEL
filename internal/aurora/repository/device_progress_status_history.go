@@ -3,9 +3,11 @@ package repository
 import (
 	"context"
 	"fmt"
+	"strings"
+	"time"
+
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
-	"strings"
 )
 
 type DeviceProgressStatusHistoryRepo interface {
@@ -14,6 +16,7 @@ type DeviceProgressStatusHistoryRepo interface {
 	SoftDelete(ctx context.Context, id string) error
 	Search(ctx context.Context, s *SearchDeviceProgressStatusHistoryOpts) ([]*DeviceProgressStatusHistoryData, error)
 	Count(ctx context.Context, s *SearchDeviceProgressStatusHistoryOpts) (*CountResult, error)
+	FindProductionOrderStageDeviceID(ctx context.Context, ProductionOrderStageID string, deviceID string) (*DeviceProgressStatusHistoryData, error)
 }
 
 type sDeviceProgressStatusHistoryRepo struct {
@@ -22,7 +25,15 @@ type sDeviceProgressStatusHistoryRepo struct {
 func NewDeviceProgressStatusHistoryRepo() DeviceProgressStatusHistoryRepo {
 	return &sDeviceProgressStatusHistoryRepo{}
 }
-
+func (i *sDeviceProgressStatusHistoryRepo) FindProductionOrderStageDeviceID(ctx context.Context, ProductionOrderStageID string, deviceID string) (*DeviceProgressStatusHistoryData, error) {
+	deviceProcessStatusHistoryData := &DeviceProgressStatusHistoryData{}
+	sql := `SELECT * FROM device_progress_status_history WHERE production_order_stage_device_id = $1 AND device_id = $2 AND is_resolved = 0`
+	err := cockroach.Select(ctx, sql, ProductionOrderStageID, deviceID).ScanOne(deviceProcessStatusHistoryData)
+	if err != nil {
+		return nil, fmt.Errorf("cockroach.Select: %w", err)
+	}
+	return deviceProcessStatusHistoryData, nil
+}
 func (r *sDeviceProgressStatusHistoryRepo) Insert(ctx context.Context, e *model.DeviceProgressStatusHistory) error {
 	err := cockroach.Create(ctx, e)
 	if err != nil {
@@ -52,7 +63,9 @@ func (r *sDeviceProgressStatusHistoryRepo) SoftDelete(ctx context.Context, id st
 
 // SearchDeviceProgressStatusHistoryOpts all params is options
 type SearchDeviceProgressStatusHistoryOpts struct {
-	IDs []string
+	IDs         []string
+	CreatedFrom time.Time
+	CreatedTo   time.Time
 	// todo add more search options
 	Limit  int64
 	Offset int64
@@ -78,6 +91,14 @@ func (s *SearchDeviceProgressStatusHistoryOpts) buildQuery(isCount bool) (string
 	//	args = append(args, s.Code)
 	//	conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.DeviceProgressStatusHistoryFieldCode, len(args))
 	//}
+	if s.CreatedFrom.IsZero() == false {
+		args = append(args, s.CreatedFrom)
+		conds += fmt.Sprintf(" AND b.%s >= $%d", model.DeviceProgressStatusHistoryFieldCreatedAt, len(args))
+	}
+	if s.CreatedTo.IsZero() == false {
+		args = append(args, s.CreatedTo)
+		conds += fmt.Sprintf(" AND b.%s <= $%d", model.DeviceProgressStatusHistoryFieldCreatedAt, len(args))
+	}
 
 	b := &model.DeviceProgressStatusHistory{}
 	fields, _ := b.FieldMap()
