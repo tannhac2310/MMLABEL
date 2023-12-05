@@ -66,6 +66,8 @@ type SearchDeviceProgressStatusHistoryOpts struct {
 	IDs         []string
 	CreatedFrom time.Time
 	CreatedTo   time.Time
+	DeviceID    string
+	//ProductionOrderStageID string
 	// todo add more search options
 	Limit  int64
 	Offset int64
@@ -81,15 +83,13 @@ func (s *SearchDeviceProgressStatusHistoryOpts) buildQuery(isCount bool) (string
 		args = append(args, s.IDs)
 		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.DeviceProgressStatusHistoryFieldID)
 	}
-	// todo add more search options example:
-	//if s.Name != "" {
-	//	args = append(args, "%"+s.Name+"%")
-	//	conds += fmt.Sprintf(" AND (b.%[2]s ILIKE $%[1]d OR b.%[3]s ILIKE $%[1]d)",
-	//		len(args), model.DeviceProgressStatusHistoryFieldName, model.DeviceProgressStatusHistoryFieldCode)
-	//}
-	//if s.Code != "" {
-	//	args = append(args, s.Code)
-	//	conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.DeviceProgressStatusHistoryFieldCode, len(args))
+	if s.DeviceID != "" {
+		args = append(args, s.DeviceID)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.DeviceProgressStatusHistoryFieldDeviceID, len(args))
+	}
+	//if s.ProductionOrderStageID != "" {
+	//	args = append(args, s.ProductionOrderStageID)
+	//	conds += fmt.Sprintf(" AND b.%s = $%d", model.DeviceProgressStatusHistoryFieldProductionOrderStageDeviceID, len(args))
 	//}
 	if s.CreatedFrom.IsZero() == false {
 		args = append(args, s.CreatedFrom)
@@ -110,11 +110,18 @@ func (s *SearchDeviceProgressStatusHistoryOpts) buildQuery(isCount bool) (string
 	if s.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", s.Sort.By, s.Sort.Order)
 	}
+
+	joins += fmt.Sprintf(" LEFT JOIN users AS u ON u.id = b.updated_by ")
+	fields = append(fields, "u.name AS updated_user_name")
+	joins += fmt.Sprintf(" LEFT JOIN users AS u2 ON u2.id = b.created_by ")
+	fields = append(fields, "u2.name AS created_user_name")
 	return fmt.Sprintf("SELECT b.%s FROM %s AS b %s WHERE TRUE %s AND b.deleted_at IS NULL %s LIMIT %d OFFSET %d", strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
 }
 
 type DeviceProgressStatusHistoryData struct {
 	*model.DeviceProgressStatusHistory
+	UpdatedUserName string `db:"updated_user_name"`
+	CreatedUserName string `db:"created_user_name"`
 }
 
 func (r *sDeviceProgressStatusHistoryRepo) Search(ctx context.Context, s *SearchDeviceProgressStatusHistoryOpts) ([]*DeviceProgressStatusHistoryData, error) {

@@ -52,6 +52,7 @@ type Service interface {
 	Deletes(ctx context.Context, ids []string) error
 	Find(ctx context.Context, opt *FindProductionOrderStageDeviceOpts) ([]*repository.ProductionOrderStageDeviceData, error)
 	FindEventLog(ctx context.Context, opt *FindEventLogOpts) ([]*repository.EventLogData, error)
+	FindProcessDeviceHistory(ctx context.Context, opt *FindProcessDeviceHistoryOpts, sort *repository.Sort, limit, offset int64) ([]*repository.DeviceProgressStatusHistoryData, *repository.CountResult, error)
 }
 type productionOrderStageDeviceService struct {
 	productionOrderStageDeviceRepo   repository.ProductionOrderStageDeviceRepo
@@ -149,6 +150,37 @@ func (p productionOrderStageDeviceService) Create(ctx context.Context, opt *Crea
 
 func (p productionOrderStageDeviceService) Deletes(ctx context.Context, ids []string) error {
 	return p.productionOrderStageDeviceRepo.SoftDeletes(ctx, ids)
+}
+
+func (p productionOrderStageDeviceService) FindProcessDeviceHistory(ctx context.Context, opt *FindProcessDeviceHistoryOpts, sort *repository.Sort, limit, offset int64) ([]*repository.DeviceProgressStatusHistoryData, *repository.CountResult, error) {
+	data, err := p.sDeviceProgressStatusHistoryRepo.Search(ctx, &repository.SearchDeviceProgressStatusHistoryOpts{
+		CreatedFrom: opt.CreatedFrom,
+		CreatedTo:   opt.CreatedTo,
+		DeviceID:    opt.DeviceID,
+		Limit:       limit,
+		Offset:      offset,
+		Sort:        sort,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	total, err := p.sDeviceProgressStatusHistoryRepo.Count(ctx, &repository.SearchDeviceProgressStatusHistoryOpts{
+		CreatedFrom: opt.CreatedFrom,
+		CreatedTo:   opt.CreatedTo,
+		DeviceID:    opt.DeviceID,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return data, total, nil
+}
+
+type FindProcessDeviceHistoryOpts struct {
+	DeviceID    string
+	CreatedFrom time.Time
+	CreatedTo   time.Time
 }
 
 func (p productionOrderStageDeviceService) Find(ctx context.Context, opt *FindProductionOrderStageDeviceOpts) ([]*repository.ProductionOrderStageDeviceData, error) {

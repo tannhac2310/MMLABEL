@@ -8,8 +8,9 @@ import (
 )
 
 type ProductionOrderStageDeviceFilter struct {
-	ProductionOrderStageID string `json:"productionOrderStageID"`
-	ProductionOrderID      string `json:"productionOrderID"`
+	DeviceID    string    `json:"deviceID"`
+	CreatedFrom time.Time `json:"createdFrom"`
+	CreatedTo   time.Time `json:"createdTo"`
 }
 
 type FindProductionOrderStageDevicesRequest struct {
@@ -92,4 +93,37 @@ type FindEventLog struct {
 }
 type FindEventLogResponse struct {
 	EventLogs []*FindEventLog `json:"eventLogs"`
+}
+
+type DeviceStatusHistoryFilter struct {
+	ProductionOrderStageID string    `json:"productionOrderStageID"`
+	ProductionDeviceID     string    `json:"productionDeviceID"`
+	CreatedFrom            time.Time `json:"createdFrom"`
+	CreatedTo              time.Time `json:"createdTo"`
+}
+
+type FindDeviceStatusHistoryRequest struct {
+	Filter *ProductionOrderStageDeviceFilter `json:"filter" binding:"required"`
+	Paging *commondto.Paging                 `json:"paging" binding:"required"`
+	Sort   *commondto.Sort                   `json:"sort"`
+}
+
+type FindDeviceStatusHistoryResponse struct {
+	DeviceStatusHistory []*DeviceStatusHistory `json:"deviceStatusHistory"`
+	Total               int64                  `json:"total"`
+}
+type DeviceStatusHistory struct {
+	ID                           string                                `json:"id"`
+	ProductionOrderStageDeviceID string                                `json:"productionOrderStageDeviceID"`
+	DeviceID                     string                                `json:"deviceID"`
+	ProcessStatus                enum.ProductionOrderStageDeviceStatus `json:"processStatus"`
+	IsResolved                   int16                                 `json:"isResolved"`
+	UpdatedAt                    time.Time                             `json:"updatedAt"`
+	UpdatedBy                    string                                `json:"updatedBy"`
+	ErrorCode                    string                                `json:"errorCode"`
+	ErrorReason                  string                                `json:"errorReason"`
+	Description                  string                                `json:"description"`
+	CreatedAt                    time.Time                             `json:"createdAt"`
+	CreatedUserName              string                                `json:"createdUserName"`
+	UpdatedUserName              string                                `json:"updatedUserName"`
 }

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/interceptor"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
@@ -16,12 +17,65 @@ type ProductionOrderStageDeviceController interface {
 	EditProductionOrderStageDevice(c *gin.Context)
 	DeleteProductionOrderStageDevice(c *gin.Context)
 	FindEventLog(c *gin.Context)
+	FindProcessDeviceHistory(c *gin.Context)
 }
 
 type productionOrderStageDeviceController struct {
 	productionOrderStageDeviceService production_order_stage_device.Service
 }
 
+func (s productionOrderStageDeviceController) FindProcessDeviceHistory(c *gin.Context) {
+	req := &dto.FindDeviceStatusHistoryRequest{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+	sort := &repository.Sort{
+		Order: repository.SortOrderDESC,
+		By:    "ID",
+	}
+	if req.Sort != nil {
+		sort = &repository.Sort{
+			Order: repository.SortOrder(req.Sort.Order),
+			By:    req.Sort.By,
+		}
+	}
+
+	deviceProcessStatusHistoryData, total, err := s.productionOrderStageDeviceService.FindProcessDeviceHistory(c, &production_order_stage_device.FindProcessDeviceHistoryOpts{
+		DeviceID:    req.Filter.DeviceID,
+		CreatedFrom: req.Filter.CreatedFrom,
+		CreatedTo:   req.Filter.CreatedTo,
+	}, sort, req.Paging.Limit, req.Paging.Offset)
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+
+	deviceProcessStatusHistoryResponses := make([]*dto.DeviceStatusHistory, 0, len(deviceProcessStatusHistoryData))
+	for _, deviceProcessStatusHistory := range deviceProcessStatusHistoryData {
+		deviceProcessStatusHistoryResponses = append(deviceProcessStatusHistoryResponses, &dto.DeviceStatusHistory{
+			ID:                           deviceProcessStatusHistory.ID,
+			ProductionOrderStageDeviceID: deviceProcessStatusHistory.ProductionOrderStageDeviceID,
+			DeviceID:                     deviceProcessStatusHistory.DeviceID,
+			ProcessStatus:                deviceProcessStatusHistory.ProcessStatus,
+			IsResolved:                   deviceProcessStatusHistory.IsResolved,
+			UpdatedAt:                    deviceProcessStatusHistory.UpdatedAt.Time,
+			UpdatedBy:                    deviceProcessStatusHistory.UpdatedBy,
+			ErrorCode:                    deviceProcessStatusHistory.ErrorCode.String,
+			ErrorReason:                  deviceProcessStatusHistory.ErrorReason.String,
+			Description:                  deviceProcessStatusHistory.Description.String,
+			CreatedAt:                    deviceProcessStatusHistory.CreatedAt,
+			CreatedUserName:              deviceProcessStatusHistory.CreatedUserName,
+			UpdatedUserName:              deviceProcessStatusHistory.UpdatedUserName,
+		})
+	}
+
+	transportutil.SendJSONResponse(c, &dto.FindDeviceStatusHistoryResponse{
+		DeviceStatusHistory: deviceProcessStatusHistoryResponses,
+		Total:               total.Count,
+	})
+}
 func (s productionOrderStageDeviceController) FindEventLog(c *gin.Context) {
 	req := &dto.FindEvenLogRequest{}
 	err := c.ShouldBind(req)
@@ -155,6 +209,14 @@ func RegisterProductionOrderStageDeviceController(
 		&dto.FindEvenLogRequest{},
 		&dto.FindEventLogResponse{},
 		"Find event log",
+	)
+	routeutil.AddEndpoint(
+		g,
+		"find-device-status-history",
+		c.FindProcessDeviceHistory,
+		&dto.FindDeviceStatusHistoryRequest{},
+		&dto.FindDeviceStatusHistoryResponse{},
+		"Lịch sử thay đổi trạng thái của thiết bị",
 	)
 	routeutil.AddEndpoint(
 		g,
