@@ -61,13 +61,13 @@ func (s productionOrderStageDeviceController) FindProcessDeviceHistory(c *gin.Co
 			ProcessStatus:                deviceProcessStatusHistory.ProcessStatus,
 			IsResolved:                   deviceProcessStatusHistory.IsResolved,
 			UpdatedAt:                    deviceProcessStatusHistory.UpdatedAt.Time,
-			UpdatedBy:                    deviceProcessStatusHistory.UpdatedBy,
+			UpdatedBy:                    deviceProcessStatusHistory.UpdatedBy.String,
 			ErrorCode:                    deviceProcessStatusHistory.ErrorCode.String,
 			ErrorReason:                  deviceProcessStatusHistory.ErrorReason.String,
 			Description:                  deviceProcessStatusHistory.Description.String,
 			CreatedAt:                    deviceProcessStatusHistory.CreatedAt,
-			CreatedUserName:              deviceProcessStatusHistory.CreatedUserName,
-			UpdatedUserName:              deviceProcessStatusHistory.UpdatedUserName,
+			CreatedUserName:              deviceProcessStatusHistory.CreatedUserName.String,
+			UpdatedUserName:              deviceProcessStatusHistory.UpdatedUserName.String,
 		})
 	}
 

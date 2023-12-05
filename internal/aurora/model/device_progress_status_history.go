@@ -11,13 +11,14 @@ const (
 	DeviceProgressStatusHistoryFieldProductionOrderStageDeviceID = "production_order_stage_device_id"
 	DeviceProgressStatusHistoryFieldDeviceID                     = "device_id"
 	DeviceProgressStatusHistoryFieldProcessStatus                = "process_status"
+	DeviceProgressStatusHistoryFieldCreatedAt                    = "created_at"
 	DeviceProgressStatusHistoryFieldIsResolved                   = "is_resolved"
 	DeviceProgressStatusHistoryFieldUpdatedAt                    = "updated_at"
 	DeviceProgressStatusHistoryFieldUpdatedBy                    = "updated_by"
+	DeviceProgressStatusHistoryFieldCreatedBy                    = "created_by"
 	DeviceProgressStatusHistoryFieldErrorCode                    = "error_code"
 	DeviceProgressStatusHistoryFieldErrorReason                  = "error_reason"
 	DeviceProgressStatusHistoryFieldDescription                  = "description"
-	DeviceProgressStatusHistoryFieldCreatedAt                    = "created_at"
 )
 
 type DeviceProgressStatusHistory struct {
@@ -25,13 +26,14 @@ type DeviceProgressStatusHistory struct {
 	ProductionOrderStageDeviceID string                                `db:"production_order_stage_device_id"`
 	DeviceID                     string                                `db:"device_id"`
 	ProcessStatus                enum.ProductionOrderStageDeviceStatus `db:"process_status"`
+	CreatedAt                    time.Time                             `db:"created_at"`
 	IsResolved                   int16                                 `db:"is_resolved"`
 	UpdatedAt                    sql.NullTime                          `db:"updated_at"`
-	UpdatedBy                    string                                `db:"updated_by"`
+	UpdatedBy                    sql.NullString                        `db:"updated_by"`
+	CreatedBy                    sql.NullString                        `db:"created_by"`
 	ErrorCode                    sql.NullString                        `db:"error_code"`
 	ErrorReason                  sql.NullString                        `db:"error_reason"`
 	Description                  sql.NullString                        `db:"description"`
-	CreatedAt                    time.Time                             `db:"created_at"`
 }
 
 func (rcv *DeviceProgressStatusHistory) FieldMap() (fields []string, values []interface{}) {
@@ -40,13 +42,14 @@ func (rcv *DeviceProgressStatusHistory) FieldMap() (fields []string, values []in
 		DeviceProgressStatusHistoryFieldProductionOrderStageDeviceID,
 		DeviceProgressStatusHistoryFieldDeviceID,
 		DeviceProgressStatusHistoryFieldProcessStatus,
+		DeviceProgressStatusHistoryFieldCreatedAt,
 		DeviceProgressStatusHistoryFieldIsResolved,
 		DeviceProgressStatusHistoryFieldUpdatedAt,
 		DeviceProgressStatusHistoryFieldUpdatedBy,
+		DeviceProgressStatusHistoryFieldCreatedBy,
 		DeviceProgressStatusHistoryFieldErrorCode,
 		DeviceProgressStatusHistoryFieldErrorReason,
 		DeviceProgressStatusHistoryFieldDescription,
-		DeviceProgressStatusHistoryFieldCreatedAt,
 	}
 
 	values = []interface{}{
@@ -54,13 +57,14 @@ func (rcv *DeviceProgressStatusHistory) FieldMap() (fields []string, values []in
 		&rcv.ProductionOrderStageDeviceID,
 		&rcv.DeviceID,
 		&rcv.ProcessStatus,
+		&rcv.CreatedAt,
 		&rcv.IsResolved,
 		&rcv.UpdatedAt,
 		&rcv.UpdatedBy,
+		&rcv.CreatedBy,
 		&rcv.ErrorCode,
 		&rcv.ErrorReason,
 		&rcv.Description,
-		&rcv.CreatedAt,
 	}
 
 	return
