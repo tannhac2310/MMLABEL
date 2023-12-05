@@ -1,8 +1,9 @@
 package model
 
 import (
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
 const (
@@ -11,6 +12,8 @@ const (
 	DeviceProgressStatusHistoryFieldDeviceID                     = "device_id"
 	DeviceProgressStatusHistoryFieldProcessStatus                = "process_status"
 	DeviceProgressStatusHistoryFieldCreatedAt                    = "created_at"
+	DeviceProgressStatusHistoryFieldUpdatedBy                    = "updtead_by"
+	DeviceProgressStatusHistoryFieldSolved                    	 = "solved"
 )
 
 type DeviceProgressStatusHistory struct {
@@ -19,6 +22,13 @@ type DeviceProgressStatusHistory struct {
 	DeviceID                     string                                `db:"device_id"`
 	ProcessStatus                enum.ProductionOrderStageDeviceStatus `db:"process_status"`
 	CreatedAt                    time.Time                             `db:"created_at"`
+}
+
+type DeviceProgressUpdateStatusHistory struct {
+	ProcessStatus                enum.ProductionOrderStageDeviceStatus `db:"process_status"`
+	UpdatedAt                    time.Time                             `db:"updated_at"`
+	Solved						 bool								   `db:"solved"`
+	UpdatedBy					 string								   `db:"updated_by"`
 }
 
 func (rcv *DeviceProgressStatusHistory) FieldMap() (fields []string, values []interface{}) {

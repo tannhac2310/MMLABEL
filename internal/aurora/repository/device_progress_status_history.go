@@ -3,9 +3,10 @@ package repository
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
-	"strings"
 )
 
 type DeviceProgressStatusHistoryRepo interface {
@@ -14,6 +15,8 @@ type DeviceProgressStatusHistoryRepo interface {
 	SoftDelete(ctx context.Context, id string) error
 	Search(ctx context.Context, s *SearchDeviceProgressStatusHistoryOpts) ([]*DeviceProgressStatusHistoryData, error)
 	Count(ctx context.Context, s *SearchDeviceProgressStatusHistoryOpts) (*CountResult, error)
+	FindByID(ctx context.Context, id string) (*DeviceProgressStatusHistoryData, error)
+	FindProductionOrderStageDeviceID(ctx context.Context, ProductionOrderStageID string, deviceID string, process_status int) (*DeviceProgressStatusHistoryData, error)
 }
 
 type sDeviceProgressStatusHistoryRepo struct {
@@ -22,7 +25,24 @@ type sDeviceProgressStatusHistoryRepo struct {
 func NewDeviceProgressStatusHistoryRepo() DeviceProgressStatusHistoryRepo {
 	return &sDeviceProgressStatusHistoryRepo{}
 }
-
+func (i *sDeviceProgressStatusHistoryRepo) FindByID(ctx context.Context, id string) (*DeviceProgressStatusHistoryData, error) {
+	deviceProcessStatusHistoryData := &DeviceProgressStatusHistoryData{}
+	sql := `SELECT b.* FROM device_progress_status_history AS b WHERE b.id = $1 AND b.deleted_at IS NULL`
+	err := cockroach.Select(ctx, sql, id).ScanOne(deviceProcessStatusHistoryData)
+	if err != nil {
+		return nil, fmt.Errorf("cockroach.Select: %w", err)
+	}
+	return deviceProcessStatusHistoryData, nil
+}
+func (i *sDeviceProgressStatusHistoryRepo) FindProductionOrderStageDeviceID(ctx context.Context, ProductionOrderStageID string, deviceID string, status int) (*DeviceProgressStatusHistoryData, error) {
+	deviceProcessStatusHistoryData := &DeviceProgressStatusHistoryData{}
+	sql := `SELECT b.* FROM device_progress_status_history AS b WHERE b.production_order_stage_device_id = $1 AND device_id = $2 AND process_status = $3 and solved = false`
+	err := cockroach.Select(ctx, sql, ProductionOrderStageID, deviceID, status).ScanOne(deviceProcessStatusHistoryData)
+	if err != nil {
+		return nil, fmt.Errorf("cockroach.Select: %w", err)
+	}
+	return deviceProcessStatusHistoryData, nil
+}
 func (r *sDeviceProgressStatusHistoryRepo) Insert(ctx context.Context, e *model.DeviceProgressStatusHistory) error {
 	err := cockroach.Create(ctx, e)
 	if err != nil {

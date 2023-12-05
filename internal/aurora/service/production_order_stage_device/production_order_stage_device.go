@@ -3,12 +3,14 @@ package production_order_stage_device
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/idutil"
-	"time"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/interceptor"
 )
 
 type EditProductionOrderStageDeviceOpts struct {
@@ -52,13 +54,27 @@ type productionOrderStageDeviceService struct {
 }
 
 func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditProductionOrderStageDeviceOpts) error {
+	userID := interceptor.UserIDFromCtx(c)
 	table := model.ProductionOrderStageDevice{}
+	tableProductProgress := model.DeviceProgressStatusHistory{}	
 	// find by id and check if it is existed
 	data, _ := p.productionOrderStageDeviceRepo.FindByID(ctx, opt.ID)
 	// todo check error != notfound
 
 	if data.ProcessStatus != opt.ProcessStatus {
 		//  insert DeviceProgressStatusHistory
+		if (data.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed || data.ProcessStatus == enum.ProductionOrderStageDeviceStatusPause) {
+			historyData, _:= p.sDeviceProgressStatusHistoryRepo.FindProductionOrderStageDeviceID(ctx, data.ProductionOrderStageID, data.DeviceID, int(data.ProcessStatus));
+			if (historyData) {
+				
+				updater_history := cockroach.NewUpdater(tableProductProgress.TableName(), model.DeviceProgressStatusHistoryFieldID, historyData.ID)
+				updater_history.Set(model.DeviceProgressStatusHistoryFieldSolved, true)
+				updater_history.Set(model.DeviceProgressStatusHistoryFieldUpdatedBy, userID)
+				updater_history.Set(model.DeviceProgressStatusHistoryFieldUpdatedAt, time.Now())
+				err := cockroach.UpdateFields(ctx, updater_history)
+			}
+		}
+
 		err := p.sDeviceProgressStatusHistoryRepo.Insert(ctx, &model.DeviceProgressStatusHistory{
 			ID:                           idutil.ULIDNow(),
 			ProductionOrderStageDeviceID: data.ProductionOrderStageID,
