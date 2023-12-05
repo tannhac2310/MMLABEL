@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/interceptor"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_order_stage_device"
@@ -91,16 +92,26 @@ func (s productionOrderStageDeviceController) EditProductionOrderStageDevice(c *
 		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
 		return
 	}
+	settings := &production_order_stage_device.Settings{}
+	if req.Settings != nil {
+		settings = &production_order_stage_device.Settings{
+			DefectiveError: req.Settings.DefectiveError,
+			Description:    req.Settings.Description,
+		}
+	}
 
 	err = s.productionOrderStageDeviceService.Edit(c, &production_order_stage_device.EditProductionOrderStageDeviceOpts{
 		ID:                req.ID,
 		DeviceID:          req.DeviceID,
 		Quantity:          req.Quantity,
-		AssignedQuantity:  req.AssignedQuantity,
 		ProcessStatus:     req.ProcessStatus,
 		Status:            req.Status,
 		Responsible:       req.Responsible,
 		NotUpdateQuantity: req.NotUpdateQuantity,
+		AssignedQuantity:  req.AssignedQuantity,
+		Settings:          settings,
+		Note:              req.Note,
+		UserID:            interceptor.UserIDFromCtx(c),
 	})
 	if err != nil {
 		transportutil.Error(c, err)

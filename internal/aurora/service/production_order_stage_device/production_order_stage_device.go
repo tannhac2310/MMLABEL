@@ -10,7 +10,6 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/idutil"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/interceptor"
 )
 
 type EditProductionOrderStageDeviceOpts struct {
@@ -22,8 +21,14 @@ type EditProductionOrderStageDeviceOpts struct {
 	Responsible       []string
 	NotUpdateQuantity bool
 	AssignedQuantity  int64
+	UserID            string
+	Settings          *Settings
+	Note              string
 }
-
+type Settings struct {
+	DefectiveError string
+	Description    string
+}
 type CreateProductionOrderStageDeviceOpts struct {
 	ProductionOrderStageID string
 	DeviceID               string
@@ -54,34 +59,44 @@ type productionOrderStageDeviceService struct {
 }
 
 func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditProductionOrderStageDeviceOpts) error {
-	userID := interceptor.UserIDFromCtx(c)
+	userID := opt.UserID
 	table := model.ProductionOrderStageDevice{}
-	tableProductProgress := model.DeviceProgressStatusHistory{}	
+	tableProductProgress := model.DeviceProgressStatusHistory{}
 	// find by id and check if it is existed
-	data, _ := p.productionOrderStageDeviceRepo.FindByID(ctx, opt.ID)
+	data, err := p.productionOrderStageDeviceRepo.FindByID(ctx, opt.ID)
+	if err != nil {
+		return fmt.Errorf("p.productionOrderStageDeviceRepo.FindByID: %w", err)
+	}
 	// todo check error != notfound
 
-	if data.ProcessStatus != opt.ProcessStatus {
-		//  insert DeviceProgressStatusHistory
-		if (data.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed || data.ProcessStatus == enum.ProductionOrderStageDeviceStatusPause) {
-			historyData, _:= p.sDeviceProgressStatusHistoryRepo.FindProductionOrderStageDeviceID(ctx, data.ProductionOrderStageID, data.DeviceID, int(data.ProcessStatus));
-			if (historyData) {
-				
-				updater_history := cockroach.NewUpdater(tableProductProgress.TableName(), model.DeviceProgressStatusHistoryFieldID, historyData.ID)
-				updater_history.Set(model.DeviceProgressStatusHistoryFieldSolved, true)
-				updater_history.Set(model.DeviceProgressStatusHistoryFieldUpdatedBy, userID)
-				updater_history.Set(model.DeviceProgressStatusHistoryFieldUpdatedAt, time.Now())
-				err := cockroach.UpdateFields(ctx, updater_history)
+	if data != nil && data.ProcessStatus != opt.ProcessStatus {
+		// find lasted status of device
+		lasted, _ := p.sDeviceProgressStatusHistoryRepo.FindProductionOrderStageDeviceID(ctx, data.ProductionOrderStageID, data.DeviceID)
+		if lasted != nil && lasted.IsResolved == 0 && (lasted.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed || lasted.ProcessStatus == enum.ProductionOrderStageDeviceStatusPause) {
+			updaterHistory := cockroach.NewUpdater(tableProductProgress.TableName(), model.DeviceProgressStatusHistoryFieldID, lasted.ID)
+			updaterHistory.Set(model.DeviceProgressStatusHistoryFieldUpdatedBy, userID)
+			updaterHistory.Set(model.DeviceProgressStatusHistoryFieldUpdatedAt, time.Now())
+			updaterHistory.Set(model.DeviceProgressStatusHistoryFieldIsResolved, 1)
+			err := cockroach.UpdateFields(ctx, updaterHistory)
+			if err != nil {
+				return fmt.Errorf("updaterHistory.cockroach.UpdateFields: %w", err)
 			}
 		}
-
-		err := p.sDeviceProgressStatusHistoryRepo.Insert(ctx, &model.DeviceProgressStatusHistory{
+		//  insert DeviceProgressStatusHistory
+		modelData := &model.DeviceProgressStatusHistory{
 			ID:                           idutil.ULIDNow(),
 			ProductionOrderStageDeviceID: data.ProductionOrderStageID,
 			DeviceID:                     data.DeviceID,
 			ProcessStatus:                opt.ProcessStatus,
 			CreatedAt:                    time.Now(),
-		})
+		}
+		if opt.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed || opt.ProcessStatus == enum.ProductionOrderStageDeviceStatusPause {
+			modelData.IsResolved = 0
+			modelData.ErrorCode = cockroach.String(opt.Note)
+			modelData.ErrorReason = cockroach.String(opt.Settings.DefectiveError)
+			modelData.Description = cockroach.String(opt.Settings.Description)
+		}
+		err := p.sDeviceProgressStatusHistoryRepo.Insert(ctx, modelData)
 
 		if err != nil {
 			return fmt.Errorf("p.sDeviceProgressStatusHistoryRepo.Insert: %w", err)
@@ -103,7 +118,7 @@ func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditPr
 
 	updater.Set(model.ProductionOrderStageDeviceFieldUpdatedAt, time.Now())
 
-	err := cockroach.UpdateFields(ctx, updater)
+	err = cockroach.UpdateFields(ctx, updater)
 	if err != nil {
 		return err
 	}
