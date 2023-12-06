@@ -135,30 +135,36 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (
 
 	if s.OrderStageStatus > 0 && len(s.StageIDs) > 0 {
 		args = append(args, s.OrderStageStatus, s.StageIDs)
-		joins += fmt.Sprintf(` INNER JOIN production_order_stages AS pos ON pos.production_order_id = b.id AND pos.deleted_at IS NULL`)
-		conds += fmt.Sprintf(" AND pos.status = $%[1]d and pos.stage_id = ANY($%[2]d) ", len(args)-1, len(args))
+		//joins += fmt.Sprintf(` INNER JOIN production_order_stages AS pos ON pos.production_order_id = b.id AND pos.deleted_at IS NULL`)
+		//conds += fmt.Sprintf(" AND pos.status = $%[1]d and pos.stage_id = ANY($%[2]d) ", len(args)-1, len(args))
+		conds += fmt.Sprintf(` AND EXISTS (SELECT 1 FROM production_order_stages AS pos WHERE pos.production_order_id = b.id AND pos.deleted_at IS NULL AND pos.status = $%[1]d AND pos.stage_id = ANY($%[2]d))`, len(args)-1, len(args))
+
 	} else {
 		if len(s.StageIDs) > 0 {
 			args = append(args, s.StageIDs)
-			joins += fmt.Sprintf(` INNER JOIN production_order_stages AS pos ON pos.production_order_id = b.id AND pos.deleted_at IS NULL`)
-			conds += fmt.Sprintf("  AND pos.stage_id = ANY($%d)", len(args))
+			//joins += fmt.Sprintf(` INNER JOIN production_order_stages AS pos ON pos.production_order_id = b.id AND pos.deleted_at IS NULL`)
+			//conds += fmt.Sprintf("  AND pos.stage_id = ANY($%d)", len(args))
+			conds += fmt.Sprintf(` AND EXISTS (SELECT 1 FROM production_order_stages AS pos WHERE pos.production_order_id = b.id AND pos.deleted_at IS NULL AND pos.stage_id = ANY($%[1]d))`, len(args))
 		}
 		if s.OrderStageStatus > 0 {
 			args = append(args, s.OrderStageStatus)
-			joins += fmt.Sprintf(` INNER JOIN production_order_stages AS pos ON pos.production_order_id = b.id AND pos.deleted_at IS NULL`)
-			conds += fmt.Sprintf(" AND pos.status = $%[1]d  ", len(args))
+			//joins += fmt.Sprintf(` INNER JOIN production_order_stages AS pos ON pos.production_order_id = b.id AND pos.deleted_at IS NULL`)
+			//conds += fmt.Sprintf(" AND pos.status = $%[1]d  ", len(args))
+			conds += fmt.Sprintf(` AND EXISTS (SELECT 1 FROM production_order_stages AS pos WHERE pos.production_order_id = b.id AND pos.deleted_at IS NULL AND pos.status = $%[1]d)`, len(args))
 		}
 
 	}
 
 	if len(s.Responsible) > 0 {
 		args = append(args, s.Responsible)
-
-		joins += fmt.Sprintf(` INNER JOIN production_order_stages AS pos ON pos.production_order_id = b.id AND pos.deleted_at IS NULL 
-			INNER JOIN production_order_stage_devices AS posd ON posd.production_order_stage_id = pos.id AND posd.deleted_at IS NULL`,
-		)
-		conds += fmt.Sprintf(" AND posd.%s && $%d", model.ProductionOrderStageDeviceFieldResponsible, len(args))
-
+		//
+		//joins += fmt.Sprintf(` INNER JOIN production_order_stages AS pos ON pos.production_order_id = b.id AND pos.deleted_at IS NULL
+		//	INNER JOIN production_order_stage_devices AS posd ON posd.production_order_stage_id = pos.id AND posd.deleted_at IS NULL`,
+		//)
+		//conds += fmt.Sprintf(" AND posd.%s && $%d", model.ProductionOrderStageDeviceFieldResponsible, len(args))
+		conds += fmt.Sprintf(` AND EXISTS (SELECT 1 FROM production_order_stages AS pos WHERE pos.production_order_id = b.id AND pos.deleted_at IS NULL
+						AND EXISTS (SELECT 1 FROM production_order_stage_devices AS posd WHERE posd.production_order_stage_id = pos.id AND posd.deleted_at IS NULL AND posd.%[1]s && $%[2]d))`,
+			model.ProductionOrderStageDeviceFieldResponsible, len(args))
 	}
 	b := &model.ProductionOrder{}
 	if isAnalysis {
