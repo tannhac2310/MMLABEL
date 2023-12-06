@@ -113,7 +113,7 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderFieldCustomerID, len(args))
 	}
 
-	if s.Status > 0 {
+	if s.Status > 0 && !isAnalysis { // neu isAnalysis = true thi khong can check status
 		args = append(args, s.Status)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderFieldStatus, len(args))
 	}
