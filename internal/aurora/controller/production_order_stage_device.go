@@ -18,6 +18,7 @@ type ProductionOrderStageDeviceController interface {
 	DeleteProductionOrderStageDevice(c *gin.Context)
 	FindEventLog(c *gin.Context)
 	FindProcessDeviceHistory(c *gin.Context)
+	UpdateProcessDeviceHistoryIsSolved(c *gin.Context)
 }
 
 type productionOrderStageDeviceController struct {
@@ -191,7 +192,25 @@ func (s productionOrderStageDeviceController) DeleteProductionOrderStageDevice(c
 
 	transportutil.SendJSONResponse(c, &dto.DeleteProductionOrderStageDeviceResponse{})
 }
+func (s productionOrderStageDeviceController) UpdateProcessDeviceHistoryIsSolved(c *gin.Context) {
+	req := &dto.DeviceStatusHistoryUpdateSolved{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+	
+	err = s.productionOrderStageDeviceService.EditDeviceProcessHistoryIsSolved(c, &production_order_stage_device.EditDeviceProcessHistoryIsSolvedOpts{
+		ID:         req.ID,
+		UserID:     interceptor.UserIDFromCtx(c),
+	})
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
 
+	transportutil.SendJSONResponse(c, &dto.DeviceStatusHistoryUpdateSolvedResponse{})
+}
 func RegisterProductionOrderStageDeviceController(
 	r *gin.RouterGroup,
 	productionOrderStageDeviceService production_order_stage_device.Service,
@@ -216,6 +235,14 @@ func RegisterProductionOrderStageDeviceController(
 		c.FindProcessDeviceHistory,
 		&dto.FindDeviceStatusHistoryRequest{},
 		&dto.FindDeviceStatusHistoryResponse{},
+		"Lịch sử thay đổi trạng thái của thiết bị",
+	)
+	routeutil.AddEndpoint(
+		g,
+		"update-device-status-history-solved",
+		c.UpdateProcessDeviceHistoryIsSolved,
+		&dto.DeviceStatusHistoryUpdateSolved{},
+		&dto.DeviceStatusHistoryUpdateSolvedResponse{},
 		"Lịch sử thay đổi trạng thái của thiết bị",
 	)
 	routeutil.AddEndpoint(

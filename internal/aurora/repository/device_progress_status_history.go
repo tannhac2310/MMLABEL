@@ -17,6 +17,7 @@ type DeviceProgressStatusHistoryRepo interface {
 	Search(ctx context.Context, s *SearchDeviceProgressStatusHistoryOpts) ([]*DeviceProgressStatusHistoryData, error)
 	Count(ctx context.Context, s *SearchDeviceProgressStatusHistoryOpts) (*CountResult, error)
 	FindProductionOrderStageDeviceID(ctx context.Context, ProductionOrderStageID string, deviceID string) (*DeviceProgressStatusHistoryData, error)
+	FindByID(ctx context.Context, ID string) (*DeviceProgressStatusHistoryData, error) 
 }
 
 type sDeviceProgressStatusHistoryRepo struct {
@@ -29,6 +30,15 @@ func (i *sDeviceProgressStatusHistoryRepo) FindProductionOrderStageDeviceID(ctx 
 	deviceProcessStatusHistoryData := &DeviceProgressStatusHistoryData{}
 	sql := `SELECT * FROM device_progress_status_history WHERE production_order_stage_device_id = $1 AND device_id = $2 AND is_resolved = 0 ORDER BY ID DESC LIMIT 1`
 	err := cockroach.Select(ctx, sql, ProductionOrderStageDeviceID, deviceID).ScanOne(deviceProcessStatusHistoryData)
+	if err != nil {
+		return nil, fmt.Errorf("cockroach.Select: %w", err)
+	}
+	return deviceProcessStatusHistoryData, nil
+}
+func (i *sDeviceProgressStatusHistoryRepo) FindByID(ctx context.Context, ID string) (*DeviceProgressStatusHistoryData, error) {
+	deviceProcessStatusHistoryData := &DeviceProgressStatusHistoryData{}
+	sql := `SELECT * FROM device_progress_status_history WHERE ID = $1 ORDER BY ID DESC LIMIT 1`
+	err := cockroach.Select(ctx, sql, ID).ScanOne(deviceProcessStatusHistoryData)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.Select: %w", err)
 	}

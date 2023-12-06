@@ -2,8 +2,9 @@ package model
 
 import (
 	"database/sql"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
 const (
@@ -34,6 +35,9 @@ type DeviceProgressStatusHistory struct {
 	ErrorCode                    sql.NullString                        `db:"error_code"`
 	ErrorReason                  sql.NullString                        `db:"error_reason"`
 	Description                  sql.NullString                        `db:"description"`
+}
+type DeviceProgressStatusHistoryUpdateIsSolved struct {
+	ID                           string                                `db:"id"`
 }
 
 func (rcv *DeviceProgressStatusHistory) FieldMap() (fields []string, values []interface{}) {
