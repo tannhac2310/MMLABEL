@@ -13,7 +13,8 @@ type SearchUsersOpts struct {
 	NotIDs      []string
 	NotRoleIDs  []string
 	Name        string
-	Department	string
+	Department  string
+	Departments []string
 	Search      string
 	PhoneNumber string
 	Email       string
@@ -28,6 +29,7 @@ func (u *userService) SearchUsers(ctx context.Context, opts *SearchUsersOpts, li
 		NotIDs:      opts.NotIDs,
 		NotRoleIDs:  opts.NotRoleIDs,
 		Department:  opts.Department,
+		Departments: opts.Departments,
 		Name:        opts.Name,
 		Search:      opts.Search,
 		PhoneNumber: opts.PhoneNumber,

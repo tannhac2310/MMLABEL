@@ -77,6 +77,7 @@ type SearchUsersOpts struct {
 	NotRoleIDs  []string
 	Name        string
 	Department  string
+	Departments []string
 	Search      string
 	PhoneNumber string
 	Email       string
@@ -130,6 +131,14 @@ func (s *SearchUsersOpts) buildQuery(isCount bool) (string, []interface{}) {
 		conds += fmt.Sprintf(" AND u.%s iLIKE ANY($%d)", model.UserFieldDepartments, len(args))
 		// args = append(args, "%"+s.Department+"%")
 		// conds += fmt.Sprintf(" AND u.%s ILIKE $%d", model.UserFieldDepartments, len(args))
+	}
+	if len(s.Departments) > 0 {
+		departs := make([]string, len(s.Departments))
+		for i, v := range s.Departments {
+			departs[i] = "%" + v + "%"
+		}
+		args = append(args, departs)
+		conds += fmt.Sprintf(" AND u.%s iLIKE ANY($%d)", model.UserFieldDepartments, len(args))
 	}
 	fmt.Println("Minh:", s.Department)
 	if s.Search != "" {
