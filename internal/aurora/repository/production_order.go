@@ -113,6 +113,11 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderFieldCustomerID, len(args))
 	}
 
+	if s.Status > 0 {
+		args = append(args, s.Status)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderFieldStatus, len(args))
+	}
+
 	if len(s.Statuses) > 0 {
 		args = append(args, s.Statuses)
 		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.ProductionOrderFieldStatus, len(args))
