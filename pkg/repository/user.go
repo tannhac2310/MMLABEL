@@ -123,11 +123,11 @@ func (s *SearchUsersOpts) buildQuery(isCount bool) (string, []interface{}) {
 		if s.Department == "CBD" {
 			departs = []string{
 				"CBD", "CA", "NLC", "NLT", "CLD", "CLM", "CTP",
-				"CTAY", "CVT", "BE", "BCD", "BCM","PCN", "BTD", "BTM",
+				"CTAY", "CVT", "BE", "BCD", "BCM", "PCN", "BTD", "BTM",
 				"BKE", "DA", "DD", "DM", "DNN", "DNKT", "UDE"}
 		}
 		args = append(args, departs)
-		conds += fmt.Sprintf(" AND u.%s = ANY($1)", model.UserFieldDepartments)
+		conds += fmt.Sprintf(" AND u.%s = ANY($%d)", model.UserFieldDepartments, len(args))
 		// args = append(args, "%"+s.Department+"%")
 		// conds += fmt.Sprintf(" AND u.%s ILIKE $%d", model.UserFieldDepartments, len(args))
 	}
@@ -172,7 +172,7 @@ func (s *SearchUsersOpts) buildQuery(isCount bool) (string, []interface{}) {
 
 		joins += fmt.Sprintf(" INNER JOIN %[1]s AS %[1]s ON %[1]s.%[2]s = u.id AND %[1]s.deleted_at IS NULL", tableName, model.UserGroupFieldUserID)
 	}
-	
+
 	u := &model.User{}
 	fields, _ := u.FieldMap()
 	if isCount {
