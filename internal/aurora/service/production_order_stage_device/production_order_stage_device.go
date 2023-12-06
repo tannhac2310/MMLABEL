@@ -53,6 +53,7 @@ type Service interface {
 	Find(ctx context.Context, opt *FindProductionOrderStageDeviceOpts) ([]*repository.ProductionOrderStageDeviceData, error)
 	FindEventLog(ctx context.Context, opt *FindEventLogOpts) ([]*repository.EventLogData, error)
 	FindProcessDeviceHistory(ctx context.Context, opt *FindProcessDeviceHistoryOpts, sort *repository.Sort, limit, offset int64) ([]*repository.DeviceProgressStatusHistoryData, *repository.CountResult, error)
+	EditDeviceProcessHistoryIsSolved(ctx context.Context, opt *EditDeviceProcessHistoryIsSolvedOpts) error
 }
 type productionOrderStageDeviceService struct {
 	productionOrderStageDeviceRepo   repository.ProductionOrderStageDeviceRepo
@@ -75,9 +76,9 @@ func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditPr
 		// find lasted status of device
 		fmt.Println(data)
 		lasted, err := p.sDeviceProgressStatusHistoryRepo.FindProductionOrderStageDeviceID(ctx, data.ID, data.DeviceID)
-		if err != nil {
-			return fmt.Errorf("p.sDeviceProgressStatusHistoryRepo.FindProductionOrderStageDeviceID: %w", err)
-		}
+		// if lastederr != nil {
+		// 	return fmt.Errorf("p.sDeviceProgressStatusHistoryRepo.FindProductionOrderStageDeviceID: %w", err)
+		// }
 		fmt.Println("userID===============>>>>lasted", err, lasted, data.ID, data.DeviceID)
 		if lasted != nil && lasted.IsResolved == 0 && (lasted.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed || lasted.ProcessStatus == enum.ProductionOrderStageDeviceStatusPause) {
 			updaterHistory := cockroach.NewUpdater(tableProductProgress.TableName(), model.DeviceProgressStatusHistoryFieldID, lasted.ID)
@@ -188,6 +189,37 @@ type FindProcessDeviceHistoryOpts struct {
 	DeviceID    string
 	CreatedFrom time.Time
 	CreatedTo   time.Time
+}
+type EditDeviceProcessHistoryIsSolvedOpts struct {
+	UserID		 string
+	ID		     string		
+}
+
+func (p productionOrderStageDeviceService) EditDeviceProcessHistoryIsSolved(ctx context.Context, opt *EditDeviceProcessHistoryIsSolvedOpts) error {
+	userID := opt.UserID
+	tableProductProgress := model.DeviceProgressStatusHistory{}
+	lasted, err := p.sDeviceProgressStatusHistoryRepo.FindByID(ctx, opt.ID)
+	fmt.Println(lasted)
+	if err != nil {
+		return fmt.Errorf("p.sDeviceProgressStatusHistoryRepo.FindProductionOrderStageDeviceID: %w", err)
+	}
+	if lasted == nil {
+		return fmt.Errorf("This ID not exists: %w", err)
+	}
+	if lasted.IsResolved == 1 {
+		return fmt.Errorf("This is solved: %w", err)
+	}
+	if lasted.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed || lasted.ProcessStatus == enum.ProductionOrderStageDeviceStatusPause {
+		updaterHistory := cockroach.NewUpdater(tableProductProgress.TableName(), model.DeviceProgressStatusHistoryFieldID, lasted.ID)
+		updaterHistory.Set(model.DeviceProgressStatusHistoryFieldUpdatedBy, userID)
+		updaterHistory.Set(model.DeviceProgressStatusHistoryFieldUpdatedAt, time.Now())
+		updaterHistory.Set(model.DeviceProgressStatusHistoryFieldIsResolved, 1)
+		err := cockroach.UpdateFields(ctx, updaterHistory)
+		if err != nil {
+			return fmt.Errorf("updaterHistory.cockroach.UpdateFields: %w", err)
+		}
+	}
+	return nil
 }
 
 func (p productionOrderStageDeviceService) Find(ctx context.Context, opt *FindProductionOrderStageDeviceOpts) ([]*repository.ProductionOrderStageDeviceData, error) {

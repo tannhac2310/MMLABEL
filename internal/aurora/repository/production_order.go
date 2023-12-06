@@ -157,7 +157,7 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (
 	}
 	b := &model.ProductionOrder{}
 	if isAnalysis {
-		return fmt.Sprintf(`SELECT status, count(*) as count
+		return fmt.Sprintf(`SELECT b.status, count(*) as count
 		FROM %s AS b %s
 		WHERE TRUE %s AND b.deleted_at IS NULL GROUP BY b.status`, b.TableName(), joins, conds), args
 	}
