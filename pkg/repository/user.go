@@ -119,7 +119,7 @@ func (s *SearchUsersOpts) buildQuery(isCount bool) (string, []interface{}) {
 		conds += fmt.Sprintf(" AND u.%s ILIKE $%d", model.UserFieldName, len(args))
 	}
 	if s.Department != "" {
-		var departs = []string{s.Department}
+		var departs = []string{"%" + s.Department + "%"}
 		if s.Department == "CBD" {
 			departs = []string{
 				"%CBD%", "%CA%", "%NLC%", "%NLT%", "%CLD%", "%CLM%", "%CTP%",
