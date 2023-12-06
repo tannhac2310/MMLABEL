@@ -8,6 +8,7 @@ import (
 )
 
 type ProductionOrderStageDeviceFilter struct {
+	ProcessStatus []int8   `json:"processStatus"`
 	DeviceID    string    `json:"deviceID"`
 	CreatedFrom time.Time `json:"createdFrom"`
 	CreatedTo   time.Time `json:"createdTo"`

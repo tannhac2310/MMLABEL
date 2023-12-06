@@ -44,6 +44,7 @@ func (s productionOrderStageDeviceController) FindProcessDeviceHistory(c *gin.Co
 	}
 
 	deviceProcessStatusHistoryData, total, err := s.productionOrderStageDeviceService.FindProcessDeviceHistory(c, &production_order_stage_device.FindProcessDeviceHistoryOpts{
+		ProcessStatus: req.Filter.ProcessStatus,
 		DeviceID:    req.Filter.DeviceID,
 		CreatedFrom: req.Filter.CreatedFrom,
 		CreatedTo:   req.Filter.CreatedTo,
@@ -52,7 +53,6 @@ func (s productionOrderStageDeviceController) FindProcessDeviceHistory(c *gin.Co
 		transportutil.Error(c, err)
 		return
 	}
-
 	deviceProcessStatusHistoryResponses := make([]*dto.DeviceStatusHistory, 0, len(deviceProcessStatusHistoryData))
 	for _, deviceProcessStatusHistory := range deviceProcessStatusHistoryData {
 		deviceProcessStatusHistoryResponses = append(deviceProcessStatusHistoryResponses, &dto.DeviceStatusHistory{
