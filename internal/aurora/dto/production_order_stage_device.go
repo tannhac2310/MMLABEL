@@ -127,3 +127,11 @@ type DeviceStatusHistory struct {
 	CreatedUserName              string                                `json:"createdUserName"`
 	UpdatedUserName              string                                `json:"updatedUserName"`
 }
+
+type DeviceStatusHistoryUpdateSolved struct {
+	ID                           string                                `json:"id"`
+	IsResolved                   int16                                 `json:"isResolved"`
+	UpdatedBy                    string                                `json:"updatedBy"`
+}
+type DeviceStatusHistoryUpdateSolvedResponse struct {
+}
