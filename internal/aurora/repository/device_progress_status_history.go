@@ -60,6 +60,7 @@ func (r *sDeviceProgressStatusHistoryRepo) Update(ctx context.Context, e *model.
 // SearchDeviceProgressStatusHistoryOpts all params is options
 type SearchDeviceProgressStatusHistoryOpts struct {
 	IDs         []string
+	ProcessStatus []int8
 	CreatedFrom time.Time
 	CreatedTo   time.Time
 	DeviceID    string
@@ -79,6 +80,12 @@ func (s *SearchDeviceProgressStatusHistoryOpts) buildQuery(isCount bool) (string
 		args = append(args, s.IDs)
 		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.DeviceProgressStatusHistoryFieldID)
 	}
+	
+	if len(s.ProcessStatus) > 0 {
+		args = append(args, s.ProcessStatus)
+		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.DeviceProgressStatusHistoryFieldProcessStatus)
+	}
+	
 	if s.DeviceID != "" {
 		args = append(args, s.DeviceID)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.DeviceProgressStatusHistoryFieldDeviceID, len(args))
@@ -121,6 +128,7 @@ type DeviceProgressStatusHistoryData struct {
 func (r *sDeviceProgressStatusHistoryRepo) Search(ctx context.Context, s *SearchDeviceProgressStatusHistoryOpts) ([]*DeviceProgressStatusHistoryData, error) {
 	DeviceProgressStatusHistory := make([]*DeviceProgressStatusHistoryData, 0)
 	sql, args := s.buildQuery(false)
+	
 	err := cockroach.Select(ctx, sql, args...).ScanAll(&DeviceProgressStatusHistory)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.Select: %w", err)

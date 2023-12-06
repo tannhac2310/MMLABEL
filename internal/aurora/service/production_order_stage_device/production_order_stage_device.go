@@ -162,6 +162,7 @@ func (p productionOrderStageDeviceService) Deletes(ctx context.Context, ids []st
 
 func (p productionOrderStageDeviceService) FindProcessDeviceHistory(ctx context.Context, opt *FindProcessDeviceHistoryOpts, sort *repository.Sort, limit, offset int64) ([]*repository.DeviceProgressStatusHistoryData, *repository.CountResult, error) {
 	data, err := p.sDeviceProgressStatusHistoryRepo.Search(ctx, &repository.SearchDeviceProgressStatusHistoryOpts{
+		ProcessStatus: opt.ProcessStatus,
 		CreatedFrom: opt.CreatedFrom,
 		CreatedTo:   opt.CreatedTo,
 		DeviceID:    opt.DeviceID,
@@ -174,6 +175,7 @@ func (p productionOrderStageDeviceService) FindProcessDeviceHistory(ctx context.
 	}
 
 	total, err := p.sDeviceProgressStatusHistoryRepo.Count(ctx, &repository.SearchDeviceProgressStatusHistoryOpts{
+		ProcessStatus: opt.ProcessStatus,
 		CreatedFrom: opt.CreatedFrom,
 		CreatedTo:   opt.CreatedTo,
 		DeviceID:    opt.DeviceID,
@@ -186,6 +188,7 @@ func (p productionOrderStageDeviceService) FindProcessDeviceHistory(ctx context.
 }
 
 type FindProcessDeviceHistoryOpts struct {
+	ProcessStatus []int8
 	DeviceID    string
 	CreatedFrom time.Time
 	CreatedTo   time.Time
@@ -199,15 +202,14 @@ func (p productionOrderStageDeviceService) EditDeviceProcessHistoryIsSolved(ctx 
 	userID := opt.UserID
 	tableProductProgress := model.DeviceProgressStatusHistory{}
 	lasted, err := p.sDeviceProgressStatusHistoryRepo.FindByID(ctx, opt.ID)
-	fmt.Println(lasted)
 	if err != nil {
-		return fmt.Errorf("p.sDeviceProgressStatusHistoryRepo.FindProductionOrderStageDeviceID: %w", err)
+		return fmt.Errorf("p.sDeviceProgressStatusHistoryRepo.FindByID: %w", err)
 	}
 	if lasted == nil {
 		return fmt.Errorf("This ID not exists: %w", err)
 	}
 	if lasted.IsResolved == 1 {
-		return fmt.Errorf("This is solved: %w", err)
+		return fmt.Errorf("This ID is solved: %w", err)
 	}
 	if lasted.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed || lasted.ProcessStatus == enum.ProductionOrderStageDeviceStatusPause {
 		updaterHistory := cockroach.NewUpdater(tableProductProgress.TableName(), model.DeviceProgressStatusHistoryFieldID, lasted.ID)
