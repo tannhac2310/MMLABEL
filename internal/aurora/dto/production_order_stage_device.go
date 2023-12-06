@@ -130,8 +130,6 @@ type DeviceStatusHistory struct {
 
 type DeviceStatusHistoryUpdateSolved struct {
 	ID                           string                                `json:"id"`
-	IsResolved                   int16                                 `json:"isResolved"`
-	UpdatedBy                    string                                `json:"updatedBy"`
 }
 type DeviceStatusHistoryUpdateSolvedResponse struct {
 }
