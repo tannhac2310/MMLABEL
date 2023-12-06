@@ -76,9 +76,9 @@ func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditPr
 		// find lasted status of device
 		fmt.Println(data)
 		lasted, err := p.sDeviceProgressStatusHistoryRepo.FindProductionOrderStageDeviceID(ctx, data.ID, data.DeviceID)
-		if err != nil {
-			return fmt.Errorf("p.sDeviceProgressStatusHistoryRepo.FindProductionOrderStageDeviceID: %w", err)
-		}
+		// if lastederr != nil {
+		// 	return fmt.Errorf("p.sDeviceProgressStatusHistoryRepo.FindProductionOrderStageDeviceID: %w", err)
+		// }
 		fmt.Println("userID===============>>>>lasted", err, lasted, data.ID, data.DeviceID)
 		if lasted != nil && lasted.IsResolved == 0 && (lasted.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed || lasted.ProcessStatus == enum.ProductionOrderStageDeviceStatusPause) {
 			updaterHistory := cockroach.NewUpdater(tableProductProgress.TableName(), model.DeviceProgressStatusHistoryFieldID, lasted.ID)
