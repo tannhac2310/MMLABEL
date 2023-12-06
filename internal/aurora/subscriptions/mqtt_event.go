@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+	"time"
+
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	"go.uber.org/zap"
@@ -12,8 +15,6 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/service/ws"
-	"strings"
-	"time"
 )
 
 type EventMQTTSubscription struct {
@@ -112,37 +113,41 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				fmt.Println("============>>> Received message for topic ====", err)
 			}
 			activeStageID := ""
-			if len(orderStageDevices) == 1 && int64(item.Value) > 0 && int64(item.Value) > orderStageDevices[0].Quantity {
-				// update first device
+			if (len(orderStageDevices) == 1) {
 				device := orderStageDevices[0]
-				activeStageID = device.ProductionOrderStageID
-				_ = p.productionOrderStageDeviceRepo.Update(ctx, &model.ProductionOrderStageDevice{
-					ID:                     device.ID,
-					ProductionOrderStageID: device.ProductionOrderStageID,
-					DeviceID:               device.DeviceID,
-					Quantity:               int64(item.Value),
-					ProcessStatus:          device.ProcessStatus,
-					Status:                 device.Status,
-					Responsible:            device.Responsible,
-					Settings:               device.Settings,
-					Note:                   device.Note,
-					CreatedAt:              device.CreatedAt,
-					UpdatedAt:              device.UpdatedAt,
-				})
+				if (device.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart) {
+					if int64(item.Value) > 0 && int64(item.Value) > device.Quantity {
+						// update first device
+						activeStageID = device.ProductionOrderStageID
+						_ = p.productionOrderStageDeviceRepo.Update(ctx, &model.ProductionOrderStageDevice{
+							ID:                     device.ID,
+							ProductionOrderStageID: device.ProductionOrderStageID,
+							DeviceID:               device.DeviceID,
+							Quantity:               int64(item.Value),
+							ProcessStatus:          device.ProcessStatus,
+							Status:                 device.Status,
+							Responsible:            device.Responsible,
+							Settings:               device.Settings,
+							Note:                   device.Note,
+							CreatedAt:              device.CreatedAt,
+							UpdatedAt:              device.UpdatedAt,
+						})
+					}
+		
+					now := time.Now()
+					date := now.Format("2006-01-02")
+					// insert event log
+					_ = p.productionOrderStageDeviceRepo.InsertEventLog(ctx, &model.EventLog{
+						ID:        time.Now().UnixNano(),
+						DeviceID:  deviceID,
+						StageID:   cockroach.String(activeStageID),
+						Quantity:  item.Value,
+						Msg:       cockroach.String(string(message.Payload())),
+						Date:      cockroach.String(date),
+						CreatedAt: now,
+					})
+				}
 			}
-
-			now := time.Now()
-			date := now.Format("2006-01-02")
-			// insert event log
-			_ = p.productionOrderStageDeviceRepo.InsertEventLog(ctx, &model.EventLog{
-				ID:        time.Now().UnixNano(),
-				DeviceID:  deviceID,
-				StageID:   cockroach.String(activeStageID),
-				Quantity:  item.Value,
-				Msg:       cockroach.String(string(message.Payload())),
-				Date:      cockroach.String(date),
-				CreatedAt: now,
-			})
 		}
 
 		message.Ack()
