@@ -194,7 +194,7 @@ func (p productionOrderStageDeviceService) FindProcessDeviceHistory(ctx context.
 
 	total, err := p.sDeviceProgressStatusHistoryRepo.Count(ctx, &repository.SearchDeviceProgressStatusHistoryOpts{
 		ProcessStatus: opt.ProcessStatus,
-		ErrorCodes: opt.ErrorCodes,
+		ErrorCodes: 	opt.ErrorCodes,
 		CreatedFrom: opt.CreatedFrom,
 		CreatedTo:   opt.CreatedTo,
 		DeviceID:    opt.DeviceID,
