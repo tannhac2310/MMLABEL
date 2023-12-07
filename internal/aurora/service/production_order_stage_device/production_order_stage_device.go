@@ -62,9 +62,9 @@ type productionOrderStageDeviceService struct {
 
 func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditProductionOrderStageDeviceOpts) error {
 	userID := opt.UserID
-	fmt.Println("userID===============>>>>", userID)
 	table := model.ProductionOrderStageDevice{}
 	tableProductProgress := model.DeviceProgressStatusHistory{}
+	tableDevice := model.Device{}
 	// find by id and check if it is existed
 	data, err := p.productionOrderStageDeviceRepo.FindByID(ctx, opt.ID)
 	if err != nil {
@@ -74,20 +74,37 @@ func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditPr
 
 	if data != nil && data.ProcessStatus != opt.ProcessStatus {
 		// find lasted status of device
-		fmt.Println(data)
 		lasted, err := p.sDeviceProgressStatusHistoryRepo.FindProductionOrderStageDeviceID(ctx, data.ID, data.DeviceID)
 		// if lastederr != nil {
 		// 	return fmt.Errorf("p.sDeviceProgressStatusHistoryRepo.FindProductionOrderStageDeviceID: %w", err)
 		// }
 		fmt.Println("userID===============>>>>lasted", err, lasted, data.ID, data.DeviceID)
-		if lasted != nil && lasted.IsResolved == 0 && (lasted.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed || lasted.ProcessStatus == enum.ProductionOrderStageDeviceStatusPause) {
+		if lasted != nil && lasted.IsResolved == 0 && opt.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart && (lasted.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed || lasted.ProcessStatus == enum.ProductionOrderStageDeviceStatusPause) {
 			updaterHistory := cockroach.NewUpdater(tableProductProgress.TableName(), model.DeviceProgressStatusHistoryFieldID, lasted.ID)
 			updaterHistory.Set(model.DeviceProgressStatusHistoryFieldUpdatedBy, userID)
 			updaterHistory.Set(model.DeviceProgressStatusHistoryFieldUpdatedAt, time.Now())
 			updaterHistory.Set(model.DeviceProgressStatusHistoryFieldIsResolved, 1)
 			err := cockroach.UpdateFields(ctx, updaterHistory)
 			if err != nil {
-				return fmt.Errorf("updaterHistory.cockroach.UpdateFields: %w", err)
+				// return fmt.Errorf("updaterHistory.cockroach.UpdateFields: %w", err)
+			}
+			fmt.Println("lasted.ErrorCode.String: ", lasted.ErrorCode.String);
+			if lasted.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed && lasted.ErrorCode.String == "MA1" {
+				updaterDevice := cockroach.NewUpdater(tableDevice.TableName(), model.DeviceFieldID, data.DeviceID)
+				updaterDevice.Set(model.DeviceFieldStatus, enum.CommonStatusActive)
+				err := cockroach.UpdateFields(ctx, updaterDevice)
+				if err != nil {
+					// return fmt.Errorf("updaterDevice.cockroach.UpdateFields: %w", err)
+				}
+			}
+		}
+		if (opt.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed && opt.Note == "MA1") {
+			fmt.Println("opt.Note: ", opt.Note);
+			updaterDevice := cockroach.NewUpdater(tableDevice.TableName(), model.DeviceFieldID, data.DeviceID)
+			updaterDevice.Set(model.DeviceFieldStatus, enum.CommonStatusDamage)
+			err := cockroach.UpdateFields(ctx, updaterDevice)
+			if err != nil {
+				// return fmt.Errorf("updaterDevice.cockroach.UpdateFields: %w", err)
 			}
 		}
 		//  insert DeviceProgressStatusHistory
@@ -106,7 +123,7 @@ func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditPr
 			modelData.Description = cockroach.String(opt.Settings.Description)
 		}
 		err = p.sDeviceProgressStatusHistoryRepo.Insert(ctx, modelData)
-
+		
 		if err != nil {
 			return fmt.Errorf("p.sDeviceProgressStatusHistoryRepo.Insert: %w", err)
 		}
@@ -202,6 +219,7 @@ func (p productionOrderStageDeviceService) EditDeviceProcessHistoryIsSolved(ctx 
 	userID := opt.UserID
 	tableProductProgress := model.DeviceProgressStatusHistory{}
 	lasted, err := p.sDeviceProgressStatusHistoryRepo.FindByID(ctx, opt.ID)
+	tableDevice := model.Device{}
 	if err != nil {
 		return fmt.Errorf("p.sDeviceProgressStatusHistoryRepo.FindByID: %w", err)
 	}
@@ -219,6 +237,14 @@ func (p productionOrderStageDeviceService) EditDeviceProcessHistoryIsSolved(ctx 
 		err := cockroach.UpdateFields(ctx, updaterHistory)
 		if err != nil {
 			return fmt.Errorf("updaterHistory.cockroach.UpdateFields: %w", err)
+		}
+		if lasted.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed && lasted.ErrorCode.String == "MA1" {
+			updaterDevice := cockroach.NewUpdater(tableDevice.TableName(), model.DeviceFieldID, lasted.DeviceID)
+			updaterDevice.Set(model.DeviceFieldStatus, enum.CommonStatusActive)
+			err := cockroach.UpdateFields(ctx, updaterDevice)
+			if err != nil {
+				// return fmt.Errorf("updaterDevice.cockroach.UpdateFields: %w", err)
+			}
 		}
 	}
 	return nil

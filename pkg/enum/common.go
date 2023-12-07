@@ -10,11 +10,13 @@ type CommonStatus uint8
 const (
 	CommonStatusActive CommonStatus = iota + 1
 	CommonStatusDisable
+	CommonStatusDamage
 )
 
 var CommonStatusName = map[CommonStatus]string{
 	CommonStatusActive:  "active",
 	CommonStatusDisable: "disable",
+	CommonStatusDamage:	 "damage",
 }
 
 var CommonStatusValue = func() map[string]CommonStatus {
