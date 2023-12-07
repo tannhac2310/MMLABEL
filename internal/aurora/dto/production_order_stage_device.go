@@ -9,7 +9,8 @@ import (
 
 type ProductionOrderStageDeviceFilter struct {
 	ProcessStatus []int8   `json:"processStatus"`
-	DeviceID    string    `json:"deviceID"`
+	DeviceID    string      `json:"deviceID"`
+	ErrorCodes    []string    `json:"errorCodes"`
 	CreatedFrom time.Time `json:"createdFrom"`
 	CreatedTo   time.Time `json:"createdTo"`
 }

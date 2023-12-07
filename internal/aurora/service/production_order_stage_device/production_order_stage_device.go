@@ -180,6 +180,7 @@ func (p productionOrderStageDeviceService) Deletes(ctx context.Context, ids []st
 func (p productionOrderStageDeviceService) FindProcessDeviceHistory(ctx context.Context, opt *FindProcessDeviceHistoryOpts, sort *repository.Sort, limit, offset int64) ([]*repository.DeviceProgressStatusHistoryData, *repository.CountResult, error) {
 	data, err := p.sDeviceProgressStatusHistoryRepo.Search(ctx, &repository.SearchDeviceProgressStatusHistoryOpts{
 		ProcessStatus: opt.ProcessStatus,
+		ErrorCodes: opt.ErrorCodes,
 		CreatedFrom: opt.CreatedFrom,
 		CreatedTo:   opt.CreatedTo,
 		DeviceID:    opt.DeviceID,
@@ -193,6 +194,7 @@ func (p productionOrderStageDeviceService) FindProcessDeviceHistory(ctx context.
 
 	total, err := p.sDeviceProgressStatusHistoryRepo.Count(ctx, &repository.SearchDeviceProgressStatusHistoryOpts{
 		ProcessStatus: opt.ProcessStatus,
+		ErrorCodes: opt.ErrorCodes,
 		CreatedFrom: opt.CreatedFrom,
 		CreatedTo:   opt.CreatedTo,
 		DeviceID:    opt.DeviceID,
@@ -207,6 +209,7 @@ func (p productionOrderStageDeviceService) FindProcessDeviceHistory(ctx context.
 type FindProcessDeviceHistoryOpts struct {
 	ProcessStatus []int8
 	DeviceID    string
+	ErrorCodes	[]string
 	CreatedFrom time.Time
 	CreatedTo   time.Time
 }

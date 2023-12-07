@@ -46,6 +46,7 @@ func (s productionOrderStageDeviceController) FindProcessDeviceHistory(c *gin.Co
 	deviceProcessStatusHistoryData, total, err := s.productionOrderStageDeviceService.FindProcessDeviceHistory(c, &production_order_stage_device.FindProcessDeviceHistoryOpts{
 		ProcessStatus: req.Filter.ProcessStatus,
 		DeviceID:    req.Filter.DeviceID,
+		ErrorCode: req.Filter.ErrorCode,
 		CreatedFrom: req.Filter.CreatedFrom,
 		CreatedTo:   req.Filter.CreatedTo,
 	}, sort, req.Paging.Limit, req.Paging.Offset)
