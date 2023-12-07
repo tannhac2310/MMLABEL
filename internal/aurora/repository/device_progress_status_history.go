@@ -64,6 +64,7 @@ type SearchDeviceProgressStatusHistoryOpts struct {
 	CreatedFrom time.Time
 	CreatedTo   time.Time
 	DeviceID    string
+	ErrorCodes	[]string
 	//ProductionOrderStageID string
 	// todo add more search options
 	Limit  int64
@@ -85,7 +86,10 @@ func (s *SearchDeviceProgressStatusHistoryOpts) buildQuery(isCount bool) (string
 		args = append(args, s.ProcessStatus)
 		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.DeviceProgressStatusHistoryFieldProcessStatus)
 	}
-	
+	if len(s.ErrorCodes) > 0 {
+		args = append(args, s.ErrorCodes)
+		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.DeviceProgressStatusHistoryFieldErrorCode)
+	}
 	if s.DeviceID != "" {
 		args = append(args, s.DeviceID)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.DeviceProgressStatusHistoryFieldDeviceID, len(args))
