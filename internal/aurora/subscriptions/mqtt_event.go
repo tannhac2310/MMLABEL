@@ -113,9 +113,9 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				fmt.Println("============>>> Received message for topic ====", err)
 			}
 			activeStageID := ""
-			if (len(orderStageDevices) == 1) {
+			if len(orderStageDevices) == 1 {
 				device := orderStageDevices[0]
-				if (device.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart) {
+				if device.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart {
 					if int64(item.Value) > 0 && int64(item.Value) > device.Quantity {
 						// update first device
 						activeStageID = device.ProductionOrderStageID
@@ -126,14 +126,16 @@ func (p *EventMQTTSubscription) Subscribe() error {
 							Quantity:               int64(item.Value),
 							ProcessStatus:          device.ProcessStatus,
 							Status:                 device.Status,
-							Responsible:            device.Responsible,
 							Settings:               device.Settings,
 							Note:                   device.Note,
 							CreatedAt:              device.CreatedAt,
 							UpdatedAt:              device.UpdatedAt,
+							Responsible:            device.Responsible,
+							EstimatedCompleteAt:    device.EstimatedCompleteAt,
+							AssignedQuantity:       device.AssignedQuantity,
 						})
 					}
-		
+
 					now := time.Now()
 					date := now.Format("2006-01-02")
 					// insert event log
