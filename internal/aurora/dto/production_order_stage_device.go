@@ -118,6 +118,7 @@ type DeviceStatusHistory struct {
 	ID                           string                                `json:"id"`
 	ProductionOrderStageDeviceID string                                `json:"productionOrderStageDeviceID"`
 	DeviceID                     string                                `json:"deviceID"`
+	StageID						 string                                `json:"stageID"`
 	ProcessStatus                enum.ProductionOrderStageDeviceStatus `json:"processStatus"`
 	IsResolved                   int16                                 `json:"isResolved"`
 	UpdatedAt                    time.Time                             `json:"updatedAt"`
