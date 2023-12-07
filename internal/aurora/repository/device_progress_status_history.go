@@ -84,11 +84,11 @@ func (s *SearchDeviceProgressStatusHistoryOpts) buildQuery(isCount bool) (string
 	
 	if len(s.ProcessStatus) > 0 {
 		args = append(args, s.ProcessStatus)
-		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.DeviceProgressStatusHistoryFieldProcessStatus)
+		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.DeviceProgressStatusHistoryFieldProcessStatus, len(args))
 	}
 	if len(s.ErrorCodes) > 0 {
 		args = append(args, s.ErrorCodes)
-		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.DeviceProgressStatusHistoryFieldErrorCode)
+		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.DeviceProgressStatusHistoryFieldErrorCode, len(args))
 	}
 	if s.DeviceID != "" {
 		args = append(args, s.DeviceID)
