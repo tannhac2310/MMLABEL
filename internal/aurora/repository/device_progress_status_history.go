@@ -120,12 +120,15 @@ func (s *SearchDeviceProgressStatusHistoryOpts) buildQuery(isCount bool) (string
 
 	joins += fmt.Sprintf(" LEFT JOIN users AS u ON u.id = b.updated_by ")
 	joins += fmt.Sprintf(" LEFT JOIN users AS u2 ON u2.id = b.created_by ")
-	return fmt.Sprintf("SELECT b.%s,u2.name AS created_user_name,u.name AS updated_user_name  FROM %s AS b %s WHERE TRUE %s %s LIMIT %d OFFSET %d", strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
+	joins += fmt.Sprintf(" LEFT JOIN production_order_stage_devices AS posd ON posd.id = b.production_order_stage_device_id ")
+	joins += fmt.Sprintf(" LEFT JOIN production_order_stages AS pos ON pos.id = posd.production_order_stage_id ")
+	return fmt.Sprintf("SELECT b.%s,u2.name AS created_user_name,u.name AS updated_user_name, pos.stage_id as stage_id  FROM %s AS b %s WHERE TRUE %s %s LIMIT %d OFFSET %d", strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
 }
 
 type DeviceProgressStatusHistoryData struct {
 	*model.DeviceProgressStatusHistory
 	UpdatedUserName sql.NullString `db:"updated_user_name"`
+	StageID sql.NullString `db:"stage_id"`
 	CreatedUserName sql.NullString `db:"created_user_name"`
 }
 
