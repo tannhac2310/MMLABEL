@@ -60,6 +60,7 @@ func (s productionOrderStageDeviceController) FindProcessDeviceHistory(c *gin.Co
 			ID:                           deviceProcessStatusHistory.ID,
 			ProductionOrderStageDeviceID: deviceProcessStatusHistory.ProductionOrderStageDeviceID,
 			DeviceID:                     deviceProcessStatusHistory.DeviceID,
+			StageID: 					  deviceProcessStatusHistory.ProductionOrderStageDeviceID,
 			ProcessStatus:                deviceProcessStatusHistory.ProcessStatus,
 			IsResolved:                   deviceProcessStatusHistory.IsResolved,
 			UpdatedAt:                    deviceProcessStatusHistory.UpdatedAt.Time,
