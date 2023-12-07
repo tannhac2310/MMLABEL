@@ -127,8 +127,8 @@ func (s *SearchDeviceProgressStatusHistoryOpts) buildQuery(isCount bool) (string
 
 type DeviceProgressStatusHistoryData struct {
 	*model.DeviceProgressStatusHistory
+	StageID 		sql.NullString `db:"stage_id"`
 	UpdatedUserName sql.NullString `db:"updated_user_name"`
-	StageID sql.NullString `db:"stage_id"`
 	CreatedUserName sql.NullString `db:"created_user_name"`
 }
 
