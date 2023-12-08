@@ -231,7 +231,7 @@ func (s *SearchEventLogOpts) buildQuery(isCount bool) (string, []interface{}) {
 		WHERE TRUE %s
 		%s
 		LIMIT %d
-		OFFSET %d`, strings.Join(fields, ", el."), b.TableName(), joins, conds, order, 1000, 0), args
+		OFFSET %d`, strings.Join(fields, ", el."), b.TableName(), joins, conds, order, 50000, 0), args
 
 }
 func (r *productionOrderStageDevicesRepo) FindEventLog(ctx context.Context, s *SearchEventLogOpts) ([]*EventLogData, error) {
