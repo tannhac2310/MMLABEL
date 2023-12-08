@@ -88,7 +88,7 @@ func (s *SearchDevicesOpts) buildQuery(isCount bool) (string, []interface{}) {
 		args = append(args, s.Code)
 		conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.DeviceFieldCode, len(args))
 	}
-	
+
 	b := &model.Device{}
 	fields, _ := b.FieldMap()
 	if isCount {
@@ -118,7 +118,7 @@ func (r *devicesRepo) Search(ctx context.Context, s *SearchDevicesOpts) ([]*Devi
 	sql, args := s.buildQuery(false)
 	err := cockroach.Select(ctx, sql, args...).ScanAll(&devices)
 	if err != nil {
-		return nil, fmt.Errorf("cockroach.Select: %w", err)
+		return nil, fmt.Errorf("deviceRepo.cockroach.Select: %w", err)
 	}
 
 	return devices, nil
