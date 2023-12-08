@@ -81,7 +81,7 @@ func (s *SearchDevicesOpts) buildQuery(isCount bool) (string, []interface{}) {
 			len(args), model.DeviceFieldName, model.DeviceFieldCode)
 	}
 	if s.Step != "" {
-		args = append(args, s.Step)
+		args = append(args, "%"+s.Step+"%")
 		conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.DeviceFieldStep, len(args))
 	}
 	if s.Code != "" {
