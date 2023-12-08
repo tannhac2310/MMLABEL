@@ -12,6 +12,7 @@ const (
 	DeviceFieldName      = "name"
 	DeviceFieldStep      = "step"
 	DeviceFieldCode      = "code"
+	DeviceFieldSort      = "sort"
 	DeviceFieldOptionID  = "option_id"
 	DeviceFieldData      = "data"
 	DeviceFieldStatus    = "status"
@@ -25,7 +26,8 @@ type Device struct {
 	ID        string                 `db:"id"`
 	Name      string                 `db:"name"`
 	Code      string                 `db:"code"`
-	Step      string           		 `db:"step"`
+	Sort      int                    `db:"sort"`
+	Step      string                 `db:"step"`
 	OptionID  sql.NullString         `db:"option_id"`
 	Data      map[string]interface{} `db:"data"`
 	Status    enum.CommonStatus      `db:"status"`
@@ -40,6 +42,7 @@ func (rcv *Device) FieldMap() (fields []string, values []interface{}) {
 		DeviceFieldID,
 		DeviceFieldName,
 		DeviceFieldCode,
+		DeviceFieldSort,
 		DeviceFieldStep,
 		DeviceFieldOptionID,
 		DeviceFieldData,
@@ -54,6 +57,7 @@ func (rcv *Device) FieldMap() (fields []string, values []interface{}) {
 		&rcv.ID,
 		&rcv.Name,
 		&rcv.Code,
+		&rcv.Sort,
 		&rcv.Step,
 		&rcv.OptionID,
 		&rcv.Data,

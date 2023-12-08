@@ -25,7 +25,8 @@ type Device struct {
 	ID        string                 `json:"id"`
 	Name      string                 `json:"name"`
 	Code      string                 `json:"code"`
-	Step 	  string                 `json:"Step"`
+	Step      string                 `json:"Step"`
+	Sort      int                    `json:"sort"`
 	OptionID  string                 `json:"optionID"`
 	Data      map[string]interface{} `json:"data"`
 	Status    enum.CommonStatus      `json:"status"`
