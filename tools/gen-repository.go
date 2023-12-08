@@ -64,7 +64,7 @@ func main() {
 		if tableName.String == "schema_lock" || tableName.String == "schema_migrations" {
 			continue
 		}
-		if tableName.String != "device_progress_status_history" {
+		if tableName.String != "device_working_history" {
 			continue
 		}
 		genRepository(pool, tableName)
@@ -215,6 +215,7 @@ type {{.Name}}Repo interface {
 	Insert(ctx context.Context, e *model.{{.Name}}) error
 	Update(ctx context.Context, e *model.{{.Name}}) error
 	SoftDelete(ctx context.Context, id string) error
+	FindByID(ctx context.Context, id string) (*{{.Name}}Data, error)
 	Search(ctx context.Context, s *Search{{.Name}}Opts) ([]*{{.Name}}Data, error)
 	Count(ctx context.Context, s *Search{{.Name}}Opts) (*CountResult, error)
 }
@@ -235,6 +236,15 @@ func (r *s{{.Name}}Repo) Insert(ctx context.Context, e *model.{{.Name}}) error {
 	return nil
 }
 
+func (r *s{{.Name}}Repo) FindByID(ctx context.Context, id string) (*{{.Name}}Data, error) {
+	e := &{{.Name}}Data{}
+	err := cockroach.FindOne(ctx, e, "id = $1", id)
+	if err != nil {
+		return nil, fmt.Errorf("s{{.Name}}Repo.cockroach.FindOne: %w", err)
+	}
+
+	return e, nil
+}
 func (r *s{{.Name}}Repo) Update(ctx context.Context, e *model.{{.Name}}) error {
 	e.UpdatedAt = time.Now()
 	return cockroach.Update(ctx, e)

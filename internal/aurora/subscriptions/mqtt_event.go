@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/idutil"
 	"strings"
 	"time"
 
@@ -21,6 +22,7 @@ type EventMQTTSubscription struct {
 	db cockroach.Ext
 	//busFactory nats.BusFactory
 	productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo
+	deviceWorkingHistoryRepo       repository.DeviceWorkingHistoryRepo
 	logger                         *zap.Logger
 	wsService                      ws.WebSocketService
 }
@@ -28,12 +30,14 @@ type EventMQTTSubscription struct {
 func NewMQTTSubscription(
 	db cockroach.Ext,
 	productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo,
+	deviceWorkingHistoryRepo repository.DeviceWorkingHistoryRepo,
 	logger *zap.Logger,
 	wsService ws.WebSocketService,
 ) *EventMQTTSubscription {
 	return &EventMQTTSubscription{
 		db:                             db,
 		productionOrderStageDeviceRepo: productionOrderStageDeviceRepo,
+		deviceWorkingHistoryRepo:       deviceWorkingHistoryRepo,
 		logger:                         logger,
 		wsService:                      wsService,
 	}
@@ -94,6 +98,9 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			return
 		}
 
+		// data is {"d":[{"tag":"B_PR04:Counter","value":413.00},{"tag":"B_PR03:Counter","value":391.00},{"tag":"B_PR03:TG_in","value":1.00},{"tag":"B_PR03:ON_OFF","value":1},{"tag":"B_PR04:TG_in","value":11.00},{"tag":"B_PR04:ON_OFF","value":1},{"tag":"B_PR03:SL_1Ngay","value":0.00},{"tag":"B_PR03:Counter_Day","value":393.00},{"tag":"B_PR04:SL_1Ngay","value":0.00},{"tag":"B_PR04:Counter_Day","value":431.00}],"ts":"2023-12-08T07:13:34+0000"}
+		now := time.Now()
+		dateStr := now.Format("2006-01-02")
 		fmt.Println(iotData.D, iotData.Ts)
 		for _, item := range iotData.D {
 			// find device in production order stage device
@@ -102,6 +109,8 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				continue
 			}
 			deviceID := s[0]
+			action := s[1]
+
 			orderStageDevices, err := p.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
 				DeviceID:                   deviceID,
 				ProductionOrderStageStatus: enum.ProductionOrderStageStatusProductionStart,
@@ -136,8 +145,74 @@ func (p *EventMQTTSubscription) Subscribe() error {
 						})
 					}
 
-					now := time.Now()
-					date := now.Format("2006-01-02")
+					// upsert to device_working_history
+					if action == "Counter_Day" {
+						counterByDay := item.Value
+						p.logger.Info("Counter_Day", zap.String("deviceID", deviceID), zap.Int("counterByDay", int(counterByDay)))
+
+						deviceWorkingHistories, err := p.deviceWorkingHistoryRepo.Search(ctx, &repository.SearchDeviceWorkingHistoryOpts{
+							DeviceID: deviceID,
+							Date:     dateStr,
+							Limit:    1,
+						})
+						if err != nil {
+							// todo check error is not_found or not
+						}
+
+						if len(deviceWorkingHistories) == 0 {
+							p.deviceWorkingHistoryRepo.Insert(ctx, &model.DeviceWorkingHistory{
+								ID:                           idutil.ULIDNow(),
+								ProductionOrderStageDeviceID: device.ID,
+								DeviceID:                     deviceID,
+								Date:                         dateStr,
+								Quantity:                     int64(counterByDay),
+								WorkingTime:                  0,
+								CreatedAt:                    now,
+							})
+						} else {
+							deviceWorkingHistory := deviceWorkingHistories[0].DeviceWorkingHistory
+							deviceWorkingHistory.Quantity = int64(counterByDay)
+							err := p.deviceWorkingHistoryRepo.Update(ctx, deviceWorkingHistory)
+							if err != nil {
+								// todo nothing
+								p.logger.Error(" p.deviceWorkingHistoryRepo.Update error", zap.Error(err))
+							}
+						}
+					}
+					// upsert to device_working_history
+					if action == "TG_in_1Ngay" {
+						TG_in_1Ngay := item.Value
+						p.logger.Info("TG_in_1Ngay", zap.String("deviceID", deviceID), zap.Int("TG_in_1Ngay", int(TG_in_1Ngay)))
+
+						deviceWorkingHistories, err := p.deviceWorkingHistoryRepo.Search(ctx, &repository.SearchDeviceWorkingHistoryOpts{
+							DeviceID: deviceID,
+							Date:     dateStr,
+							Limit:    1,
+						})
+						if err != nil {
+							// todo check error is not_found or not
+						}
+
+						if len(deviceWorkingHistories) == 0 {
+							p.deviceWorkingHistoryRepo.Insert(ctx, &model.DeviceWorkingHistory{
+								ID:                           idutil.ULIDNow(),
+								ProductionOrderStageDeviceID: device.ID,
+								DeviceID:                     deviceID,
+								Date:                         dateStr,
+								WorkingTime:                  int64(TG_in_1Ngay),
+								CreatedAt:                    now,
+							})
+						} else {
+							deviceWorkingHistory := deviceWorkingHistories[0].DeviceWorkingHistory
+							deviceWorkingHistory.WorkingTime = int64(TG_in_1Ngay)
+							err := p.deviceWorkingHistoryRepo.Update(ctx, deviceWorkingHistory)
+							if err != nil {
+								// todo nothing
+								p.logger.Error(" p.deviceWorkingHistoryRepo.Update error", zap.Error(err))
+							}
+						}
+					}
+
 					// insert event log
 					_ = p.productionOrderStageDeviceRepo.InsertEventLog(ctx, &model.EventLog{
 						ID:        time.Now().UnixNano(),
@@ -145,7 +220,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 						StageID:   cockroach.String(activeStageID),
 						Quantity:  item.Value,
 						Msg:       cockroach.String(string(message.Payload())),
-						Date:      cockroach.String(date),
+						Date:      cockroach.String(dateStr),
 						CreatedAt: now,
 					})
 				}

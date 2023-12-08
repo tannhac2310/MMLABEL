@@ -138,11 +138,12 @@ type DeviceStatusHistoryUpdateSolvedResponse struct {
 }
 
 // lostime
-type FindLostTimeRequest struct {
+type FindAvailabilityTimeRequest struct {
 	DeviceID string `json:"deviceID"`
 	Date     string `json:"date"`
 }
 
-type FindLostTimeResponse struct {
-	LostTime float64 `json:"lostTime"`
+type FindAvailabilityTimeResponse struct {
+	LossTime    int64 `json:"lossTime"`
+	WorkingTime int64 `json:"workingTime"`
 }

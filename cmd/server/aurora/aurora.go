@@ -144,6 +144,7 @@ func Run(ctx context.Context, configPath string) {
 			repository2.NewOptionRepo,
 			repository2.NewProductionOrderDeviceConfigRepo,
 			repository2.NewDeviceProgressStatusHistoryRepo,
+			repository2.NewDeviceWorkingHistoryRepo,
 		),
 		// services
 		fx.Provide(
