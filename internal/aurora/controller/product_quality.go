@@ -67,6 +67,7 @@ func (s productQualityController) EditProductQuality(c *gin.Context) {
 	err = s.productQualityService.EditProductQuality(c, &product_quality.EditProductQualityOpts{
 		ID:                req.ID,
 		DefectType:        req.DefectType,
+		DeviceID:          req.DeviceID,
 		DefectCode:        req.DefectCode,
 		DefectLevel:       req.DefectLevel,
 		ProductionStageID: req.ProductionStageID,
@@ -109,6 +110,7 @@ func (s productQualityController) FindProductQuality(c *gin.Context) {
 
 	productQualitys, cnt, analysis, err := s.productQualityService.FindProductQuality(c, &product_quality.FindProductQualityOpts{
 		ProductionOrderID: req.Filter.ProductionOrderID,
+		DeviceID: 		   req.Filter.DeviceID,
 		DefectType:        req.Filter.DefectType,
 		DefectCode:        req.Filter.DefectCode,
 		CreatedAtFrom:     req.Filter.CreatedAtFrom,
@@ -147,6 +149,7 @@ func toProductQualityResp(f *product_quality.Data) *dto.ProductQuality {
 		ID:                  f.ID,
 		ProductionOrderID:   f.ProductionOrderID,
 		ProductionOrderName: f.ProductionOrderName,
+		DeviceID:            f.DeviceID.String,
 		ProductID:           f.ProductID.String,
 		DefectType:          f.DefectType.String,
 		DefectCode:          f.DefectCode.String,
