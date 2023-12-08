@@ -54,6 +54,7 @@ type Service interface {
 	FindEventLog(ctx context.Context, opt *FindEventLogOpts) ([]*repository.EventLogData, error)
 	FindProcessDeviceHistory(ctx context.Context, opt *FindProcessDeviceHistoryOpts, sort *repository.Sort, limit, offset int64) ([]*repository.DeviceProgressStatusHistoryData, *repository.CountResult, error)
 	EditDeviceProcessHistoryIsSolved(ctx context.Context, opt *EditDeviceProcessHistoryIsSolvedOpts) error
+	CalculateLostTime(ctx context.Context, opt *FindLostTimeOpts) (float64, error)
 }
 type productionOrderStageDeviceService struct {
 	productionOrderStageDeviceRepo   repository.ProductionOrderStageDeviceRepo
@@ -88,7 +89,7 @@ func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditPr
 			if err != nil {
 				// return fmt.Errorf("updaterHistory.cockroach.UpdateFields: %w", err)
 			}
-			fmt.Println("lasted.ErrorCode.String: ", lasted.ErrorCode.String);
+			fmt.Println("lasted.ErrorCode.String: ", lasted.ErrorCode.String)
 			if lasted.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed && lasted.ErrorCode.String == "MA1" {
 				updaterDevice := cockroach.NewUpdater(tableDevice.TableName(), model.DeviceFieldID, data.DeviceID)
 				updaterDevice.Set(model.DeviceFieldStatus, enum.CommonStatusActive)
@@ -98,8 +99,8 @@ func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditPr
 				}
 			}
 		}
-		if (opt.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed && opt.Note == "MA1") {
-			fmt.Println("opt.Note: ", opt.Note);
+		if opt.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed && opt.Note == "MA1" {
+			fmt.Println("opt.Note: ", opt.Note)
 			updaterDevice := cockroach.NewUpdater(tableDevice.TableName(), model.DeviceFieldID, data.DeviceID)
 			updaterDevice.Set(model.DeviceFieldStatus, enum.CommonStatusDamage)
 			err := cockroach.UpdateFields(ctx, updaterDevice)
@@ -123,7 +124,7 @@ func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditPr
 			modelData.Description = cockroach.String(opt.Settings.Description)
 		}
 		err = p.sDeviceProgressStatusHistoryRepo.Insert(ctx, modelData)
-		
+
 		if err != nil {
 			return fmt.Errorf("p.sDeviceProgressStatusHistoryRepo.Insert: %w", err)
 		}
@@ -180,13 +181,13 @@ func (p productionOrderStageDeviceService) Deletes(ctx context.Context, ids []st
 func (p productionOrderStageDeviceService) FindProcessDeviceHistory(ctx context.Context, opt *FindProcessDeviceHistoryOpts, sort *repository.Sort, limit, offset int64) ([]*repository.DeviceProgressStatusHistoryData, *repository.CountResult, error) {
 	data, err := p.sDeviceProgressStatusHistoryRepo.Search(ctx, &repository.SearchDeviceProgressStatusHistoryOpts{
 		ProcessStatus: opt.ProcessStatus,
-		ErrorCodes: opt.ErrorCodes,
-		CreatedFrom: opt.CreatedFrom,
-		CreatedTo:   opt.CreatedTo,
-		DeviceID:    opt.DeviceID,
-		Limit:       limit,
-		Offset:      offset,
-		Sort:        sort,
+		ErrorCodes:    opt.ErrorCodes,
+		CreatedFrom:   opt.CreatedFrom,
+		CreatedTo:     opt.CreatedTo,
+		DeviceID:      opt.DeviceID,
+		Limit:         limit,
+		Offset:        offset,
+		Sort:          sort,
 	})
 	if err != nil {
 		return nil, nil, err
@@ -194,10 +195,10 @@ func (p productionOrderStageDeviceService) FindProcessDeviceHistory(ctx context.
 
 	total, err := p.sDeviceProgressStatusHistoryRepo.Count(ctx, &repository.SearchDeviceProgressStatusHistoryOpts{
 		ProcessStatus: opt.ProcessStatus,
-		ErrorCodes: 	opt.ErrorCodes,
-		CreatedFrom: opt.CreatedFrom,
-		CreatedTo:   opt.CreatedTo,
-		DeviceID:    opt.DeviceID,
+		ErrorCodes:    opt.ErrorCodes,
+		CreatedFrom:   opt.CreatedFrom,
+		CreatedTo:     opt.CreatedTo,
+		DeviceID:      opt.DeviceID,
 	})
 	if err != nil {
 		return nil, nil, err
@@ -208,14 +209,14 @@ func (p productionOrderStageDeviceService) FindProcessDeviceHistory(ctx context.
 
 type FindProcessDeviceHistoryOpts struct {
 	ProcessStatus []int8
-	DeviceID    string
-	ErrorCodes	[]string
-	CreatedFrom time.Time
-	CreatedTo   time.Time
+	DeviceID      string
+	ErrorCodes    []string
+	CreatedFrom   time.Time
+	CreatedTo     time.Time
 }
 type EditDeviceProcessHistoryIsSolvedOpts struct {
-	UserID		 string
-	ID		     string		
+	UserID string
+	ID     string
 }
 
 func (p productionOrderStageDeviceService) EditDeviceProcessHistoryIsSolved(ctx context.Context, opt *EditDeviceProcessHistoryIsSolvedOpts) error {

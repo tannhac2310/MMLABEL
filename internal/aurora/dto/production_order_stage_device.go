@@ -8,11 +8,11 @@ import (
 )
 
 type ProductionOrderStageDeviceFilter struct {
-	ProcessStatus []int8   `json:"processStatus"`
-	DeviceID    string      `json:"deviceID"`
-	ErrorCodes    []string    `json:"errorCodes"`
-	CreatedFrom time.Time `json:"createdFrom"`
-	CreatedTo   time.Time `json:"createdTo"`
+	ProcessStatus []int8    `json:"processStatus"`
+	DeviceID      string    `json:"deviceID"`
+	ErrorCodes    []string  `json:"errorCodes"`
+	CreatedFrom   time.Time `json:"createdFrom"`
+	CreatedTo     time.Time `json:"createdTo"`
 }
 
 type FindProductionOrderStageDevicesRequest struct {
@@ -118,7 +118,7 @@ type DeviceStatusHistory struct {
 	ID                           string                                `json:"id"`
 	ProductionOrderStageDeviceID string                                `json:"productionOrderStageDeviceID"`
 	DeviceID                     string                                `json:"deviceID"`
-	StageID						 string                                `json:"stageID"`
+	StageID                      string                                `json:"stageID"`
 	ProcessStatus                enum.ProductionOrderStageDeviceStatus `json:"processStatus"`
 	IsResolved                   int16                                 `json:"isResolved"`
 	UpdatedAt                    time.Time                             `json:"updatedAt"`
@@ -132,7 +132,17 @@ type DeviceStatusHistory struct {
 }
 
 type DeviceStatusHistoryUpdateSolved struct {
-	ID                           string                                `json:"id"`
+	ID string `json:"id"`
 }
 type DeviceStatusHistoryUpdateSolvedResponse struct {
+}
+
+// lostime
+type FindLostTimeRequest struct {
+	DeviceID string `json:"deviceID"`
+	Date     string `json:"date"`
+}
+
+type FindLostTimeResponse struct {
+	LostTime float64 `json:"lostTime"`
 }

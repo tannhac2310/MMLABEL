@@ -19,6 +19,7 @@ type ProductionOrderStageDeviceController interface {
 	FindEventLog(c *gin.Context)
 	FindProcessDeviceHistory(c *gin.Context)
 	UpdateProcessDeviceHistoryIsSolved(c *gin.Context)
+	FindLostTime(c *gin.Context)
 }
 
 type productionOrderStageDeviceController struct {
@@ -45,10 +46,10 @@ func (s productionOrderStageDeviceController) FindProcessDeviceHistory(c *gin.Co
 
 	deviceProcessStatusHistoryData, total, err := s.productionOrderStageDeviceService.FindProcessDeviceHistory(c, &production_order_stage_device.FindProcessDeviceHistoryOpts{
 		ProcessStatus: req.Filter.ProcessStatus,
-		DeviceID:    	req.Filter.DeviceID,
-		ErrorCodes: 	req.Filter.ErrorCodes,
-		CreatedFrom: req.Filter.CreatedFrom,
-		CreatedTo:   req.Filter.CreatedTo,
+		DeviceID:      req.Filter.DeviceID,
+		ErrorCodes:    req.Filter.ErrorCodes,
+		CreatedFrom:   req.Filter.CreatedFrom,
+		CreatedTo:     req.Filter.CreatedTo,
 	}, sort, req.Paging.Limit, req.Paging.Offset)
 	if err != nil {
 		transportutil.Error(c, err)
@@ -60,7 +61,7 @@ func (s productionOrderStageDeviceController) FindProcessDeviceHistory(c *gin.Co
 			ID:                           deviceProcessStatusHistory.ID,
 			ProductionOrderStageDeviceID: deviceProcessStatusHistory.ProductionOrderStageDeviceID,
 			DeviceID:                     deviceProcessStatusHistory.DeviceID,
-			StageID: 					  deviceProcessStatusHistory.StageID.String,
+			StageID:                      deviceProcessStatusHistory.StageID.String,
 			ProcessStatus:                deviceProcessStatusHistory.ProcessStatus,
 			IsResolved:                   deviceProcessStatusHistory.IsResolved,
 			UpdatedAt:                    deviceProcessStatusHistory.UpdatedAt.Time,
@@ -77,6 +78,27 @@ func (s productionOrderStageDeviceController) FindProcessDeviceHistory(c *gin.Co
 	transportutil.SendJSONResponse(c, &dto.FindDeviceStatusHistoryResponse{
 		DeviceStatusHistory: deviceProcessStatusHistoryResponses,
 		Total:               total.Count,
+	})
+}
+func (s productionOrderStageDeviceController) FindLostTime(c *gin.Context) {
+	req := &dto.FindEvenLogRequest{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+
+	lostTime, err := s.productionOrderStageDeviceService.CalculateLostTime(c, &production_order_stage_device.FindLostTimeOpts{
+		DeviceID: req.DeviceID,
+		Date:     req.Date,
+	})
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+
+	transportutil.SendJSONResponse(c, &dto.FindLostTimeResponse{
+		LostTime: lostTime,
 	})
 }
 func (s productionOrderStageDeviceController) FindEventLog(c *gin.Context) {
@@ -201,10 +223,10 @@ func (s productionOrderStageDeviceController) UpdateProcessDeviceHistoryIsSolved
 		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
 		return
 	}
-	
+
 	err = s.productionOrderStageDeviceService.EditDeviceProcessHistoryIsSolved(c, &production_order_stage_device.EditDeviceProcessHistoryIsSolvedOpts{
-		ID:         req.ID,
-		UserID:     interceptor.UserIDFromCtx(c),
+		ID:     req.ID,
+		UserID: interceptor.UserIDFromCtx(c),
 	})
 	if err != nil {
 		transportutil.Error(c, err)
@@ -245,7 +267,7 @@ func RegisterProductionOrderStageDeviceController(
 		c.UpdateProcessDeviceHistoryIsSolved,
 		&dto.DeviceStatusHistoryUpdateSolved{},
 		&dto.DeviceStatusHistoryUpdateSolvedResponse{},
-		"Lịch sử thay đổi trạng thái của thiết bị",
+		"Cập nhật thay đổi trạng thái của thiết bị",
 	)
 	routeutil.AddEndpoint(
 		g,
@@ -272,5 +294,13 @@ func RegisterProductionOrderStageDeviceController(
 		&dto.DeleteProductionOrderStageDeviceRequest{},
 		&dto.DeleteProductionOrderStageDeviceResponse{},
 		"delete productionOrderStageDevice",
+	)
+	routeutil.AddEndpoint(
+		g,
+		"lost-time",
+		c.FindLostTime,
+		&dto.FindLostTimeRequest{},
+		&dto.FindLostTimeResponse{},
+		"FindLostTime",
 	)
 }
