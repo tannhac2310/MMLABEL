@@ -40,7 +40,7 @@ func (r *deviceWorkingHistoryRepo) Update(ctx context.Context, e *model.DeviceWo
 }
 
 func (r *deviceWorkingHistoryRepo) FindByDeviceAndDate(ctx context.Context, device_id string, working_date date.Date) error {
-
+	return nil
 }
 
 
