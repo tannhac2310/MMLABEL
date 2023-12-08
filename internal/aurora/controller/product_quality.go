@@ -36,6 +36,7 @@ func (s productQualityController) CreateProductQuality(c *gin.Context) {
 	id, err := s.productQualityService.CreateProductQuality(c, &product_quality.CreateProductQualityOpts{
 		ProductionOrderID: req.ProductionOrderID,
 		ProductID:         req.ProductID,
+		DeviceID:          req.DeviceID,
 		DefectType:        req.DefectType,
 		DefectCode:        req.DefectCode,
 		DefectLevel:       req.DefectLevel,

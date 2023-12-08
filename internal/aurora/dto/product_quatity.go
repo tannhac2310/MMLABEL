@@ -1,8 +1,9 @@
 package dto
 
 import (
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/commondto"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/commondto"
 )
 
 type ProductQualityFilter struct {
@@ -47,6 +48,7 @@ type ProductQuality struct {
 type CreateProductQualityRequest struct {
 	ProductionOrderID string `json:"productionOrderID"  binding:"required"`
 	ProductID         string `json:"productID"`
+	DeviceID          string `json:"deviceID"`
 	DefectType        string `json:"defectType" binding:"required"`
 	DefectCode        string `json:"defectCode" binding:"required"`
 	DefectLevel       int16  `json:"defectLevel"`
