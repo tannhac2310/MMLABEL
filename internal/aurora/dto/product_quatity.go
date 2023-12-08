@@ -8,6 +8,7 @@ import (
 
 type ProductQualityFilter struct {
 	ProductionOrderID string    `json:"productionOrderID"`
+	DeviceID        string    	`json:"deviceID"`
 	DefectType        string    `json:"defectType"`
 	DefectCode        string    `json:"defectCode"`
 	CreatedAtFrom     time.Time `json:"createdAtFrom"`
@@ -32,6 +33,7 @@ type ProductQuality struct {
 	ID                  string    `json:"id"`
 	ProductionOrderID   string    `json:"productionOrderID"`
 	ProductionOrderName string    `json:"productionOrderName"`
+	DeviceID			string	  `json:"deviceID"`
 	ProductID           string    `json:"productID"`
 	DefectType          string    `json:"defectType"`
 	DefectCode          string    `json:"defectCode"`
@@ -65,6 +67,7 @@ type CreateProductQualityResponse struct {
 type EditProductQualityRequest struct {
 	ID                string `json:"id" binding:"required"`
 	DefectType        string `json:"defectType"`
+	DeviceID          string `json:"deviceID"`
 	DefectCode        string `json:"defectCode"`
 	DefectLevel       string `json:"defectLevel"`
 	ProductionStageID string `json:"productionStageID"`
