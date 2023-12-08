@@ -54,11 +54,12 @@ type Service interface {
 	FindEventLog(ctx context.Context, opt *FindEventLogOpts) ([]*repository.EventLogData, error)
 	FindProcessDeviceHistory(ctx context.Context, opt *FindProcessDeviceHistoryOpts, sort *repository.Sort, limit, offset int64) ([]*repository.DeviceProgressStatusHistoryData, *repository.CountResult, error)
 	EditDeviceProcessHistoryIsSolved(ctx context.Context, opt *EditDeviceProcessHistoryIsSolvedOpts) error
-	CalculateLostTime(ctx context.Context, opt *FindLostTimeOpts) (float64, error)
+	FindAvailabilityTime(ctx context.Context, opt *FindLostTimeOpts) (*AvailabilityTime, error)
 }
 type productionOrderStageDeviceService struct {
 	productionOrderStageDeviceRepo   repository.ProductionOrderStageDeviceRepo
 	sDeviceProgressStatusHistoryRepo repository.DeviceProgressStatusHistoryRepo
+	sDeviceWorkingHistoryRepo        repository.DeviceWorkingHistoryRepo
 }
 
 func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditProductionOrderStageDeviceOpts) error {
@@ -269,10 +270,12 @@ func (p productionOrderStageDeviceService) Find(ctx context.Context, opt *FindPr
 func NewService(
 	productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo,
 	sDeviceProgressStatusHistoryRepo repository.DeviceProgressStatusHistoryRepo,
+	sDeviceWorkingHistoryRepo repository.DeviceWorkingHistoryRepo,
 ) Service {
 	return &productionOrderStageDeviceService{
 		productionOrderStageDeviceRepo:   productionOrderStageDeviceRepo,
 		sDeviceProgressStatusHistoryRepo: sDeviceProgressStatusHistoryRepo,
+		sDeviceWorkingHistoryRepo:        sDeviceWorkingHistoryRepo,
 	}
 
 }

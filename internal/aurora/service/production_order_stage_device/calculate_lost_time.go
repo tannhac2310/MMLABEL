@@ -13,7 +13,12 @@ type FindLostTimeOpts struct {
 	Date     string // format: 2006-01-02
 }
 
-func (p productionOrderStageDeviceService) CalculateLostTime(ctx context.Context, opt *FindLostTimeOpts) (float64, error) {
+type AvailabilityTime struct {
+	AvailabilityTime int64 `json:"availabilityTime"`
+	LossTime         int64 `json:"lossTime"`
+}
+
+func (p productionOrderStageDeviceService) FindAvailabilityTime(ctx context.Context, opt *FindLostTimeOpts) (*AvailabilityTime, error) {
 	// find FindProcessDeviceHistory by deviceID and start of date and end of date
 	createdFrom, _ := time.Parse("2006-01-02 15:04:05", opt.Date+" 00:00:00")
 	createdTo, _ := time.Parse("2006-01-02 15:04:05", opt.Date+" 23:59:59")
@@ -27,32 +32,48 @@ func (p productionOrderStageDeviceService) CalculateLostTime(ctx context.Context
 		By:    "created_at",
 	}, 100000, 0)
 	if err != nil {
-		return 0, fmt.Errorf("p.FindProcessDeviceHistory: %w", err)
+		return nil, fmt.Errorf("p.FindProcessDeviceHistory: %w", err)
 	}
 	// calculate lost time
-	var lostTime float64
+	var lossTime float64
 	now := time.Now()
 	for i, processDevice := range processDeviceHistory {
 		if i == 0 {
 			continue
 		}
 		if processDevice.UpdatedAt.Valid && processDevice.IsResolved == 1 {
-			lostTime += processDevice.UpdatedAt.Time.Sub(processDeviceHistory[i-1].CreatedAt).Minutes()
+			lossTime += processDevice.UpdatedAt.Time.Sub(processDeviceHistory[i-1].CreatedAt).Minutes()
 		} else {
-			lostTime += now.Sub(processDeviceHistory[i-1].CreatedAt).Minutes()
+			lossTime += now.Sub(processDeviceHistory[i-1].CreatedAt).Minutes()
 		}
 	}
 	lunchTimeAt, _ := time.Parse("15:04:05", "11:30:00")
 	lunchTimeTo, _ := time.Parse("15:04:05", "12:00:00")
 	if now.After(lunchTimeAt) && now.Before(lunchTimeTo) {
-		lostTime -= now.Sub(lunchTimeAt).Minutes()
+		lossTime -= now.Sub(lunchTimeAt).Minutes()
 	} else {
-		lostTime -= 30
+		lossTime -= 30
 	}
 
-	if lostTime < 0 {
-		lostTime = 0
+	if lossTime < 0 {
+		lossTime = 0
 	}
-
-	return lostTime, nil
+	var availabilityTime int64
+	// find availability time from device working history
+	availabilityTimes, err := p.sDeviceWorkingHistoryRepo.Search(ctx, &repository.SearchDeviceWorkingHistoryOpts{
+		DeviceID: opt.DeviceID,
+		Date:     opt.Date,
+		Limit:    1,
+		Offset:   0,
+	})
+	if err != nil {
+		// do nothing
+	}
+	if len(availabilityTimes) == 1 {
+		availabilityTime = availabilityTimes[0].WorkingTime
+	}
+	return &AvailabilityTime{
+		AvailabilityTime: availabilityTime,
+		LossTime:         int64(lossTime),
+	}, nil
 }

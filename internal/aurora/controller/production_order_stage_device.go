@@ -19,7 +19,7 @@ type ProductionOrderStageDeviceController interface {
 	FindEventLog(c *gin.Context)
 	FindProcessDeviceHistory(c *gin.Context)
 	UpdateProcessDeviceHistoryIsSolved(c *gin.Context)
-	FindLostTime(c *gin.Context)
+	FindAvailabilityTime(c *gin.Context)
 }
 
 type productionOrderStageDeviceController struct {
@@ -80,15 +80,15 @@ func (s productionOrderStageDeviceController) FindProcessDeviceHistory(c *gin.Co
 		Total:               total.Count,
 	})
 }
-func (s productionOrderStageDeviceController) FindLostTime(c *gin.Context) {
-	req := &dto.FindEvenLogRequest{}
+func (s productionOrderStageDeviceController) FindAvailabilityTime(c *gin.Context) {
+	req := &dto.FindAvailabilityTimeRequest{}
 	err := c.ShouldBind(req)
 	if err != nil {
 		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
 		return
 	}
 
-	lostTime, err := s.productionOrderStageDeviceService.CalculateLostTime(c, &production_order_stage_device.FindLostTimeOpts{
+	availabilityTime, err := s.productionOrderStageDeviceService.FindAvailabilityTime(c, &production_order_stage_device.FindLostTimeOpts{
 		DeviceID: req.DeviceID,
 		Date:     req.Date,
 	})
@@ -97,8 +97,9 @@ func (s productionOrderStageDeviceController) FindLostTime(c *gin.Context) {
 		return
 	}
 
-	transportutil.SendJSONResponse(c, &dto.FindLostTimeResponse{
-		LostTime: lostTime,
+	transportutil.SendJSONResponse(c, &dto.FindAvailabilityTimeResponse{
+		LossTime:    availabilityTime.LossTime,
+		WorkingTime: availabilityTime.AvailabilityTime,
 	})
 }
 func (s productionOrderStageDeviceController) FindEventLog(c *gin.Context) {
@@ -297,10 +298,10 @@ func RegisterProductionOrderStageDeviceController(
 	)
 	routeutil.AddEndpoint(
 		g,
-		"lost-time",
-		c.FindLostTime,
-		&dto.FindLostTimeRequest{},
-		&dto.FindLostTimeResponse{},
-		"FindLostTime",
+		"availability-time",
+		c.FindAvailabilityTime,
+		&dto.FindAvailabilityTimeRequest{},
+		&dto.FindAvailabilityTimeResponse{},
+		"FindAvailabilityTime",
 	)
 }
