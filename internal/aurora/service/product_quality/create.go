@@ -17,6 +17,7 @@ func (c *productQualityService) CreateProductQuality(ctx context.Context, opt *C
 		ID:                idutil.ULIDNow(),
 		ProductionOrderID: opt.ProductionOrderID,
 		ProductID:         cockroach.String(opt.ProductID),
+		DeviceID:          cockroach.String(opt.DeviceID),
 		DefectType:        cockroach.String(opt.DefectType),
 		DefectCode:        cockroach.String(opt.DefectCode),
 		DefectLevel:       opt.DefectLevel,
@@ -46,6 +47,7 @@ func (c *productQualityService) CreateProductQuality(ctx context.Context, opt *C
 type CreateProductQualityOpts struct {
 	ProductionOrderID string
 	ProductID         string
+	DeviceID         string
 	DefectType        string
 	DefectCode        string
 	DefectLevel       int16

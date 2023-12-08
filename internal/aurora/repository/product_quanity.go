@@ -61,6 +61,7 @@ type SearchProductQualitysOpts struct {
 	ProductionOrderID string
 	DefectType        string
 	DefectCode        string
+	DeviceID          string
 	CreatedAtFrom     time.Time
 	CreatedAtTo       time.Time
 	Limit             int64
@@ -76,6 +77,10 @@ func (s *SearchProductQualitysOpts) buildQuery(isCount bool, isAnalysis bool) (s
 	if s.ProductionOrderID != "" {
 		args = append(args, s.ProductionOrderID)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductQualityFieldProductionOrderID, len(args))
+	}
+	if s.DeviceID != "" {
+		args = append(args, s.DeviceID)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductQualityFieldDeviceID, len(args))
 	}
 	if s.DefectType != "" && !isAnalysis {
 		args = append(args, s.DefectType)

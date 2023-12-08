@@ -9,6 +9,7 @@ const (
 	ProductQualityFieldID                = "id"
 	ProductQualityFieldProductionOrderID = "production_order_id"
 	ProductQualityFieldProductID         = "product_id"
+	ProductQualityFieldDeviceID          = "device_id"
 	ProductQualityFieldDefectType        = "defect_type"
 	ProductQualityFieldDefectCode        = "defect_code"
 	ProductQualityFieldDefectLevel       = "defect_level"
@@ -26,6 +27,7 @@ type ProductQuality struct {
 	ID                string         `db:"id"`
 	ProductionOrderID string         `db:"production_order_id"`
 	ProductID         sql.NullString `db:"product_id"`
+	DeviceID          sql.NullString `db:"device_id"`
 	DefectType        sql.NullString `db:"defect_type"`
 	DefectCode        sql.NullString `db:"defect_code"`
 	DefectLevel       int16          `db:"defect_level"`
@@ -44,6 +46,7 @@ func (rcv *ProductQuality) FieldMap() (fields []string, values []interface{}) {
 		ProductQualityFieldID,
 		ProductQualityFieldProductionOrderID,
 		ProductQualityFieldProductID,
+		ProductQualityFieldDeviceID,
 		ProductQualityFieldDefectType,
 		ProductQualityFieldDefectCode,
 		ProductQualityFieldDefectLevel,
@@ -61,6 +64,7 @@ func (rcv *ProductQuality) FieldMap() (fields []string, values []interface{}) {
 		&rcv.ID,
 		&rcv.ProductionOrderID,
 		&rcv.ProductID,
+		&rcv.DeviceID,
 		&rcv.DefectType,
 		&rcv.DefectCode,
 		&rcv.DefectLevel,
