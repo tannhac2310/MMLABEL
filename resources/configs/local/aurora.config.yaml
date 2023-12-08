@@ -5,7 +5,7 @@ debug: true
 logger:
   logLvl: "debug"
   logReq: true
-  logResp: true
+  logResp: false
 statsEnabled: true
 remoteProfiler:
   enabled: true

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/idutil"
 	"strings"
 	"time"
 
@@ -152,6 +153,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 						deviceWorkingHistories, err := p.deviceWorkingHistoryRepo.Search(ctx, &repository.SearchDeviceWorkingHistoryOpts{
 							DeviceID: deviceID,
 							Date:     dateStr,
+							Limit:    1,
 						})
 						if err != nil {
 							// todo check error is not_found or not
@@ -159,7 +161,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 
 						if len(deviceWorkingHistories) == 0 {
 							p.deviceWorkingHistoryRepo.Insert(ctx, &model.DeviceWorkingHistory{
-								ID:                           deviceID,
+								ID:                           idutil.ULIDNow(),
 								ProductionOrderStageDeviceID: device.ID,
 								DeviceID:                     deviceID,
 								Date:                         dateStr,
@@ -185,6 +187,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 						deviceWorkingHistories, err := p.deviceWorkingHistoryRepo.Search(ctx, &repository.SearchDeviceWorkingHistoryOpts{
 							DeviceID: deviceID,
 							Date:     dateStr,
+							Limit:    1,
 						})
 						if err != nil {
 							// todo check error is not_found or not
@@ -192,7 +195,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 
 						if len(deviceWorkingHistories) == 0 {
 							p.deviceWorkingHistoryRepo.Insert(ctx, &model.DeviceWorkingHistory{
-								ID:                           deviceID,
+								ID:                           idutil.ULIDNow(),
 								ProductionOrderStageDeviceID: device.ID,
 								DeviceID:                     deviceID,
 								Date:                         dateStr,
@@ -201,7 +204,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 							})
 						} else {
 							deviceWorkingHistory := deviceWorkingHistories[0].DeviceWorkingHistory
-							deviceWorkingHistory.Quantity = int64(TG_in_1Ngay)
+							deviceWorkingHistory.WorkingTime = int64(TG_in_1Ngay)
 							err := p.deviceWorkingHistoryRepo.Update(ctx, deviceWorkingHistory)
 							if err != nil {
 								// todo nothing

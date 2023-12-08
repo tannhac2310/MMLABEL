@@ -72,6 +72,7 @@ func (p productionOrderStageDeviceService) FindAvailabilityTime(ctx context.Cont
 	if len(availabilityTimes) == 1 {
 		availabilityTime = availabilityTimes[0].WorkingTime
 	}
+	fmt.Println("availabilityTimesavailabilityTimesavailabilityTimesavailabilityTimesavailabilityTimesavailabilityTimes", availabilityTimes)
 	return &AvailabilityTime{
 		AvailabilityTime: availabilityTime,
 		LossTime:         int64(lossTime),
