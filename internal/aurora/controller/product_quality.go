@@ -67,6 +67,7 @@ func (s productQualityController) EditProductQuality(c *gin.Context) {
 	err = s.productQualityService.EditProductQuality(c, &product_quality.EditProductQualityOpts{
 		ID:                req.ID,
 		DefectType:        req.DefectType,
+		DeviceID:          req.DeviceID,
 		DefectCode:        req.DefectCode,
 		DefectLevel:       req.DefectLevel,
 		ProductionStageID: req.ProductionStageID,

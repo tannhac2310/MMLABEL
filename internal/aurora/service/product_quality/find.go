@@ -11,6 +11,7 @@ func (c *productQualityService) FindProductQuality(ctx context.Context, opts *Fi
 	filter := &repository.SearchProductQualitysOpts{
 		ProductionOrderID: opts.ProductionOrderID,
 		DefectType:        opts.DefectType,
+		DeviceID:          opts.DeviceID,
 		DefectCode:        opts.DefectCode,
 		CreatedAtFrom:     opts.CreatedAtFrom,
 		CreatedAtTo:       opts.CreatedAtTo,
@@ -54,6 +55,7 @@ func (c *productQualityService) FindProductQuality(ctx context.Context, opts *Fi
 
 type FindProductQualityOpts struct {
 	ProductionOrderID string
+	DeviceID          string
 	DefectType        string
 	DefectCode        string
 	CreatedAtFrom     time.Time

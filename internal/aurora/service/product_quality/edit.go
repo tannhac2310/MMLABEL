@@ -35,6 +35,7 @@ type EditProductQualityOpts struct {
 	ID                string
 	DefectType        string
 	DefectCode        string
+	DeviceID          string
 	DefectLevel       string
 	ProductionStageID string
 	DefectiveQuantity int64
