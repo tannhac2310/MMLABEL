@@ -40,6 +40,8 @@ case $ENV in
       -- ./cockroach sql --certs-dir=/cockroach-certs --host=cockroachdb-public --execute="CREATE USER mm-printing WITH PASSWORD 'M6763zUnr8tBdwyd';"
     kubectl -n databases exec -i cockroachdb-client-secure \
       -- ./cockroach sql --certs-dir=/cockroach-certs --host=cockroachdb-public --execute="GRANT admin TO mm-printing;"
+      kubectl -n databases exec -i cockroachdb-client-secure \
+      			-- ./cockroach sql --certs-dir=/cockroach-certs --host=cockroachdb-public --execute="GRANT admin TO tech4edu;"
     ;;
 
   "production")
