@@ -74,10 +74,12 @@ func (s *SearchStagesOpts) buildQuery(isCount bool) (string, []interface{}) {
 		args = append(args, s.IDs)
 		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.StageFieldID)
 	}
+
 	if s.Name != "" {
-		args = append(args, s.Name)
+		args = append(args, "%"+s.Name+"%")
 		conds += fmt.Sprintf(" AND (b.%[1]s ILIKE $%[3]d OR b.%[2]s ILIKE $%[3]d)", model.StageFieldName, model.StageFieldShortName, len(args))
 	}
+
 	if s.Code != "" {
 		args = append(args, s.Code)
 		conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.StageFieldCode, len(args))

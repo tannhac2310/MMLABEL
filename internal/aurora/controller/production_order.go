@@ -195,6 +195,8 @@ func (s productionOrderController) FindProductionOrders(c *gin.Context) {
 		OrderStageStatus:     req.Filter.OrderStageStatus,
 		Responsible:          req.Filter.Responsible,
 		StageIDs:             req.Filter.StageIDs,
+		StageInLine:          req.Filter.StageInLine, // search lsx mà theo công đoạn StageInLine đang sản xuất: production_start
+		DeviceID:             req.Filter.DeviceID,
 	}, sort, req.Paging.Limit, req.Paging.Offset)
 	if err != nil {
 		transportutil.Error(c, err)

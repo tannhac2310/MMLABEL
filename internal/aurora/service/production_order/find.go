@@ -28,6 +28,8 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 		Responsible:          opts.Responsible,
 		StageIDs:             opts.StageIDs,
 		OrderStageStatus:     opts.OrderStageStatus,
+		StageInLine:          opts.StageInLine, // search lsx mà theo công đoạn StageInLine đang sản xuất: production_start
+		DeviceID:             opts.DeviceID,
 		Limit:                limit,
 		Offset:               offset,
 		Sort:                 sort,
@@ -149,4 +151,6 @@ type FindProductionOrdersOpts struct {
 	OrderStageStatus     enum.ProductionOrderStageStatus
 	Responsible          []string
 	StageIDs             []string
+	StageInLine          string // search lsx mà theo công đoạn StageInLine đang sản xuất: production_start
+	DeviceID             string
 }

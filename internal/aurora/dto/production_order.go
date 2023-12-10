@@ -18,6 +18,8 @@ type ProductionOrderFilter struct {
 	EstimatedStartAtFrom time.Time                       `json:"estimatedStartAtFrom"`
 	Responsible          []string                        `json:"responsible"`
 	StageIDs             []string                        `json:"stageIDs"`
+	StageInLine          string                          `json:"stageInLine"` // search lsx mà theo công đoạn StageInLine đang sản xuất: production_start
+	DeviceID             string                          `json:"deviceID"`
 }
 
 type FindProductionOrdersRequest struct {
