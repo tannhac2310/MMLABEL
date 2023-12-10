@@ -32,8 +32,8 @@ jwt:
 firebase:
   configPath: /secrets/firebase-adminsdk-creds.json
 s3Storage:
-  region: us-east-1
-  bucket: mm-printing-images
-  accessKey: bX983KRuvA7dF8MYthfK
-  secretKey: YOwWxiBiountG3xwcild
-  endpoint: "https://mmlabel.buonho.vn/"
+  region: ap-southeast-1
+  bucket: 'hagi-public'
+  accessKey: "AKIARCAEPCVP4C7RFYW3"
+  secretKey: "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"
+  endpoint: ""
