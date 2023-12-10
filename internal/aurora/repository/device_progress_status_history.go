@@ -17,7 +17,7 @@ type DeviceProgressStatusHistoryRepo interface {
 	Search(ctx context.Context, s *SearchDeviceProgressStatusHistoryOpts) ([]*DeviceProgressStatusHistoryData, error)
 	Count(ctx context.Context, s *SearchDeviceProgressStatusHistoryOpts) (*CountResult, error)
 	FindProductionOrderStageDeviceID(ctx context.Context, ProductionOrderStageID string, deviceID string) (*DeviceProgressStatusHistoryData, error)
-	FindByID(ctx context.Context, ID string) (*DeviceProgressStatusHistoryData, error) 
+	FindByID(ctx context.Context, ID string) (*DeviceProgressStatusHistoryData, error)
 }
 
 type sDeviceProgressStatusHistoryRepo struct {
@@ -59,12 +59,13 @@ func (r *sDeviceProgressStatusHistoryRepo) Update(ctx context.Context, e *model.
 
 // SearchDeviceProgressStatusHistoryOpts all params is options
 type SearchDeviceProgressStatusHistoryOpts struct {
-	IDs         []string
+	IDs           []string
 	ProcessStatus []int8
-	CreatedFrom time.Time
-	CreatedTo   time.Time
-	DeviceID    string
-	ErrorCodes	[]string
+	CreatedFrom   time.Time
+	CreatedTo     time.Time
+	DeviceID      string
+	IsResolved    int16
+	ErrorCodes    []string
 	//ProductionOrderStageID string
 	// todo add more search options
 	Limit  int64
@@ -81,11 +82,17 @@ func (s *SearchDeviceProgressStatusHistoryOpts) buildQuery(isCount bool) (string
 		args = append(args, s.IDs)
 		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.DeviceProgressStatusHistoryFieldID)
 	}
-	
+
 	if len(s.ProcessStatus) > 0 {
 		args = append(args, s.ProcessStatus)
 		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.DeviceProgressStatusHistoryFieldProcessStatus, len(args))
 	}
+
+	if s.IsResolved != 0 {
+		args = append(args, s.IsResolved)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.DeviceProgressStatusHistoryFieldIsResolved, len(args))
+	}
+
 	if len(s.ErrorCodes) > 0 {
 		args = append(args, s.ErrorCodes)
 		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.DeviceProgressStatusHistoryFieldErrorCode, len(args))
@@ -127,7 +134,7 @@ func (s *SearchDeviceProgressStatusHistoryOpts) buildQuery(isCount bool) (string
 
 type DeviceProgressStatusHistoryData struct {
 	*model.DeviceProgressStatusHistory
-	StageID 		sql.NullString `db:"stage_id"`
+	StageID         sql.NullString `db:"stage_id"`
 	UpdatedUserName sql.NullString `db:"updated_user_name"`
 	CreatedUserName sql.NullString `db:"created_user_name"`
 }
@@ -135,7 +142,7 @@ type DeviceProgressStatusHistoryData struct {
 func (r *sDeviceProgressStatusHistoryRepo) Search(ctx context.Context, s *SearchDeviceProgressStatusHistoryOpts) ([]*DeviceProgressStatusHistoryData, error) {
 	DeviceProgressStatusHistory := make([]*DeviceProgressStatusHistoryData, 0)
 	sql, args := s.buildQuery(false)
-	
+
 	err := cockroach.Select(ctx, sql, args...).ScanAll(&DeviceProgressStatusHistory)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.Select: %w", err)

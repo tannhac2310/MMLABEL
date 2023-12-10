@@ -44,6 +44,9 @@ type CreateProductionOrderStageDeviceOpts struct {
 type FindProductionOrderStageDeviceOpts struct {
 	ProductionOrderStageID string
 	ProductionOrderID      string
+	ProcessStatus          enum.ProductionOrderStageDeviceStatus
+	Limit                  int64
+	Offset                 int64
 }
 
 type Service interface {
@@ -186,6 +189,7 @@ func (p productionOrderStageDeviceService) FindProcessDeviceHistory(ctx context.
 		CreatedFrom:   opt.CreatedFrom,
 		CreatedTo:     opt.CreatedTo,
 		DeviceID:      opt.DeviceID,
+		IsResolved:    opt.IsResolved,
 		Limit:         limit,
 		Offset:        offset,
 		Sort:          sort,
@@ -200,6 +204,7 @@ func (p productionOrderStageDeviceService) FindProcessDeviceHistory(ctx context.
 		CreatedFrom:   opt.CreatedFrom,
 		CreatedTo:     opt.CreatedTo,
 		DeviceID:      opt.DeviceID,
+		IsResolved:    opt.IsResolved,
 	})
 	if err != nil {
 		return nil, nil, err
@@ -211,6 +216,7 @@ func (p productionOrderStageDeviceService) FindProcessDeviceHistory(ctx context.
 type FindProcessDeviceHistoryOpts struct {
 	ProcessStatus []int8
 	DeviceID      string
+	IsResolved    int16
 	ErrorCodes    []string
 	CreatedFrom   time.Time
 	CreatedTo     time.Time
@@ -259,7 +265,9 @@ func (p productionOrderStageDeviceService) Find(ctx context.Context, opt *FindPr
 	productionOrderStageDevices, err := p.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
 		ProductionOrderStageID: opt.ProductionOrderStageID,
 		ProductionOrderID:      opt.ProductionOrderID,
-		Limit:                  10000,
+		ProcessStatus:          opt.ProcessStatus,
+		Limit:                  opt.Limit,
+		Offset:                 opt.Offset,
 	})
 	if err != nil {
 		return nil, err

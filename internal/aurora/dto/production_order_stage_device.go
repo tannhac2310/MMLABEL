@@ -10,6 +10,7 @@ import (
 type ProductionOrderStageDeviceFilter struct {
 	ProcessStatus []int8    `json:"processStatus"`
 	DeviceID      string    `json:"deviceID"`
+	IsResolved    int16     `json:"isResolved"`
 	ErrorCodes    []string  `json:"errorCodes"`
 	CreatedFrom   time.Time `json:"createdFrom"`
 	CreatedTo     time.Time `json:"createdTo"`
@@ -23,6 +24,8 @@ type FindProductionOrderStageDevicesRequest struct {
 type FindProductionOrderStageDevicesResponse struct {
 	ProductionOrderStageDevices []*ProductionOrderStageDevice `json:"productionOrderStageDevices"`
 	Total                       int64                         `json:"total"`
+}
+type FindWorkingDevice struct {
 }
 type ProductionOrderStageDevice struct {
 	ID                     string                                `json:"id"`

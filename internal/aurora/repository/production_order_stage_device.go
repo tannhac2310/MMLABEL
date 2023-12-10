@@ -128,9 +128,10 @@ type SearchProductionOrderStageDevicesOpts struct {
 	IDs                        []string
 	ProductionOrderStageID     string
 	ProductionOrderID          string
+	ProcessStatus              enum.ProductionOrderStageDeviceStatus
 	DeviceID                   string
 	ProductionOrderStageStatus enum.ProductionOrderStageStatus
-	Status                     enum.ProductionOrderStageDeviceStatus
+	Status                     enum.CommonStatus
 	Limit                      int64
 	Offset                     int64
 	Sort                       *Sort
@@ -165,6 +166,12 @@ func (s *SearchProductionOrderStageDevicesOpts) buildQuery(isCount bool) (string
 		args = append(args, s.Status)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderStageDeviceFieldStatus, len(args))
 	}
+
+	if s.ProcessStatus > 0 {
+		args = append(args, s.ProcessStatus)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderStageDeviceFieldProcessStatus, len(args))
+	}
+
 	if s.ProductionOrderStageStatus > 0 {
 		args = append(args, s.ProductionOrderStageStatus)
 		conds += fmt.Sprintf(" AND pos.%s = $%d", model.ProductionOrderStageFieldStatus, len(args))

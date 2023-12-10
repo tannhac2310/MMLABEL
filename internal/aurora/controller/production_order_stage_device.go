@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/interceptor"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
@@ -20,12 +21,44 @@ type ProductionOrderStageDeviceController interface {
 	FindProcessDeviceHistory(c *gin.Context)
 	UpdateProcessDeviceHistoryIsSolved(c *gin.Context)
 	FindAvailabilityTime(c *gin.Context)
+	FindWorkingDevice(c *gin.Context)
 }
 
 type productionOrderStageDeviceController struct {
 	productionOrderStageDeviceService production_order_stage_device.Service
 }
 
+func (s productionOrderStageDeviceController) FindWorkingDevice(c *gin.Context) {
+	data, err := s.productionOrderStageDeviceService.Find(c, &production_order_stage_device.FindProductionOrderStageDeviceOpts{
+		ProcessStatus: enum.ProductionOrderStageDeviceStatusStart,
+		Limit:         10000,
+		Offset:        0,
+	})
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+	result := make([]*dto.ProductionOrderStageDevice, 0, len(data))
+
+	for _, d := range data {
+		result = append(result, &dto.ProductionOrderStageDevice{
+			ID:                     d.ID,
+			ProductionOrderStageID: d.ProductionOrderStageID,
+			DeviceID:               d.DeviceID,
+			Quantity:               d.Quantity,
+			ProcessStatus:          d.ProcessStatus,
+			Status:                 d.Status,
+			Responsible:            d.Responsible,
+			Settings:               d.Settings,
+			Note:                   d.Note.String,
+		})
+	}
+
+	transportutil.SendJSONResponse(c, &dto.FindProductionOrderStageDevicesResponse{
+		ProductionOrderStageDevices: result,
+		Total:                       int64(len(result)),
+	})
+}
 func (s productionOrderStageDeviceController) FindProcessDeviceHistory(c *gin.Context) {
 	req := &dto.FindDeviceStatusHistoryRequest{}
 	err := c.ShouldBind(req)
@@ -47,6 +80,7 @@ func (s productionOrderStageDeviceController) FindProcessDeviceHistory(c *gin.Co
 	deviceProcessStatusHistoryData, total, err := s.productionOrderStageDeviceService.FindProcessDeviceHistory(c, &production_order_stage_device.FindProcessDeviceHistoryOpts{
 		ProcessStatus: req.Filter.ProcessStatus,
 		DeviceID:      req.Filter.DeviceID,
+		IsResolved:    req.Filter.IsResolved,
 		ErrorCodes:    req.Filter.ErrorCodes,
 		CreatedFrom:   req.Filter.CreatedFrom,
 		CreatedTo:     req.Filter.CreatedTo,
@@ -303,5 +337,13 @@ func RegisterProductionOrderStageDeviceController(
 		&dto.FindAvailabilityTimeRequest{},
 		&dto.FindAvailabilityTimeResponse{},
 		"FindAvailabilityTime",
+	)
+	routeutil.AddEndpoint(
+		g,
+		"find-working-device",
+		c.FindWorkingDevice,
+		&dto.FindWorkingDevice{},
+		&dto.FindProductionOrderStageDevicesResponse{},
+		"Lay danh sach thiet bi dang lam viec",
 	)
 }
