@@ -149,6 +149,7 @@ func toProductQualityResp(f *product_quality.Data) *dto.ProductQuality {
 		ID:                  f.ID,
 		ProductionOrderID:   f.ProductionOrderID,
 		ProductionOrderName: f.ProductionOrderName,
+		ProductionOrderQtyPaper: f.ProductionOrderQtyPaper,
 		DeviceID:            f.DeviceID.String,
 		ProductID:           f.ProductID.String,
 		DefectType:          f.DefectType.String,
