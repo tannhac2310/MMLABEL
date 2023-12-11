@@ -33,7 +33,7 @@ type ProductQuality struct {
 	ID                  	string    `json:"id"`
 	ProductionOrderID   	string    `json:"productionOrderID"`
 	ProductionOrderName 	string    `json:"productionOrderName"`
-	ProductionOrderQtyPaper string    `json:"productionOrderQtyPaper"`
+	ProductionOrderQtyPaper int64    `json:"productionOrderQtyPaper"`
 	DeviceID			string	  `json:"deviceID"`
 	ProductID           string    `json:"productID"`
 	DefectType          string    `json:"defectType"`

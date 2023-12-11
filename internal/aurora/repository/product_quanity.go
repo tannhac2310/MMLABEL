@@ -130,7 +130,7 @@ func (s *SearchProductQualitysOpts) buildQuery(isCount bool, isAnalysis bool) (s
 type ProductQualityData struct {
 	*model.ProductQuality
 	ProductionOrderName string `db:"production_order_name"`
-	ProductionOrderQtyPaper string `db:"production_order_qty_paper"`
+	ProductionOrderQtyPaper int64 `db:"production_order_qty_paper"`
 }
 
 func (r *productQualitysRepo) Search(ctx context.Context, s *SearchProductQualitysOpts) ([]*ProductQualityData, error) {
