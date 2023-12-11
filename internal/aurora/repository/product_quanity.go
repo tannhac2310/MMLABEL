@@ -118,7 +118,7 @@ func (s *SearchProductQualitysOpts) buildQuery(isCount bool, isAnalysis bool) (s
 	if s.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", s.Sort.By, s.Sort.Order)
 	}
-	return fmt.Sprintf(`SELECT b.%s, po.name as production_order_name
+	return fmt.Sprintf(`SELECT b.%s, po.name as production_order_name, po.qty_paper as production_order_qty_paper
 		FROM %s AS b %s
  		JOIN production_orders AS po ON po.id = b.production_order_id
 		WHERE TRUE %s AND b.deleted_at IS NULL
@@ -130,6 +130,7 @@ func (s *SearchProductQualitysOpts) buildQuery(isCount bool, isAnalysis bool) (s
 type ProductQualityData struct {
 	*model.ProductQuality
 	ProductionOrderName string `db:"production_order_name"`
+	ProductionOrderQtyPaper string `db:"production_order_qty_paper"`
 }
 
 func (r *productQualitysRepo) Search(ctx context.Context, s *SearchProductQualitysOpts) ([]*ProductQualityData, error) {
