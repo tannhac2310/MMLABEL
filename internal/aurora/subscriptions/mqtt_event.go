@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/idutil"
 	"strings"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/idutil"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
@@ -124,10 +125,10 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			activeStageID := ""
 			if len(orderStageDevices) == 1 {
 				device := orderStageDevices[0]
+				activeStageID = device.ProductionOrderStageID
 				if device.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart {
 					if int64(item.Value) > 0 && int64(item.Value) > device.Quantity {
 						// update first device
-						activeStageID = device.ProductionOrderStageID
 						_ = p.productionOrderStageDeviceRepo.Update(ctx, &model.ProductionOrderStageDevice{
 							ID:                     device.ID,
 							ProductionOrderStageID: device.ProductionOrderStageID,
@@ -212,21 +213,20 @@ func (p *EventMQTTSubscription) Subscribe() error {
 							}
 						}
 					}
-
-					// insert event log
-					_ = p.productionOrderStageDeviceRepo.InsertEventLog(ctx, &model.EventLog{
-						ID:        time.Now().UnixNano(),
-						DeviceID:  deviceID,
-						StageID:   cockroach.String(activeStageID),
-						Quantity:  item.Value,
-						Msg:       cockroach.String(string(message.Payload())),
-						Date:      cockroach.String(dateStr),
-						CreatedAt: now,
-					})
 				}
 			}
+			// insert event log
+			_ = p.productionOrderStageDeviceRepo.InsertEventLog(ctx, &model.EventLog{
+				ID:        time.Now().UnixNano(),
+				DeviceID:  deviceID,
+				StageID:   cockroach.String(activeStageID),
+				Quantity:  item.Value,
+				Msg:       cockroach.String(string(message.Payload())),
+				Date:      cockroach.String(dateStr),
+				CreatedAt: now,
+			})
 		}
-
+		
 		message.Ack()
 	})
 	fmt.Printf("Subscribed to topic '%s'\n", topic)

@@ -2,6 +2,7 @@ package production_order
 
 import (
 	"context"
+
 	"github.com/go-redis/redis"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 
@@ -34,12 +35,32 @@ type productionOrderService struct {
 
 func (c *productionOrderService) GetCustomField() []string {
 	return []string{
-		"ma_xuat_film",
+		// "ma_xuat_film",
+		// "ma_dao_be_keo",
+		// "ma_dao_thanh_pham",
+		// "ma_dao_khuon_dap",
+		// "ma_dao_khuon_khiem_thi",
+		// "khoi_luong_thanh_pham",
+		// "so_mau_in",
+		// "so_lan_in",
+		// "vat_lieu_chinh",
+		// "keo",
+		// "mang",
+		// "khac",
+		// "kho_in",
+		// "so_sp_in",
+		// "hinh_thuc_in",
+		// "so_luong_su_dung",
+		// "so_luong_san_xuat",
+		// "kich_thuoc_thanh_pham",
+		"ma_sp_kh",
+		"ma_sp_mm",
+		"ma_xuat_phim",
 		"ma_dao_be_keo",
 		"ma_dao_thanh_pham",
-		"ma_dao_khuon_dap",
-		"ma_dao_khuon_khiem_thi",
-		"khoi_luong_thanh_pham",
+		"ma_khuon_dap",
+		"ma_khuon_khiem_thi",
+		"kich_thuoc_thanh_pham",
 		"so_mau_in",
 		"so_lan_in",
 		"vat_lieu_chinh",
@@ -47,10 +68,10 @@ func (c *productionOrderService) GetCustomField() []string {
 		"mang",
 		"khac",
 		"kho_in",
-		"so_sp_in",
+		"so_sp_in_ban_in",
 		"hinh_thuc_in",
 		"so_luong_su_dung",
-		"so_luong_san_xuat",
+		"su_co",
 	}
 }
 func (c *productionOrderService) deleteProductionOrderStage(ctx context.Context, ids []string, productionId string) interface{} {
