@@ -19,6 +19,8 @@ type RoleController interface {
 	AddUsers(c *gin.Context)
 	RemoveUsers(c *gin.Context)
 	DeleteRole(c *gin.Context)
+	UpsertRolePermissions(c *gin.Context)
+	FindRolePermissions(c *gin.Context)
 	FindPermissions(ctx *gin.Context)
 }
 
@@ -110,5 +112,22 @@ func RegisterRoleController(
 		&dto.RemoveRoleToUsersRequest{},
 		&dto.RemoveRolesForUserResponse{},
 		"Remove roles for user",
+	)
+
+	routeutil.AddEndpoint(
+		g,
+		"get-role-permission",
+		c.FindRolePermissions,
+		&dto.FindRolePermissionsRequest{},
+		&dto.FindRolePermissionsResponse{},
+		"Remove roles for user",
+	)
+	routeutil.AddEndpoint(
+		g,
+		"upsert-role-permission",
+		c.UpsertRolePermissions,
+		&dto.UpsertRolePermissionsRequest{},
+		&dto.UpsertRolePermissionsResponse{},
+		"Upsert role permission",
 	)
 }

@@ -98,3 +98,28 @@ type FindRoleUsersResponse struct {
 	NextPage  *commondto.Paging `json:"nextPage"`
 	Total     int64             `json:"total"`
 }
+
+type RolePermission struct {
+	ID         string `json:"id"`
+	RoleID     string `json:"roleId"`
+	EntityType string `json:"entityType"`
+	EntityID   string `json:"entityId"`
+}
+
+type FindRolePermissionsRequest struct {
+	RoleID string `json:"roleId" binding:"required"`
+}
+
+type FindRolePermissionsResponse struct {
+	RolePermissions []*RolePermission `json:"rolePermissions"`
+}
+type Permission struct {
+	EntityID   string `json:"entityId"`
+	EntityType string `json:"entityType"`
+}
+type UpsertRolePermissionsRequest struct {
+	RoleID      string        `json:"roleId" binding:"required"`
+	Permissions []*Permission `json:"permissions" binding:"required"`
+}
+type UpsertRolePermissionsResponse struct {
+}

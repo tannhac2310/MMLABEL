@@ -13,7 +13,7 @@ import (
 type RoleRepo interface {
 	Insert(ctx context.Context, e *model.Role) error
 	Update(ctx context.Context, e *model.Role) error
-	SoftDelete(ctx context.Context, id string) error
+	Delete(ctx context.Context, id string) error
 	FindByID(ctx context.Context, id string) (*model.Role, error)
 	HighestRole(ctx context.Context, id []string) (*model.Role, error)
 	Search(ctx context.Context, s *SearchRoleOpts) ([]*model.Role, error)
@@ -34,9 +34,8 @@ func (r *roleRepo) Insert(ctx context.Context, e *model.Role) error {
 
 	return nil
 }
-func (r *roleRepo) SoftDelete(ctx context.Context, id string) error {
-	sql := `UPDATE roles
-		SET deleted_at = NOW()
+func (r *roleRepo) Delete(ctx context.Context, id string) error {
+	sql := `DELETE FROM roles
 		WHERE id = $1`
 
 	cmd, err := cockroach.Exec(ctx, sql, id)

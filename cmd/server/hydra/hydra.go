@@ -161,6 +161,7 @@ func Run(ctx context.Context, configPath string) {
 			repository.NewUserFCMTokenRepo,
 			repository.NewUserNotificationRepo,
 			repository.NewCasbinRuleRepo,
+			repository.NewRolePermissionRepo,
 		),
 		// services
 		fx.Provide(

@@ -2,7 +2,11 @@ package role
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"github.com/casbin/casbin/v2"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
+	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/repository"
@@ -23,28 +27,56 @@ type Service interface {
 	HighestRole(ctx context.Context, ids []string) (*model.Role, error)
 	AddPolicy(params ...string) (bool, error)
 	RemovePolicy(params ...string) (bool, error)
+	UpsertRolePermissions(ctx context.Context, roleID string, permissions []*Permission) error
+	FindRolePermissions(ctx context.Context, roleId string) ([]*repository.RolePermissionData, error)
 }
-
+type Permission struct {
+	EntityType string
+	EntityID   string
+}
 type roleService struct {
 	endforcer casbin.IEnforcer
 
-	roleRepo     repository.RoleRepo
-	userRoleRepo repository.UserRoleRepo
+	roleRepo       repository.RoleRepo
+	userRoleRepo   repository.UserRoleRepo
+	rolePermission repository.RolePermissionRepo
 }
 
 func (r *roleService) DeleteRole(ctx context.Context, id string) error {
-	return r.roleRepo.SoftDelete(ctx, id)
+	err := cockroach.ExecInTx(ctx, func(ctx context.Context) error {
+		err := r.roleRepo.Delete(ctx, id)
+		if err != nil {
+			return fmt.Errorf("DeleteRole r.roleRepo.Delete: %w", err)
+		}
+		err = r.userRoleRepo.DeleteByRoleID(ctx, id)
+		if err != nil {
+			return fmt.Errorf("DeleteRole r.userRoleRepo.DeleteByRoleID: %w", err)
+		}
+		err = r.rolePermission.DeleteByRoleID(ctx, id)
+		if err != nil {
+			return fmt.Errorf("DeleteRole r.rolePermission.DeleteByRoleID: %w", err)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("DeleteRole cockroach.ExecInTx: %w", err)
+	}
+
+	return nil
 }
 
 func NewService(
 	endforcer casbin.IEnforcer,
 	roleRepo repository.RoleRepo,
 	userRoleRepo repository.UserRoleRepo,
+	rolePermission repository.RolePermissionRepo,
 ) Service {
 	return &roleService{
-		endforcer:    endforcer,
-		roleRepo:     roleRepo,
-		userRoleRepo: userRoleRepo,
+		endforcer:      endforcer,
+		roleRepo:       roleRepo,
+		rolePermission: rolePermission,
+		userRoleRepo:   userRoleRepo,
 	}
 }
 
@@ -61,4 +93,38 @@ type Role struct {
 	*model.Role
 	Permissions []string
 	UserCount   int64
+}
+
+func (s *roleService) FindRolePermissions(ctx context.Context, roleId string) ([]*repository.RolePermissionData, error) {
+	return s.rolePermission.Search(ctx, &repository.SearchRolePermissionOpts{
+		RoleID: roleId,
+		Limit:  10000,
+		Offset: 0,
+	})
+}
+func (s *roleService) UpsertRolePermissions(ctx context.Context, roleID string, permissions []*Permission) error {
+
+	// delete all permissions for role
+	err := cockroach.ExecInTx(ctx, func(ctx context.Context) error {
+		err := s.rolePermission.DeleteByRoleID(ctx, roleID)
+		if err != nil && !errors.Is(err, repository.ErrNotFound) {
+			return err
+		}
+		for _, p := range permissions {
+			err = s.rolePermission.Insert(ctx, &model.RolePermission{
+				RoleID:     roleID,
+				EntityType: p.EntityType,
+				EntityID:   p.EntityID,
+				CreatedAt:  time.Now(),
+			})
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("UpsertRolePermissions cockroach.ExecInTx: %w", err)
+	}
+	return nil
 }

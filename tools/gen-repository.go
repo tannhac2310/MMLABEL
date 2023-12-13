@@ -64,7 +64,7 @@ func main() {
 		if tableName.String == "schema_lock" || tableName.String == "schema_migrations" {
 			continue
 		}
-		if tableName.String != "device_working_history" {
+		if tableName.String != "role_permissions" {
 			continue
 		}
 		genRepository(pool, tableName)

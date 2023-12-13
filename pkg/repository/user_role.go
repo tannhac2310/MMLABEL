@@ -19,6 +19,7 @@ type UserRoleRepo interface {
 	FindByRoleID(ctx context.Context, id string) ([]*model.UserRole, error)
 	DeleteByUserIDAndRoleIDs(ctx context.Context, userID string, roleIDs []string) error
 	DeleteByUserIDsAndRoleID(ctx context.Context, userIDs []string, roleID string) error
+	DeleteByRoleID(ctx context.Context, roleID string) error
 }
 type SearchUserRoleOpts struct {
 	RoleIDs   []string
@@ -69,9 +70,19 @@ func (r *userRoleRepo) FindByUserID(ctx context.Context, id string) ([]*model.Us
 	return result, nil
 }
 
+func (r *userRoleRepo) DeleteByRoleID(ctx context.Context, roleID string) error {
+	sql := `DELETE FROM user_role
+		WHERE role_id = $1`
+
+	_, err := cockroach.Exec(ctx, sql, roleID)
+	if err != nil {
+		return fmt.Errorf("cockroach.Exec: %w", err)
+	}
+
+	return nil
+}
 func (r *userRoleRepo) DeleteByUserIDAndRoleIDs(ctx context.Context, userID string, roleIDs []string) error {
-	sql := `UPDATE user_role
-		SET deleted_at = NOW()
+	sql := `DELETE FROM user_role
 		WHERE user_id = $1 AND role_id = ANY($2)`
 
 	cmd, err := cockroach.Exec(ctx, sql, userID, roleIDs)
@@ -86,8 +97,7 @@ func (r *userRoleRepo) DeleteByUserIDAndRoleIDs(ctx context.Context, userID stri
 	return nil
 }
 func (r *userRoleRepo) DeleteByUserIDsAndRoleID(ctx context.Context, userIDs []string, roleID string) error {
-	sql := `UPDATE user_role
-		SET deleted_at = NOW()
+	sql := `DELETE FROM user_role
 		WHERE user_id = ANY($1) AND role_id = $2`
 
 	cmd, err := cockroach.Exec(ctx, sql, userIDs, roleID)
