@@ -147,9 +147,9 @@ func (p *EventMQTTSubscription) Subscribe() error {
 					}
 
 					// upsert to device_working_history
-					if action == "Counter_Day" {
+					if action == "SL_in_Ngay" {
 						counterByDay := item.Value
-						p.logger.Info("Counter_Day", zap.String("deviceID", deviceID), zap.Int("counterByDay", int(counterByDay)))
+						p.logger.Info("SL_in_Ngay", zap.String("deviceID", deviceID), zap.Int("counterByDay", int(counterByDay)))
 
 						deviceWorkingHistories, err := p.deviceWorkingHistoryRepo.Search(ctx, &repository.SearchDeviceWorkingHistoryOpts{
 							DeviceID: deviceID,
@@ -181,9 +181,9 @@ func (p *EventMQTTSubscription) Subscribe() error {
 						}
 					}
 					// upsert to device_working_history
-					if action == "TG_in_1Ngay" {
+					if action == "TG_in_Ngay" {
 						TG_in_1Ngay := item.Value
-						p.logger.Info("TG_in_1Ngay", zap.String("deviceID", deviceID), zap.Int("TG_in_1Ngay", int(TG_in_1Ngay)))
+						p.logger.Info("TG_in_Ngay", zap.String("deviceID", deviceID), zap.Int("TG_in_Ngay", int(TG_in_1Ngay)))
 
 						deviceWorkingHistories, err := p.deviceWorkingHistoryRepo.Search(ctx, &repository.SearchDeviceWorkingHistoryOpts{
 							DeviceID: deviceID,
