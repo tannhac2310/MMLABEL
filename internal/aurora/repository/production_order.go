@@ -88,6 +88,7 @@ type SearchProductionOrdersOpts struct {
 	Responsible          []string
 	StageIDs             []string
 	StageInLine          string
+	UserID               string
 	DeviceID             string
 	Limit                int64
 	Offset               int64

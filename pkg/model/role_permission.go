@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
+	"time"
+)
 
 const (
 	RolePermissionFieldID         = "id"
@@ -11,11 +14,11 @@ const (
 )
 
 type RolePermission struct {
-	ID         string    `db:"id"`
-	RoleID     string    `db:"role_id"`
-	EntityType string    `db:"entity_type"`
-	EntityID   string    `db:"entity_id"`
-	CreatedAt  time.Time `db:"created_at"`
+	ID         string                    `db:"id"`
+	RoleID     string                    `db:"role_id"`
+	EntityType enum.PermissionEntityType `db:"entity_type"`
+	EntityID   string                    `db:"entity_id"`
+	CreatedAt  time.Time                 `db:"created_at"`
 }
 
 func (rcv *RolePermission) FieldMap() (fields []string, values []interface{}) {

@@ -15,6 +15,20 @@ type Analysis struct {
 }
 
 func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts *FindProductionOrdersOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, []*Analysis, error) {
+	// find permission stage for user
+	permissions, err := c.role.FindRolePermissionsByUser(ctx, opts.UserID)
+
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	// find stage for user
+	stages := make([]string, 0)
+	for _, p := range permissions {
+		if p.EntityType == enum.PermissionEntityTypeStage {
+			stages = append(stages, p.EntityID)
+		}
+	}
+
 	filter := &repository.SearchProductionOrdersOpts{
 		IDs:                  opts.IDs,
 		CustomerID:           opts.CustomerID,
@@ -26,7 +40,8 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 		Status:               opts.Status,
 		Statuses:             opts.Statuses,
 		Responsible:          opts.Responsible,
-		StageIDs:             opts.StageIDs,
+		StageIDs:             stages,
+		UserID:               opts.UserID,
 		OrderStageStatus:     opts.OrderStageStatus,
 		StageInLine:          opts.StageInLine, // search lsx mà theo công đoạn StageInLine đang sản xuất: production_start
 		DeviceID:             opts.DeviceID,
@@ -153,4 +168,5 @@ type FindProductionOrdersOpts struct {
 	StageIDs             []string
 	StageInLine          string // search lsx mà theo công đoạn StageInLine đang sản xuất: production_start
 	DeviceID             string
+	UserID               string
 }

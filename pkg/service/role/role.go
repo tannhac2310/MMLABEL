@@ -29,6 +29,7 @@ type Service interface {
 	RemovePolicy(params ...string) (bool, error)
 	UpsertRolePermissions(ctx context.Context, roleID string, permissions []*Permission) error
 	FindRolePermissions(ctx context.Context, roleId string) ([]*repository.RolePermissionData, error)
+	FindRolePermissionsByUser(ctx context.Context, userID string) ([]*repository.RolePermissionData, error)
 }
 type Permission struct {
 	EntityType string
@@ -101,6 +102,36 @@ func (s *roleService) FindRolePermissions(ctx context.Context, roleId string) ([
 		Limit:  10000,
 		Offset: 0,
 	})
+}
+func (s *roleService) FindRolePermissionsByUser(ctx context.Context, userId string) ([]*repository.RolePermissionData, error) {
+	filter := &repository.SearchUserRoleOpts{
+		UserIDs:   []string{userId, "-1"},
+		UserTypes: nil,
+		Search:    "",
+		Limit:     1000,
+		Offset:    0,
+	}
+	userRoles, err := s.userRoleRepo.Search(ctx, filter)
+
+	if err != nil {
+		return nil, err
+	}
+
+	permissions := make([]*repository.RolePermissionData, 0)
+
+	for _, userRole := range userRoles {
+		rolePermissions, err := s.rolePermission.Search(ctx, &repository.SearchRolePermissionOpts{
+			RoleID: userRole.RoleID,
+			Limit:  10000,
+			Offset: 0,
+		})
+		if err != nil {
+			return nil, err
+		}
+		permissions = append(permissions, rolePermissions...)
+	}
+
+	return permissions, nil
 }
 func (s *roleService) UpsertRolePermissions(ctx context.Context, roleID string, permissions []*Permission) error {
 

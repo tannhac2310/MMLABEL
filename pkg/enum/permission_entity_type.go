@@ -5,12 +5,12 @@ import (
 	"fmt"
 )
 
-type PermissionEntityType uint8
+type PermissionEntityType string
 
 const (
-	PermissionEntityTypeStage PermissionEntityType = iota + 1
-	PermissionEntityTypeDevice
-	PermissionEntityTypeScreen
+	PermissionEntityTypeStage  PermissionEntityType = "stage"
+	PermissionEntityTypeDevice                      = "device"
+	PermissionEntityTypeScreen                      = "screen"
 )
 
 var PermissionEntityTypeName = map[PermissionEntityType]string{

@@ -2,6 +2,7 @@ package production_order
 
 import (
 	"context"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/service/role"
 
 	"github.com/go-redis/redis"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
@@ -29,6 +30,7 @@ type productionOrderService struct {
 	productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo
 	customFieldRepo                repository.CustomFieldRepo
 	userRepo                       repository2.UserRepo
+	role                           role.Service
 	cfg                            *configs.Config
 	redisDB                        redis.Cmdable
 }

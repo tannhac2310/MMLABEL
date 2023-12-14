@@ -62,7 +62,6 @@ type SearchProductQualitysOpts struct {
 	DefectType        string
 	DefectCode        string
 	DeviceID          string
-	UserID            string
 	CreatedAtFrom     time.Time
 	CreatedAtTo       time.Time
 	Limit             int64
