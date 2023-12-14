@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/casbin/casbin/v2"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"strings"
 
 	"firebase.google.com/go/v4/auth"
@@ -160,7 +161,7 @@ func (a *authService) buildLoginResult(ctx context.Context, userID string) (*Log
 	}
 
 	mainRole, err := a.roleService.HighestRole(ctx, claims.Roles)
-	if err != nil {
+	if err != nil && !cockroach.IsErrNoRows(err) {
 		return nil, fmt.Errorf("a.roleService.HighestRole: %w", err)
 	}
 
