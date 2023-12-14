@@ -30,7 +30,7 @@ type productionOrderService struct {
 	productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo
 	customFieldRepo                repository.CustomFieldRepo
 	userRepo                       repository2.UserRepo
-	role                           role.Service
+	roleService                    role.Service
 	cfg                            *configs.Config
 	redisDB                        redis.Cmdable
 }
@@ -114,6 +114,7 @@ func NewService(
 	userRepo repository2.UserRepo,
 	cfg *configs.Config,
 	redisDB redis.Cmdable,
+	roleService role.Service,
 ) Service {
 	return &productionOrderService{
 		productionOrderRepo:            productionOrderRepo,
@@ -123,6 +124,7 @@ func NewService(
 		userRepo:                       userRepo,
 		cfg:                            cfg,
 		redisDB:                        redisDB,
+		roleService:                    roleService,
 	}
 }
 

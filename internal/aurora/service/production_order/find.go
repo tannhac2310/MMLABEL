@@ -16,7 +16,7 @@ type Analysis struct {
 
 func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts *FindProductionOrdersOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, []*Analysis, error) {
 	// find permission stage for user
-	permissions, err := c.role.FindRolePermissionsByUser(ctx, opts.UserID)
+	permissions, err := c.roleService.FindRolePermissionsByUser(ctx, opts.UserID)
 
 	if err != nil {
 		return nil, nil, nil, err
