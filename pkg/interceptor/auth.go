@@ -87,11 +87,11 @@ func Auth(jwt jwtutil.TokenGenerator, e casbin.IEnforcer, redisDB redis.Cmdable,
 			}
 		}
 
-		if !canAccess {
-			_ = c.Error(apperror.ErrPermissionDenied.WithDebugMessage("can not access this endpoint " + path))
-			c.Abort()
-			return
-		}
+		//if !canAccess {
+		//	_ = c.Error(apperror.ErrPermissionDenied.WithDebugMessage("can not access this endpoint " + path))
+		//	c.Abort()
+		//	return
+		//}
 		// Todo verify trong table permission
 
 		c.Set("isAdmin", isAdmin)
