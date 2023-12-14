@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/casbin/casbin/v2"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/model"
@@ -32,7 +33,7 @@ type Service interface {
 	FindRolePermissionsByUser(ctx context.Context, userID string) ([]*repository.RolePermissionData, error)
 }
 type Permission struct {
-	EntityType string
+	EntityType enum.PermissionEntityType
 	EntityID   string
 }
 type roleService struct {

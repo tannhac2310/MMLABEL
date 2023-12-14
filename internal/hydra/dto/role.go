@@ -100,10 +100,10 @@ type FindRoleUsersResponse struct {
 }
 
 type RolePermission struct {
-	ID         string `json:"id"`
-	RoleID     string `json:"roleId"`
-	EntityType string `json:"entityType"`
-	EntityID   string `json:"entityId"`
+	ID         string                    `json:"id"`
+	RoleID     string                    `json:"roleId"`
+	EntityType enum.PermissionEntityType `json:"entityType"`
+	EntityID   string                    `json:"entityId"`
 }
 
 type FindRolePermissionsRequest struct {
@@ -114,8 +114,8 @@ type FindRolePermissionsResponse struct {
 	RolePermissions []*RolePermission `json:"rolePermissions"`
 }
 type Permission struct {
-	EntityID   string `json:"entityId"`
-	EntityType string `json:"entityType"`
+	EntityID   string                    `json:"entityId"`
+	EntityType enum.PermissionEntityType `json:"entityType"`
 }
 type UpsertRolePermissionsRequest struct {
 	RoleID      string        `json:"roleId" binding:"required"`
