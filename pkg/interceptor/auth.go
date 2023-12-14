@@ -86,7 +86,7 @@ func Auth(jwt jwtutil.TokenGenerator, e casbin.IEnforcer, redisDB redis.Cmdable,
 				break
 			}
 		}
-
+		fmt.Println("canAccess", canAccess)
 		//if !canAccess {
 		//	_ = c.Error(apperror.ErrPermissionDenied.WithDebugMessage("can not access this endpoint " + path))
 		//	c.Abort()
