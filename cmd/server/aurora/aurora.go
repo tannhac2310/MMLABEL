@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/device_config"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/service/role"
 	"os"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/option"
@@ -166,6 +167,7 @@ func Run(ctx context.Context, configPath string) {
 			product_quality.NewService,
 			option.NewService,
 			device_config.NewService,
+			role.NewService,
 		),
 		// nats streaming
 		fx.Provide(func(cfg *pkgConfig.BaseConfig, zapLogger *zap.Logger) (nats.BusFactory, error) {
