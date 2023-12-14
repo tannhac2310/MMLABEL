@@ -13,6 +13,7 @@ func (c *productQualityService) FindProductQuality(ctx context.Context, opts *Fi
 		DefectType:        opts.DefectType,
 		DeviceID:          opts.DeviceID,
 		DefectCode:        opts.DefectCode,
+		UserID:            opts.UserID,
 		CreatedAtFrom:     opts.CreatedAtFrom,
 		CreatedAtTo:       opts.CreatedAtTo,
 		Limit:             limit,
@@ -60,4 +61,5 @@ type FindProductQualityOpts struct {
 	DefectCode        string
 	CreatedAtFrom     time.Time
 	CreatedAtTo       time.Time
+	UserID            string
 }

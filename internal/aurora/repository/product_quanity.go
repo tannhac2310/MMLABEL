@@ -19,14 +19,14 @@ type ProductQualityRepo interface {
 	Count(ctx context.Context, s *SearchProductQualitysOpts) (*CountResult, error)
 }
 
-type productQualitysRepo struct {
+type productQualityRepo struct {
 }
 
 func NewProductQualityRepo() ProductQualityRepo {
-	return &productQualitysRepo{}
+	return &productQualityRepo{}
 }
 
-func (r *productQualitysRepo) Insert(ctx context.Context, e *model.ProductQuality) error {
+func (r *productQualityRepo) Insert(ctx context.Context, e *model.ProductQuality) error {
 	err := cockroach.Create(ctx, e)
 	if err != nil {
 		return fmt.Errorf("r.baseRepo.Create: %w", err)
@@ -35,12 +35,12 @@ func (r *productQualitysRepo) Insert(ctx context.Context, e *model.ProductQualit
 	return nil
 }
 
-func (r *productQualitysRepo) Update(ctx context.Context, e *model.ProductQuality) error {
+func (r *productQualityRepo) Update(ctx context.Context, e *model.ProductQuality) error {
 	e.UpdatedAt = time.Now()
 	return cockroach.Update(ctx, e)
 }
 
-func (r *productQualitysRepo) SoftDelete(ctx context.Context, id string) error {
+func (r *productQualityRepo) SoftDelete(ctx context.Context, id string) error {
 	sql := `UPDATE product_quality
 		SET deleted_at = NOW()
 		WHERE id = $1`
@@ -62,6 +62,7 @@ type SearchProductQualitysOpts struct {
 	DefectType        string
 	DefectCode        string
 	DeviceID          string
+	UserID            string
 	CreatedAtFrom     time.Time
 	CreatedAtTo       time.Time
 	Limit             int64
@@ -134,15 +135,15 @@ type ProductQualityData struct {
 	ProductionOrderQtyPaper int64  `db:"production_order_qty_paper"`
 }
 
-func (r *productQualitysRepo) Search(ctx context.Context, s *SearchProductQualitysOpts) ([]*ProductQualityData, error) {
-	productQualitys := make([]*ProductQualityData, 0)
+func (r *productQualityRepo) Search(ctx context.Context, s *SearchProductQualitysOpts) ([]*ProductQualityData, error) {
+	productQuality := make([]*ProductQualityData, 0)
 	sql, args := s.buildQuery(false, false)
-	err := cockroach.Select(ctx, sql, args...).ScanAll(&productQualitys)
+	err := cockroach.Select(ctx, sql, args...).ScanAll(&productQuality)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.Select: %w", err)
 	}
 
-	return productQualitys, nil
+	return productQuality, nil
 }
 
 type ProductQualityAnalysis struct {
@@ -150,7 +151,7 @@ type ProductQualityAnalysis struct {
 	Count      int64  `json:"count"`
 }
 
-func (r *productQualitysRepo) Analysis(ctx context.Context, s *SearchProductQualitysOpts) ([]*ProductQualityAnalysis, error) {
+func (r *productQualityRepo) Analysis(ctx context.Context, s *SearchProductQualitysOpts) ([]*ProductQualityAnalysis, error) {
 	productQualitys := make([]*ProductQualityAnalysis, 0)
 	sql, args := s.buildQuery(false, true)
 	err := cockroach.Select(ctx, sql, args...).ScanAll(&productQualitys)
@@ -161,7 +162,7 @@ func (r *productQualitysRepo) Analysis(ctx context.Context, s *SearchProductQual
 	return productQualitys, nil
 }
 
-func (r *productQualitysRepo) Count(ctx context.Context, s *SearchProductQualitysOpts) (*CountResult, error) {
+func (r *productQualityRepo) Count(ctx context.Context, s *SearchProductQualitysOpts) (*CountResult, error) {
 	countResult := &CountResult{}
 	sql, args := s.buildQuery(true, false)
 	err := cockroach.Select(ctx, sql, args...).ScanOne(countResult)
