@@ -103,8 +103,8 @@ func (s *SearchProductQualitysOpts) buildQuery(isCount bool, isAnalysis bool) (s
 	fields, _ := b.FieldMap()
 	if isCount {
 		return fmt.Sprintf(`SELECT count(*) as cnt
-		JOIN production_orders AS po ON po.id = b.production_order_id
 		FROM %s AS b %s
+		JOIN production_orders AS po ON po.id = b.production_order_id
 		WHERE TRUE %s AND b.deleted_at IS NULL`, b.TableName(), joins, conds), args
 	}
 
@@ -166,7 +166,7 @@ func (r *productQualitysRepo) Count(ctx context.Context, s *SearchProductQuality
 	sql, args := s.buildQuery(true, false)
 	err := cockroach.Select(ctx, sql, args...).ScanOne(countResult)
 	if err != nil {
-		return nil, fmt.Errorf("chat.Count: %w", err)
+		return nil, fmt.Errorf("productQualityRepo.Count: %w", err)
 	}
 
 	return countResult, nil
