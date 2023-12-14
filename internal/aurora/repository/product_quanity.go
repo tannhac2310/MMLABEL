@@ -103,6 +103,7 @@ func (s *SearchProductQualitysOpts) buildQuery(isCount bool, isAnalysis bool) (s
 	fields, _ := b.FieldMap()
 	if isCount {
 		return fmt.Sprintf(`SELECT count(*) as cnt
+		JOIN production_orders AS po ON po.id = b.production_order_id
 		FROM %s AS b %s
 		WHERE TRUE %s AND b.deleted_at IS NULL`, b.TableName(), joins, conds), args
 	}
@@ -129,8 +130,8 @@ func (s *SearchProductQualitysOpts) buildQuery(isCount bool, isAnalysis bool) (s
 
 type ProductQualityData struct {
 	*model.ProductQuality
-	ProductionOrderName string `db:"production_order_name"`
-	ProductionOrderQtyPaper int64 `db:"production_order_qty_paper"`
+	ProductionOrderName     string `db:"production_order_name"`
+	ProductionOrderQtyPaper int64  `db:"production_order_qty_paper"`
 }
 
 func (r *productQualitysRepo) Search(ctx context.Context, s *SearchProductQualitysOpts) ([]*ProductQualityData, error) {
