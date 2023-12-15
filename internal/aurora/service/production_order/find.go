@@ -30,12 +30,12 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 			stages = append(stages, p.EntityID)
 		}
 	}
-	// intercect stage with opts.StageIDs
+	// Tập hợp giao stages và opts.StageIDs
 	if len(opts.StageIDs) > 0 {
 		intersect := make([]string, 0)
-		for _, stage := range opts.StageIDs {
-			for _, p := range stages {
-				if stage == p {
+		for _, stage := range stages { // loop user can access stages
+			for _, p := range opts.StageIDs { // loop stage in opts.StageIDs
+				if stage == p { // if stage in opts.StageIDs is in user can access stages
 					intersect = append(intersect, stage)
 				}
 			}
