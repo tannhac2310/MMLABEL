@@ -30,6 +30,19 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 			stages = append(stages, p.EntityID)
 		}
 	}
+	// intercect stage with opts.StageIDs
+	if len(opts.StageIDs) > 0 {
+		intersect := make([]string, 0)
+		for _, stage := range opts.StageIDs {
+			for _, p := range stages {
+				if stage == p {
+					intersect = append(intersect, stage)
+				}
+			}
+		}
+		stages = intersect
+	}
+
 	fmt.Println("FindProductionOrders stages", stages)
 
 	filter := &repository.SearchProductionOrdersOpts{
