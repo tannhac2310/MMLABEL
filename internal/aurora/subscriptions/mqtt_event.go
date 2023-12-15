@@ -215,6 +215,75 @@ func (p *EventMQTTSubscription) Subscribe() error {
 					}
 				}
 			}
+			if len(orderStageDevices) < 1 {
+				// upsert to device_working_history
+				if action == "SL_in_Ngay" {
+					counterByDay := item.Value
+					p.logger.Info("SL_in_Ngay", zap.String("deviceID", deviceID), zap.Int("counterByDay", int(counterByDay)))
+
+					deviceWorkingHistories, err := p.deviceWorkingHistoryRepo.Search(ctx, &repository.SearchDeviceWorkingHistoryOpts{
+						DeviceID: deviceID,
+						Date:     dateStr,
+						Limit:    1,
+					})
+					if err != nil {
+						// todo check error is not_found or not
+					}
+
+					if len(deviceWorkingHistories) == 0 {
+						p.deviceWorkingHistoryRepo.Insert(ctx, &model.DeviceWorkingHistory{
+							ID:                           idutil.ULIDNow(),
+							ProductionOrderStageDeviceID: deviceID,
+							DeviceID:                     deviceID,
+							Date:                         dateStr,
+							Quantity:                     int64(counterByDay),
+							WorkingTime:                  0,
+							CreatedAt:                    now,
+						})
+					} else {
+						deviceWorkingHistory := deviceWorkingHistories[0].DeviceWorkingHistory
+						deviceWorkingHistory.Quantity = int64(counterByDay)
+						err := p.deviceWorkingHistoryRepo.Update(ctx, deviceWorkingHistory)
+						if err != nil {
+							// todo nothing
+							p.logger.Error(" p.deviceWorkingHistoryRepo.Update error", zap.Error(err))
+						}
+					}
+				}
+				// upsert to device_working_history
+				if action == "TG_in_Ngay" {
+					TG_in_1Ngay := item.Value
+					p.logger.Info("TG_in_Ngay", zap.String("deviceID", deviceID), zap.Int("TG_in_Ngay", int(TG_in_1Ngay)))
+
+					deviceWorkingHistories, err := p.deviceWorkingHistoryRepo.Search(ctx, &repository.SearchDeviceWorkingHistoryOpts{
+						DeviceID: deviceID,
+						Date:     dateStr,
+						Limit:    1,
+					})
+					if err != nil {
+						// todo check error is not_found or not
+					}
+
+					if len(deviceWorkingHistories) == 0 {
+						p.deviceWorkingHistoryRepo.Insert(ctx, &model.DeviceWorkingHistory{
+							ID:                           idutil.ULIDNow(),
+							ProductionOrderStageDeviceID: deviceID,
+							DeviceID:                     deviceID,
+							Date:                         dateStr,
+							WorkingTime:                  int64(TG_in_1Ngay),
+							CreatedAt:                    now,
+						})
+					} else {
+						deviceWorkingHistory := deviceWorkingHistories[0].DeviceWorkingHistory
+						deviceWorkingHistory.WorkingTime = int64(TG_in_1Ngay)
+						err := p.deviceWorkingHistoryRepo.Update(ctx, deviceWorkingHistory)
+						if err != nil {
+							// todo nothing
+							p.logger.Error(" p.deviceWorkingHistoryRepo.Update error", zap.Error(err))
+						}
+					}
+				}
+			}
 			// insert event log
 			_ = p.productionOrderStageDeviceRepo.InsertEventLog(ctx, &model.EventLog{
 				ID:        time.Now().UnixNano(),
