@@ -2,6 +2,7 @@ package production_order
 
 import (
 	"context"
+	"fmt"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	model2 "mmlabel.gitlab.com/mm-printing-backend/pkg/model"
 	"time"
@@ -23,11 +24,13 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 	}
 	// find stage for user
 	stages := make([]string, 0)
+	stages = append(stages, "-1")
 	for _, p := range permissions {
 		if p.EntityType == enum.PermissionEntityTypeStage {
 			stages = append(stages, p.EntityID)
 		}
 	}
+	fmt.Println("FindProductionOrders stages", stages)
 
 	filter := &repository.SearchProductionOrdersOpts{
 		IDs:                  opts.IDs,
