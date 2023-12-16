@@ -123,7 +123,8 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				fmt.Println("============>>> Received message for topic ====", err)
 			}
 			activeStageID := ""
-			if len(orderStageDevices) == 1 {
+			if len(orderStageDevices) >= 1 {
+				fmt.Println("============>>> orderStageDevices", orderStageDevices)
 				device := orderStageDevices[0]
 				activeStageID = device.ProductionOrderStageID
 				if device.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart {
