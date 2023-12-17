@@ -1,7 +1,7 @@
 image: docker:git
 
-services:
-  - docker:dnd
+#services:
+#  - docker:dnd
 stages:
   - build
   - test
