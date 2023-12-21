@@ -10,5 +10,5 @@ CREATE TABLE role_permissions
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT now():::TIMESTAMPTZ
 );
 
-alter table user_role drop constraint fk__user_role__users
-alter table user_role drop constraint fk__user_role__roles
+alter table user_role drop constraint fk__user_role__users;
+alter table user_role drop constraint fk__user_role__roles;
