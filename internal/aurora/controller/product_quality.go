@@ -36,7 +36,7 @@ func (s productQualityController) CreateProductQuality(c *gin.Context) {
 	id, err := s.productQualityService.CreateProductQuality(c, &product_quality.CreateProductQualityOpts{
 		ProductionOrderID: req.ProductionOrderID,
 		ProductID:         req.ProductID,
-		DeviceID:          req.DeviceID,
+		DeviceIDs:         req.DeviceIDs,
 		DefectType:        req.DefectType,
 		DefectCode:        req.DefectCode,
 		DefectLevel:       req.DefectLevel,
@@ -67,7 +67,7 @@ func (s productQualityController) EditProductQuality(c *gin.Context) {
 	err = s.productQualityService.EditProductQuality(c, &product_quality.EditProductQualityOpts{
 		ID:                req.ID,
 		DefectType:        req.DefectType,
-		DeviceID:          req.DeviceID,
+		DeviceIDs:         req.DeviceIDs,
 		DefectCode:        req.DefectCode,
 		DefectLevel:       req.DefectLevel,
 		ProductionStageID: req.ProductionStageID,
@@ -108,9 +108,9 @@ func (s productQualityController) FindProductQuality(c *gin.Context) {
 		return
 	}
 
-	productQualitys, cnt, analysis, err := s.productQualityService.FindProductQuality(c, &product_quality.FindProductQualityOpts{
+	productQuality, cnt, analysis, err := s.productQualityService.FindProductQuality(c, &product_quality.FindProductQualityOpts{
 		ProductionOrderID: req.Filter.ProductionOrderID,
-		DeviceID: 		   req.Filter.DeviceID,
+		DeviceIDs:         req.Filter.DeviceIDs,
 		DefectType:        req.Filter.DefectType,
 		DefectCode:        req.Filter.DefectCode,
 		CreatedAtFrom:     req.Filter.CreatedAtFrom,
@@ -124,8 +124,8 @@ func (s productQualityController) FindProductQuality(c *gin.Context) {
 		return
 	}
 
-	productQualityResp := make([]*dto.ProductQuality, 0, len(productQualitys))
-	for _, f := range productQualitys {
+	productQualityResp := make([]*dto.ProductQuality, 0, len(productQuality))
+	for _, f := range productQuality {
 		productQualityResp = append(productQualityResp, toProductQualityResp(f))
 	}
 
@@ -145,23 +145,31 @@ func (s productQualityController) FindProductQuality(c *gin.Context) {
 }
 
 func toProductQualityResp(f *product_quality.Data) *dto.ProductQuality {
+	devices := make([]*dto.DeviceData, 0)
+	for _, device := range f.Devices {
+		devices = append(devices, &dto.DeviceData{
+			ID:   device.ID,
+			Name: device.Name,
+		})
+	}
 	return &dto.ProductQuality{
-		ID:                  f.ID,
-		ProductionOrderID:   f.ProductionOrderID,
-		ProductionOrderName: f.ProductionOrderName,
+		ID:                      f.ID,
+		ProductionOrderID:       f.ProductionOrderID,
+		ProductionOrderName:     f.ProductionOrderName,
 		ProductionOrderQtyPaper: f.ProductionOrderQtyPaper,
-		DeviceID:            f.DeviceID.String,
-		ProductID:           f.ProductID.String,
-		DefectType:          f.DefectType.String,
-		DefectCode:          f.DefectCode.String,
-		DefectLevel:         f.DefectLevel,
-		ProductionStageID:   f.ProductionStageID.String,
-		DefectiveQuantity:   f.DefectiveQuantity,
-		GoodQuantity:        f.GoodQuantity,
-		Description:         f.Description.String,
-		CreatedBy:           f.CreatedBy,
-		CreatedAt:           f.CreatedAt,
-		UpdatedAt:           f.UpdatedAt,
+		DeviceIDs:               f.DeviceIDs,
+		Devices:                 devices,
+		ProductID:               f.ProductID.String,
+		DefectType:              f.DefectType.String,
+		DefectCode:              f.DefectCode.String,
+		DefectLevel:             f.DefectLevel,
+		ProductionStageID:       f.ProductionStageID.String,
+		DefectiveQuantity:       f.DefectiveQuantity,
+		GoodQuantity:            f.GoodQuantity,
+		Description:             f.Description.String,
+		CreatedBy:               f.CreatedBy,
+		CreatedAt:               f.CreatedAt,
+		UpdatedAt:               f.UpdatedAt,
 	}
 }
 

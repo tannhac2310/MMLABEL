@@ -21,17 +21,20 @@ type ProductQualityAnalysis struct {
 }
 type productQualityService struct {
 	productQualityRepo repository.ProductQualityRepo
+	deviceRepo         repository.DeviceRepo
 	cfg                *configs.Config
 	redisDB            redis.Cmdable
 }
 
 func NewService(
 	productQualityRepo repository.ProductQualityRepo,
+	deviceRepo repository.DeviceRepo,
 	cfg *configs.Config,
 	redisDB redis.Cmdable,
 ) Service {
 	return &productQualityService{
 		productQualityRepo: productQualityRepo,
+		deviceRepo:         deviceRepo,
 		cfg:                cfg,
 		redisDB:            redisDB,
 	}
@@ -39,4 +42,5 @@ func NewService(
 
 type Data struct {
 	*repository.ProductQualityData
+	Devices []*repository.DeviceData
 }

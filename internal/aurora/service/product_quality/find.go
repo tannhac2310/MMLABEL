@@ -11,7 +11,7 @@ func (c *productQualityService) FindProductQuality(ctx context.Context, opts *Fi
 	filter := &repository.SearchProductQualitysOpts{
 		ProductionOrderID: opts.ProductionOrderID,
 		DefectType:        opts.DefectType,
-		DeviceID:          opts.DeviceID,
+		DeviceIDs:         opts.DeviceIDs,
 		DefectCode:        opts.DefectCode,
 		CreatedAtFrom:     opts.CreatedAtFrom,
 		CreatedAtTo:       opts.CreatedAtTo,
@@ -34,8 +34,16 @@ func (c *productQualityService) FindProductQuality(ctx context.Context, opts *Fi
 		if err != nil {
 			return nil, nil, nil, err
 		}
+		deviceIds := productQuality.DeviceIDs
+		devices, _ := c.deviceRepo.Search(ctx, &repository.SearchDevicesOpts{
+			IDs:    deviceIds,
+			Limit:  int64(len(deviceIds)),
+			Offset: 0,
+		})
+
 		results = append(results, &Data{
 			ProductQualityData: productQuality,
+			Devices:            devices,
 		})
 	}
 
@@ -55,7 +63,7 @@ func (c *productQualityService) FindProductQuality(ctx context.Context, opts *Fi
 
 type FindProductQualityOpts struct {
 	ProductionOrderID string
-	DeviceID          string
+	DeviceIDs         []string
 	DefectType        string
 	DefectCode        string
 	CreatedAtFrom     time.Time

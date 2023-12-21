@@ -61,7 +61,7 @@ type SearchProductQualitysOpts struct {
 	ProductionOrderID string
 	DefectType        string
 	DefectCode        string
-	DeviceID          string
+	DeviceIDs         []string
 	CreatedAtFrom     time.Time
 	CreatedAtTo       time.Time
 	Limit             int64
@@ -78,9 +78,8 @@ func (s *SearchProductQualitysOpts) buildQuery(isCount bool, isAnalysis bool) (s
 		args = append(args, s.ProductionOrderID)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductQualityFieldProductionOrderID, len(args))
 	}
-	if s.DeviceID != "" {
-		args = append(args, s.DeviceID)
-		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductQualityFieldDeviceID, len(args))
+	if len(s.DeviceIDs) > 0 {
+		args = append(args, s.DeviceIDs)
 	}
 	if s.DefectType != "" && !isAnalysis {
 		args = append(args, s.DefectType)
@@ -111,6 +110,7 @@ func (s *SearchProductQualitysOpts) buildQuery(isCount bool, isAnalysis bool) (s
 	if isAnalysis {
 		return fmt.Sprintf(`SELECT b.%s, sum(b.defective_quantity) as count
 		FROM %s AS b %s
+		JOIN production_orders AS po ON po.id = b.production_order_id
 		WHERE TRUE %s AND b.deleted_at IS NULL
 		GROUP BY b.%s`, model.ProductQualityFieldDefectType, b.TableName(), joins, conds, model.ProductQualityFieldDefectType), args
 	}
