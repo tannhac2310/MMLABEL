@@ -169,6 +169,48 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 	return results, total, analysis, nil
 }
 
+func (c *productionOrderService) FindProductionOrdersWithNoPermission(ctx context.Context, opts *FindProductionOrdersOpts, sort *repository.Sort, limit, offset int64) ([]*DataWithNoPermission, *repository.CountResult, error) {
+	filter := &repository.SearchProductionOrdersOpts{
+		IDs:                  opts.IDs,
+		CustomerID:           opts.CustomerID,
+		ProductCode:          opts.ProductCode,
+		ProductName:          opts.ProductName,
+		Name:                 opts.Name,
+		EstimatedStartAtFrom: opts.EstimatedStartAtFrom,
+		EstimatedStartAtTo:   opts.EstimatedStartAtTo,
+		Status:               opts.Status,
+		Statuses:             opts.Statuses,
+		Responsible:          opts.Responsible,
+		StageIDs:             opts.StageIDs,
+		UserID:               opts.UserID,
+		OrderStageStatus:     opts.OrderStageStatus,
+		StageInLine:          opts.StageInLine, // search lsx mà theo công đoạn StageInLine đang sản xuất: production_start
+		DeviceID:             opts.DeviceID,
+		Limit:                limit,
+		Offset:               offset,
+		Sort:                 sort,
+	}
+	productionOrders, err := c.productionOrderRepo.Search(ctx, filter)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	total, err := c.productionOrderRepo.Count(ctx, filter)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	results := make([]*DataWithNoPermission, 0, len(productionOrders))
+
+	for _, productionOrder := range productionOrders {
+		results = append(results, &DataWithNoPermission{
+			ProductionOrderData: productionOrder,
+		})
+	}
+
+	return results, total, nil
+}
+
 type FindProductionOrdersOpts struct {
 	IDs                  []string
 	CustomerID           string

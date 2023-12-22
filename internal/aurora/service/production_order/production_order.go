@@ -20,6 +20,7 @@ type Service interface {
 	CreateProductionOrder(ctx context.Context, opt *CreateProductionOrderOpts) (string, error)
 	EditProductionOrder(ctx context.Context, opt *EditProductionOrderOpts) error
 	FindProductionOrders(ctx context.Context, opts *FindProductionOrdersOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, []*Analysis, error)
+	FindProductionOrdersWithNoPermission(ctx context.Context, opts *FindProductionOrdersOpts, sort *repository.Sort, limit, offset int64) ([]*DataWithNoPermission, *repository.CountResult, error)
 	DeleteProductionOrder(ctx context.Context, id string) error
 	GetCustomField() []string
 }
@@ -132,6 +133,9 @@ type Data struct {
 	*repository.ProductionOrderData
 	ProductionOrderStage []*ProductionOrderStageData
 	CustomData           map[string]string
+}
+type DataWithNoPermission struct {
+	*repository.ProductionOrderData
 }
 
 type ProductionOrderStageData struct {

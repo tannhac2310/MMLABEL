@@ -16,6 +16,7 @@ type ProductionOrderController interface {
 	EditProductionOrder(c *gin.Context)
 	DeleteProductionOrder(c *gin.Context)
 	FindProductionOrders(c *gin.Context)
+	FindProductionOrdersWithNoPermission(c *gin.Context)
 	AcceptAndChangeNextStage(c *gin.Context)
 }
 
@@ -166,6 +167,71 @@ func (s productionOrderController) DeleteProductionOrder(c *gin.Context) {
 	transportutil.SendJSONResponse(c, &dto.DeleteProductionOrderResponse{})
 }
 
+func (s productionOrderController) FindProductionOrdersWithNoPermission(c *gin.Context) {
+	req := &dto.FindProductionOrdersRequest{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+
+	sort := &repository.Sort{
+		Order: repository.SortOrderDESC,
+		By:    "ID",
+	}
+	if req.Sort != nil {
+		sort = &repository.Sort{
+			Order: repository.SortOrder(req.Sort.Order),
+			By:    req.Sort.By,
+		}
+	}
+	productionOrders, cnt, err := s.productionOrderService.FindProductionOrdersWithNoPermission(c, &production_order.FindProductionOrdersOpts{
+		IDs:                  req.Filter.IDs,
+		CustomerID:           req.Filter.CustomerID,
+		Name:                 req.Filter.Name,
+		Status:               req.Filter.Status,
+		Statuses:             req.Filter.Statuses,
+		EstimatedStartAtFrom: req.Filter.EstimatedStartAtFrom,
+		EstimatedStartAtTo:   req.Filter.EstimatedStartAtTo,
+		OrderStageStatus:     req.Filter.OrderStageStatus,
+		Responsible:          req.Filter.Responsible,
+		StageIDs:             req.Filter.StageIDs,
+		StageInLine:          req.Filter.StageInLine, // search lsx mà theo công đoạn StageInLine đang sản xuất: production_start
+		DeviceID:             req.Filter.DeviceID,
+		UserID:               interceptor.UserIDFromCtx(c),
+	}, sort, req.Paging.Limit, req.Paging.Offset)
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+	//FindProductionOrdersWithNoPermissionResponse
+	productionOrderResp := make([]*dto.ProductionOrder2, 0, len(productionOrders))
+	for _, f := range productionOrders {
+		data := &dto.ProductionOrder2{
+			ID:                  f.ID,
+			Name:                f.Name,
+			ProductCode:         f.ProductCode,
+			ProductName:         f.ProductName,
+			CustomerID:          f.CustomerID,
+			SalesID:             f.SalesID,
+			QtyPaper:            f.QtyPaper,
+			QtyFinished:         f.QtyFinished,
+			QtyDelivered:        f.QtyDelivered,
+			EstimatedStartAt:    f.EstimatedStartAt.Time,
+			EstimatedCompleteAt: f.EstimatedCompleteAt.Time,
+			DeliveryDate:        f.DeliveryDate,
+			DeliveryImage:       f.DeliveryImage.String,
+			Status:              f.Status,
+			Note:                f.Note.String,
+		}
+		productionOrderResp = append(productionOrderResp, data)
+	}
+
+	transportutil.SendJSONResponse(c, &dto.FindProductionOrdersWithNoPermissionResponse{
+		ProductionOrders: productionOrderResp,
+		Total:            cnt.Count,
+	})
+}
 func (s productionOrderController) FindProductionOrders(c *gin.Context) {
 	req := &dto.FindProductionOrdersRequest{}
 	err := c.ShouldBind(req)
@@ -346,6 +412,14 @@ func RegisterProductionOrderController(
 		g,
 		"find",
 		c.FindProductionOrders,
+		&dto.FindProductionOrdersRequest{},
+		&dto.FindProductionOrdersResponse{},
+		"Find productionOrders",
+	)
+	routeutil.AddEndpoint(
+		g,
+		"find-with-no-permission",
+		c.FindProductionOrdersWithNoPermission,
 		&dto.FindProductionOrdersRequest{},
 		&dto.FindProductionOrdersResponse{},
 		"Find productionOrders",

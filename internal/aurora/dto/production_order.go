@@ -37,6 +37,29 @@ type Analysis struct {
 	Status enum.ProductionOrderStatus `json:"status"`
 	Count  int64                      `json:"count"`
 }
+
+type FindProductionOrdersWithNoPermissionResponse struct {
+	ProductionOrders []*ProductionOrder2 `json:"production_orders"`
+	Total            int64               `json:"total"`
+}
+
+type ProductionOrder2 struct {
+	ID                  string                     `json:"id"`
+	Name                string                     `json:"name"`
+	ProductCode         string                     `json:"productCode"`
+	ProductName         string                     `json:"productName"`
+	CustomerID          string                     `json:"customerID"`
+	SalesID             string                     `json:"salesID"`
+	QtyPaper            int64                      `json:"qtyPaper"`
+	QtyFinished         int64                      `json:"qtyFinished"`
+	QtyDelivered        int64                      `json:"qtyDelivered"`
+	EstimatedStartAt    time.Time                  `json:"estimatedStartAt"`
+	EstimatedCompleteAt time.Time                  `json:"estimatedCompleteAt"`
+	DeliveryDate        time.Time                  `json:"deliveryDate"`
+	DeliveryImage       string                     `json:"deliveredImage"`
+	Status              enum.ProductionOrderStatus `json:"status"`
+	Note                string                     `json:"note"`
+}
 type ProductionOrder struct {
 	ID                    string                     `json:"id"`
 	Name                  string                     `json:"name"`
