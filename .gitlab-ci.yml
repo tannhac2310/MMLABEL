@@ -63,7 +63,7 @@ deploy_development:
     - echo ${kube_config} | base64 -d > ${KUBECONFIG}
   script: |
     echo "Deploy to development server"
-    helm upgrade --install mm-printing \
+    helm upgrade --install --wait --atomic mm-printing  \
         ./deployments/helm/backend/ \
         -f ./deployments/helm/backend/values-staging.yaml \
         -n backend \
