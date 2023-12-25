@@ -41,10 +41,10 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args: ["iot", "--configPath", "/configs/iot.config.yaml"]
-          ports:
-            - name: http
-              containerPort: {{ .Values.containerPort }}
-              protocol: TCP
+#          ports:
+#            - name: http
+#              containerPort: {{ .Values.containerPort }}
+#              protocol: TCP
           volumeMounts:
           - name: volume
             mountPath: "/configs"
