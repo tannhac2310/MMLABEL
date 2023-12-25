@@ -22,8 +22,8 @@ run-migrate:
 	docker-compose --file ./deployments/docker-compose.yml up migrate
 run-hydra:
 	docker-compose --file ./deployments/docker-compose.yml up hydra
-run-gezu:
-	docker-compose --file ./deployments/docker-compose.yml up gezu
+run-iot:
+	docker-compose --file ./deployments/docker-compose.yml up iot
 run-aurora:
 	docker-compose --file ./deployments/docker-compose.yml up aurora
 run-swagger-ui:

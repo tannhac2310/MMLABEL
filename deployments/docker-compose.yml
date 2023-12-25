@@ -82,7 +82,7 @@ services:
     entrypoint: modd --file=modd_hydra.conf
     ports:
       - "4100:4100"
-  gezu:
+  iot:
     build:
       context: ../
       dockerfile: ${DOCKER_FILE}
@@ -91,7 +91,7 @@ services:
     volumes:
       - "../:/mm-printing/"
     working_dir: /mm-printing
-    entrypoint: modd --file=modd_gezu.conf
+    entrypoint: modd --file=modd_iot.conf
     ports:
       - "5100:5100"
   aurora:
@@ -141,7 +141,7 @@ services:
   #         - gezu
   gateway:
     depends_on:
-      - gezu
+      - iot
       - hydra
       - aurora
     restart: always

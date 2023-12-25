@@ -1,21 +1,19 @@
-package aurora
+package iot
 
 import (
 	"context"
 	"fmt"
 	"log"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/device_config"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/iot/subscriptions"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/service/role"
 	"os"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/option"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/product_quality"
 
-	"github.com/casbin/casbin/v2"
-	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
 	"github.com/pyroscope-io/pyroscope/pkg/agent/profiler"
-	"go.opentelemetry.io/otel/exporters/metric/prometheus"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 
@@ -33,18 +31,13 @@ import (
 	pkgConfig "mmlabel.gitlab.com/mm-printing-backend/pkg/configs"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/configs"
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/controller"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/customer"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/jwtutil"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/logger"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/nats"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/rbacutil"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/repository"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/routeutil"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/service/ws"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/tracingutil"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/transportutil"
 )
 
 func Run(ctx context.Context, configPath string) {
@@ -66,15 +59,6 @@ func Run(ctx context.Context, configPath string) {
 				return &cfg.BaseConfig
 			},
 		),
-		// http server
-		fx.Provide(transportutil.InitGinEngine),
-		// route group
-		fx.Provide(func(r *gin.Engine) *gin.RouterGroup {
-			g := r.Group("aurora")
-			g.GET("api-docs", routeutil.ServingDocs)
-
-			return g
-		}),
 		// redis
 		fx.Provide(func(cfg *configs.Config) (redis.Cmdable, error) {
 			c := redis.NewClient(&redis.Options{
@@ -94,19 +78,6 @@ func Run(ctx context.Context, configPath string) {
 		// cockroach db
 		fx.Provide(func(cfg *pkgConfig.BaseConfig, logger *zap.Logger) cockroach.Ext {
 			return cockroach.NewConnectionPool(ctx, logger, string(cfg.CockroachDB.URI), cfg.Debug)
-		}),
-		// jwt
-		fx.Provide(func(cfg *pkgConfig.BaseConfig) (jwtutil.TokenGenerator, error) {
-			return jwtutil.NewTokenGenerator(
-				cfg.JWT.EncryptionKey,
-				cfg.JWT.Audience,
-				cfg.JWT.Issuer,
-				cfg.JWT.Expiry,
-			)
-		}),
-		// casbin rbac
-		fx.Provide(func(cfg *pkgConfig.BaseConfig) (casbin.IEnforcer, error) {
-			return rbacutil.New(string(cfg.CockroachDB.URI))
 		}),
 		// monitoring
 		fx.Provide(tracingutil.InitTelemetry),
@@ -181,32 +152,15 @@ func Run(ctx context.Context, configPath string) {
 			return bus, nil
 		}),
 		// subsciptions
-		//fx.Provide(
-		//),
+		fx.Provide(
+			subscriptions.NewMQTTSubscription,
+		),
 		// invoke init func
 		fx.Invoke(
 			run,
 			runWorker,
-			func(r *gin.Engine, pe *prometheus.Exporter) {
-				if pe != nil {
-					r.GET("/metrics", func(c *gin.Context) {
-						pe.ServeHTTP(c.Writer, c.Request)
-					})
-				}
-			},
+
 			// controller, register routes
-			controller.RegisterConfigController,
-			controller.RegisterCustomerController,
-			controller.RegisterProductionOrderController,
-			controller.RegisterStageController,
-			controller.RegisterDepartmentController,
-			controller.RegisterDeviceController,
-			controller.RegisterProductionOrderStageController,
-			controller.RegisterProductionOrderStageDeviceController,
-			controller.RegisterInkController,
-			controller.RegisterProductQualityController,
-			controller.RegisterOptionController,
-			controller.RegisterDeviceConfigController,
 		),
 	}
 
@@ -228,7 +182,6 @@ func run(
 	lifecycle fx.Lifecycle,
 	zapLogger *zap.Logger,
 	cfg *pkgConfig.BaseConfig,
-	r *gin.Engine,
 	wsApp ws.WebSocketService,
 	p *profiler.Profiler,
 ) {
@@ -236,10 +189,10 @@ func run(
 		fx.Hook{
 			OnStart: func(ctx context.Context) error {
 				go func() {
-					err := r.Run(cfg.Port)
-					if err != nil {
-						zapLogger.Fatal("r.Run", zap.String("port", cfg.Port), zap.Error(err))
-					}
+					//err := r.Run(cfg.Port)
+					//if err != nil {
+					//	zapLogger.Fatal("r.Run", zap.String("port", cfg.Port), zap.Error(err))
+					//}
 				}()
 
 				zapLogger.Info("Gezu is running", zap.String("port", cfg.Port), zap.String("env", cfg.Env), zap.Bool("debug", cfg.Debug))
@@ -265,11 +218,25 @@ func run(
 func runWorker(
 	lifecycle fx.Lifecycle,
 	zapLogger *zap.Logger,
+	eventMQTTSubscription *subscriptions.EventMQTTSubscription,
 ) {
 	closeSubs := func() {}
 
 	subscribe := func() error {
-		// todo: subscribe
+		fmt.Println("==============================================MQTT==============================================")
+		zapLogger.Info("start worker, subscribe to nats server...")
+
+		err := eventMQTTSubscription.Subscribe()
+		if err != nil {
+			return fmt.Errorf("err eventMQTTSubscription.Subscribe: %w", err)
+		}
+
+		zapLogger.Info("subscribe done")
+
+		closeSubs = func() {
+			zapLogger.Info("close all subscriptions...")
+
+		}
 
 		return nil
 	}

@@ -15,6 +15,7 @@ import (
 
 	"mmlabel.gitlab.com/mm-printing-backend/cmd/server/aurora"
 	"mmlabel.gitlab.com/mm-printing-backend/cmd/server/hydra"
+	"mmlabel.gitlab.com/mm-printing-backend/cmd/server/iot"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/configs"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/logger"
 	"mmlabel.gitlab.com/mm-printing-backend/version"
@@ -55,6 +56,15 @@ func main() {
 			hydra.Run(ctx, configPath)
 		},
 	}
+	cmdIot := &cobra.Command{
+		Use:   "iot",
+		Short: "Start iot handler",
+		Long:  `Start iot handler to handle iot device`,
+		Args:  cobra.MinimumNArgs(0),
+		Run: func(cmd *cobra.Command, args []string) {
+			iot.Run(ctx, configPath)
+		},
+	}
 
 	cmdVersion := &cobra.Command{
 		Use:   "version",
@@ -71,6 +81,7 @@ func main() {
 		cmdMigrate,
 		cmdHydra,
 		cmdAurora,
+		cmdIot,
 		cmdVersion,
 	)
 
