@@ -27,6 +27,7 @@ case $ENV in
 			--set=aurora.env=${ENV} \
 			--set=hydra.image.tag=${TAG} \
 			--set=aurora.image.tag=${TAG} \
+			--set=iot.image.tag=${TAG} \
 			--set=appVersion=${TAG}
 
 # helm upgrade --install mm-printing \

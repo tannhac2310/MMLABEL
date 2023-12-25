@@ -1,5 +1,5 @@
-name: "Iot"
-port: ":5100"
+name: "Iot Service"
+port: ":7100"
 env: "staging"
 debug: false
 logger:

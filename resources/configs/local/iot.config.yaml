@@ -1,5 +1,5 @@
 name: "Iot Service"
-port: ":6100"
+port: ":7100"
 env: "local"
 debug: true
 logger:

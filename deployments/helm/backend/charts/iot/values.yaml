@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 env: dev
-containerPort: 5100
+containerPort: 7100
 podAnnotations:
   prometheus.io/scheme: "http"
   prometheus.io/port: "6100"

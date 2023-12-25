@@ -195,7 +195,7 @@ func run(
 					//}
 				}()
 
-				zapLogger.Info("Gezu is running", zap.String("port", cfg.Port), zap.String("env", cfg.Env), zap.Bool("debug", cfg.Debug))
+				zapLogger.Info("IOT is running", zap.String("port", cfg.Port), zap.String("env", cfg.Env), zap.Bool("debug", cfg.Debug))
 				return nil
 			},
 			OnStop: func(ctx context.Context) error {
