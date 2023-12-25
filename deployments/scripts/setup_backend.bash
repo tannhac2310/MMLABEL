@@ -25,6 +25,7 @@ case $ENV in
 			 -n backend \
 			--set=hydra.env=${ENV} \
 			--set=aurora.env=${ENV} \
+			--set=iot.env=${ENV} \
 			--set=hydra.image.tag=${TAG} \
 			--set=aurora.image.tag=${TAG} \
 			--set=iot.image.tag=${TAG} \
