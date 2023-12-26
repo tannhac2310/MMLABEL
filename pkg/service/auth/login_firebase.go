@@ -28,7 +28,9 @@ func (a *authService) LoginFirebase(ctx context.Context, idToken string) (*Login
 
 	userID := ""
 	// storage user in our system
-	if userFirebase == nil {
+	if userFirebase != nil {
+		userID = userFirebase.UserID
+	} else {
 		err := cockroach.ExecInTx(ctx, func(ctx context.Context) error {
 			u, err := a.firebaseAuth.GetUser(ctx, token.Subject)
 			if err != nil {
@@ -49,8 +51,6 @@ func (a *authService) LoginFirebase(ctx context.Context, idToken string) (*Login
 		if err != nil {
 			return nil, fmt.Errorf("cockroach.ExecInTx: %w", err)
 		}
-	} else {
-		userID = userFirebase.UserID
 	}
 
 	return a.buildLoginResult(ctx, userID)
