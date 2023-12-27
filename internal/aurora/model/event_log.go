@@ -2,8 +2,9 @@ package model
 
 import (
 	"database/sql"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
 const (
@@ -12,6 +13,7 @@ const (
 	EventLogFieldStageID     = "stage_id"
 	EventLogFieldStageStatus = "stage_status"
 	EventLogFieldQuantity    = "quantity"
+	EventLogFieldTimeSpend   = "time_spend"
 	EventLogFieldMsg         = "msg"
 	EventLogFieldDate        = "date"
 	EventLogFieldCreatedAt   = "created_at"
@@ -23,6 +25,7 @@ type EventLog struct {
 	StageID     sql.NullString                   `db:"stage_id"`
 	StageStatus *enum.ProductionOrderStageStatus `db:"stage_status"`
 	Quantity    float64                          `db:"quantity"`
+	TimeSpend	int64							 `db:"time_spend"`
 	Msg         sql.NullString                   `db:"msg"`
 	Date        sql.NullString                   `db:"date"`
 	CreatedAt   time.Time                        `db:"created_at"`
@@ -35,6 +38,7 @@ func (rcv *EventLog) FieldMap() (fields []string, values []interface{}) {
 		EventLogFieldStageID,
 		EventLogFieldStageStatus,
 		EventLogFieldQuantity,
+		EventLogFieldTimeSpend,
 		EventLogFieldMsg,
 		EventLogFieldDate,
 		EventLogFieldCreatedAt,
@@ -46,6 +50,7 @@ func (rcv *EventLog) FieldMap() (fields []string, values []interface{}) {
 		&rcv.StageID,
 		&rcv.StageStatus,
 		&rcv.Quantity,
+		&rcv.TimeSpend,
 		&rcv.Msg,
 		&rcv.Date,
 		&rcv.CreatedAt,

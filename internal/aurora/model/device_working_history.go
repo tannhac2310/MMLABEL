@@ -12,6 +12,8 @@ const (
 	DeviceWorkingHistoryFieldDate                         = "date"
 	DeviceWorkingHistoryFieldQuantity                     = "quantity"
 	DeviceWorkingHistoryFieldWorkingTime                  = "working_time"
+	DeviceWorkingHistoryFieldPoQuantity                   = "po_quantity"
+	DeviceWorkingHistoryFieldPoWorkingTime                = "po_working_time"
 	DeviceWorkingHistoryFieldUpdatedAt                    = "updated_at"
 	DeviceWorkingHistoryFieldCreatedAt                    = "created_at"
 )
@@ -23,6 +25,8 @@ type DeviceWorkingHistory struct {
 	Date                         string       `db:"date"`
 	Quantity                     int64        `db:"quantity"`
 	WorkingTime                  int64        `db:"working_time"`
+	PoQuantity                   int64        `db:"po_quantity"`
+	PoWorkingTime                int64        `db:"po_working_time"`
 	UpdatedAt                    sql.NullTime `db:"updated_at"`
 	CreatedAt                    time.Time    `db:"created_at"`
 }
@@ -35,6 +39,8 @@ func (rcv *DeviceWorkingHistory) FieldMap() (fields []string, values []interface
 		DeviceWorkingHistoryFieldDate,
 		DeviceWorkingHistoryFieldQuantity,
 		DeviceWorkingHistoryFieldWorkingTime,
+		DeviceWorkingHistoryFieldPoQuantity,
+		DeviceWorkingHistoryFieldPoWorkingTime,
 		DeviceWorkingHistoryFieldUpdatedAt,
 		DeviceWorkingHistoryFieldCreatedAt,
 	}
@@ -46,6 +52,8 @@ func (rcv *DeviceWorkingHistory) FieldMap() (fields []string, values []interface
 		&rcv.Date,
 		&rcv.Quantity,
 		&rcv.WorkingTime,
+		&rcv.PoQuantity,
+		&rcv.PoWorkingTime,
 		&rcv.UpdatedAt,
 		&rcv.CreatedAt,
 	}
