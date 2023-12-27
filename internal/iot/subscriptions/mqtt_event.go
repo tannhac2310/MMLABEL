@@ -144,17 +144,12 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			}
 		}
 		fmt.Println(iotData.D, iotData.Ts)
-		for _, item := range iotData.D {
+		for deviceID, item := range mappingData {
 			// find device in production order stage device
-			s := strings.Split(item.Tag, ":")
-			if len(s) != 2 {
-				continue
-			}
-			deviceID := s[0]
 
 			p.logger.Info("IOT+PARSE+DATA",
 				zap.Any("deviceID", deviceID),
-				zap.Any("mappingData", mappingData[deviceID]))
+				zap.Any("mappingData", item))
 
 			orderStageDevices, err := p.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
 				DeviceID:                   deviceID,
@@ -164,7 +159,8 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			})
 
 			if err != nil {
-				fmt.Println("============>>> Received message for topic ====", err)
+				// todo nothing
+				p.logger.Error(" p.productionOrderStageDeviceRepo.Search error", zap.Error(err))
 			}
 			activeStageID := ""
 			orderStageDeviceID := ""
@@ -172,13 +168,13 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				device := orderStageDevices[0]
 				orderStageDeviceID = device.ID
 				activeStageID = device.ProductionOrderStageID
-				if mappingData[deviceID].SL_in_LSX > 0 && mappingData[deviceID].SL_in_LSX > device.Quantity {
+				if item.SL_in_LSX > 0 && item.SL_in_LSX > device.Quantity {
 					// update first device
 					_ = p.productionOrderStageDeviceRepo.Update(ctx, &model.ProductionOrderStageDevice{
 						ID:                     device.ID,
 						ProductionOrderStageID: device.ProductionOrderStageID,
 						DeviceID:               device.DeviceID,
-						Quantity:               mappingData[deviceID].SL_in_LSX,
+						Quantity:               item.SL_in_LSX,
 						ProcessStatus:          device.ProcessStatus,
 						Status:                 device.Status,
 						Settings:               device.Settings,
@@ -198,7 +194,8 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				Limit:    1,
 			})
 			if err != nil {
-				// todo check error is not_found or not
+				// todo nothing
+				p.logger.Error(" p.deviceWorkingHistoryRepo.Search error", zap.Error(err))
 			}
 			if len(deviceWorkingHistories) == 0 {
 				p.deviceWorkingHistoryRepo.Insert(ctx, &model.DeviceWorkingHistory{
@@ -206,24 +203,24 @@ func (p *EventMQTTSubscription) Subscribe() error {
 					ProductionOrderStageDeviceID: cockroach.String(orderStageDeviceID),
 					DeviceID:                     deviceID,
 					Date:                         dateStr,
-					Quantity:                     mappingData[deviceID].SL_in_Ngay, // todo remove this field in db
-					WorkingTime:                  mappingData[deviceID].TG_in_Ngay, // todo remove this field in db
-					NumberOfPrintsPerDay:         mappingData[deviceID].SL_in_LSX,
-					PrintingTimePerDay:           mappingData[deviceID].TG_in_Ngay,
-					PoQuantity:                   mappingData[deviceID].SL_in_LSX,
-					PoWorkingTime:                mappingData[deviceID].TG_in_LSX,
+					Quantity:                     item.SL_in_Ngay, // todo remove this field in db
+					WorkingTime:                  item.TG_in_Ngay, // todo remove this field in db
+					NumberOfPrintsPerDay:         item.SL_in_Ngay,
+					PrintingTimePerDay:           item.TG_in_Ngay,
+					PoQuantity:                   item.SL_in_LSX,
+					PoWorkingTime:                item.TG_in_LSX,
 					CreatedAt:                    now,
 				})
 			} else {
 				// update
 				deviceWorkingHistory := deviceWorkingHistories[0].DeviceWorkingHistory
 
-				deviceWorkingHistory.NumberOfPrintsPerDay = mappingData[deviceID].SL_in_LSX
-				deviceWorkingHistory.PrintingTimePerDay = mappingData[deviceID].TG_in_LSX
-				deviceWorkingHistory.Quantity = mappingData[deviceID].SL_in_Ngay    // todo remove this field in db
-				deviceWorkingHistory.WorkingTime = mappingData[deviceID].TG_in_Ngay // todo remove this field in db
-				deviceWorkingHistory.PoWorkingTime = mappingData[deviceID].TG_in_LSX
-				deviceWorkingHistory.PoQuantity = mappingData[deviceID].SL_in_LSX
+				deviceWorkingHistory.NumberOfPrintsPerDay = item.SL_in_Ngay
+				deviceWorkingHistory.PrintingTimePerDay = item.TG_in_Ngay
+				deviceWorkingHistory.Quantity = item.SL_in_Ngay    // todo remove this field in db
+				deviceWorkingHistory.WorkingTime = item.TG_in_Ngay // todo remove this field in db
+				deviceWorkingHistory.PoWorkingTime = item.TG_in_LSX
+				deviceWorkingHistory.PoQuantity = item.SL_in_LSX
 
 				deviceWorkingHistory.UpdatedAt = cockroach.Time(now)
 
@@ -234,14 +231,14 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				}
 			}
 
-			fmt.Println("=======event_logsevent_logsevent_logs")
+			fmt.Println("activeStageID", activeStageID)
 			// insert event log
 			_ = p.productionOrderStageDeviceRepo.InsertEventLog(ctx, &model.EventLog{
 				ID:          time.Now().UnixNano(),
 				DeviceID:    deviceID,
 				StageID:     cockroach.String(activeStageID),
 				StageStatus: nil, // todo check stage status
-				Quantity:    item.Value,
+				Quantity:    float64(item.SL_in_Ngay),
 				Msg:         cockroach.String(string(message.Payload())),
 				Date:        cockroach.String(dateStr),
 				CreatedAt:   now,
