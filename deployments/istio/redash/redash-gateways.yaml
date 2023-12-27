@@ -1,0 +1,63 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: redash-gateway
+  namespace: redash
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "bi.amysleben.fun"
+    tls:
+      httpsRedirect: false
+  - port:
+      number: 443
+      name: https-secondary
+      protocol: HTTPS
+    hosts:
+    - "bi.amysleben.fun"
+    tls:
+      credentialName: cert-bi.amysleben.fun
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: redash-ingress
+  namespace: redash
+spec:
+  hosts:
+  - "bi.amysleben.fun"
+  gateways:
+  - redash-gateway
+  http:
+  - match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        host: redash
+        port:
+          number: 80
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: bi.amysleben.fun
+  namespace: istio-system
+spec:
+  commonName: bi.amysleben.fun
+  dnsNames:
+  - bi.amysleben.fun
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt
+  secretName: cert-bi.amysleben.fun
+

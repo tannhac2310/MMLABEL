@@ -48,6 +48,17 @@ spec:
           host: mm-printing-backend
           port:
             number: 80
+
+  - match:
+      - uri:
+          prefix: "/bi-mmlabel"
+    rewrite:
+      uri: "/"
+    route:
+      - destination:
+          host: redash
+          port:
+            number: 80
   - match:
     - uri:
         prefix: "/hydra"

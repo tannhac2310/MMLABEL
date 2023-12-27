@@ -55,19 +55,7 @@ var connectHandler mqtt.OnConnectHandler = func(client mqtt.Client) {
 var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err error) {
 	fmt.Printf("Connect lost: %v", err)
 }
-type IotData struct {
-	Tags []IotTag `json:"d"`
-	Ts   string `json:"ts"`
-}
 
-type IotTag struct {
-	Tag   string  `json:"tag"`
-	Value float64 `json:"value"`
-}
-func parseTag(tag string) (string, string) {
-	parts := strings.Split(tag, ":")
-	return parts[0], parts[1]
-}
 func (p *EventMQTTSubscription) Subscribe() error {
 	var broker = "146.196.65.9"
 	var port = 31883
@@ -96,322 +84,133 @@ func (p *EventMQTTSubscription) Subscribe() error {
 	})
 
 	client.AddRoute("toppic", func(client mqtt.Client, message mqtt.Message) {
-		fmt.Println("============>>> Received message for toppic ====", string(message.Payload()))
+		fmt.Println("============>>> Received message for topic ====", string(message.Payload()))
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
 
 		ctx = ctxzap.ToContext(ctx, p.logger)
 		ctx = cockroach.ContextWithDB(ctx, p.db)
 
-		var data IotData
-		err := json.Unmarshal([]byte(string(message.Payload())), &data)
+		// parse message.Payload() to data struct
+		var iotData MyStruct
+		err := json.Unmarshal(message.Payload(), &iotData)
 		if err != nil {
-			fmt.Println("Error decoding JSON:", err)
+			fmt.Println("Error parsing JSON:", err)
 			return
-		}
-
-		iotObject := make(map[string]map[string]float64)
-
-		for _, tag := range data.Tags {
-			machineKey, key := parseTag(tag.Tag)
-			if _, ok := iotObject[machineKey]; !ok {
-				iotObject[machineKey] = make(map[string]float64)
-			}
-			iotObject[machineKey][key] = tag.Value
 		}
 
 		// data is {"d":[{"tag":"B_PR04:Counter","value":413.00},{"tag":"B_PR03:Counter","value":391.00},{"tag":"B_PR03:TG_in","value":1.00},{"tag":"B_PR03:ON_OFF","value":1},{"tag":"B_PR04:TG_in","value":11.00},{"tag":"B_PR04:ON_OFF","value":1},{"tag":"B_PR03:SL_1Ngay","value":0.00},{"tag":"B_PR03:Counter_Day","value":393.00},{"tag":"B_PR04:SL_1Ngay","value":0.00},{"tag":"B_PR04:Counter_Day","value":431.00}],"ts":"2023-12-08T07:13:34+0000"}
 		now := time.Now()
 		dateStr := now.Format("2006-01-02")
-		// fmt.Println(iotData.D, iotData.Ts)
+		fmt.Println(iotData.D, iotData.Ts)
+		for _, item := range iotData.D {
+			// find device in production order stage device
+			s := strings.Split(item.Tag, ":")
+			if len(s) != 2 {
+				continue
+			}
+			deviceID := s[0]
+			action := s[1]
+			numberOfPrintsPerDay := int64(0)
+			printingTimePerDay := int64(0)
 
-		for deviceID, values := range iotObject {
+			if action == "SL_in_Ngay" {
+				numberOfPrintsPerDay = int64((item.Value))
+			}
+			if action == "TG_in_Ngay" {
+				printingTimePerDay = int64(item.Value)
+			}
+
+			p.logger.Info("IOT+PARSE+DATA",
+				zap.Int64("numberOfPrintsPerDay", numberOfPrintsPerDay),
+				zap.Int64("printingTimePerDay", printingTimePerDay))
+
 			orderStageDevices, err := p.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
 				DeviceID:                   deviceID,
 				ProductionOrderStageStatus: enum.ProductionOrderStageStatusProductionStart,
 				Limit:                      1,
 				Offset:                     0,
 			})
+
 			if err != nil {
 				fmt.Println("============>>> Received message for topic ====", err)
-				continue
 			}
-			counterByDay := int64(values["SL_in_Ngay"])
-			TG_in_1Ngay := values["TG_in_Ngay"]
-			counterByPo := int64(values["SL_in_LSX"])
-			TG_in_NgayPo := int64(values["TG_in_LSX"])
-
 			activeStageID := ""
-			if len(orderStageDevices) >= 1 {
-				fmt.Println("============>>> orderStageDevices", orderStageDevices)
+			orderStageDeviceID := ""
+			if len(orderStageDevices) >= 1 && orderStageDevices[0].ProcessStatus == enum.ProductionOrderStageDeviceStatusStart {
 				device := orderStageDevices[0]
+				orderStageDeviceID = device.ID
 				activeStageID = device.ProductionOrderStageID
-				if device.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart {
-					if counterByPo > 0 && counterByPo > device.Quantity {
-						// update first device
-						_ = p.productionOrderStageDeviceRepo.Update(ctx, &model.ProductionOrderStageDevice{
-							ID:                     device.ID,
-							ProductionOrderStageID: device.ProductionOrderStageID,
-							DeviceID:               device.DeviceID,
-							Quantity:               counterByPo,
-							ProcessStatus:          device.ProcessStatus,
-							Status:                 device.Status,
-							Settings:               device.Settings,
-							Note:                   device.Note,
-							CreatedAt:              device.CreatedAt,
-							UpdatedAt:              device.UpdatedAt,
-							Responsible:            device.Responsible,
-							EstimatedCompleteAt:    device.EstimatedCompleteAt,
-							AssignedQuantity:       device.AssignedQuantity,
-						})
-					}
-				}
-				
-				p.logger.Info("SL_in_Ngay", zap.String("deviceID", deviceID), zap.Int("counterByDay", int(counterByDay)))
-
-				deviceWorkingHistories, err := p.deviceWorkingHistoryRepo.Search(ctx, &repository.SearchDeviceWorkingHistoryOpts{
-					DeviceID: deviceID,
-					Date:     dateStr,
-					Limit:    1,
-				})
-				if err != nil {
-					// todo check error is not_found or not
-				}
-
-				if len(deviceWorkingHistories) == 0 {
-					p.deviceWorkingHistoryRepo.Insert(ctx, &model.DeviceWorkingHistory{
-						ID:                           idutil.ULIDNow(),
-						ProductionOrderStageDeviceID: device.ID,
-						DeviceID:                     deviceID,
-						Date:                         dateStr,
-						Quantity:                     counterByDay,
-						WorkingTime:                  int64(TG_in_1Ngay),
-						PoQuantity:                   counterByPo,
-						PoWorkingTime:                TG_in_NgayPo,
-						CreatedAt:                    now,
+				if int64(item.Value) > 0 && int64(item.Value) > device.Quantity {
+					// update first device
+					_ = p.productionOrderStageDeviceRepo.Update(ctx, &model.ProductionOrderStageDevice{
+						ID:                     device.ID,
+						ProductionOrderStageID: device.ProductionOrderStageID,
+						DeviceID:               device.DeviceID,
+						Quantity:               int64(item.Value),
+						ProcessStatus:          device.ProcessStatus,
+						Status:                 device.Status,
+						Settings:               device.Settings,
+						Note:                   device.Note,
+						CreatedAt:              device.CreatedAt,
+						UpdatedAt:              device.UpdatedAt,
+						Responsible:            device.Responsible,
+						EstimatedCompleteAt:    device.EstimatedCompleteAt,
+						AssignedQuantity:       device.AssignedQuantity,
 					})
-				} else {
-					deviceWorkingHistory := deviceWorkingHistories[0].DeviceWorkingHistory
-					deviceWorkingHistory.Quantity = counterByDay
-					deviceWorkingHistory.WorkingTime = int64(TG_in_1Ngay)
-					deviceWorkingHistory.PoQuantity = counterByPo
-					deviceWorkingHistory.PoWorkingTime = TG_in_NgayPo
-					err := p.deviceWorkingHistoryRepo.Update(ctx, deviceWorkingHistory)
-					if err != nil {
-						// todo nothing
-						p.logger.Error(" p.deviceWorkingHistoryRepo.Update error", zap.Error(err))
-					}
 				}
 			}
+			// upsert to device_working_history
+			deviceWorkingHistories, err := p.deviceWorkingHistoryRepo.Search(ctx, &repository.SearchDeviceWorkingHistoryOpts{
+				DeviceID: deviceID,
+				Date:     dateStr,
+				Limit:    1,
+			})
+			if err != nil {
+				// todo check error is not_found or not
+			}
+			if len(deviceWorkingHistories) == 0 {
+				p.deviceWorkingHistoryRepo.Insert(ctx, &model.DeviceWorkingHistory{
+					ID:                           idutil.ULIDNow(),
+					ProductionOrderStageDeviceID: cockroach.String(orderStageDeviceID),
+					DeviceID:                     deviceID,
+					Date:                         dateStr,
+					Quantity:                     numberOfPrintsPerDay, // todo remove this field in db
+					WorkingTime:                  printingTimePerDay,   // todo remove this field in db
+					NumberOfPrintsPerDay:         numberOfPrintsPerDay,
+					PrintingTimePerDay:           printingTimePerDay,
+					CreatedAt:                    now,
+				})
+			} else {
+				// update
+				deviceWorkingHistory := deviceWorkingHistories[0].DeviceWorkingHistory
+
+				deviceWorkingHistory.NumberOfPrintsPerDay = numberOfPrintsPerDay
+				deviceWorkingHistory.PrintingTimePerDay = printingTimePerDay
+
+				deviceWorkingHistory.Quantity = numberOfPrintsPerDay
+				deviceWorkingHistory.WorkingTime = printingTimePerDay
+				err := p.deviceWorkingHistoryRepo.Update(ctx, deviceWorkingHistory)
+				if err != nil {
+					// todo nothing
+					p.logger.Error(" p.deviceWorkingHistoryRepo.Update error", zap.Error(err))
+				}
+			}
+
+			fmt.Println("=======event_logsevent_logsevent_logs")
+			// insert event log
 			_ = p.productionOrderStageDeviceRepo.InsertEventLog(ctx, &model.EventLog{
 				ID:          time.Now().UnixNano(),
 				DeviceID:    deviceID,
 				StageID:     cockroach.String(activeStageID),
 				StageStatus: nil, // todo check stage status
-				Quantity:    float64(counterByPo),
-				TimeSpend:   TG_in_NgayPo,
+				Quantity:    item.Value,
 				Msg:         cockroach.String(string(message.Payload())),
 				Date:        cockroach.String(dateStr),
 				CreatedAt:   now,
 			})
-		}		
+		}
 
-		// for _, item := range iotData.D {
-		// 	// find device in production order stage device
-		// 	s := strings.Split(item.Tag, ":")
-		// 	if len(s) != 2 {
-		// 		continue
-		// 	}
-		// 	deviceID := s[0]
-		// 	action := s[1]
-
-		// 	orderStageDevices, err := p.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
-		// 		DeviceID:                   deviceID,
-		// 		ProductionOrderStageStatus: enum.ProductionOrderStageStatusProductionStart,
-		// 		Limit:                      1,
-		// 		Offset:                     0,
-		// 	})
-
-		// 	if err != nil {
-		// 		fmt.Println("============>>> Received message for topic ====", err)
-		// 	}
-		// 	activeStageID := ""
-		// 	if len(orderStageDevices) >= 1 {
-		// 		fmt.Println("============>>> orderStageDevices", orderStageDevices)
-		// 		device := orderStageDevices[0]
-		// 		activeStageID = device.ProductionOrderStageID
-		// 		if device.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart {
-		// 			if int64(item.Value) > 0 && int64(item.Value) > device.Quantity {
-		// 				// update first device
-		// 				_ = p.productionOrderStageDeviceRepo.Update(ctx, &model.ProductionOrderStageDevice{
-		// 					ID:                     device.ID,
-		// 					ProductionOrderStageID: device.ProductionOrderStageID,
-		// 					DeviceID:               device.DeviceID,
-		// 					Quantity:               int64(item.Value),
-		// 					ProcessStatus:          device.ProcessStatus,
-		// 					Status:                 device.Status,
-		// 					Settings:               device.Settings,
-		// 					Note:                   device.Note,
-		// 					CreatedAt:              device.CreatedAt,
-		// 					UpdatedAt:              device.UpdatedAt,
-		// 					Responsible:            device.Responsible,
-		// 					EstimatedCompleteAt:    device.EstimatedCompleteAt,
-		// 					AssignedQuantity:       device.AssignedQuantity,
-		// 				})
-		// 			}
-
-		// 			// upsert to device_working_history
-		// 			if action == "SL_in_Ngay" {
-		// 				counterByDay := item.Value
-		// 				p.logger.Info("SL_in_Ngay", zap.String("deviceID", deviceID), zap.Int("counterByDay", int(counterByDay)))
-
-		// 				deviceWorkingHistories, err := p.deviceWorkingHistoryRepo.Search(ctx, &repository.SearchDeviceWorkingHistoryOpts{
-		// 					DeviceID: deviceID,
-		// 					Date:     dateStr,
-		// 					Limit:    1,
-		// 				})
-		// 				if err != nil {
-		// 					// todo check error is not_found or not
-		// 				}
-
-		// 				if len(deviceWorkingHistories) == 0 {
-		// 					p.deviceWorkingHistoryRepo.Insert(ctx, &model.DeviceWorkingHistory{
-		// 						ID:                           idutil.ULIDNow(),
-		// 						ProductionOrderStageDeviceID: device.ID,
-		// 						DeviceID:                     deviceID,
-		// 						Date:                         dateStr,
-		// 						Quantity:                     int64(counterByDay),
-		// 						WorkingTime:                  0,
-		// 						CreatedAt:                    now,
-		// 					})
-		// 				} else {
-		// 					deviceWorkingHistory := deviceWorkingHistories[0].DeviceWorkingHistory
-		// 					deviceWorkingHistory.Quantity = int64(counterByDay)
-		// 					err := p.deviceWorkingHistoryRepo.Update(ctx, deviceWorkingHistory)
-		// 					if err != nil {
-		// 						// todo nothing
-		// 						p.logger.Error(" p.deviceWorkingHistoryRepo.Update error", zap.Error(err))
-		// 					}
-		// 				}
-		// 			}
-		// 			// upsert to device_working_history
-		// 			if action == "TG_in_Ngay" {
-		// 				TG_in_1Ngay := item.Value
-		// 				p.logger.Info("TG_in_Ngay", zap.String("deviceID", deviceID), zap.Int("TG_in_Ngay", int(TG_in_1Ngay)))
-
-		// 				deviceWorkingHistories, err := p.deviceWorkingHistoryRepo.Search(ctx, &repository.SearchDeviceWorkingHistoryOpts{
-		// 					DeviceID: deviceID,
-		// 					Date:     dateStr,
-		// 					Limit:    1,
-		// 				})
-		// 				if err != nil {
-		// 					// todo check error is not_found or not
-		// 				}
-
-		// 				if len(deviceWorkingHistories) == 0 {
-		// 					p.deviceWorkingHistoryRepo.Insert(ctx, &model.DeviceWorkingHistory{
-		// 						ID:                           idutil.ULIDNow(),
-		// 						ProductionOrderStageDeviceID: device.ID,
-		// 						DeviceID:                     deviceID,
-		// 						Date:                         dateStr,
-		// 						WorkingTime:                  int64(TG_in_1Ngay),
-		// 						CreatedAt:                    now,
-		// 					})
-		// 				} else {
-		// 					deviceWorkingHistory := deviceWorkingHistories[0].DeviceWorkingHistory
-		// 					deviceWorkingHistory.WorkingTime = int64(TG_in_1Ngay)
-		// 					err := p.deviceWorkingHistoryRepo.Update(ctx, deviceWorkingHistory)
-		// 					if err != nil {
-		// 						// todo nothing
-		// 						p.logger.Error(" p.deviceWorkingHistoryRepo.Update error", zap.Error(err))
-		// 					}
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-		// 	if len(orderStageDevices) < 1 {
-		// 		// upsert to device_working_history
-		// 		if action == "SL_in_Ngay" {
-		// 			counterByDay := item.Value
-		// 			p.logger.Info("SL_in_Ngay", zap.String("deviceID", deviceID), zap.Int("counterByDay", int(counterByDay)))
-
-		// 			deviceWorkingHistories, err := p.deviceWorkingHistoryRepo.Search(ctx, &repository.SearchDeviceWorkingHistoryOpts{
-		// 				DeviceID: deviceID,
-		// 				Date:     dateStr,
-		// 				Limit:    1,
-		// 			})
-		// 			if err != nil {
-		// 				// todo check error is not_found or not
-		// 			}
-
-		// 			if len(deviceWorkingHistories) == 0 {
-		// 				p.deviceWorkingHistoryRepo.Insert(ctx, &model.DeviceWorkingHistory{
-		// 					ID:                           idutil.ULIDNow(),
-		// 					ProductionOrderStageDeviceID: deviceID,
-		// 					DeviceID:                     deviceID,
-		// 					Date:                         dateStr,
-		// 					Quantity:                     int64(counterByDay),
-		// 					WorkingTime:                  0,
-		// 					CreatedAt:                    now,
-		// 				})
-		// 			} else {
-		// 				deviceWorkingHistory := deviceWorkingHistories[0].DeviceWorkingHistory
-		// 				deviceWorkingHistory.Quantity = int64(counterByDay)
-		// 				err := p.deviceWorkingHistoryRepo.Update(ctx, deviceWorkingHistory)
-		// 				if err != nil {
-		// 					// todo nothing
-		// 					p.logger.Error(" p.deviceWorkingHistoryRepo.Update error", zap.Error(err))
-		// 				}
-		// 			}
-		// 		}
-		// 		// upsert to device_working_history
-		// 		if action == "TG_in_Ngay" {
-		// 			TG_in_1Ngay := item.Value
-		// 			p.logger.Info("TG_in_Ngay", zap.String("deviceID", deviceID), zap.Int("TG_in_Ngay", int(TG_in_1Ngay)))
-
-		// 			deviceWorkingHistories, err := p.deviceWorkingHistoryRepo.Search(ctx, &repository.SearchDeviceWorkingHistoryOpts{
-		// 				DeviceID: deviceID,
-		// 				Date:     dateStr,
-		// 				Limit:    1,
-		// 			})
-		// 			if err != nil {
-		// 				// todo check error is not_found or not
-		// 			}
-
-		// 			if len(deviceWorkingHistories) == 0 {
-		// 				p.deviceWorkingHistoryRepo.Insert(ctx, &model.DeviceWorkingHistory{
-		// 					ID:                           idutil.ULIDNow(),
-		// 					ProductionOrderStageDeviceID: deviceID,
-		// 					DeviceID:                     deviceID,
-		// 					Date:                         dateStr,
-		// 					WorkingTime:                  int64(TG_in_1Ngay),
-		// 					CreatedAt:                    now,
-		// 				})
-		// 			} else {
-		// 				deviceWorkingHistory := deviceWorkingHistories[0].DeviceWorkingHistory
-		// 				deviceWorkingHistory.WorkingTime = int64(TG_in_1Ngay)
-		// 				err := p.deviceWorkingHistoryRepo.Update(ctx, deviceWorkingHistory)
-		// 				if err != nil {
-		// 					// todo nothing
-		// 					p.logger.Error(" p.deviceWorkingHistoryRepo.Update error", zap.Error(err))
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-		// 	fmt.Println("=======event_logsevent_logsevent_logs")
-		// 	// insert event log
-		// 	_ = p.productionOrderStageDeviceRepo.InsertEventLog(ctx, &model.EventLog{
-		// 		ID:          time.Now().UnixNano(),
-		// 		DeviceID:    deviceID,
-		// 		StageID:     cockroach.String(activeStageID),
-		// 		StageStatus: nil, // todo check stage status
-		// 		Quantity:    item.Value,
-		// 		TimeSpend:   ,
-		// 		Msg:         cockroach.String(string(message.Payload())),
-		// 		Date:        cockroach.String(dateStr),
-		// 		CreatedAt:   now,
-		// 	})
-		// }
 		message.Ack()
 	})
 	fmt.Printf("Subscribed to topic '%s'\n", topic)
@@ -419,3 +218,13 @@ func (p *EventMQTTSubscription) Subscribe() error {
 }
 
 // create struct to parse {"d":[{"tag":"B_PR04:CounterTag","value":38.00}],"ts":"2023-11-17T04:13:55+0000"}
+
+type MyStruct struct {
+	D  []DataItem `json:"d"`
+	Ts string     `json:"ts"`
+}
+
+type DataItem struct {
+	Tag   string  `json:"tag"`
+	Value float64 `json:"value"`
+}
