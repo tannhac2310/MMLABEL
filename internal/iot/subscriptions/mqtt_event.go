@@ -56,6 +56,14 @@ var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err
 	fmt.Printf("Connect lost: %v", err)
 }
 
+type IotParseData struct {
+	DeviceID   string
+	SL_in_Ngay int64
+	TG_in_Ngay int64
+	SL_in_LSX  int64
+	TG_in_LSX  int64
+}
+
 func (p *EventMQTTSubscription) Subscribe() error {
 	var broker = "146.196.65.9"
 	var port = 31883
@@ -99,9 +107,42 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			return
 		}
 
-		// data is {"d":[{"tag":"B_PR04:Counter","value":413.00},{"tag":"B_PR03:Counter","value":391.00},{"tag":"B_PR03:TG_in","value":1.00},{"tag":"B_PR03:ON_OFF","value":1},{"tag":"B_PR04:TG_in","value":11.00},{"tag":"B_PR04:ON_OFF","value":1},{"tag":"B_PR03:SL_1Ngay","value":0.00},{"tag":"B_PR03:Counter_Day","value":393.00},{"tag":"B_PR04:SL_1Ngay","value":0.00},{"tag":"B_PR04:Counter_Day","value":431.00}],"ts":"2023-12-08T07:13:34+0000"}
 		now := time.Now()
 		dateStr := now.Format("2006-01-02")
+		// iotData.D is {"d":[{"tag":"B_PR03:SL_in_LSX","value":259.00},{"tag":"B_PR03:ON_OFF","value":1},{"tag":"B_PR03:SL_in_Ngay","value":143.00},{"tag":"B_PR03:TG_in_Ngay","value":32.00},{"tag":"B_PR03:SL_in_LSX_1","value":0.00},{"tag":"B_PR03:TG_in_LSX_1","value":0.00},{"tag":"B_PR03:SL_in_LSX_2","value":0.00},{"tag":"B_PR03:TG_in_LSX_2","value":0.00},{"tag":"B_PR03:SL_in_LSX_3","value":0.00},{"tag":"B_PR03:TG_in_LSX_3","value":0.00},{"tag":"B_PR03:SL_in_LSX_4","value":0.00},{"tag":"B_PR03:TG_in_LSX_4","value":0.00},{"tag":"B_PR03:TG_in_LSX","value":32.00},{"tag":"B_PR04:SL_in_LSX","value":0.00},{"tag":"B_PR04:ON_OFF","value":1},{"tag":"B_PR04:SL_in_Ngay","value":0.00},{"tag":"B_PR04:TG_in_Ngay","value":0.00},{"tag":"B_PR04:TG_in_LSX","value":0.00},{"tag":"B_PR04:SL_in_LSX_1","value":0.00},{"tag":"B_PR04:TG_in_LSX_1","value":0.00},{"tag":"B_PR04:SL_in_LSX_2","value":0.00},{"tag":"B_PR04:TG_in_LSX_2","value":0.00},{"tag":"B_PR04:SL_in_LSX_3","value":0.00},{"tag":"B_PR04:TG_in_LSX_3","value":0.00},{"tag":"B_PR04:SL_in_LSX_4","value":0.00},{"tag":"B_PR04:TG_in_LSX_4","value":0.00}],"ts":"2023-12-27T01:19:15+0000"}
+		// group by by device id
+		//
+		mappingData := make(map[string]*IotParseData, 0)
+		for _, item := range iotData.D {
+
+			d := strings.Split(item.Tag, ":")
+			if len(d) != 2 {
+				continue
+			}
+			deviceID := d[0]
+			action := d[1]
+			if _, ok := mappingData[deviceID]; !ok {
+				mappingData[deviceID] = &IotParseData{
+					DeviceID:   deviceID,
+					SL_in_Ngay: 0,
+					TG_in_Ngay: 0,
+					SL_in_LSX:  0,
+					TG_in_LSX:  0,
+				}
+			}
+			if action == "SL_in_Ngay" {
+				mappingData[deviceID].SL_in_Ngay = int64(item.Value)
+			}
+			if action == "TG_in_Ngay" {
+				mappingData[deviceID].TG_in_Ngay = int64(item.Value)
+			}
+			if action == "SL_in_LSX" {
+				mappingData[deviceID].SL_in_LSX = int64(item.Value)
+			}
+			if action == "TG_in_LSX" {
+				mappingData[deviceID].TG_in_LSX = int64(item.Value)
+			}
+		}
 		fmt.Println(iotData.D, iotData.Ts)
 		for _, item := range iotData.D {
 			// find device in production order stage device
@@ -110,20 +151,10 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				continue
 			}
 			deviceID := s[0]
-			action := s[1]
-			numberOfPrintsPerDay := int64(0)
-			printingTimePerDay := int64(0)
-
-			if action == "SL_in_Ngay" {
-				numberOfPrintsPerDay = int64((item.Value))
-			}
-			if action == "TG_in_Ngay" {
-				printingTimePerDay = int64(item.Value)
-			}
 
 			p.logger.Info("IOT+PARSE+DATA",
-				zap.Int64("numberOfPrintsPerDay", numberOfPrintsPerDay),
-				zap.Int64("printingTimePerDay", printingTimePerDay))
+				zap.Any("deviceID", deviceID),
+				zap.Any("mappingData", mappingData[deviceID]))
 
 			orderStageDevices, err := p.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
 				DeviceID:                   deviceID,
@@ -141,13 +172,13 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				device := orderStageDevices[0]
 				orderStageDeviceID = device.ID
 				activeStageID = device.ProductionOrderStageID
-				if int64(item.Value) > 0 && int64(item.Value) > device.Quantity {
+				if mappingData[deviceID].SL_in_LSX > 0 && mappingData[deviceID].SL_in_LSX > device.Quantity {
 					// update first device
 					_ = p.productionOrderStageDeviceRepo.Update(ctx, &model.ProductionOrderStageDevice{
 						ID:                     device.ID,
 						ProductionOrderStageID: device.ProductionOrderStageID,
 						DeviceID:               device.DeviceID,
-						Quantity:               int64(item.Value),
+						Quantity:               mappingData[deviceID].SL_in_LSX,
 						ProcessStatus:          device.ProcessStatus,
 						Status:                 device.Status,
 						Settings:               device.Settings,
@@ -175,21 +206,27 @@ func (p *EventMQTTSubscription) Subscribe() error {
 					ProductionOrderStageDeviceID: cockroach.String(orderStageDeviceID),
 					DeviceID:                     deviceID,
 					Date:                         dateStr,
-					Quantity:                     numberOfPrintsPerDay, // todo remove this field in db
-					WorkingTime:                  printingTimePerDay,   // todo remove this field in db
-					NumberOfPrintsPerDay:         numberOfPrintsPerDay,
-					PrintingTimePerDay:           printingTimePerDay,
+					Quantity:                     mappingData[deviceID].SL_in_Ngay, // todo remove this field in db
+					WorkingTime:                  mappingData[deviceID].TG_in_Ngay, // todo remove this field in db
+					NumberOfPrintsPerDay:         mappingData[deviceID].SL_in_LSX,
+					PrintingTimePerDay:           mappingData[deviceID].TG_in_Ngay,
+					PoQuantity:                   mappingData[deviceID].SL_in_LSX,
+					PoWorkingTime:                mappingData[deviceID].TG_in_LSX,
 					CreatedAt:                    now,
 				})
 			} else {
 				// update
 				deviceWorkingHistory := deviceWorkingHistories[0].DeviceWorkingHistory
 
-				deviceWorkingHistory.NumberOfPrintsPerDay = numberOfPrintsPerDay
-				deviceWorkingHistory.PrintingTimePerDay = printingTimePerDay
+				deviceWorkingHistory.NumberOfPrintsPerDay = mappingData[deviceID].SL_in_LSX
+				deviceWorkingHistory.PrintingTimePerDay = mappingData[deviceID].TG_in_LSX
+				deviceWorkingHistory.Quantity = mappingData[deviceID].SL_in_Ngay    // todo remove this field in db
+				deviceWorkingHistory.WorkingTime = mappingData[deviceID].TG_in_Ngay // todo remove this field in db
+				deviceWorkingHistory.PoWorkingTime = mappingData[deviceID].TG_in_LSX
+				deviceWorkingHistory.PoQuantity = mappingData[deviceID].SL_in_LSX
 
-				deviceWorkingHistory.Quantity = numberOfPrintsPerDay
-				deviceWorkingHistory.WorkingTime = printingTimePerDay
+				deviceWorkingHistory.UpdatedAt = cockroach.Time(now)
+
 				err := p.deviceWorkingHistoryRepo.Update(ctx, deviceWorkingHistory)
 				if err != nil {
 					// todo nothing
