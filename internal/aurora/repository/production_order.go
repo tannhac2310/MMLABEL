@@ -151,11 +151,6 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (
 		}
 
 	}
-	if s.StageInLine != "" {
-		args = append(args, s.StageInLine)
-		conds += fmt.Sprintf(` AND EXISTS (SELECT 1 FROM production_order_stages AS pos WHERE
-					pos.production_order_id = b.id AND pos.deleted_at IS NULL AND pos.stage_id = $%[1]d and pos.status = 3)`, len(args)) // 3: production_start
-	}
 
 	// filter by device_id in production_order_stage_devices
 	if s.DeviceID != "" {
@@ -165,12 +160,29 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (
 			model.ProductionOrderStageDeviceFieldDeviceID, len(args))
 	}
 
-	if len(s.Responsible) > 0 {
-		args = append(args, s.Responsible)
-		conds += fmt.Sprintf(` AND EXISTS (SELECT 1 FROM production_order_stages AS pos WHERE pos.production_order_id = b.id AND pos.deleted_at IS NULL
+	if s.StageInLine != "" && len(s.Responsible) > 0 {
+		args = append(args, s.StageInLine, s.Responsible)
+		// and pos.status = 3 đang thực hiện
+		// posd.stage_id = $%[1]d AND posd.responsible && $%[2]d : trong công đoạn đang thực hiện X, và user có trong mảng responsible
+		conds += fmt.Sprintf(` AND EXISTS (SELECT 1 FROM production_order_stages AS pos WHERE pos.production_order_id = b.id AND pos.deleted_at IS NULL and pos.status = 3
+						AND EXISTS (SELECT 1 FROM production_order_stage_devices AS posd WHERE posd.production_order_stage_id = pos.id AND posd.deleted_at IS NULL AND posd.stage_id = $%[1]d AND posd.responsible && $%[2]d))`,
+			len(args)-1, len(args))
+	} else {
+		// StageInLine công đoạn đang thực hiện pos.status = enum.ProductionOrderStageStatusProductionStart = 3
+		if s.StageInLine != "" {
+			args = append(args, s.StageInLine)
+			conds += fmt.Sprintf(` AND EXISTS (SELECT 1 FROM production_order_stages AS pos WHERE
+					pos.production_order_id = b.id AND pos.deleted_at IS NULL AND pos.stage_id = $%[1]d and pos.status = 3)`, len(args)) // 3: production_start
+		}
+
+		if len(s.Responsible) > 0 {
+			args = append(args, s.Responsible)
+			conds += fmt.Sprintf(` AND EXISTS (SELECT 1 FROM production_order_stages AS pos WHERE pos.production_order_id = b.id AND pos.deleted_at IS NULL
 						AND EXISTS (SELECT 1 FROM production_order_stage_devices AS posd WHERE posd.production_order_stage_id = pos.id AND posd.deleted_at IS NULL AND posd.%[1]s && $%[2]d))`,
-			model.ProductionOrderStageDeviceFieldResponsible, len(args))
+				model.ProductionOrderStageDeviceFieldResponsible, len(args))
+		}
 	}
+
 	b := &model.ProductionOrder{}
 	if isAnalysis {
 		return fmt.Sprintf(`SELECT b.status, count(*) as count
