@@ -165,7 +165,7 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (
 		// and pos.status = 3 đang thực hiện
 		// posd.stage_id = $%[1]d AND posd.responsible && $%[2]d : trong công đoạn đang thực hiện X, và user có trong mảng responsible
 		conds += fmt.Sprintf(` AND EXISTS (SELECT 1 FROM production_order_stages AS pos WHERE pos.production_order_id = b.id AND pos.deleted_at IS NULL and pos.status = 3
-						AND EXISTS (SELECT 1 FROM production_order_stage_devices AS posd WHERE posd.production_order_stage_id = pos.id AND posd.deleted_at IS NULL AND posd.stage_id = $%[1]d AND posd.responsible && $%[2]d))`,
+						AND EXISTS (SELECT 1 FROM production_order_stage_devices AS posd WHERE posd.production_order_stage_id = pos.id AND posd.deleted_at IS NULL AND pos.stage_id = $%[1]d AND posd.responsible && $%[2]d))`,
 			len(args)-1, len(args))
 	} else {
 		// StageInLine công đoạn đang thực hiện pos.status = enum.ProductionOrderStageStatusProductionStart = 3
