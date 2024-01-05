@@ -8,18 +8,22 @@ import (
 )
 
 type ProductionOrderFilter struct {
-	IDs                  []string                        `json:"ids"`
-	Name                 string                          `json:"name"`
-	CustomerID           string                          `json:"customerID"`
-	Status               enum.ProductionOrderStatus      `json:"status"`
-	Statuses             []enum.ProductionOrderStatus    `json:"statuses"`
-	OrderStageStatus     enum.ProductionOrderStageStatus `json:"orderStageStatus"`
-	EstimatedStartAtTo   time.Time                       `json:"estimatedStartAtTo"`
-	EstimatedStartAtFrom time.Time                       `json:"estimatedStartAtFrom"`
-	Responsible          []string                        `json:"responsible"`
-	StageIDs             []string                        `json:"stageIDs"`
-	StageInLine          string                          `json:"stageInLine"` // search lsx mà theo công đoạn StageInLine đang sản xuất: production_start
-	DeviceID             string                          `json:"deviceID"`
+	IDs                             []string                        `json:"ids"`
+	Name                            string                          `json:"name"`
+	CustomerID                      string                          `json:"customerID"`
+	Status                          enum.ProductionOrderStatus      `json:"status"`
+	Statuses                        []enum.ProductionOrderStatus    `json:"statuses"`
+	OrderStageStatus                enum.ProductionOrderStageStatus `json:"orderStageStatus"`
+	EstimatedStartAtTo              time.Time                       `json:"estimatedStartAtTo"`
+	EstimatedStartAtFrom            time.Time                       `json:"estimatedStartAtFrom"`
+	OrderStageEstimatedStartFrom    time.Time                       `json:"orderStageEstimatedStartFrom"`
+	OrderStageEstimatedStartTo      time.Time                       `json:"orderStageEstimatedStartTo"`
+	OrderStageEstimatedCompleteFrom time.Time                       `json:"orderStageEstimatedCompleteFrom"`
+	OrderStageEstimatedCompleteTo   time.Time                       `json:"orderStageEstimatedCompleteTo"`
+	Responsible                     []string                        `json:"responsible"`
+	StageIDs                        []string                        `json:"stageIDs"`
+	StageInLine                     string                          `json:"stageInLine"` // search lsx mà theo công đoạn StageInLine đang sản xuất: production_start
+	DeviceID                        string                          `json:"deviceID"`
 }
 
 type FindProductionOrdersRequest struct {

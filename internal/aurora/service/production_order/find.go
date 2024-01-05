@@ -46,24 +46,28 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 	fmt.Println("FindProductionOrders stages", stages)
 
 	filter := &repository.SearchProductionOrdersOpts{
-		IDs:                  opts.IDs,
-		CustomerID:           opts.CustomerID,
-		ProductCode:          opts.ProductCode,
-		ProductName:          opts.ProductName,
-		Name:                 opts.Name,
-		EstimatedStartAtFrom: opts.EstimatedStartAtFrom,
-		EstimatedStartAtTo:   opts.EstimatedStartAtTo,
-		Status:               opts.Status,
-		Statuses:             opts.Statuses,
-		Responsible:          opts.Responsible,
-		StageIDs:             stages,
-		UserID:               opts.UserID,
-		OrderStageStatus:     opts.OrderStageStatus,
-		StageInLine:          opts.StageInLine, // search lsx mà theo công đoạn StageInLine đang sản xuất: production_start
-		DeviceID:             opts.DeviceID,
-		Limit:                limit,
-		Offset:               offset,
-		Sort:                 sort,
+		IDs:                             opts.IDs,
+		CustomerID:                      opts.CustomerID,
+		ProductCode:                     opts.ProductCode,
+		ProductName:                     opts.ProductName,
+		Name:                            opts.Name,
+		EstimatedStartAtFrom:            opts.EstimatedStartAtFrom,
+		EstimatedStartAtTo:              opts.EstimatedStartAtTo,
+		Status:                          opts.Status,
+		Statuses:                        opts.Statuses,
+		OrderStageStatus:                opts.OrderStageStatus,
+		OrderStageEstimatedStartFrom:    opts.OrderStageEstimatedStartFrom,
+		OrderStageEstimatedStartTo:      opts.OrderStageEstimatedStartTo,
+		OrderStageEstimatedCompleteFrom: opts.OrderStageEstimatedCompleteFrom,
+		OrderStageEstimatedCompleteTo:   opts.OrderStageEstimatedCompleteTo,
+		Responsible:                     opts.Responsible,
+		StageIDs:                        stages,
+		StageInLine:                     opts.StageInLine, // search lsx mà theo công đoạn StageInLine đang sản xuất: production_start
+		UserID:                          opts.UserID,
+		DeviceID:                        opts.DeviceID,
+		Limit:                           limit,
+		Offset:                          offset,
+		Sort:                            sort,
 	}
 	productionOrders, err := c.productionOrderRepo.Search(ctx, filter)
 	if err != nil {
@@ -212,19 +216,23 @@ func (c *productionOrderService) FindProductionOrdersWithNoPermission(ctx contex
 }
 
 type FindProductionOrdersOpts struct {
-	IDs                  []string
-	CustomerID           string
-	ProductName          string
-	Name                 string
-	ProductCode          string
-	Status               enum.ProductionOrderStatus
-	Statuses             []enum.ProductionOrderStatus
-	EstimatedStartAtFrom time.Time
-	EstimatedStartAtTo   time.Time
-	OrderStageStatus     enum.ProductionOrderStageStatus
-	Responsible          []string
-	StageIDs             []string
-	StageInLine          string // search lsx mà theo công đoạn StageInLine đang sản xuất: production_start
-	DeviceID             string
-	UserID               string
+	IDs                             []string
+	CustomerID                      string
+	ProductName                     string
+	Name                            string
+	ProductCode                     string
+	Status                          enum.ProductionOrderStatus
+	Statuses                        []enum.ProductionOrderStatus
+	EstimatedStartAtFrom            time.Time
+	EstimatedStartAtTo              time.Time
+	OrderStageStatus                enum.ProductionOrderStageStatus
+	OrderStageEstimatedStartFrom    time.Time
+	OrderStageEstimatedStartTo      time.Time
+	OrderStageEstimatedCompleteFrom time.Time
+	OrderStageEstimatedCompleteTo   time.Time
+	Responsible                     []string
+	StageIDs                        []string
+	StageInLine                     string // search lsx mà theo công đoạn StageInLine đang sản xuất: production_start
+	DeviceID                        string
+	UserID                          string
 }

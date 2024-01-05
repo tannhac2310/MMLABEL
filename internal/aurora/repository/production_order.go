@@ -75,24 +75,28 @@ func (r *productionOrdersRepo) SoftDelete(ctx context.Context, id string) error 
 
 // SearchProductionOrdersOpts all params is options
 type SearchProductionOrdersOpts struct {
-	IDs                  []string
-	CustomerID           string
-	ProductCode          string
-	ProductName          string
-	Name                 string
-	EstimatedStartAtFrom time.Time //planned_production_date
-	EstimatedStartAtTo   time.Time //planned_production_date
-	Status               enum.ProductionOrderStatus
-	Statuses             []enum.ProductionOrderStatus
-	OrderStageStatus     enum.ProductionOrderStageStatus
-	Responsible          []string
-	StageIDs             []string
-	StageInLine          string
-	UserID               string
-	DeviceID             string
-	Limit                int64
-	Offset               int64
-	Sort                 *Sort
+	IDs                             []string
+	CustomerID                      string
+	ProductCode                     string
+	ProductName                     string
+	Name                            string
+	EstimatedStartAtFrom            time.Time //planned_production_date
+	EstimatedStartAtTo              time.Time //planned_production_date
+	Status                          enum.ProductionOrderStatus
+	Statuses                        []enum.ProductionOrderStatus
+	OrderStageStatus                enum.ProductionOrderStageStatus
+	OrderStageEstimatedStartFrom    time.Time
+	OrderStageEstimatedStartTo      time.Time
+	OrderStageEstimatedCompleteFrom time.Time
+	OrderStageEstimatedCompleteTo   time.Time
+	Responsible                     []string
+	StageIDs                        []string
+	StageInLine                     string
+	UserID                          string
+	DeviceID                        string
+	Limit                           int64
+	Offset                          int64
+	Sort                            *Sort
 }
 
 func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (string, []interface{}) {
@@ -149,7 +153,22 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (
 			args = append(args, s.OrderStageStatus)
 			conds += fmt.Sprintf(` AND EXISTS (SELECT 1 FROM production_order_stages AS pos WHERE pos.production_order_id = b.id AND pos.deleted_at IS NULL AND pos.status = $%[1]d)`, len(args))
 		}
-
+	}
+	if !s.OrderStageEstimatedStartFrom.IsZero() {
+		args = append(args, s.OrderStageEstimatedStartFrom)
+		conds += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM production_order_stages AS pos WHERE pos.production_order_id = b.id AND pos.deleted_at IS NULL AND pos.estimated_start_at >= $%d)", len(args))
+	}
+	if !s.OrderStageEstimatedStartTo.IsZero() {
+		args = append(args, s.OrderStageEstimatedStartTo)
+		conds += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM production_order_stages AS pos WHERE pos.production_order_id = b.id AND pos.deleted_at IS NULL AND pos.estimated_start_at < $%d)", len(args))
+	}
+	if !s.OrderStageEstimatedCompleteFrom.IsZero() {
+		args = append(args, s.OrderStageEstimatedCompleteFrom)
+		conds += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM production_order_stages AS pos WHERE pos.production_order_id = b.id AND pos.deleted_at IS NULL AND pos.estimated_complete_at >= $%d)", len(args))
+	}
+	if !s.OrderStageEstimatedCompleteTo.IsZero() {
+		args = append(args, s.OrderStageEstimatedCompleteTo)
+		conds += fmt.Sprintf(" AND EXISTS (SELECT 1 FROM production_order_stages AS pos WHERE pos.production_order_id = b.id AND pos.deleted_at IS NULL AND pos.estimated_complete_at < $%d)", len(args))
 	}
 
 	// filter by device_id in production_order_stage_devices
