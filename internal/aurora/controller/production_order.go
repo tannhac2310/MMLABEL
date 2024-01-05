@@ -251,19 +251,23 @@ func (s productionOrderController) FindProductionOrders(c *gin.Context) {
 		}
 	}
 	productionOrders, cnt, analysis, err := s.productionOrderService.FindProductionOrders(c, &production_order.FindProductionOrdersOpts{
-		IDs:                  req.Filter.IDs,
-		CustomerID:           req.Filter.CustomerID,
-		Name:                 req.Filter.Name,
-		Status:               req.Filter.Status,
-		Statuses:             req.Filter.Statuses,
-		EstimatedStartAtFrom: req.Filter.EstimatedStartAtFrom,
-		EstimatedStartAtTo:   req.Filter.EstimatedStartAtTo,
-		OrderStageStatus:     req.Filter.OrderStageStatus,
-		Responsible:          req.Filter.Responsible,
-		StageIDs:             req.Filter.StageIDs,
-		StageInLine:          req.Filter.StageInLine, // search lsx mà theo công đoạn StageInLine đang sản xuất: production_start
-		DeviceID:             req.Filter.DeviceID,
-		UserID:               interceptor.UserIDFromCtx(c),
+		IDs:                             req.Filter.IDs,
+		CustomerID:                      req.Filter.CustomerID,
+		Name:                            req.Filter.Name,
+		Status:                          req.Filter.Status,
+		Statuses:                        req.Filter.Statuses,
+		EstimatedStartAtFrom:            req.Filter.EstimatedStartAtFrom,
+		EstimatedStartAtTo:              req.Filter.EstimatedStartAtTo,
+		OrderStageStatus:                req.Filter.OrderStageStatus,
+		OrderStageEstimatedStartFrom:    req.Filter.OrderStageEstimatedStartFrom,
+		OrderStageEstimatedStartTo:      req.Filter.OrderStageEstimatedStartTo,
+		OrderStageEstimatedCompleteFrom: req.Filter.OrderStageEstimatedCompleteFrom,
+		OrderStageEstimatedCompleteTo:   req.Filter.OrderStageEstimatedCompleteTo,
+		Responsible:                     req.Filter.Responsible,
+		StageIDs:                        req.Filter.StageIDs,
+		StageInLine:                     req.Filter.StageInLine, // search lsx mà theo công đoạn StageInLine đang sản xuất: production_start
+		DeviceID:                        req.Filter.DeviceID,
+		UserID:                          interceptor.UserIDFromCtx(c),
 	}, sort, req.Paging.Limit, req.Paging.Offset)
 	if err != nil {
 		transportutil.Error(c, err)
