@@ -7,10 +7,12 @@ import (
 )
 
 func (c *stageService) FindStages(ctx context.Context, opts *FindStagesOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error) {
+
 	filter := &repository.SearchStagesOpts{
 		IDs:    opts.IDs,
 		Name:   opts.Name,
 		Code:   opts.Code,
+		UserID: opts.UserID,
 		Limit:  limit,
 		Offset: offset,
 		Sort:   sort,
@@ -38,7 +40,8 @@ func (c *stageService) FindStages(ctx context.Context, opts *FindStagesOpts, sor
 }
 
 type FindStagesOpts struct {
-	IDs  []string
-	Name string
-	Code string
+	IDs    []string
+	Name   string
+	Code   string
+	UserID string
 }

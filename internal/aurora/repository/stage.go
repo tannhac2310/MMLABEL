@@ -60,6 +60,7 @@ type SearchStagesOpts struct {
 	IDs    []string
 	Name   string
 	Code   string
+	UserID string
 	Limit  int64
 	Offset int64
 	Sort   *Sort
@@ -85,6 +86,13 @@ func (s *SearchStagesOpts) buildQuery(isCount bool) (string, []interface{}) {
 		conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.StageFieldCode, len(args))
 	}
 
+	if s.UserID != "" {
+		args = append(args, s.UserID)
+		// join user_role, role_permission
+		joins += fmt.Sprintf(` INNER JOIN user_role AS ur ON ur.user_id = $%d AND ur.deleted_at IS NULL
+			INNER JOIN role_permissions AS rp ON rp.role_id = ur.role_id AND rp.entity_type = 'stage' and rp.entity_id = b.id`, len(args))
+	}
+
 	b := &model.Stage{}
 	fields, _ := b.FieldMap()
 	if isCount {
@@ -97,6 +105,12 @@ func (s *SearchStagesOpts) buildQuery(isCount bool) (string, []interface{}) {
 	if s.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", s.Sort.By, s.Sort.Order)
 	}
+	fmt.Println(fmt.Sprintf(`SELECT b.%s
+		FROM %s AS b %s
+		WHERE TRUE %s AND b.deleted_at IS NULL
+		%s
+		LIMIT %d
+		OFFSET %d`, strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset))
 	return fmt.Sprintf(`SELECT b.%s
 		FROM %s AS b %s
 		WHERE TRUE %s AND b.deleted_at IS NULL
