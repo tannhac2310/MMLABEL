@@ -133,12 +133,12 @@ func (s *SearchUsersOpts) buildQuery(isCount bool) (string, []interface{}) {
 		// conds += fmt.Sprintf(" AND u.%s ILIKE $%d", model.UserFieldDepartments, len(args))
 	}
 	if len(s.Departments) > 0 {
-		departs := make([]string, len(s.Departments))
-		for i, v := range s.Departments {
-			departs[i] = "%" + v + "%"
-		}
-		args = append(args, departs)
-		conds += fmt.Sprintf(" AND u.%s iLIKE ANY($%d)", model.UserFieldDepartments, len(args))
+		args = append(args, s.Departments)
+
+		// join user_role, role_permission
+		joins += fmt.Sprintf(` INNER JOIN user_role AS ur ON ur.user_id = u.id AND ur.deleted_at IS NULL
+	
+		INNER JOIN role_permissions AS rp ON rp.role_id = ur.role_id AND rp.entity_type = 'stage' and rp.entity_id = ANY($%d)`, len(args))
 	}
 	fmt.Println("Minh:", s.Department)
 	if s.Search != "" {
