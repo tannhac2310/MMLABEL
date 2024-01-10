@@ -60,6 +60,7 @@ type SearchDevicesOpts struct {
 	IDs    []string
 	Name   string
 	Step   string
+	Steps  []string
 	Code   string
 	Limit  int64
 	Offset int64
@@ -83,6 +84,12 @@ func (s *SearchDevicesOpts) buildQuery(isCount bool) (string, []interface{}) {
 	if s.Step != "" {
 		args = append(args, "%"+s.Step+"%")
 		conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.DeviceFieldStep, len(args))
+	}
+	if len(s.Steps) > 0 {
+		args = append(args, s.Steps)
+		// condition like in array steps
+		// compare each step in steps like value of model.DeviceFieldStep
+		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.DeviceFieldStep, len(args))
 	}
 	if s.Code != "" {
 		args = append(args, s.Code)

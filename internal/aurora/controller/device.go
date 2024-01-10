@@ -101,8 +101,9 @@ func (s deviceController) FindDevices(c *gin.Context) {
 	}
 
 	devices, cnt, err := s.deviceService.FindDevices(c, &device.FindDevicesOpts{
-		Name: req.Filter.Name,
-		Step: req.Filter.Step,
+		Name:  req.Filter.Name,
+		Step:  req.Filter.Step,
+		Steps: req.Filter.Steps,
 	}, &repository.Sort{
 		Order: repository.SortOrderDESC,
 		By:    "ID",

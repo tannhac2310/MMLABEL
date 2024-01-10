@@ -8,8 +8,9 @@ import (
 )
 
 type DeviceFilter struct {
-	Name string `json:"name"`
-	Step string `json:"department"`
+	Name  string `json:"name"`
+	Step  string `json:"department"`
+	Steps string `json:"departments"`
 }
 
 type FindDevicesRequest struct {

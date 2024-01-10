@@ -10,6 +10,7 @@ func (c *deviceService) FindDevices(ctx context.Context, opts *FindDevicesOpts, 
 	filter := &repository.SearchDevicesOpts{
 		Name:   opts.Name,
 		Step:   opts.Step,
+		Steps:  opts.Steps,
 		Limit:  limit,
 		Offset: offset,
 		Sort:   sort,
@@ -37,6 +38,7 @@ func (c *deviceService) FindDevices(ctx context.Context, opts *FindDevicesOpts, 
 }
 
 type FindDevicesOpts struct {
-	Name string
-	Step string
+	Name  string
+	Step  string
+	Steps []string
 }
