@@ -18,17 +18,20 @@ type Service interface {
 
 type deviceService struct {
 	deviceRepo repository.DeviceRepo
+	stageRepo  repository.StageRepo
 	cfg        *configs.Config
 	redisDB    redis.Cmdable
 }
 
 func NewService(
 	deviceRepo repository.DeviceRepo,
+	stageRepo repository.StageRepo,
 	cfg *configs.Config,
 	redisDB redis.Cmdable,
 ) Service {
 	return &deviceService{
 		deviceRepo: deviceRepo,
+		stageRepo:  stageRepo,
 		cfg:        cfg,
 		redisDB:    redisDB,
 	}
