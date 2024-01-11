@@ -89,7 +89,7 @@ func (s *SearchDevicesOpts) buildQuery(isCount bool) (string, []interface{}) {
 		args = append(args, s.Steps)
 		// condition like in array steps
 		// compare each step in steps like value of model.DeviceFieldStep
-		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.DeviceFieldStep, len(args))
+		conds += fmt.Sprintf(" AND b.%s ILIKE ANY($%d)", model.DeviceFieldStep, len(args))
 	}
 	if s.Code != "" {
 		args = append(args, s.Code)
