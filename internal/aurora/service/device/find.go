@@ -15,7 +15,7 @@ func (c *deviceService) FindDevices(ctx context.Context, opts *FindDevicesOpts, 
 	})
 	steps := make([]string, 0)
 	if opts.Step != "" {
-		steps = append(steps, opts.Step)
+		steps = append(steps, "%"+opts.Step+"%")
 	}
 	var step *repository.StageData
 
