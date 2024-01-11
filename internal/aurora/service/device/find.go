@@ -29,7 +29,7 @@ func (c *deviceService) FindDevices(ctx context.Context, opts *FindDevicesOpts, 
 	parents := make([]*repository.StageData, 0)
 	allDepartments := getAllParents(departments, step, parents)
 	for _, department := range allDepartments {
-		steps = append(steps, department.ID)
+		steps = append(steps, "%"+department.ID+"%")
 	}
 	fmt.Println("steps", departments, steps)
 	filter := &repository.SearchDevicesOpts{
