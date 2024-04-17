@@ -30,7 +30,7 @@ iotHub:
   requestTimeout: 300
   connectTimeout: 5
 mqtt:
-  broker: "103.252.72.219"
+  host: "103.252.72.219"
   port: 31883
   username: "user1"
   password: "123"
