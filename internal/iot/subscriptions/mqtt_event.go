@@ -71,11 +71,13 @@ type IotParseData struct {
 
 func (p *EventMQTTSubscription) Subscribe() error {
 	// get from config
-
+	b, _ := json.Marshal(p.config.MQTT)
+	fmt.Println("config.MQTT", string(b))
 	var broker = p.config.MQTT.Host
 	var port = p.config.MQTT.Port //31883
+	fmt.Println(fmt.Sprintf("tcp://%s:%s", broker, port))
 	opts := mqtt.NewClientOptions()
-	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", broker, port))
+	opts.AddBroker(fmt.Sprintf("tcp://%s:%s", broker, port))
 	//opts.SetClientID("go_mqtt_client")
 	opts.SetUsername(p.config.MQTT.Username)
 	opts.SetPassword(p.config.MQTT.Password)
