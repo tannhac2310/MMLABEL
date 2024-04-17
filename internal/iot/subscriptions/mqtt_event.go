@@ -21,7 +21,7 @@ import (
 )
 
 type EventMQTTSubscription struct {
-	config configs.Config
+	config *configs.Config
 	db     cockroach.Ext
 	//busFactory nats.BusFactory
 	productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo
@@ -31,7 +31,7 @@ type EventMQTTSubscription struct {
 }
 
 func NewMQTTSubscription(
-	config configs.Config,
+	config *configs.Config,
 	db cockroach.Ext,
 	productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo,
 	deviceWorkingHistoryRepo repository.DeviceWorkingHistoryRepo,
