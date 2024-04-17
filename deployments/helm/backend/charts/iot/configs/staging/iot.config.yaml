@@ -29,6 +29,11 @@ iotHub:
   maxIdleConnections: 100
   requestTimeout: 300
   connectTimeout: 5
+mqtt:
+  broker: "103.252.72.219"
+  port: 31883
+  username: "user1"
+  password: "123"
 jwt:
   expiry: 365h
   encryptionKey : "NsdXN0dZXIubG9jYWw6Mjcww"

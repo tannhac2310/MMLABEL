@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"mmlabel.gitlab.com/mm-printing-backend/internal/iot/configs"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/idutil"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -20,7 +21,8 @@ import (
 )
 
 type EventMQTTSubscription struct {
-	db cockroach.Ext
+	config configs.Config
+	db     cockroach.Ext
 	//busFactory nats.BusFactory
 	productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo
 	deviceWorkingHistoryRepo       repository.DeviceWorkingHistoryRepo
@@ -29,6 +31,7 @@ type EventMQTTSubscription struct {
 }
 
 func NewMQTTSubscription(
+	config configs.Config,
 	db cockroach.Ext,
 	productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo,
 	deviceWorkingHistoryRepo repository.DeviceWorkingHistoryRepo,
@@ -36,6 +39,7 @@ func NewMQTTSubscription(
 	wsService ws.WebSocketService,
 ) *EventMQTTSubscription {
 	return &EventMQTTSubscription{
+		config:                         config,
 		db:                             db,
 		productionOrderStageDeviceRepo: productionOrderStageDeviceRepo,
 		deviceWorkingHistoryRepo:       deviceWorkingHistoryRepo,
@@ -66,13 +70,15 @@ type IotParseData struct {
 }
 
 func (p *EventMQTTSubscription) Subscribe() error {
-	var broker = "146.196.65.9"
-	var port = 31883
+	// get from config
+
+	var broker = p.config.MQTT.Host
+	var port = p.config.MQTT.Port //31883
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", broker, port))
 	//opts.SetClientID("go_mqtt_client")
-	opts.SetUsername("user1")
-	opts.SetPassword("123")
+	opts.SetUsername(p.config.MQTT.Username)
+	opts.SetPassword(p.config.MQTT.Password)
 	opts.SetDefaultPublishHandler(messagePubHandler)
 	opts.OnConnect = connectHandler
 	opts.OnConnectionLost = connectLostHandler

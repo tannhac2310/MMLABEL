@@ -30,8 +30,8 @@ import (
 	repository2 "mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	pkgConfig "mmlabel.gitlab.com/mm-printing-backend/pkg/configs"
 
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/configs"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/customer"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/iot/configs"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/logger"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/nats"
@@ -42,6 +42,7 @@ import (
 
 func Run(ctx context.Context, configPath string) {
 	cfg, err := configs.NewConfig(configPath)
+
 	if err != nil {
 		log.Panic("err load config:", err)
 	}
