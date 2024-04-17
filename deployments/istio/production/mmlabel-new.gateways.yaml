@@ -1,0 +1,107 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: backend-gateway
+  namespace: backend
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "mmlabel.buonho.vn"
+      tls:
+        httpsRedirect: false
+    - port:
+        number: 443
+        name: https-secondary
+        protocol: HTTPS
+      hosts:
+        - "mmlabel.buonho.vn"
+      tls:
+        credentialName: cert-mmlabel.buonho.vn
+        mode: SIMPLE
+        privateKey: sds
+        serverCertificate: sds
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: backend-ingress
+  namespace: backend
+spec:
+  hosts:
+    - "mmlabel.buonho.vn"
+  gateways:
+    - backend-gateway
+  http:
+    - match:
+        - uri:
+            prefix: "/swagger-ui/"
+      rewrite:
+        uri: "/"
+      route:
+        - destination:
+            host: mm-printing-backend
+            port:
+              number: 80
+
+    - match:
+        - uri:
+            prefix: "/bi-mmlabel"
+      rewrite:
+        uri: "/"
+      route:
+        - destination:
+            host: redash
+            port:
+              number: 80
+    - match:
+        - uri:
+            prefix: "/hydra"
+      route:
+        - destination:
+            host: mm-printing-hydra
+            port:
+              number: 80
+    - match:
+        - uri:
+            prefix: "/aurora"
+      route:
+        - destination:
+            host: mm-printing-aurora
+            port:
+              number: 80
+    - match:
+        - uri:
+            prefix: "/mm-printing-images"
+      route:
+        - destination:
+            host: s3-storage-minio
+            port:
+              number: 9000
+    - match:
+        - uri:
+            prefix: "/"
+      route:
+        - destination:
+            host: web-mm-printing
+            port:
+              number: 80
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: mmlabel.buonho.vn
+  namespace: istio-system
+spec:
+  commonName: mmlabel.buonho.vn
+  dnsNames:
+    - mmlabel.buonho.vn
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt
+  secretName: cert-mmlabel.buonho.vn
