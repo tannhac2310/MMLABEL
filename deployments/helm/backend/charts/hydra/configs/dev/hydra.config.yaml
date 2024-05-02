@@ -1,0 +1,39 @@
+name: "Hydra"
+port: ":4100"
+env: "dev"
+debug: true
+logger:
+  logLvl: "debug"
+  logReq: true
+  logResp: true
+statsEnabled: true
+remoteProfiler:
+  enabled: false
+  profilerURL: "http://pyroscope:4040"
+remoteTrace:
+  enabled: true
+  traceAgent: "jaeger-tracing-agent.monitoring:6831"
+  traceCollector: "http://jaeger-tracing-collector.monitoring:14268/api/traces"
+  ratio: 1
+nats:
+  clusterId: "tech4edu"
+  address: "nats-streaming-client.nats-streaming"
+redis:
+  host: "redis-master.databases:6379"
+  password: "NGtKOGFRWXR3endnS3NTcQ=="
+cockroachdb:
+  uri: "cG9zdGdyZXM6Ly90ZWNoNGVkdTpNNjc2M3pVbnI4dEJkd3lkQGNvY2tyb2FjaGRiLmRhdGFiYXNlczoyNjI1Ny9kZXZtbWxhYmVsP3Bvb2xfbWF4X2Nvbm5zPTUwJnBvb2xfbWF4X2Nvbm5fbGlmZXRpbWU9NW0mcG9vbF9oZWFsdGhfY2hlY2tfcGVyaW9kPTMwcw=="
+  migrationPath: "file://./migrations"
+jwt:
+  expiry: 365h
+  encryptionKey: "NsdXN0dZXIubG9jYWw6Mjcww"
+  audience: "mmprinting"
+  issuer: "hydra"
+firebase:
+  configPath: /secrets/firebase-adminsdk-creds.json
+s3Storage:
+  region: ap-southeast-1
+  bucket: 'hagi-public'
+  accessKey: "AKIARCAEPCVP4C7RFYW3"
+  secretKey: "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"
+  endpoint: ""
