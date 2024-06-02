@@ -409,6 +409,7 @@ func (s inkController) FindInk(c *gin.Context) {
 	inks, cnt, err := s.inkService.Find(c, &ink.FindInkOpts{
 		Name:   req.Filter.Name,
 		ID:     req.Filter.ID,
+		Code:   req.Filter.Code,
 		Status: req.Filter.Status,
 	}, &repository.Sort{
 		Order: repository.SortOrderDESC,

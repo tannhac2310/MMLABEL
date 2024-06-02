@@ -49,6 +49,7 @@ type CreateInkOpts struct {
 type FindInkOpts struct {
 	Name   string
 	ID     string
+	Code   string
 	Status enum.CommonStatus
 }
 
@@ -189,6 +190,7 @@ func (p inkService) Find(ctx context.Context, opt *FindInkOpts, sort *repository
 		Name:   opt.Name,
 		Status: opt.Status,
 		ID:     opt.ID,
+		Code:   opt.Code,
 		Limit:  limit,
 		Offset: offset,
 		Sort:   sort,

@@ -31,6 +31,7 @@ type Ink struct {
 type InkFilter struct {
 	Name   string            `json:"name"`
 	ID     string            `json:"id"`
+	Code   string            `json:"code"`
 	Status enum.CommonStatus `json:"status"`
 }
 type FindInkRequest struct {
