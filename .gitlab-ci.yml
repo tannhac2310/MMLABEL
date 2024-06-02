@@ -75,7 +75,7 @@ deploy_development:
         --set=iot.env=staging \
         --set=appVersion=${CI_COMMIT_TAG}
   environment:
-    name: staging
+    name: dev
   only:
     - tags
 
@@ -101,7 +101,7 @@ deploy_production:
         --set=iot.env=staging \
         --set=appVersion=${CI_COMMIT_TAG}
   environment:
-    name: production
+    name: staging
   when: manual
   only:
     - tags
