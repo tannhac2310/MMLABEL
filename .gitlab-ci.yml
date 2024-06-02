@@ -65,6 +65,32 @@ deploy_development:
     echo "Deploy to development server"
     helm upgrade --install --wait --atomic mm-printing  \
         ./deployments/helm/backend/ \
+        -f ./deployments/helm/backend/values-dev.yaml \
+        -n backend-dev \
+        --set=hydra.env=staging \
+        --set=aurora.env=staging \
+        --set=hydra.image.tag=${CI_COMMIT_TAG} \
+        --set=aurora.image.tag=${CI_COMMIT_TAG} \
+        --set=iot.image.tag=${CI_COMMIT_TAG} \
+        --set=iot.env=staging \
+        --set=appVersion=${CI_COMMIT_TAG}
+  environment:
+    name: staging
+  only:
+    - tags
+
+deploy_production:
+  stage: deploy
+  image: dtzar/helm-kubectl:3.1.2
+  before_script:
+    - mkdir -p /etc/deploy
+    - echo ${PROD_KUBE_CONFIG} | base64 -d > ${KUBECONFIG}
+
+  script: |
+    echo "Deploy to production"
+
+    helm upgrade --install --wait --atomic mm-printing  \
+        ./deployments/helm/backend/ \
         -f ./deployments/helm/backend/values-staging.yaml \
         -n backend \
         --set=hydra.env=staging \
@@ -75,6 +101,7 @@ deploy_development:
         --set=iot.env=staging \
         --set=appVersion=${CI_COMMIT_TAG}
   environment:
-    name: staging
+    name: production
+  when: manual
   only:
     - tags
