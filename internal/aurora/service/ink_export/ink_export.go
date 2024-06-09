@@ -37,10 +37,11 @@ type CreateInkExportOpts struct {
 	InkExportDetail   []*CreateInkExportDetailOpts
 }
 type FindInkExportOpts struct {
-	Name   string
-	Code   string
-	ID     string
-	Status enum.InventoryCommonStatus
+	Name        string
+	Code        string
+	ID          string
+	ProductName string
+	Status      enum.InventoryCommonStatus
 }
 
 type Service interface {
@@ -190,12 +191,14 @@ type InkExportDetail struct {
 
 func (p inkExportService) Find(ctx context.Context, opt *FindInkExportOpts, sort *repository.Sort, limit, offset int64) ([]*InkExportData, *repository.CountResult, error) {
 	filter := &repository.SearchInkExportOpts{
-		Name:   opt.Name,
-		Status: opt.Status,
-		ID:     opt.ID,
-		Limit:  limit,
-		Offset: offset,
-		Sort:   sort,
+		Name:                opt.Name,
+		InkCode:             opt.Code,
+		ProductionOrderName: opt.ProductName,
+		Status:              opt.Status,
+		ID:                  opt.ID,
+		Limit:               limit,
+		Offset:              offset,
+		Sort:                sort,
 	}
 	inkExports, err := p.inkExportRepo.Search(ctx, filter)
 	if err != nil {
