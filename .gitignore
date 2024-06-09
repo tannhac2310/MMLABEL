@@ -13,3 +13,8 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+.DS_Store
+deployments/.DS_Store
+internal/.DS_Store
+pkg/.DS_Store
+resources/.DS_Store
