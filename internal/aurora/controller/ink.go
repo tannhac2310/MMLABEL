@@ -140,7 +140,8 @@ func (s inkController) FindInkExport(c *gin.Context) {
 		return
 	}
 	inkExports, cnt, err := s.inkExportService.Find(c, &ink_export.FindInkExportOpts{
-		Name: req.Filter.Name,
+		Code:        req.Filter.InkCode,
+		ProductName: req.Filter.ProductName,
 	}, &repository.Sort{
 		Order: repository.SortOrderDESC,
 		By:    "ID",

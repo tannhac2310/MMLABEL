@@ -179,8 +179,10 @@ type FindInkExportsRequest struct {
 	Paging *commondto.Paging `json:"paging" binding:"required"`
 }
 type InkExportFilter struct {
-	Name string `json:"name"`
-	ID   string `json:"id"`
+	ProductName string `json:"productName"`
+	InkCode     string `json:"inkCode"`
+	Name        string `json:"name"`
+	ID          string `json:"id"`
 }
 
 type ProductionOrderData struct {

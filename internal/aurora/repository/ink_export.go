@@ -12,13 +12,15 @@ import (
 )
 
 type SearchInkExportOpts struct {
-	ID                string
-	Name              string
-	ProductionOrderID string
-	Status            enum.InventoryCommonStatus
-	Limit             int64
-	Offset            int64
-	Sort              *Sort
+	ID                  string
+	Name                string
+	ProductionOrderID   string
+	ProductionOrderName string
+	InkCode             string
+	Status              enum.InventoryCommonStatus
+	Limit               int64
+	Offset              int64
+	Sort                *Sort
 }
 
 type InkExportData struct {
@@ -73,17 +75,31 @@ func (i *SearchInkExportOpts) buildQuery(isCount bool) (string, []interface{}) {
 		conds += " AND b.id = $1"
 		args = append(args, i.ID)
 	}
+
+	if i.ProductionOrderName != "" {
+		joins += fmt.Sprintf(" LEFT JOIN production_orders AS po ON po.id = b.%s", model.InkExportFieldProductionOrderID)
+		args = append(args, "%"+i.ProductionOrderName+"%")
+		conds += fmt.Sprintf(" AND po.%s ILIKE $%d ", model.ProductionOrderFieldProductName, len(args))
+	}
+	if i.InkCode != "" {
+		joins += fmt.Sprintf(" LEFT JOIN ink_export_detail AS id ON id.ink_export_id = b.%s", model.InkExportFieldID)
+		joins += fmt.Sprintf(" LEFT JOIN ink ON ink.id = id.%s", model.InkExportDetailFieldInkID)
+		args = append(args, "%"+i.InkCode+"%")
+		conds += fmt.Sprintf(" AND ink.%s ILIKE $%d ", model.InkFieldCode, len(args))
+	}
+
 	if i.ProductionOrderID != "" {
+		joins += fmt.Sprintf(" LEFT JOIN ink AS ik ON ik.id = b.%s LEFT JOIN ", model.InkExportDetailFieldInkID)
 		args = append(args, i.ProductionOrderID)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkExportFieldProductionOrderID, len(args))
 	}
 
-	if i.Name != "" {
-		joins += fmt.Sprintf(" LEFT JOIN production_orders AS po ON po.id = b.%s", model.InkExportFieldProductionOrderID)
-		args = append(args, "%"+i.Name+"%")
-		conds += fmt.Sprintf(" AND( b.%[2]s ILIKE $%[1]d OR  b.%[3]s ILIKE $%[1]d OR po.%[4]s ILIKE $%[1]d OR  po.%[5]s ILIKE $%[1]d )", len(args),
-			model.InkExportFieldName, model.InkExportFieldCode, model.ProductionOrderFieldName, model.ProductionOrderFieldProductName)
-	}
+	//if i.Name != "" {
+	//	joins += fmt.Sprintf(" LEFT JOIN production_orders AS po ON po.id = b.%s", model.InkExportFieldProductionOrderID)
+	//	args = append(args, "%"+i.Name+"%")
+	//	conds += fmt.Sprintf(" AND( b.%[2]s ILIKE $%[1]d OR  b.%[3]s ILIKE $%[1]d OR po.%[4]s ILIKE $%[1]d OR  po.%[5]s ILIKE $%[1]d )", len(args),
+	//		model.InkExportFieldName, model.InkExportFieldCode, model.ProductionOrderFieldName, model.ProductionOrderFieldProductName)
+	//}
 
 	if i.Status > 0 {
 		args = append(args, i.Status)
