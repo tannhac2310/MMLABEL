@@ -33,7 +33,7 @@ type FindProductionOrdersRequest struct {
 }
 
 type FindProductionOrdersResponse struct {
-	ProductionOrders []*ProductionOrder `json:"production_orders"`
+	ProductionOrders []*ProductionOrder `json:"productionOrders"`
 	Analysis         []*Analysis        `json:"analysis"`
 	Total            int64              `json:"total"`
 }

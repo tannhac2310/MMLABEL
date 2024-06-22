@@ -110,9 +110,9 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (
 	}
 	if s.Name != "" {
 		args = append(args, "%"+s.Name+"%")
-		conds += fmt.Sprintf(" AND ( b.%[2]s ILIKE $%[1]d OR  b.%[3]s ILIKE $%[1]d OR b.%[4]s ILIKE $%[1]d OR b.%[5]s ILIKE $%[1]d OR b.%[6]s ILIKE $%[1]d) ",
+		conds += fmt.Sprintf(" AND ( b.%[2]s ILIKE $%[1]d OR  b.%[3]s ILIKE $%[1]d OR b.%[4]s ILIKE $%[1]d OR b.%[5]s ILIKE $%[1]d OR b.%[6]s ILIKE $%[1]d OR b.%[7]s ILIKE $%[1]d ) ",
 			len(args), model.ProductionOrderFieldName, model.ProductionOrderFieldProductCode, model.ProductionOrderFieldProductName, model.ProductionOrderFieldCustomerID,
-			model.ProductionOrderFieldSalesID,
+			model.ProductionOrderFieldSalesID, model.ProductionOrderFieldID,
 		)
 	}
 	if s.CustomerID != "" {
