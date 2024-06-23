@@ -10,6 +10,7 @@ const (
 	InkReturnFieldID              = "id"
 	InkReturnFieldName            = "name"
 	InkReturnFieldCode            = "code"
+	InkReturnFieldInkExportID     = "ink_export_id"
 	InkReturnFieldReturnDate      = "return_date"
 	InkReturnFieldReturnWarehouse = "return_warehouse"
 	InkReturnFieldDescription     = "description"
@@ -26,6 +27,7 @@ type InkReturn struct {
 	ID              string                     `db:"id"`
 	Name            string                     `db:"name"`
 	Code            string                     `db:"code"`
+	InkExportID     string                     `db:"ink_export_id"`
 	ReturnDate      sql.NullTime               `db:"return_date"`
 	ReturnWarehouse sql.NullString             `db:"return_warehouse"`
 	Description     sql.NullString             `db:"description"`
@@ -43,6 +45,7 @@ func (rcv *InkReturn) FieldMap() (fields []string, values []interface{}) {
 		InkReturnFieldID,
 		InkReturnFieldName,
 		InkReturnFieldCode,
+		InkReturnFieldInkExportID,
 		InkReturnFieldReturnDate,
 		InkReturnFieldReturnWarehouse,
 		InkReturnFieldDescription,
@@ -59,6 +62,7 @@ func (rcv *InkReturn) FieldMap() (fields []string, values []interface{}) {
 		&rcv.ID,
 		&rcv.Name,
 		&rcv.Code,
+		&rcv.InkExportID,
 		&rcv.ReturnDate,
 		&rcv.ReturnWarehouse,
 		&rcv.Description,

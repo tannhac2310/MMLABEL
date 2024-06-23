@@ -3,6 +3,7 @@ package ink_export
 import (
 	"context"
 	"fmt"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_return"
 	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
@@ -57,6 +58,7 @@ type inkExportService struct {
 	inkExportDetailRepo repository.InkExportDetailRepo
 	inkRepo             repository.InkRepo
 	productionOrderRepo repository.ProductionOrderRepo
+	inkReturnSvc        ink_return.Service
 }
 
 func (p inkExportService) FindImportDetailByPOID(ctx context.Context, poID string) ([]*InkExportDetail, error) {
@@ -188,6 +190,7 @@ type InkExportData struct {
 	UpdatedByName       string
 	InkExportDetail     []*InkExportDetail
 	ProductionOrderData *repository.ProductionOrderData
+	InkReturnData       []*ink_return.InkReturnData
 }
 
 type InkExportDetail struct {
@@ -276,9 +279,22 @@ func (p inkExportService) Find(ctx context.Context, opt *FindInkExportOpts, sort
 		if len(productionOrderData) == 1 {
 			data.ProductionOrderData = productionOrderData[0]
 		}
+		// find ink return data
+		inkReturns, _, errInkReturn := p.inkReturnSvc.Find(ctx, &ink_return.FindInkReturnOpts{
+			InkExportID: inkExport.ID,
+		}, &repository.Sort{
+			Order: repository.SortOrderDESC,
+			By:    "ID",
+		}, 1000, 0)
+		if errInkReturn != nil {
+			return nil, nil, fmt.Errorf("error when find ink return data: %w", errInkReturn)
+		}
+		data.InkReturnData = inkReturns
+
 		results = append(results, data)
 	}
 	total, err := p.inkExportRepo.Count(ctx, filter)
+
 	return results, total, nil
 }
 
@@ -287,12 +303,14 @@ func NewService(
 	inkExportDetailRepo repository.InkExportDetailRepo,
 	inkRepo repository.InkRepo,
 	productionOrderRepo repository.ProductionOrderRepo,
+	inkReturnSvc ink_return.Service,
 ) Service {
 	return &inkExportService{
 		inkExportRepo:       inkExportRepo,
 		inkExportDetailRepo: inkExportDetailRepo,
 		inkRepo:             inkRepo,
 		productionOrderRepo: productionOrderRepo,
+		inkReturnSvc:        inkReturnSvc,
 	}
 
 }

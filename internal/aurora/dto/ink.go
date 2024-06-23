@@ -207,6 +207,7 @@ type InkExport struct {
 	CreatedByName       string                     `json:"createdByName"`
 	UpdatedByName       string                     `json:"updatedByName"`
 	InkExportDetail     []*InkExportDetail         `json:"inkExportDetail"`
+	InkReturnData       []*InkReturn               `json:"inkReturnData"`
 }
 type FindInkExportsResponse struct {
 	InkExport []*InkExport `json:"inkExport"`
@@ -217,12 +218,12 @@ type CreateInkReturnRequest struct {
 	Name            string                       `json:"name"`
 	Code            string                       `json:"code"`
 	Description     string                       `json:"description"`
+	InkExportID     string                       `json:"inkExportID"`
 	Data            map[string]interface{}       `json:"data"`
 	InkReturnDetail []*CreateInkReturnDetailOpts `json:"inkReturnDetail" binding:"required"`
 }
 type CreateInkReturnDetailOpts struct {
 	InkID             string                 `json:"inkID"`
-	InkExportID       string                 `json:"inkExportID"`
 	InkExportDetailID string                 `json:"inkExportDetailID"`
 	Quantity          float64                `json:"quantity"`
 	ColorDetail       map[string]interface{} `json:"colorDetail"`
@@ -248,20 +249,22 @@ type InkReturn struct {
 	ID              string                 `json:"id"`
 	Name            string                 `json:"name"`
 	Code            string                 `json:"code"`
+	InkExportID     string                 `json:"inkExportID"`
 	Description     string                 `json:"description"`
 	Data            map[string]interface{} `json:"data"`
 	InkReturnDetail []*InkReturnDetail     `json:"inkReturnDetail" binding:"required"`
 }
 
 type InkReturnDetail struct {
-	ID          string                 `json:"id"`
-	InkID       string                 `json:"inkID"`
-	InkData     *InkDataExportDetail   `json:"inkData"`
-	InkExportID string                 `json:"inkExportID"`
-	Quantity    float64                `json:"quantity"`
-	ColorDetail map[string]interface{} `json:"colorDetail"`
-	Description string                 `json:"description"`
-	Data        map[string]interface{} `json:"data"`
+	ID                string                 `json:"id"`
+	InkReturnID       string                 `json:"inkReturnID"`
+	InkID             string                 `json:"inkID"`
+	InkData           *InkDataExportDetail   `json:"inkData"`
+	InkExportDetailID string                 `json:"inkExportDetailID"`
+	Quantity          float64                `json:"quantity"`
+	ColorDetail       map[string]interface{} `json:"colorDetail"`
+	Description       string                 `json:"description"`
+	Data              map[string]interface{} `json:"data"`
 }
 
 // dto for ink_export.find_by_po
