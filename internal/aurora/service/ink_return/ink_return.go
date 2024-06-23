@@ -23,12 +23,13 @@ type EditInkReturnOpts struct {
 
 type CreateInkReturnDetailOpts struct {
 	//InkReturnID string
-	InkID       string
-	InkExportID string
-	Quantity    float64
-	ColorDetail map[string]interface{}
-	Description string
-	Data        map[string]interface{}
+	InkID             string
+	InkExportID       string
+	InkExportDetailID string
+	Quantity          float64
+	ColorDetail       map[string]interface{}
+	Description       string
+	Data              map[string]interface{}
 }
 type CreateInkReturnOpts struct {
 	Name            string
@@ -64,7 +65,6 @@ func (p inkReturnService) Edit(ctx context.Context, opt *EditInkReturnOpts) erro
 }
 
 func (p inkReturnService) Create(ctx context.Context, opt *CreateInkReturnOpts) (string, error) {
-
 	// write code to insert to ink_import table and insert to ink_import_detail table in transaction
 	returnId := idutil.ULIDNow()
 	now := time.Now()
@@ -90,16 +90,17 @@ func (p inkReturnService) Create(ctx context.Context, opt *CreateInkReturnOpts) 
 		// write code to insert to ink_import_detail table
 		for _, inkReturnDetail := range opt.InkReturnDetail {
 			err2 := p.inkReturnDetailRepo.Insert(c, &model.InkReturnDetail{
-				ID:          idutil.ULIDNow(),
-				InkReturnID: returnId,
-				InkID:       inkReturnDetail.InkID,
-				InkExportID: inkReturnDetail.InkExportID,
-				Quantity:    inkReturnDetail.Quantity,
-				ColorDetail: inkReturnDetail.ColorDetail,
-				Description: cockroach.String(inkReturnDetail.Description),
-				Data:        inkReturnDetail.Data,
-				CreatedAt:   now,
-				UpdatedAt:   now,
+				ID:                idutil.ULIDNow(),
+				InkReturnID:       returnId,
+				InkID:             inkReturnDetail.InkID,
+				InkExportID:       inkReturnDetail.InkExportID,
+				InkExportDetailID: inkReturnDetail.InkExportDetailID,
+				Quantity:          inkReturnDetail.Quantity,
+				ColorDetail:       inkReturnDetail.ColorDetail,
+				Description:       cockroach.String(inkReturnDetail.Description),
+				Data:              inkReturnDetail.Data,
+				CreatedAt:         now,
+				UpdatedAt:         now,
 			})
 			if err2 != nil {
 				return fmt.Errorf("error when insert ink import detail: %w", err2)
@@ -110,6 +111,7 @@ func (p inkReturnService) Create(ctx context.Context, opt *CreateInkReturnOpts) 
 				InkExportID: inkReturnDetail.InkExportID,
 				InkID:       inkReturnDetail.InkID,
 				Limit:       1000,
+				Offset:      0,
 			})
 			if err != nil {
 				return fmt.Errorf("phiếu xuất kho và màu mực không tồn tại: %w", err)

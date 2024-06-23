@@ -21,6 +21,7 @@ type InkController interface {
 	ImportInk(c *gin.Context)
 	FindInkImport(c *gin.Context)
 	ExportInk(c *gin.Context)
+	EditExportInk(c *gin.Context)
 	FindInkExportByPO(c *gin.Context)
 	FindInkExport(c *gin.Context)
 	ReturnInk(c *gin.Context)
@@ -46,11 +47,12 @@ func (s inkController) ReturnInk(c *gin.Context) {
 	inkReturnDetail := make([]*ink_return.CreateInkReturnDetailOpts, 0, len(req.InkReturnDetail))
 	for _, f := range req.InkReturnDetail {
 		inkReturnDetail = append(inkReturnDetail, &ink_return.CreateInkReturnDetailOpts{
-			InkID:       f.InkID,
-			InkExportID: f.InkExportID,
-			Quantity:    f.Quantity,
-			Description: f.Description,
-			Data:        f.Data,
+			InkID:             f.InkID,
+			InkExportID:       f.InkExportID,
+			InkExportDetailID: f.InkExportDetailID,
+			Quantity:          f.Quantity,
+			Description:       f.Description,
+			Data:              f.Data,
 		})
 	}
 	id, err := s.inkReturnService.Create(c, &ink_return.CreateInkReturnOpts{
@@ -97,6 +99,31 @@ func (s inkController) FindInkReturn(c *gin.Context) {
 		Total:     cnt.Count,
 	})
 }
+func (s inkController) EditExportInk(c *gin.Context) {
+	//req := &dto.EditInkExportRequest{}
+	//err := c.ShouldBind(req)
+	//if err != nil {
+	//	transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+	//	return
+	//}
+	//userId := interceptor.UserIDFromCtx(c)
+	//err = s.inkExportService.Edit(c, &ink_export.EditInkExportOpts{
+	//	ID:             req.ID,
+	//	Name:           req.Name,
+	//	Code:           req.Code,
+	//	ProductionOrderID: req.ProductionOrderID,
+	//	ExportDate:     req.ExportDate,
+	//	Description:    req.Description,
+	//	Data:           req.Data,
+	//	Status:         req.Status,
+	//	UpdatedBy:      userId,
+	//})
+	//if err != nil {
+	//	transportutil.Error(c, err)
+	//	return
+	//}
+	//transportutil.SendJSONResponse(c, &dto.EditInkExportResponse{})
+}
 
 func toInkReturnResp(f *ink_return.InkReturnData) *dto.InkReturn {
 	inkReturnDetail := make([]*dto.InkReturnDetail, 0, len(f.InkReturnDetail))
@@ -140,7 +167,9 @@ func (s inkController) FindInkExport(c *gin.Context) {
 		return
 	}
 	inkExports, cnt, err := s.inkExportService.Find(c, &ink_export.FindInkExportOpts{
-		Code:        req.Filter.InkCode,
+		Search:      req.Filter.Search,
+		InkCode:     req.Filter.InkCode,
+		ID:          req.Filter.ID,
 		ProductName: req.Filter.ProductName,
 	}, &repository.Sort{
 		Order: repository.SortOrderDESC,
@@ -206,6 +235,10 @@ func toInkExportResp(f *ink_export.InkExportData) *dto.InkExport {
 		Status:              f.Status,
 		CreatedBy:           f.CreatedBy,
 		CreatedAt:           f.CreatedAt,
+		UpdatedBy:           f.UpdatedBy,
+		UpdatedAt:           f.UpdatedAt,
+		CreatedByName:       f.CreatedByName,
+		UpdatedByName:       f.UpdatedByName,
 		InkExportDetail:     inkExportDetail,
 		ProductionOrderData: productionOrderData,
 	}

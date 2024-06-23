@@ -181,7 +181,7 @@ type FindInkExportsRequest struct {
 type InkExportFilter struct {
 	ProductName string `json:"productName"`
 	InkCode     string `json:"inkCode"`
-	Name        string `json:"name"`
+	Search      string `json:"search"`
 	ID          string `json:"id"`
 }
 
@@ -202,6 +202,10 @@ type InkExport struct {
 	Status              enum.InventoryCommonStatus `json:"status"`
 	CreatedBy           string                     `json:"createdBy"`
 	CreatedAt           time.Time                  `json:"createdAt"`
+	UpdatedBy           string                     `json:"updatedBy"`
+	UpdatedAt           time.Time                  `json:"updatedAt"`
+	CreatedByName       string                     `json:"createdByName"`
+	UpdatedByName       string                     `json:"updatedByName"`
 	InkExportDetail     []*InkExportDetail         `json:"inkExportDetail"`
 }
 type FindInkExportsResponse struct {
@@ -217,12 +221,13 @@ type CreateInkReturnRequest struct {
 	InkReturnDetail []*CreateInkReturnDetailOpts `json:"inkReturnDetail" binding:"required"`
 }
 type CreateInkReturnDetailOpts struct {
-	InkID       string                 `json:"inkID"`
-	InkExportID string                 `json:"inkExportID"`
-	Quantity    float64                `json:"quantity"`
-	ColorDetail map[string]interface{} `json:"colorDetail"`
-	Description string                 `json:"description"`
-	Data        map[string]interface{} `json:"data"`
+	InkID             string                 `json:"inkID"`
+	InkExportID       string                 `json:"inkExportID"`
+	InkExportDetailID string                 `json:"inkExportDetailID"`
+	Quantity          float64                `json:"quantity"`
+	ColorDetail       map[string]interface{} `json:"colorDetail"`
+	Description       string                 `json:"description"`
+	Data              map[string]interface{} `json:"data"`
 }
 
 type CreateInkReturnResponse struct {

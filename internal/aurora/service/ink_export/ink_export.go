@@ -37,8 +37,8 @@ type CreateInkExportOpts struct {
 	InkExportDetail   []*CreateInkExportDetailOpts
 }
 type FindInkExportOpts struct {
-	Name        string
-	Code        string
+	Search      string
+	InkCode     string
 	ID          string
 	ProductName string
 	Status      enum.InventoryCommonStatus
@@ -96,12 +96,23 @@ func (p inkExportService) Create(ctx context.Context, opt *CreateInkExportOpts) 
 	// write code to insert to ink_export table and insert to ink_export_detail table in transaction
 	exportId := idutil.ULIDNow()
 	now := time.Now()
+	startOfDay := now.Truncate(time.Hour * 24)
+	endOfDay := startOfDay.Add(time.Hour*24 - time.Nanosecond)
+
 	err := cockroach.ExecInTx(ctx, func(c context.Context) error {
+		// get count ink_export by date
+		count, err := p.inkExportRepo.Count(c, &repository.SearchInkExportOpts{
+			ExportDateFrom: startOfDay,
+			ExportDateTo:   endOfDay,
+		})
+		if err != nil {
+			return fmt.Errorf("error when count ink export by date: %w", err)
+		}
 		// insert to ink_export
 		err1 := p.inkExportRepo.Insert(c, &model.InkExport{
 			ID:                exportId,
 			Name:              opt.Name,
-			Code:              opt.Code,
+			Code:              opt.Code + fmt.Sprintf("%03d", count.Count+1), // hopefully we don't face race condition
 			ProductionOrderID: opt.ProductionOrderID,
 			ExportDate:        cockroach.Time(now),
 			Description:       cockroach.String(opt.Description),
@@ -140,7 +151,7 @@ func (p inkExportService) Create(ctx context.Context, opt *CreateInkExportOpts) 
 			// update ink quantity
 			inkData.Quantity = inkData.Quantity - inkExportDetail.Quantity
 			if inkData.Quantity < 0 {
-				return fmt.Errorf("không đủ số lượng để xuất khoa: trong kho còn %v", inkData.Quantity)
+				return fmt.Errorf("không đủ số lượng để xuất kho: trong kho còn %v", inkData.Quantity)
 			}
 			err3 := p.inkRepo.Update(c, inkData.Ink)
 			if err3 != nil {
@@ -170,8 +181,11 @@ type InkExportData struct {
 	Description         string
 	Data                map[string]interface{}
 	CreatedAt           time.Time
-	UpdatedAt           time.Time
 	CreatedBy           string
+	UpdatedAt           time.Time
+	UpdatedBy           string
+	CreatedByName       string
+	UpdatedByName       string
 	InkExportDetail     []*InkExportDetail
 	ProductionOrderData *repository.ProductionOrderData
 }
@@ -191,8 +205,8 @@ type InkExportDetail struct {
 
 func (p inkExportService) Find(ctx context.Context, opt *FindInkExportOpts, sort *repository.Sort, limit, offset int64) ([]*InkExportData, *repository.CountResult, error) {
 	filter := &repository.SearchInkExportOpts{
-		Name:                opt.Name,
-		InkCode:             opt.Code,
+		Search:              opt.Search,
+		InkCode:             opt.InkCode,
 		ProductionOrderName: opt.ProductName,
 		Status:              opt.Status,
 		ID:                  opt.ID,
@@ -216,8 +230,11 @@ func (p inkExportService) Find(ctx context.Context, opt *FindInkExportOpts, sort
 			Description:         inkExport.Description.String,
 			Data:                inkExport.Data,
 			CreatedAt:           inkExport.CreatedAt,
-			UpdatedAt:           inkExport.UpdatedAt,
 			CreatedBy:           inkExport.CreatedBy,
+			CreatedByName:       inkExport.CreatedByName,
+			UpdatedAt:           inkExport.UpdatedAt,
+			UpdatedBy:           inkExport.UpdatedBy,
+			UpdatedByName:       inkExport.UpdatedByName,
 			InkExportDetail:     nil,
 			ProductionOrderData: nil,
 		}

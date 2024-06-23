@@ -13,11 +13,13 @@ import (
 
 type SearchInkExportOpts struct {
 	ID                  string
-	Name                string
+	Search              string
 	ProductionOrderID   string
 	ProductionOrderName string
 	InkCode             string
 	Status              enum.InventoryCommonStatus
+	ExportDateFrom      time.Time
+	ExportDateTo        time.Time
 	Limit               int64
 	Offset              int64
 	Sort                *Sort
@@ -25,6 +27,8 @@ type SearchInkExportOpts struct {
 
 type InkExportData struct {
 	*model.InkExport
+	CreatedByName string `db:"created_by_name"`
+	UpdatedByName string `db:"updated_by_name"`
 }
 
 // InkExportRepo is a repository interface for inkExport
@@ -69,7 +73,8 @@ func (i *inkExportRepo) SoftDelete(ctx context.Context, id string) error {
 func (i *SearchInkExportOpts) buildQuery(isCount bool) (string, []interface{}) {
 	var args []interface{}
 	conds := ""
-	joins := ""
+	joins := " JOIN users AS cu ON cu.id = b.created_by " +
+		"JOIN users AS uu ON uu.id = b.updated_by "
 
 	if i.ID != "" {
 		conds += " AND b.id = $1"
@@ -94,12 +99,21 @@ func (i *SearchInkExportOpts) buildQuery(isCount bool) (string, []interface{}) {
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkExportFieldProductionOrderID, len(args))
 	}
 
-	//if i.Name != "" {
-	//	joins += fmt.Sprintf(" LEFT JOIN production_orders AS po ON po.id = b.%s", model.InkExportFieldProductionOrderID)
-	//	args = append(args, "%"+i.Name+"%")
-	//	conds += fmt.Sprintf(" AND( b.%[2]s ILIKE $%[1]d OR  b.%[3]s ILIKE $%[1]d OR po.%[4]s ILIKE $%[1]d OR  po.%[5]s ILIKE $%[1]d )", len(args),
-	//		model.InkExportFieldName, model.InkExportFieldCode, model.ProductionOrderFieldName, model.ProductionOrderFieldProductName)
-	//}
+	if !i.ExportDateFrom.IsZero() {
+		args = append(args, i.ExportDateFrom)
+		conds += fmt.Sprintf(" AND b.%s >= $%d", model.InkExportFieldExportDate, len(args))
+	}
+	if !i.ExportDateTo.IsZero() {
+		args = append(args, i.ExportDateTo)
+		conds += fmt.Sprintf(" AND b.%s <= $%d", model.InkExportFieldExportDate, len(args))
+	}
+	if i.Search != "" {
+		joins += fmt.Sprintf(" LEFT JOIN production_orders AS po ON po.id = b.%s", model.InkExportFieldProductionOrderID)
+		args = append(args, "%"+i.Search+"%")
+		conds += fmt.Sprintf(" AND (b.%[2]s ILIKE $%[1]d OR b.%[3]s ILIKE $%[1]d OR b.%[4]s ILIKE $%[1]d OR b.%[5]s ILIKE $%[1]d OR po.name ILIKE $%[1]d)",
+			len(args), model.InkExportFieldCode, model.InkExportFieldName, model.InkExportFieldDescription, model.InkExportFieldProductionOrderID,
+		)
+	}
 
 	if i.Status > 0 {
 		args = append(args, i.Status)
@@ -118,7 +132,7 @@ func (i *SearchInkExportOpts) buildQuery(isCount bool) (string, []interface{}) {
 	if i.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", i.Sort.By, i.Sort.Order)
 	}
-	return fmt.Sprintf(`SELECT b.%s
+	return fmt.Sprintf(`SELECT b.%s, cu.name as created_by_name, uu.name as updated_by_name
 		FROM %s AS b %s
 		WHERE TRUE %s AND b.deleted_at IS NULL
 		%s
