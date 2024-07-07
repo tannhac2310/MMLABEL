@@ -12,18 +12,20 @@ import (
 )
 
 type SearchInkReturnOpts struct {
-	ID                string
-	InkID             string
-	ProductionOrderID string
-	Name              string
-	Status            enum.InventoryCommonStatus
-	Limit             int64
-	Offset            int64
-	Sort              *Sort
+	ID           string
+	Name         string
+	InkExportID  string
+	InkExportIDs []string
+	Status       enum.InventoryCommonStatus
+	Limit        int64
+	Offset       int64
+	Sort         *Sort
 }
 
 type InkReturnData struct {
 	*model.InkReturn
+	CreatedByName string `db:"created_by_name"`
+	UpdatedByName string `db:"updated_by_name"`
 }
 
 // InkReturnRepo is a repository interface for inkReturn
@@ -67,7 +69,7 @@ func (i *inkReturnRepo) SoftDelete(ctx context.Context, id string) error {
 func (s *SearchInkReturnOpts) buildQuery(isCount bool) (string, []interface{}) {
 	var args []interface{}
 	conds := ""
-	joins := ""
+	joins := " LEFT JOIN users AS cu ON b.created_by = cu.id LEFT JOIN users AS uu ON b.updated_by = uu.id"
 
 	if s.ID != "" {
 		conds += " AND b.id = $1"
@@ -84,9 +86,14 @@ func (s *SearchInkReturnOpts) buildQuery(isCount bool) (string, []interface{}) {
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkReturnFieldStatus, len(args))
 	}
 
-	if s.ID != "" {
-		args = append(args, s.ID)
-		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkReturnFieldID, len(args))
+	if s.InkExportID != "" {
+		args = append(args, s.InkExportID)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkReturnFieldInkExportID, len(args))
+	}
+
+	if len(s.InkExportIDs) > 0 {
+		args = append(args, s.InkExportIDs)
+		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.InkReturnFieldInkExportID, len(args))
 	}
 
 	b := &model.InkReturn{}
@@ -101,7 +108,7 @@ func (s *SearchInkReturnOpts) buildQuery(isCount bool) (string, []interface{}) {
 	if s.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", s.Sort.By, s.Sort.Order)
 	}
-	return fmt.Sprintf(`SELECT b.%s
+	return fmt.Sprintf(`SELECT b.%s, cu.name AS created_by_name, uu.name AS updated_by_name
 		FROM %s AS b %s
 		WHERE TRUE %s AND b.deleted_at IS NULL
 		%s

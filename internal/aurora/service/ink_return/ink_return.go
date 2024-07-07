@@ -22,9 +22,7 @@ type EditInkReturnOpts struct {
 }
 
 type CreateInkReturnDetailOpts struct {
-	//InkReturnID string
 	InkID             string
-	InkExportID       string
 	InkExportDetailID string
 	Quantity          float64
 	ColorDetail       map[string]interface{}
@@ -34,15 +32,18 @@ type CreateInkReturnDetailOpts struct {
 type CreateInkReturnOpts struct {
 	Name            string
 	Code            string
+	InkExportID     string
 	Description     string
 	Data            map[string]interface{}
 	InkReturnDetail []*CreateInkReturnDetailOpts
 	CreatedBy       string
 }
 type FindInkReturnOpts struct {
-	Name   string
-	ID     string
-	Status enum.InventoryCommonStatus
+	Name         string
+	ID           string
+	InkExportID  string
+	InkExportIDs []string
+	Status       enum.InventoryCommonStatus
 }
 
 type Service interface {
@@ -74,6 +75,7 @@ func (p inkReturnService) Create(ctx context.Context, opt *CreateInkReturnOpts) 
 			ID:          returnId,
 			Name:        opt.Name,
 			Code:        opt.Code,
+			InkExportID: opt.InkExportID,
 			ReturnDate:  cockroach.Time(now),
 			Description: cockroach.String(opt.Description),
 			Status:      enum.InventoryCommonStatusStatusCompleted, // default status is completed
@@ -93,7 +95,7 @@ func (p inkReturnService) Create(ctx context.Context, opt *CreateInkReturnOpts) 
 				ID:                idutil.ULIDNow(),
 				InkReturnID:       returnId,
 				InkID:             inkReturnDetail.InkID,
-				InkExportID:       inkReturnDetail.InkExportID,
+				InkExportID:       opt.InkExportID, // todo remove this field
 				InkExportDetailID: inkReturnDetail.InkExportDetailID,
 				Quantity:          inkReturnDetail.Quantity,
 				ColorDetail:       inkReturnDetail.ColorDetail,
@@ -108,9 +110,9 @@ func (p inkReturnService) Create(ctx context.Context, opt *CreateInkReturnOpts) 
 			// todo check if import status is completed, insert to ink table
 			// check exist inkID and inkExportID in ink_export_detail
 			inkExportDetail, err := p.inkExportDetailRepo.Search(c, &repository.SearchInkExportDetailOpts{
-				InkExportID: inkReturnDetail.InkExportID,
+				InkExportID: opt.InkExportID,
 				InkID:       inkReturnDetail.InkID,
-				Limit:       1000,
+				Limit:       1,
 				Offset:      0,
 			})
 			if err != nil {
@@ -150,6 +152,7 @@ type InkReturnData struct {
 	ID              string
 	Name            string
 	Code            string
+	InkExportID     string
 	ReturnDate      time.Time
 	ReturnWarehouse string
 	Description     string
@@ -159,31 +162,35 @@ type InkReturnData struct {
 	UpdatedBy       string
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
+	CreatedByName   string
+	UpdatedByName   string
 	InkReturnDetail []*InkReturnDetail
 }
 
 type InkReturnDetail struct {
-	ID          string
-	InkReturnID string
-	InkID       string
-	InkData     *repository.InkData
-	InkExportID string
-	Quantity    float64
-	ColorDetail map[string]interface{}
-	Description string
-	Data        map[string]interface{}
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID                string
+	InkReturnID       string // FK to ink_return
+	InkExportDetailID string // FK to ink_export_detail
+	InkID             string
+	InkData           *repository.InkData
+	Quantity          float64
+	ColorDetail       map[string]interface{}
+	Description       string
+	Data              map[string]interface{}
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
 }
 
 func (p inkReturnService) Find(ctx context.Context, opt *FindInkReturnOpts, sort *repository.Sort, limit, offset int64) ([]*InkReturnData, *repository.CountResult, error) {
 	filter := &repository.SearchInkReturnOpts{
-		Name:   opt.Name,
-		Status: opt.Status,
-		ID:     opt.ID,
-		Limit:  limit,
-		Offset: offset,
-		Sort:   sort,
+		Name:         opt.Name,
+		Status:       opt.Status,
+		InkExportID:  opt.InkExportID,
+		InkExportIDs: opt.InkExportIDs,
+		ID:           opt.ID,
+		Limit:        limit,
+		Offset:       offset,
+		Sort:         sort,
 	}
 	inkReturns, err := p.inkReturnRepo.Search(ctx, filter)
 	if err != nil {
@@ -192,7 +199,6 @@ func (p inkReturnService) Find(ctx context.Context, opt *FindInkReturnOpts, sort
 	results := make([]*InkReturnData, 0)
 	// write code to get ink_import_detail
 	for _, inkReturn := range inkReturns {
-
 		data := &InkReturnData{
 			ID:              inkReturn.ID,
 			Name:            inkReturn.Name,
@@ -200,8 +206,11 @@ func (p inkReturnService) Find(ctx context.Context, opt *FindInkReturnOpts, sort
 			Description:     inkReturn.Description.String,
 			Status:          inkReturn.Status,
 			Data:            inkReturn.Data,
+			InkExportID:     inkReturn.InkExportID,
 			CreatedBy:       inkReturn.CreatedBy,
-			UpdatedBy:       "",
+			UpdatedBy:       inkReturn.UpdatedBy,
+			CreatedByName:   inkReturn.CreatedByName,
+			UpdatedByName:   inkReturn.UpdatedByName,
 			CreatedAt:       inkReturn.CreatedAt,
 			UpdatedAt:       inkReturn.UpdatedAt,
 			InkReturnDetail: nil,
@@ -218,17 +227,17 @@ func (p inkReturnService) Find(ctx context.Context, opt *FindInkReturnOpts, sort
 			// find inkdata
 			inkData, _ := p.inkRepo.FindByID(ctx, inkReturnDetail.InkID)
 			dataDetail := &InkReturnDetail{
-				ID:          inkReturnDetail.ID,
-				InkData:     inkData,
-				InkReturnID: inkReturnDetail.InkReturnID,
-				InkID:       inkReturnDetail.InkID,
-				InkExportID: inkReturnDetail.InkExportID,
-				Quantity:    inkReturnDetail.Quantity,
-				ColorDetail: inkReturnDetail.ColorDetail,
-				Description: inkReturnDetail.Description.String,
-				Data:        inkReturnDetail.Data,
-				CreatedAt:   inkReturnDetail.CreatedAt,
-				UpdatedAt:   inkReturnDetail.UpdatedAt,
+				ID:                inkReturnDetail.ID,
+				InkReturnID:       inkReturnDetail.InkReturnID,
+				InkData:           inkData,
+				InkExportDetailID: inkReturnDetail.InkExportDetailID,
+				InkID:             inkReturnDetail.InkID,
+				Quantity:          inkReturnDetail.Quantity,
+				ColorDetail:       inkReturnDetail.ColorDetail,
+				Description:       inkReturnDetail.Description.String,
+				Data:              inkReturnDetail.Data,
+				CreatedAt:         inkReturnDetail.CreatedAt,
+				UpdatedAt:         inkReturnDetail.UpdatedAt,
 			}
 			inkReturnDetailResults = append(inkReturnDetailResults, dataDetail)
 		}

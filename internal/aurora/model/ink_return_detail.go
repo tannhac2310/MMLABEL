@@ -24,7 +24,7 @@ type InkReturnDetail struct {
 	ID                string                 `db:"id"`
 	InkReturnID       string                 `db:"ink_return_id"`
 	InkID             string                 `db:"ink_id"`
-	InkExportID       string                 `db:"ink_export_id"`
+	InkExportID       string                 `db:"ink_export_id"` // todo remove this field
 	InkExportDetailID string                 `db:"ink_export_detail_id"`
 	Quantity          float64                `db:"quantity"`
 	ColorDetail       map[string]interface{} `db:"color_detail"`

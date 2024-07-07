@@ -48,7 +48,6 @@ func (s inkController) ReturnInk(c *gin.Context) {
 	for _, f := range req.InkReturnDetail {
 		inkReturnDetail = append(inkReturnDetail, &ink_return.CreateInkReturnDetailOpts{
 			InkID:             f.InkID,
-			InkExportID:       f.InkExportID,
 			InkExportDetailID: f.InkExportDetailID,
 			Quantity:          f.Quantity,
 			Description:       f.Description,
@@ -59,6 +58,7 @@ func (s inkController) ReturnInk(c *gin.Context) {
 		Name:            req.Name,
 		Code:            req.Code,
 		Description:     req.Description,
+		InkExportID:     req.InkExportID, // one inkExportID for all inkReturnDetail
 		Data:            req.Data,
 		InkReturnDetail: inkReturnDetail,
 		CreatedBy:       userID,
@@ -140,21 +140,30 @@ func toInkReturnResp(f *ink_return.InkReturnData) *dto.InkReturn {
 		}
 
 		inkReturnDetail = append(inkReturnDetail, &dto.InkReturnDetail{
-			ID:          k.ID,
-			InkID:       k.InkID,
-			InkData:     inkData,
-			InkExportID: k.InkExportID,
-			Quantity:    k.Quantity,
-			Description: k.Description,
-			Data:        k.Data,
+			ID:                k.ID,
+			InkReturnID:       k.InkReturnID,
+			InkID:             k.InkID,
+			InkData:           inkData,
+			InkExportDetailID: k.InkExportDetailID,
+			Quantity:          k.Quantity,
+			Description:       k.Description,
+			Data:              k.Data,
 		})
 	}
 	return &dto.InkReturn{
 		ID:              f.ID,
 		Name:            f.Name,
 		Code:            f.Code,
+		InkExportID:     f.InkExportID,
 		Description:     f.Description,
 		Data:            f.Data,
+		Status:          f.Status,
+		CreatedBy:       f.CreatedBy,
+		CreatedAt:       f.CreatedAt,
+		UpdatedBy:       f.UpdatedBy,
+		UpdatedAt:       f.UpdatedAt,
+		CreatedByName:   f.CreatedByName,
+		UpdatedByName:   f.UpdatedByName,
 		InkReturnDetail: inkReturnDetail,
 	}
 }
@@ -225,11 +234,17 @@ func toInkExportResp(f *ink_export.InkExportData) *dto.InkExport {
 		}
 	}
 
+	inkReturnResp := make([]*dto.InkReturn, 0, len(f.InkReturnData))
+	for _, f := range f.InkReturnData {
+		inkReturnResp = append(inkReturnResp, toInkReturnResp(f))
+	}
+
 	return &dto.InkExport{
 		ID:                  f.ID,
 		Name:                f.Name,
 		Code:                f.Code,
 		ProductionOrderID:   f.ProductionOrderID,
+		ProductionOrderData: productionOrderData,
 		Description:         f.Description,
 		Data:                f.Data,
 		Status:              f.Status,
@@ -240,7 +255,7 @@ func toInkExportResp(f *ink_export.InkExportData) *dto.InkExport {
 		CreatedByName:       f.CreatedByName,
 		UpdatedByName:       f.UpdatedByName,
 		InkExportDetail:     inkExportDetail,
-		ProductionOrderData: productionOrderData,
+		InkReturnData:       inkReturnResp,
 	}
 
 }
