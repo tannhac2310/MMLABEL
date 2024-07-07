@@ -39,10 +39,11 @@ type CreateInkReturnOpts struct {
 	CreatedBy       string
 }
 type FindInkReturnOpts struct {
-	Name        string
-	ID          string
-	InkExportID string
-	Status      enum.InventoryCommonStatus
+	Name         string
+	ID           string
+	InkExportID  string
+	InkExportIDs []string
+	Status       enum.InventoryCommonStatus
 }
 
 type Service interface {
@@ -182,13 +183,14 @@ type InkReturnDetail struct {
 
 func (p inkReturnService) Find(ctx context.Context, opt *FindInkReturnOpts, sort *repository.Sort, limit, offset int64) ([]*InkReturnData, *repository.CountResult, error) {
 	filter := &repository.SearchInkReturnOpts{
-		Name:        opt.Name,
-		Status:      opt.Status,
-		InkExportID: opt.InkExportID,
-		ID:          opt.ID,
-		Limit:       limit,
-		Offset:      offset,
-		Sort:        sort,
+		Name:         opt.Name,
+		Status:       opt.Status,
+		InkExportID:  opt.InkExportID,
+		InkExportIDs: opt.InkExportIDs,
+		ID:           opt.ID,
+		Limit:        limit,
+		Offset:       offset,
+		Sort:         sort,
 	}
 	inkReturns, err := p.inkReturnRepo.Search(ctx, filter)
 	if err != nil {
@@ -197,7 +199,6 @@ func (p inkReturnService) Find(ctx context.Context, opt *FindInkReturnOpts, sort
 	results := make([]*InkReturnData, 0)
 	// write code to get ink_import_detail
 	for _, inkReturn := range inkReturns {
-
 		data := &InkReturnData{
 			ID:              inkReturn.ID,
 			Name:            inkReturn.Name,

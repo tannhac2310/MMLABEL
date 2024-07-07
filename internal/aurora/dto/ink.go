@@ -246,13 +246,20 @@ type FindInkReturnsResponse struct {
 	Total     int64        `json:"total"`
 }
 type InkReturn struct {
-	ID              string                 `json:"id"`
-	Name            string                 `json:"name"`
-	Code            string                 `json:"code"`
-	InkExportID     string                 `json:"inkExportID"`
-	Description     string                 `json:"description"`
-	Data            map[string]interface{} `json:"data"`
-	InkReturnDetail []*InkReturnDetail     `json:"inkReturnDetail" binding:"required"`
+	ID              string                     `json:"id"`
+	Name            string                     `json:"name"`
+	Code            string                     `json:"code"`
+	InkExportID     string                     `json:"inkExportID"`
+	Description     string                     `json:"description"`
+	Data            map[string]interface{}     `json:"data"`
+	Status          enum.InventoryCommonStatus `json:"status"`
+	InkReturnDetail []*InkReturnDetail         `json:"inkReturnDetail" binding:"required"`
+	CreatedBy       string                     `json:"createdBy"`
+	CreatedAt       time.Time                  `json:"createdAt"`
+	UpdatedBy       string                     `json:"updatedBy"`
+	UpdatedAt       time.Time                  `json:"updatedAt"`
+	CreatedByName   string                     `json:"createdByName"`
+	UpdatedByName   string                     `json:"updatedByName"`
 }
 
 type InkReturnDetail struct {

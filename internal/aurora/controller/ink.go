@@ -157,6 +157,13 @@ func toInkReturnResp(f *ink_return.InkReturnData) *dto.InkReturn {
 		InkExportID:     f.InkExportID,
 		Description:     f.Description,
 		Data:            f.Data,
+		Status:          f.Status,
+		CreatedBy:       f.CreatedBy,
+		CreatedAt:       f.CreatedAt,
+		UpdatedBy:       f.UpdatedBy,
+		UpdatedAt:       f.UpdatedAt,
+		CreatedByName:   f.CreatedByName,
+		UpdatedByName:   f.UpdatedByName,
 		InkReturnDetail: inkReturnDetail,
 	}
 }

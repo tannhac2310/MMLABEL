@@ -222,6 +222,29 @@ func (p inkExportService) Find(ctx context.Context, opt *FindInkExportOpts, sort
 		return nil, nil, err
 	}
 	results := make([]*InkExportData, 0)
+
+	//InkExportIDs
+	inkExportIDs := make([]string, 0)
+	for _, inkExport := range inkExports {
+		inkExportIDs = append(inkExportIDs, inkExport.ID)
+	}
+	inkReturnData, _, err := p.inkReturnSvc.Find(ctx, &ink_return.FindInkReturnOpts{
+		InkExportIDs: inkExportIDs,
+	}, &repository.Sort{
+		Order: repository.SortOrderDESC,
+		By:    "ID",
+	}, 1000, 0)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error when find ink return data: %w", err)
+	}
+	inkReturnDataMap := make(map[string][]*ink_return.InkReturnData)
+	for _, inkReturn := range inkReturnData {
+		if _, ok := inkReturnDataMap[inkReturn.InkExportID]; !ok {
+			inkReturnDataMap[inkReturn.InkExportID] = make([]*ink_return.InkReturnData, 0)
+		}
+		inkReturnDataMap[inkReturn.InkExportID] = append(inkReturnDataMap[inkReturn.InkExportID], inkReturn)
+	}
+
 	// write code to get ink_export_detail
 	for _, inkExport := range inkExports {
 		data := &InkExportData{
@@ -280,16 +303,7 @@ func (p inkExportService) Find(ctx context.Context, opt *FindInkExportOpts, sort
 			data.ProductionOrderData = productionOrderData[0]
 		}
 		// find ink return data
-		inkReturns, _, errInkReturn := p.inkReturnSvc.Find(ctx, &ink_return.FindInkReturnOpts{
-			InkExportID: inkExport.ID,
-		}, &repository.Sort{
-			Order: repository.SortOrderDESC,
-			By:    "ID",
-		}, 1000, 0)
-		if errInkReturn != nil {
-			return nil, nil, fmt.Errorf("error when find ink return data: %w", errInkReturn)
-		}
-		data.InkReturnData = inkReturns
+		data.InkReturnData = inkReturnDataMap[inkExport.ID]
 
 		results = append(results, data)
 	}
