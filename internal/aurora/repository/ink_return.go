@@ -16,6 +16,8 @@ type SearchInkReturnOpts struct {
 	Name         string
 	InkExportID  string
 	InkExportIDs []string
+	DateFrom     time.Time
+	DateTo       time.Time
 	Status       enum.InventoryCommonStatus
 	Limit        int64
 	Offset       int64
@@ -94,6 +96,16 @@ func (s *SearchInkReturnOpts) buildQuery(isCount bool) (string, []interface{}) {
 	if len(s.InkExportIDs) > 0 {
 		args = append(args, s.InkExportIDs)
 		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.InkReturnFieldInkExportID, len(args))
+	}
+
+	if !s.DateFrom.IsZero() {
+		args = append(args, s.DateFrom)
+		conds += fmt.Sprintf(" AND b.%s >= $%d", model.InkReturnFieldReturnDate, len(args))
+	}
+
+	if !s.DateTo.IsZero() {
+		args = append(args, s.DateTo)
+		conds += fmt.Sprintf(" AND b.%s <= $%d", model.InkReturnFieldReturnDate, len(args))
 	}
 
 	b := &model.InkReturn{}

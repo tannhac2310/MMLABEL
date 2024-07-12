@@ -69,12 +69,23 @@ func (p inkReturnService) Create(ctx context.Context, opt *CreateInkReturnOpts) 
 	// write code to insert to ink_import table and insert to ink_import_detail table in transaction
 	returnId := idutil.ULIDNow()
 	now := time.Now()
+	startOfDay := now.Truncate(time.Hour * 24)
+	endOfDay := startOfDay.Add(time.Hour*24 - time.Nanosecond)
+
 	err := cockroach.ExecInTx(ctx, func(c context.Context) error {
+		// get count ink return in day
+		count, err := p.inkReturnRepo.Count(c, &repository.SearchInkReturnOpts{
+			DateFrom: startOfDay,
+			DateTo:   endOfDay,
+		})
+		if err != nil {
+			return fmt.Errorf("error when count ink return: %w", err)
+		}
 		// insert to ink_import
 		err1 := p.inkReturnRepo.Insert(c, &model.InkReturn{
 			ID:          returnId,
 			Name:        opt.Name,
-			Code:        opt.Code,
+			Code:        opt.Code + fmt.Sprintf("%03d", count.Count+1),
 			InkExportID: opt.InkExportID,
 			ReturnDate:  cockroach.Time(now),
 			Description: cockroach.String(opt.Description),
