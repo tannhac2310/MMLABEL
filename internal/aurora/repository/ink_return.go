@@ -35,6 +35,7 @@ type InkReturnRepo interface {
 	Insert(ctx context.Context, e *model.InkReturn) error
 	Update(ctx context.Context, e *model.InkReturn) error
 	SoftDelete(ctx context.Context, id string) error
+	FindByID(ctx context.Context, id string) (*model.InkReturn, error)
 	Search(ctx context.Context, s *SearchInkReturnOpts) ([]*InkReturnData, error)
 	Count(ctx context.Context, s *SearchInkReturnOpts) (*CountResult, error)
 }
@@ -66,6 +67,37 @@ func (i *inkReturnRepo) SoftDelete(ctx context.Context, id string) error {
 		return fmt.Errorf("not found any records to delete")
 	}
 	return nil
+}
+
+func (i *inkReturnRepo) FindByID(ctx context.Context, id string) (*model.InkReturn, error) {
+	e := &model.InkReturn{}
+	if err := cockroach.FindOne(ctx, e, "id = $1", id); err != nil {
+		return nil, err
+	}
+
+	return e, nil
+}
+
+func (i *inkReturnRepo) Search(ctx context.Context, s *SearchInkReturnOpts) ([]*InkReturnData, error) {
+	inkReturnData := make([]*InkReturnData, 0)
+	sql, args := s.buildQuery(false)
+	err := cockroach.Select(ctx, sql, args...).ScanAll(&inkReturnData)
+	if err != nil {
+		return nil, fmt.Errorf("cockroach.Select: %w", err)
+	}
+
+	return inkReturnData, nil
+}
+
+func (i *inkReturnRepo) Count(ctx context.Context, s *SearchInkReturnOpts) (*CountResult, error) {
+	countResult := &CountResult{}
+	sql, args := s.buildQuery(true)
+	err := cockroach.Select(ctx, sql, args...).ScanOne(countResult)
+	if err != nil {
+		return nil, fmt.Errorf("chat.Count: %w", err)
+	}
+
+	return countResult, nil
 }
 
 func (s *SearchInkReturnOpts) buildQuery(isCount bool) (string, []interface{}) {
@@ -126,28 +158,6 @@ func (s *SearchInkReturnOpts) buildQuery(isCount bool) (string, []interface{}) {
 		%s
 		LIMIT %d
 		OFFSET %d`, strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
-}
-
-func (i *inkReturnRepo) Search(ctx context.Context, s *SearchInkReturnOpts) ([]*InkReturnData, error) {
-	inkReturnData := make([]*InkReturnData, 0)
-	sql, args := s.buildQuery(false)
-	err := cockroach.Select(ctx, sql, args...).ScanAll(&inkReturnData)
-	if err != nil {
-		return nil, fmt.Errorf("cockroach.Select: %w", err)
-	}
-
-	return inkReturnData, nil
-}
-
-func (i *inkReturnRepo) Count(ctx context.Context, s *SearchInkReturnOpts) (*CountResult, error) {
-	countResult := &CountResult{}
-	sql, args := s.buildQuery(true)
-	err := cockroach.Select(ctx, sql, args...).ScanOne(countResult)
-	if err != nil {
-		return nil, fmt.Errorf("chat.Count: %w", err)
-	}
-
-	return countResult, nil
 }
 
 // NewInkReturnRepo is a constructor for inkReturn repository

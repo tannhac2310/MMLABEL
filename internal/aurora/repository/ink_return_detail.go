@@ -62,6 +62,28 @@ func (i *inkReturnDetailRepo) SoftDelete(ctx context.Context, id string) error {
 	return nil
 }
 
+func (i *inkReturnDetailRepo) Search(ctx context.Context, s *SearchInkReturnDetailOpts) ([]*InkReturnDetailData, error) {
+	inkReturnDetailData := make([]*InkReturnDetailData, 0)
+	sql, args := s.buildQuery(false)
+	err := cockroach.Select(ctx, sql, args...).ScanAll(&inkReturnDetailData)
+	if err != nil {
+		return nil, fmt.Errorf("cockroach.Select: %w", err)
+	}
+
+	return inkReturnDetailData, nil
+}
+
+func (i *inkReturnDetailRepo) Count(ctx context.Context, s *SearchInkReturnDetailOpts) (*CountResult, error) {
+	countResult := &CountResult{}
+	sql, args := s.buildQuery(true)
+	err := cockroach.Select(ctx, sql, args...).ScanOne(countResult)
+	if err != nil {
+		return nil, fmt.Errorf("chat.Count: %w", err)
+	}
+
+	return countResult, nil
+}
+
 // buildSearchInkReturnDetailQuery is a helper function to build query for search inkReturnDetails
 func (i *SearchInkReturnDetailOpts) buildQuery(isCount bool) (string, []interface{}) {
 	var args []interface{}
@@ -104,28 +126,6 @@ func (i *SearchInkReturnDetailOpts) buildQuery(isCount bool) (string, []interfac
 		%s
 		LIMIT %d
 		OFFSET %d`, strings.Join(fields, ", b."), b.TableName(), joins, conds, order, i.Limit, i.Offset), args
-}
-
-func (i *inkReturnDetailRepo) Search(ctx context.Context, s *SearchInkReturnDetailOpts) ([]*InkReturnDetailData, error) {
-	inkReturnDetailData := make([]*InkReturnDetailData, 0)
-	sql, args := s.buildQuery(false)
-	err := cockroach.Select(ctx, sql, args...).ScanAll(&inkReturnDetailData)
-	if err != nil {
-		return nil, fmt.Errorf("cockroach.Select: %w", err)
-	}
-
-	return inkReturnDetailData, nil
-}
-
-func (i *inkReturnDetailRepo) Count(ctx context.Context, s *SearchInkReturnDetailOpts) (*CountResult, error) {
-	countResult := &CountResult{}
-	sql, args := s.buildQuery(true)
-	err := cockroach.Select(ctx, sql, args...).ScanOne(countResult)
-	if err != nil {
-		return nil, fmt.Errorf("chat.Count: %w", err)
-	}
-
-	return countResult, nil
 }
 
 // NewInkReturnDetailRepo is a constructor for inkReturnDetail repository

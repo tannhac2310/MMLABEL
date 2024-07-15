@@ -99,30 +99,23 @@ func (s inkController) FindInkReturn(c *gin.Context) {
 		Total:     cnt.Count,
 	})
 }
-func (s inkController) EditExportInk(c *gin.Context) {
-	//req := &dto.EditInkExportRequest{}
-	//err := c.ShouldBind(req)
-	//if err != nil {
-	//	transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
-	//	return
-	//}
-	//userId := interceptor.UserIDFromCtx(c)
-	//err = s.inkExportService.Edit(c, &ink_export.EditInkExportOpts{
-	//	ID:             req.ID,
-	//	Name:           req.Name,
-	//	Code:           req.Code,
-	//	ProductionOrderID: req.ProductionOrderID,
-	//	ExportDate:     req.ExportDate,
-	//	Description:    req.Description,
-	//	Data:           req.Data,
-	//	Status:         req.Status,
-	//	UpdatedBy:      userId,
-	//})
-	//if err != nil {
-	//	transportutil.Error(c, err)
-	//	return
-	//}
-	//transportutil.SendJSONResponse(c, &dto.EditInkExportResponse{})
+
+func (s inkController) EditInkReturn(c *gin.Context) {
+	req := &dto.EditInkReturnRequest{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+	userId := interceptor.UserIDFromCtx(c)
+	err = s.inkReturnService.Edit(c, &ink_return.EditInkReturnOpts{
+		UpdatedBy: userId,
+	})
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+	transportutil.SendJSONResponse(c, &dto.EditInkReturnResponse{})
 }
 
 func toInkReturnResp(f *ink_return.InkReturnData) *dto.InkReturn {
@@ -257,7 +250,6 @@ func toInkExportResp(f *ink_export.InkExportData) *dto.InkExport {
 		InkExportDetail:     inkExportDetail,
 		InkReturnData:       inkReturnResp,
 	}
-
 }
 
 func (s inkController) ExportInk(c *gin.Context) {
@@ -333,6 +325,32 @@ func (s inkController) FindInkExportByPO(c *gin.Context) {
 	transportutil.SendJSONResponse(c, &dto.FindInkExportByPOResponse{
 		InkExportDetail: exportDetailResp,
 	})
+}
+
+func (s inkController) EditExportInk(c *gin.Context) {
+	//req := &dto.EditInkExportRequest{}
+	//err := c.ShouldBind(req)
+	//if err != nil {
+	//	transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+	//	return
+	//}
+	//userId := interceptor.UserIDFromCtx(c)
+	//err = s.inkExportService.Edit(c, &ink_export.EditInkExportOpts{
+	//	ID:             req.ID,
+	//	Name:           req.Name,
+	//	Code:           req.Code,
+	//	ProductionOrderID: req.ProductionOrderID,
+	//	ExportDate:     req.ExportDate,
+	//	Description:    req.Description,
+	//	Data:           req.Data,
+	//	Status:         req.Status,
+	//	UpdatedBy:      userId,
+	//})
+	//if err != nil {
+	//	transportutil.Error(c, err)
+	//	return
+	//}
+	//transportutil.SendJSONResponse(c, &dto.EditInkExportResponse{})
 }
 
 func (s inkController) FindInkImport(c *gin.Context) {
@@ -480,6 +498,7 @@ func (s inkController) FindInk(c *gin.Context) {
 		Total: cnt.Count,
 	})
 }
+
 func (s inkController) EditInk(c *gin.Context) {
 	req := &dto.EditInkRequest{}
 	err := c.ShouldBind(req)

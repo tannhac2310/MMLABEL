@@ -9,16 +9,24 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/generic"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/idutil"
 )
 
 type EditInkReturnDetailOpts struct {
-	ID string
+	InkID             string
+	InkExportDetailID string
+	Quantity          float64
+	ColorDetail       map[string]interface{}
+	Description       string
+	Data              map[string]interface{}
 }
 
 type EditInkReturnOpts struct {
 	ID        string
 	UpdatedBy string
+
+	InkReturnDetail []*EditInkReturnDetailOpts
 }
 
 type CreateInkReturnDetailOpts struct {
@@ -61,8 +69,118 @@ type inkReturnService struct {
 }
 
 func (p inkReturnService) Edit(ctx context.Context, opt *EditInkReturnOpts) error {
-	// todo implement later
-	panic("not implemented")
+	now := time.Now()
+
+	inkReturn, err := p.inkReturnRepo.FindByID(ctx, opt.ID)
+	if err != nil {
+		return err
+	}
+	inkReturn.UpdatedBy = opt.UpdatedBy
+	inkReturn.UpdatedAt = now
+
+	inkReturnItems, err := p.inkReturnDetailRepo.Search(ctx, &repository.SearchInkReturnDetailOpts{
+		InkReturnID: inkReturn.ID,
+		Limit:       10000,
+		Offset:      0,
+	})
+	if err != nil {
+		return err
+	}
+
+	updatingItems := generic.ToMap(opt.InkReturnDetail, func(v *EditInkReturnDetailOpts) string {
+		return v.InkID
+	})
+
+	execTx := cockroach.ExecInTx(ctx, func(c context.Context) error {
+		// modify changing ink return detail
+		for i := range inkReturnItems {
+			updatingItem, ok := updatingItems[inkReturnItems[i].InkID]
+			if !ok {
+				continue
+			}
+
+			// update returning ink
+			existingQuality := inkReturnItems[i].Quantity
+			inkReturnItems[i].Quantity = updatingItem.Quantity
+			inkReturnItems[i].Description = cockroach.String(updatingItem.Description)
+			inkReturnItems[i].UpdatedAt = now
+			if err := p.inkReturnDetailRepo.Update(ctx, inkReturnItems[i].InkReturnDetail); err != nil {
+				return fmt.Errorf("error when update return ink detail: %w", err)
+			}
+
+			// remove updated item out of map
+			delete(updatingItems, inkReturnItems[i].InkID)
+
+			// correct ink quality with updating quantity
+			inkData, err := p.inkRepo.FindByID(c, inkReturnItems[i].InkID)
+			if err != nil {
+				return fmt.Errorf("màu mực không tồn tại. id: %w", err)
+			}
+			inkData.Quantity = inkData.Quantity - existingQuality + inkReturnItems[i].Quantity
+
+			if err := p.inkRepo.Update(c, inkData.Ink); err != nil {
+				return fmt.Errorf("error when insert ink: %w", err)
+			}
+		}
+
+		// add new changing ink return detail
+		for _, inkReturnDetail := range updatingItems {
+			newInkReturnDetail := &model.InkReturnDetail{
+				ID:                idutil.ULIDNow(),
+				InkReturnID:       inkReturn.ID,
+				InkExportID:       inkReturn.InkExportID, // todo remove this field
+				InkID:             inkReturnDetail.InkID,
+				InkExportDetailID: inkReturnDetail.InkExportDetailID,
+				Quantity:          inkReturnDetail.Quantity,
+				ColorDetail:       inkReturnDetail.ColorDetail,
+				Description:       cockroach.String(inkReturnDetail.Description),
+				Data:              inkReturnDetail.Data,
+				CreatedAt:         now,
+				UpdatedAt:         now,
+			}
+			if err := p.inkReturnDetailRepo.Insert(c, newInkReturnDetail); err != nil {
+				return fmt.Errorf("error when insert ink import detail: %w", err)
+			}
+
+			// check exist inkID and inkExportID in ink_export_detail
+			inkExportDetail, err := p.inkExportDetailRepo.Search(c, &repository.SearchInkExportDetailOpts{
+				InkExportID: inkReturn.InkExportID,
+				InkID:       inkReturnDetail.InkID,
+				Limit:       1,
+				Offset:      0,
+			})
+			if err != nil {
+				return fmt.Errorf("phiếu xuất kho và màu mực không tồn tại: %w", err)
+			}
+			if len(inkExportDetail) == 0 {
+				return fmt.Errorf("phiếu xuất kho và màu mực không tồn tại")
+			}
+
+			// check if inkExportDetail.InkID exist in ink.ID
+			inkData, err := p.inkRepo.FindByID(c, inkReturnDetail.InkID)
+			if err != nil {
+				return fmt.Errorf("màu mực không tồn tại. id: %w", err)
+			}
+
+			// update ink quantity
+			inkData.Quantity = inkData.Quantity + inkReturnDetail.Quantity
+			if err := p.inkRepo.Update(c, inkData.Ink); err != nil {
+				return fmt.Errorf("error when insert ink: %w", err)
+			}
+		}
+
+		// update ink return
+		if err := p.inkReturnRepo.Update(ctx, inkReturn); err != nil {
+			return fmt.Errorf("error when update ink return: %w", err)
+		}
+
+		return nil
+	})
+	if execTx != nil {
+		return execTx
+	}
+
+	return nil
 }
 
 func (p inkReturnService) Create(ctx context.Context, opt *CreateInkReturnOpts) (string, error) {
