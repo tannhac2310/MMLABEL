@@ -1,8 +1,9 @@
 package dto
 
 import (
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/commondto"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/commondto"
 
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
@@ -60,6 +61,7 @@ type EditInkRequest struct {
 	Status         enum.CommonStatus      `json:"status"`
 	Quantity       int64                  `json:"quantity"`
 }
+
 type EditInkResponse struct{}
 
 // dto for ink_import.create
@@ -222,6 +224,14 @@ type CreateInkReturnRequest struct {
 	Data            map[string]interface{}       `json:"data"`
 	InkReturnDetail []*CreateInkReturnDetailOpts `json:"inkReturnDetail" binding:"required"`
 }
+
+type EditInkReturnRequest struct {
+	ID              string                       `json:"id" binding:"required"`
+	InkReturnDetail []*CreateInkReturnDetailOpts `json:"inkReturnDetail" binding:"required"`
+}
+
+type EditInkReturnResponse struct{}
+
 type CreateInkReturnDetailOpts struct {
 	InkID             string                 `json:"inkID"`
 	InkExportDetailID string                 `json:"inkExportDetailID"`

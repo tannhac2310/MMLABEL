@@ -5,6 +5,7 @@
 *.so
 *.dylib
 .idea
+.vscode
 # Test binary, built with `go test -c`
 *.test
 
@@ -18,3 +19,5 @@ deployments/.DS_Store
 internal/.DS_Store
 pkg/.DS_Store
 resources/.DS_Store
+
+.env
