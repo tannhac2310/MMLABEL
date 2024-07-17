@@ -82,6 +82,7 @@ func (s inkController) FindInkReturn(c *gin.Context) {
 	}
 	inkReturns, cnt, err := s.inkReturnService.Find(c, &ink_return.FindInkReturnOpts{
 		Name: req.Filter.Name,
+		ID:   req.Filter.ID,
 	}, &repository.Sort{
 		Order: repository.SortOrderDESC,
 		By:    "ID",
@@ -109,8 +110,22 @@ func (s inkController) EditInkReturn(c *gin.Context) {
 		return
 	}
 	userId := interceptor.UserIDFromCtx(c)
+	inkReturnDetail := make([]*ink_return.EditInkReturnDetailOpts, 0, len(req.InkReturnDetail))
+	for _, f := range req.InkReturnDetail {
+		inkReturnDetail = append(inkReturnDetail, &ink_return.EditInkReturnDetailOpts{
+			//ID:                f.ID, //TODO do we need this?
+			InkID:             f.InkID,
+			InkExportDetailID: f.InkExportDetailID,
+			Quantity:          f.Quantity,
+			Description:       f.Description,
+			Data:              f.Data,
+		})
+	}
 	err = s.inkReturnService.Edit(c, &ink_return.EditInkReturnOpts{
-		UpdatedBy: userId,
+		ID:              req.ID,
+		Description:     req.Description,
+		UpdatedBy:       userId,
+		InkReturnDetail: inkReturnDetail,
 	})
 	if err != nil {
 		transportutil.Error(c, err)

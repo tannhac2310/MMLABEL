@@ -23,9 +23,9 @@ type EditInkReturnDetailOpts struct {
 }
 
 type EditInkReturnOpts struct {
-	ID        string
-	UpdatedBy string
-
+	ID              string
+	UpdatedBy       string
+	Description     string
 	InkReturnDetail []*EditInkReturnDetailOpts
 }
 
@@ -75,6 +75,7 @@ func (p inkReturnService) Edit(ctx context.Context, opt *EditInkReturnOpts) erro
 	if err != nil {
 		return err
 	}
+	inkReturn.Description = cockroach.String(opt.Description)
 	inkReturn.UpdatedBy = opt.UpdatedBy
 	inkReturn.UpdatedAt = now
 
