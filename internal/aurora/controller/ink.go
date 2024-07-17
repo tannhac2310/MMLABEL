@@ -26,6 +26,7 @@ type InkController interface {
 	FindInkExport(c *gin.Context)
 	ReturnInk(c *gin.Context)
 	FindInkReturn(c *gin.Context)
+	EditInkReturn(c *gin.Context)
 }
 
 type inkController struct {
@@ -638,6 +639,15 @@ func RegisterInkController(
 		&dto.CreateInkReturnRequest{},
 		&dto.CreateInkReturnResponse{},
 		"return ink",
+	)
+
+	routeutil.AddEndpoint(
+		g,
+		"edit-ink-return",
+		c.EditInkReturn,
+		&dto.EditInkReturnRequest{},
+		&dto.EditInkReturnResponse{},
+		"edit return ink",
 	)
 
 	routeutil.AddEndpoint(
