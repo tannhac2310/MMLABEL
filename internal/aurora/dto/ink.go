@@ -227,6 +227,7 @@ type CreateInkReturnRequest struct {
 
 type EditInkReturnRequest struct {
 	ID              string                       `json:"id" binding:"required"`
+	Description     string                       `json:"description"`
 	InkReturnDetail []*CreateInkReturnDetailOpts `json:"inkReturnDetail" binding:"required"`
 }
 
