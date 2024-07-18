@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_export"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_import"
@@ -231,7 +233,7 @@ func toInkExportResp(f *ink_export.InkExportData) *dto.InkExport {
 			Data:        k.Data,
 		})
 	}
-
+	fmt.Println(f.ProductionOrderData)
 	po := f.ProductionOrderData
 	productionOrderData := &dto.ProductionOrderData{}
 	if po != nil {

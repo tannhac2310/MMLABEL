@@ -75,14 +75,14 @@ func (i *SearchInkExportOpts) buildQuery(isCount bool) (string, []interface{}) {
 	conds := ""
 	joins := " JOIN users AS cu ON cu.id = b.created_by " +
 		"JOIN users AS uu ON uu.id = b.updated_by "
-
+	joins += fmt.Sprintf(" LEFT JOIN production_orders AS po ON po.id = b.%s", model.InkExportFieldProductionOrderID)
 	if i.ID != "" {
 		conds += " AND b.id = $1"
 		args = append(args, i.ID)
 	}
 
 	if i.ProductionOrderName != "" {
-		joins += fmt.Sprintf(" LEFT JOIN production_orders AS po ON po.id = b.%s", model.InkExportFieldProductionOrderID)
+
 		args = append(args, "%"+i.ProductionOrderName+"%")
 		conds += fmt.Sprintf(" AND po.%s ILIKE $%d ", model.ProductionOrderFieldName, len(args))
 	}
@@ -108,10 +108,9 @@ func (i *SearchInkExportOpts) buildQuery(isCount bool) (string, []interface{}) {
 		conds += fmt.Sprintf(" AND b.%s <= $%d", model.InkExportFieldExportDate, len(args))
 	}
 	if i.Search != "" {
-		joins += fmt.Sprintf(" LEFT JOIN production_orders AS po ON po.id = b.%s", model.InkExportFieldProductionOrderID)
 		args = append(args, "%"+i.Search+"%")
-		conds += fmt.Sprintf(" AND (b.%[2]s ILIKE $%[1]d OR b.%[3]s ILIKE $%[1]d OR b.%[4]s ILIKE $%[1]d OR b.%[5]s ILIKE $%[1]d OR po.name ILIKE $%[1]d)",
-			len(args), model.InkExportFieldCode, model.InkExportFieldName, model.InkExportFieldDescription, model.InkExportFieldProductionOrderID,
+		conds += fmt.Sprintf(" AND (b.code ILIKE $%[1]d OR b.name ILIKE $%[1]d OR b.description ILIKE $%[1]d OR b.production_order_id ILIKE $%[1]d OR po.name ILIKE $%[1]d)",
+			len(args),
 		)
 	}
 

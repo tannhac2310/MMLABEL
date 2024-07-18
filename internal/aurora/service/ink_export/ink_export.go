@@ -3,8 +3,9 @@ package ink_export
 import (
 	"context"
 	"fmt"
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_return"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_return"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
@@ -222,11 +223,13 @@ func (p inkExportService) Find(ctx context.Context, opt *FindInkExportOpts, sort
 		return nil, nil, err
 	}
 	results := make([]*InkExportData, 0)
-
+	// get production order ids
+	productionOrderIDs := make([]string, 0)
 	//InkExportIDs
 	inkExportIDs := make([]string, 0)
 	for _, inkExport := range inkExports {
 		inkExportIDs = append(inkExportIDs, inkExport.ID)
+		productionOrderIDs = append(productionOrderIDs, inkExport.ProductionOrderID)
 	}
 	inkReturnData, _, err := p.inkReturnSvc.Find(ctx, &ink_return.FindInkReturnOpts{
 		InkExportIDs: inkExportIDs,
@@ -237,6 +240,21 @@ func (p inkExportService) Find(ctx context.Context, opt *FindInkExportOpts, sort
 	if err != nil {
 		return nil, nil, fmt.Errorf("error when find ink return data: %w", err)
 	}
+
+	// find production order data
+	productionOrderData, err := p.productionOrderRepo.Search(ctx, &repository.SearchProductionOrdersOpts{
+		IDs:    productionOrderIDs,
+		Limit:  10000,
+		Offset: 0,
+	})
+	if err != nil {
+		return nil, nil, fmt.Errorf("error when find production order data: %w", err)
+	}
+	productionOrderDataMap := make(map[string]*repository.ProductionOrderData)
+	for _, productionOrder := range productionOrderData {
+		productionOrderDataMap[productionOrder.ID] = productionOrder
+	}
+
 	inkReturnDataMap := make(map[string][]*ink_return.InkReturnData)
 	for _, inkReturn := range inkReturnData {
 		if _, ok := inkReturnDataMap[inkReturn.InkExportID]; !ok {
@@ -244,7 +262,6 @@ func (p inkExportService) Find(ctx context.Context, opt *FindInkExportOpts, sort
 		}
 		inkReturnDataMap[inkReturn.InkExportID] = append(inkReturnDataMap[inkReturn.InkExportID], inkReturn)
 	}
-
 	// write code to get ink_export_detail
 	for _, inkExport := range inkExports {
 		data := &InkExportData{
@@ -262,7 +279,7 @@ func (p inkExportService) Find(ctx context.Context, opt *FindInkExportOpts, sort
 			UpdatedBy:           inkExport.UpdatedBy,
 			UpdatedByName:       inkExport.UpdatedByName,
 			InkExportDetail:     nil,
-			ProductionOrderData: nil,
+			ProductionOrderData: productionOrderDataMap[inkExport.ProductionOrderID],
 		}
 		inkExportDetails, err := p.inkExportDetailRepo.Search(ctx, &repository.SearchInkExportDetailOpts{
 			InkExportID: inkExport.ID,
@@ -290,18 +307,6 @@ func (p inkExportService) Find(ctx context.Context, opt *FindInkExportOpts, sort
 		}
 		data.InkExportDetail = inkExportDetailResults
 
-		// find production order data
-		productionOrderData, err := p.productionOrderRepo.Search(ctx, &repository.SearchProductionOrdersOpts{
-			IDs:    []string{inkExport.ProductionOrderID},
-			Limit:  1,
-			Offset: 0,
-		})
-		if err != nil {
-			return nil, nil, err
-		}
-		if len(productionOrderData) == 1 {
-			data.ProductionOrderData = productionOrderData[0]
-		}
 		// find ink return data
 		data.InkReturnData = inkReturnDataMap[inkExport.ID]
 
