@@ -163,11 +163,11 @@ func (p inkExportService) Edit(ctx context.Context, opt *EditInkExportOpts) erro
 			if err != nil {
 				return fmt.Errorf("màu mực %s không tồn tại: %w", inkExportItems[i].InkID, err)
 			}
-			if inkData.Quantity < updatingItem.Quantity {
-				return fmt.Errorf("số lượng màu mực còn lại không đủ")
+			inkData.Quantity = inkData.Quantity + inkExportItems[i].Quantity - updatingItem.Quantity
+			if inkData.Quantity < 0 {
+				return fmt.Errorf("không đủ số lượng để xuất kho: trong kho còn %v", inkData.Quantity)
 			}
 
-			existingQuality := inkExportItems[i].Quantity
 			inkExportItems[i].Quantity = updatingItem.Quantity
 			inkExportItems[i].Description = cockroach.String(updatingItem.Description)
 			inkExportItems[i].UpdatedAt = now
@@ -179,10 +179,6 @@ func (p inkExportService) Edit(ctx context.Context, opt *EditInkExportOpts) erro
 			delete(updatingItems, inkExportItems[i].InkID)
 
 			// correct ink quality with updating quantity
-			inkData.Quantity = inkData.Quantity + existingQuality - inkExportItems[i].Quantity
-			if inkData.Quantity < 0 {
-				return fmt.Errorf("không đủ số lượng để xuất kho: trong kho còn %v", inkData.Quantity)
-			}
 			if err := p.inkRepo.Update(c, inkData.Ink); err != nil {
 				return fmt.Errorf("error when insert ink: %w", err)
 			}
