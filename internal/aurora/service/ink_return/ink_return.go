@@ -118,7 +118,9 @@ func (p inkReturnService) Edit(ctx context.Context, opt *EditInkReturnOpts) erro
 				return fmt.Errorf("màu mực không tồn tại. id: %w", err)
 			}
 			inkData.Quantity = inkData.Quantity - existingQuality + inkReturnItems[i].Quantity
-
+			if inkData.Quantity < 0 {
+				return fmt.Errorf("không đủ số lượng để xuất kho: trong kho còn %v", inkData.Quantity)
+			}
 			if err := p.inkRepo.Update(c, inkData.Ink); err != nil {
 				return fmt.Errorf("error when insert ink: %w", err)
 			}

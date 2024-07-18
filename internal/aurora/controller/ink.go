@@ -115,7 +115,6 @@ func (s inkController) EditInkReturn(c *gin.Context) {
 	inkReturnDetail := make([]*ink_return.EditInkReturnDetailOpts, 0, len(req.InkReturnDetail))
 	for _, f := range req.InkReturnDetail {
 		inkReturnDetail = append(inkReturnDetail, &ink_return.EditInkReturnDetailOpts{
-			//ID:                f.ID, //TODO do we need this?
 			InkID:             f.InkID,
 			InkExportDetailID: f.InkExportDetailID,
 			Quantity:          f.Quantity,
@@ -346,29 +345,33 @@ func (s inkController) FindInkExportByPO(c *gin.Context) {
 }
 
 func (s inkController) EditExportInk(c *gin.Context) {
-	//req := &dto.EditInkExportRequest{}
-	//err := c.ShouldBind(req)
-	//if err != nil {
-	//	transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
-	//	return
-	//}
-	//userId := interceptor.UserIDFromCtx(c)
-	//err = s.inkExportService.Edit(c, &ink_export.EditInkExportOpts{
-	//	ID:             req.ID,
-	//	Name:           req.Name,
-	//	Code:           req.Code,
-	//	ProductionOrderID: req.ProductionOrderID,
-	//	ExportDate:     req.ExportDate,
-	//	Description:    req.Description,
-	//	Data:           req.Data,
-	//	Status:         req.Status,
-	//	UpdatedBy:      userId,
-	//})
-	//if err != nil {
-	//	transportutil.Error(c, err)
-	//	return
-	//}
-	//transportutil.SendJSONResponse(c, &dto.EditInkExportResponse{})
+	req := &dto.EditInkExportRequest{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+	userId := interceptor.UserIDFromCtx(c)
+	inkExportDetail := make([]*ink_export.EditInkExportDetailOpts, 0, len(req.InkExportDetail))
+	for _, f := range req.InkExportDetail {
+		inkExportDetail = append(inkExportDetail, &ink_export.EditInkExportDetailOpts{
+			InkID:       f.InkID,
+			Quantity:    f.Quantity,
+			Description: f.Description,
+			Data:        f.Data,
+		})
+	}
+	err = s.inkExportService.Edit(c, &ink_export.EditInkExportOpts{
+		ID:              req.ID,
+		Description:     req.Description,
+		UpdatedBy:       userId,
+		InkExportDetail: inkExportDetail,
+	})
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+	transportutil.SendJSONResponse(c, &dto.EditInkExportResponse{})
 }
 
 func (s inkController) FindInkImport(c *gin.Context) {
@@ -634,12 +637,22 @@ func RegisterInkController(
 
 	routeutil.AddEndpoint(
 		g,
+		"edit-ink-export",
+		c.EditExportInk,
+		&dto.EditInkExportRequest{},
+		&dto.EditInkExportResponse{},
+		"edit return ink",
+	)
+
+	routeutil.AddEndpoint(
+		g,
 		"find-ink-export",
 		c.FindInkExport,
 		&dto.FindInkExportsRequest{},
 		&dto.FindInkExportsResponse{},
 		"Find export ink",
 	)
+
 	routeutil.AddEndpoint(
 		g,
 		"find-ink-export-detail-by-po",
