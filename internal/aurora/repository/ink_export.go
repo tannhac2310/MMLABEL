@@ -36,6 +36,7 @@ type InkExportRepo interface {
 	Insert(ctx context.Context, e *model.InkExport) error
 	Update(ctx context.Context, e *model.InkExport) error
 	SoftDelete(ctx context.Context, id string) error
+	FindByID(ctx context.Context, id string) (*model.InkExport, error)
 	Search(ctx context.Context, s *SearchInkExportOpts) ([]*InkExportData, error)
 	Count(ctx context.Context, s *SearchInkExportOpts) (*CountResult, error)
 }
@@ -67,6 +68,37 @@ func (i *inkExportRepo) SoftDelete(ctx context.Context, id string) error {
 		return fmt.Errorf("not found any records to delete")
 	}
 	return nil
+}
+
+func (i *inkExportRepo) FindByID(ctx context.Context, id string) (*model.InkExport, error) {
+	e := &model.InkExport{}
+	if err := cockroach.FindOne(ctx, e, "id = $1", id); err != nil {
+		return nil, err
+	}
+
+	return e, nil
+}
+
+func (i *inkExportRepo) Search(ctx context.Context, s *SearchInkExportOpts) ([]*InkExportData, error) {
+	inkExportData := make([]*InkExportData, 0)
+	sql, args := s.buildQuery(false)
+	err := cockroach.Select(ctx, sql, args...).ScanAll(&inkExportData)
+	if err != nil {
+		return nil, fmt.Errorf("cockroach.Select: %w", err)
+	}
+
+	return inkExportData, nil
+}
+
+func (i *inkExportRepo) Count(ctx context.Context, s *SearchInkExportOpts) (*CountResult, error) {
+	countResult := &CountResult{}
+	sql, args := s.buildQuery(true)
+	err := cockroach.Select(ctx, sql, args...).ScanOne(countResult)
+	if err != nil {
+		return nil, fmt.Errorf("chat.Count: %w", err)
+	}
+
+	return countResult, nil
 }
 
 // buildSearchInkExportQuery is a helper function to build query for search inkExports
@@ -138,28 +170,6 @@ func (i *SearchInkExportOpts) buildQuery(isCount bool) (string, []interface{}) {
 		%s
 		LIMIT %d
 		OFFSET %d`, strings.Join(fields, ", b."), b.TableName(), joins, conds, order, i.Limit, i.Offset), args
-}
-
-func (i *inkExportRepo) Search(ctx context.Context, s *SearchInkExportOpts) ([]*InkExportData, error) {
-	inkExportData := make([]*InkExportData, 0)
-	sql, args := s.buildQuery(false)
-	err := cockroach.Select(ctx, sql, args...).ScanAll(&inkExportData)
-	if err != nil {
-		return nil, fmt.Errorf("cockroach.Select: %w", err)
-	}
-
-	return inkExportData, nil
-}
-
-func (i *inkExportRepo) Count(ctx context.Context, s *SearchInkExportOpts) (*CountResult, error) {
-	countResult := &CountResult{}
-	sql, args := s.buildQuery(true)
-	err := cockroach.Select(ctx, sql, args...).ScanOne(countResult)
-	if err != nil {
-		return nil, fmt.Errorf("chat.Count: %w", err)
-	}
-
-	return countResult, nil
 }
 
 // NewInkExportRepo is a constructor for inkExport repository

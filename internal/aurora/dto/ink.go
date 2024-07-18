@@ -113,12 +113,14 @@ type FindInkImportsRequest struct {
 	Filter *InkImportFilter  `json:"filter" binding:"required"`
 	Paging *commondto.Paging `json:"paging" binding:"required"`
 }
+
 type InkImportFilter struct {
 	Name   string                     `json:"name"`
 	Code   string                     `json:"code"`
 	ID     string                     `json:"id"`
 	Status enum.InventoryCommonStatus `json:"status"`
 }
+
 type InkImport struct {
 	ID              string                     `json:"id"`
 	Name            string                     `json:"name"`
@@ -130,12 +132,29 @@ type InkImport struct {
 	CreatedBy       string                     `json:"createdBy"`
 	CreatedAt       time.Time                  `json:"createdAt"`
 }
+
 type FindInkImportsResponse struct {
 	InkImport []*InkImport `json:"inkImport"`
 	Total     int64        `json:"total"`
 }
 
-// dto for in_export.create
+// dto for in_export.edit
+type EditInkExportDetail struct {
+	InkID       string                 `json:"inkID" binding:"required"`
+	Quantity    float64                `json:"quantity" binding:"required"`
+	Description string                 `json:"description"`
+	Data        map[string]interface{} `json:"data"`
+}
+
+type EditInkExportRequest struct {
+	ID              string                 `json:"id" binding:"required"`
+	Description     string                 `json:"description"`
+	InkExportDetail []*EditInkExportDetail `json:"inkExportDetail" binding:"required"`
+}
+
+type EditInkExportResponse struct{}
+
+// dto for ink_export.create
 type CreateInkExportRequest struct {
 	Name              string                   `json:"name" binding:"required"`
 	Code              string                   `json:"code" binding:"required"`
@@ -152,6 +171,7 @@ type CreateInkExportDetail struct {
 	Description string                 `json:"description"`
 	Data        map[string]interface{} `json:"data"`
 }
+
 type InkDataExportDetail struct {
 	Name         string                 `json:"name"`
 	Code         string                 `json:"code"`
@@ -180,6 +200,7 @@ type FindInkExportsRequest struct {
 	Filter *InkExportFilter  `json:"filter" binding:"required"`
 	Paging *commondto.Paging `json:"paging" binding:"required"`
 }
+
 type InkExportFilter struct {
 	ProductName string `json:"productName"`
 	InkCode     string `json:"inkCode"`
@@ -193,6 +214,7 @@ type ProductionOrderData struct {
 	ProductCode string `json:"productCode"`
 	ProductName string `json:"productName"`
 }
+
 type InkExport struct {
 	ID                  string                     `json:"id"`
 	Name                string                     `json:"name"`
@@ -211,6 +233,7 @@ type InkExport struct {
 	InkExportDetail     []*InkExportDetail         `json:"inkExportDetail"`
 	InkReturnData       []*InkReturn               `json:"inkReturnData"`
 }
+
 type FindInkExportsResponse struct {
 	InkExport []*InkExport `json:"inkExport"`
 	Total     int64        `json:"total"`
@@ -225,10 +248,20 @@ type CreateInkReturnRequest struct {
 	InkReturnDetail []*CreateInkReturnDetailOpts `json:"inkReturnDetail" binding:"required"`
 }
 
+// dto for ink_return.edit
+type EditInkReturnDetailOpts struct {
+	InkID             string                 `json:"inkID"`
+	InkExportDetailID string                 `json:"inkExportDetailID"`
+	Quantity          float64                `json:"quantity"`
+	ColorDetail       map[string]interface{} `json:"colorDetail"`
+	Description       string                 `json:"description"`
+	Data              map[string]interface{} `json:"data"`
+}
+
 type EditInkReturnRequest struct {
-	ID              string                       `json:"id" binding:"required"`
-	Description     string                       `json:"description"`
-	InkReturnDetail []*CreateInkReturnDetailOpts `json:"inkReturnDetail" binding:"required"`
+	ID              string                     `json:"id" binding:"required"`
+	Description     string                     `json:"description"`
+	InkReturnDetail []*EditInkReturnDetailOpts `json:"inkReturnDetail" binding:"required"`
 }
 
 type EditInkReturnResponse struct{}
@@ -244,18 +277,22 @@ type CreateInkReturnDetailOpts struct {
 
 type CreateInkReturnResponse struct {
 }
+
 type InkReturnFilter struct {
 	Name string `json:"name"`
 	ID   string `json:"id"`
 }
+
 type FindInkReturnsRequest struct {
 	Filter *InkReturnFilter  `json:"filter" binding:"required"`
 	Paging *commondto.Paging `json:"paging" binding:"required"`
 }
+
 type FindInkReturnsResponse struct {
 	InkReturn []*InkReturn `json:"inkReturn"`
 	Total     int64        `json:"total"`
 }
+
 type InkReturn struct {
 	ID              string                     `json:"id"`
 	Name            string                     `json:"name"`
@@ -286,10 +323,10 @@ type InkReturnDetail struct {
 }
 
 // dto for ink_export.find_by_po
-
 type FindInkExportByPORequest struct {
 	ProductionOrderID string `json:"productionOrderID" binding:"required"`
 }
+
 type FindInkExportByPOResponse struct {
 	InkExportDetail []*InkExportDetail `json:"inkExportDetail"`
 }

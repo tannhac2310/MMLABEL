@@ -3,22 +3,30 @@ package ink_export
 import (
 	"context"
 	"fmt"
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_return"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_return"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/generic"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/idutil"
 )
 
 type EditInkExportDetailOpts struct {
+	InkID       string
+	Quantity    float64
+	Description string
+	Data        map[string]interface{}
 }
 
 type EditInkExportOpts struct {
-	ID string
-	// implement later
+	ID              string
+	Description     string
+	UpdatedBy       string
+	InkExportDetail []*EditInkExportDetailOpts
 }
 
 type CreateInkExportDetailOpts struct {
@@ -27,6 +35,7 @@ type CreateInkExportDetailOpts struct {
 	Description string
 	Data        map[string]interface{}
 }
+
 type CreateInkExportOpts struct {
 	Name              string
 	Code              string
@@ -37,6 +46,7 @@ type CreateInkExportOpts struct {
 	CreatedBy         string
 	InkExportDetail   []*CreateInkExportDetailOpts
 }
+
 type FindInkExportOpts struct {
 	Search      string
 	InkCode     string
@@ -90,8 +100,136 @@ func (p inkExportService) FindImportDetailByPOID(ctx context.Context, poID strin
 }
 
 func (p inkExportService) Edit(ctx context.Context, opt *EditInkExportOpts) error {
-	// todo implement later
-	panic("not implemented")
+	now := time.Now()
+
+	inkExport, err := p.inkExportRepo.FindByID(ctx, opt.ID)
+	if err != nil {
+		return err
+	}
+	inkExport.Description = cockroach.String(opt.Description)
+	inkExport.UpdatedBy = opt.UpdatedBy
+	inkExport.UpdatedAt = now
+
+	inkExportItems, err := p.inkExportDetailRepo.Search(ctx, &repository.SearchInkExportDetailOpts{
+		InkExportID: inkExport.ID,
+		Limit:       10000,
+		Offset:      0,
+	})
+	if err != nil {
+		return err
+	}
+
+	inkReturns, _, err := p.inkReturnSvc.Find(ctx, &ink_return.FindInkReturnOpts{
+		InkExportID: inkExport.ID,
+	}, &repository.Sort{
+		Order: repository.SortOrderDESC,
+		By:    "ID",
+	}, 1000, 0)
+	if err != nil {
+		return fmt.Errorf("error when find ink return data: %w", err)
+	}
+
+	// inkReturnQuantity is a map of ink_id and quality
+	inkReturnQuantity := make(map[string]float64, 0)
+	for _, inkReturn := range inkReturns {
+		for _, inkReturnDetail := range inkReturn.InkReturnDetail {
+			inkReturnItem, ok := inkReturnQuantity[inkReturnDetail.InkID]
+			if !ok {
+				inkReturnItem = 0
+			}
+			inkReturnItem += inkReturnDetail.Quantity
+		}
+	}
+
+	updatingItems := generic.ToMap(opt.InkExportDetail, func(v *EditInkExportDetailOpts) string {
+		return v.InkID
+	})
+
+	execTx := cockroach.ExecInTx(ctx, func(c context.Context) error {
+		// modify changing ink export detail
+		for i := range inkExportItems {
+			updatingItem, ok := updatingItems[inkExportItems[i].InkID]
+			if !ok {
+				continue
+			}
+
+			// update export ink
+			returnQuantity := inkReturnQuantity[inkExportItems[i].InkID]
+			if returnQuantity > updatingItem.Quantity {
+				return fmt.Errorf("số lượng màu mực đang chỉnh sửa phải lớn hơn hoặc bằng số lượng đã trả")
+			}
+
+			inkData, err := p.inkRepo.FindByID(c, inkExportItems[i].InkID)
+			if err != nil {
+				return fmt.Errorf("màu mực %s không tồn tại: %w", inkExportItems[i].InkID, err)
+			}
+			if inkData.Quantity < updatingItem.Quantity {
+				return fmt.Errorf("số lượng màu mực còn lại không đủ")
+			}
+
+			existingQuality := inkExportItems[i].Quantity
+			inkExportItems[i].Quantity = updatingItem.Quantity
+			inkExportItems[i].Description = cockroach.String(updatingItem.Description)
+			inkExportItems[i].UpdatedAt = now
+			if err := p.inkExportDetailRepo.Update(ctx, inkExportItems[i].InkExportDetail); err != nil {
+				return fmt.Errorf("error when update return ink detail: %w", err)
+			}
+
+			// remove updated item out of map
+			delete(updatingItems, inkExportItems[i].InkID)
+
+			// correct ink quality with updating quantity
+			inkData.Quantity = inkData.Quantity + existingQuality - inkExportItems[i].Quantity
+			if inkData.Quantity < 0 {
+				return fmt.Errorf("không đủ số lượng để xuất kho: trong kho còn %v", inkData.Quantity)
+			}
+			if err := p.inkRepo.Update(c, inkData.Ink); err != nil {
+				return fmt.Errorf("error when insert ink: %w", err)
+			}
+		}
+
+		// add new changing ink export detail
+		for _, inkExportDetail := range updatingItems {
+			newInkExportDetail := &model.InkExportDetail{
+				ID:          idutil.ULIDNow(),
+				InkExportID: inkExport.ID, // todo remove this field
+				InkID:       inkExportDetail.InkID,
+				Quantity:    inkExportDetail.Quantity,
+				Description: cockroach.String(inkExportDetail.Description),
+				Data:        inkExportDetail.Data,
+				CreatedAt:   now,
+				UpdatedAt:   now,
+			}
+			if err := p.inkExportDetailRepo.Insert(c, newInkExportDetail); err != nil {
+				return fmt.Errorf("error when insert ink export detail: %w", err)
+			}
+
+			// correct ink quality with updating quantity
+			inkData, err := p.inkRepo.FindByID(c, inkExportDetail.InkID)
+			if err != nil {
+				return fmt.Errorf("error when find ink by id: %w", err)
+			}
+			inkData.Quantity = inkData.Quantity - inkExportDetail.Quantity
+			if inkData.Quantity < 0 {
+				return fmt.Errorf("không đủ số lượng để xuất kho: trong kho còn %v", inkData.Quantity)
+			}
+			if err := p.inkRepo.Update(c, inkData.Ink); err != nil {
+				return fmt.Errorf("error when insert ink: %w", err)
+			}
+		}
+
+		// update ink return
+		if err := p.inkExportRepo.Update(ctx, inkExport); err != nil {
+			return fmt.Errorf("error when update ink export: %w", err)
+		}
+
+		return nil
+	})
+	if execTx != nil {
+		return execTx
+	}
+
+	return nil
 }
 
 func (p inkExportService) Create(ctx context.Context, opt *CreateInkExportOpts) (string, error) {
@@ -192,7 +330,6 @@ type InkExportData struct {
 	ProductionOrderData *repository.ProductionOrderData
 	InkReturnData       []*ink_return.InkReturnData
 }
-
 type InkExportDetail struct {
 	ID          string
 	InkExportID string
