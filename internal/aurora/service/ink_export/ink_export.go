@@ -416,13 +416,18 @@ func (p inkExportService) Find(ctx context.Context, opt *FindInkExportOpts, sort
 		inkExportDetails, err := p.inkExportDetailRepo.Search(ctx, &repository.SearchInkExportDetailOpts{
 			InkExportID: inkExport.ID,
 			Limit:       10000,
+			Offset:      0,
+			Sort: &repository.Sort{
+				Order: repository.SortOrderASC,
+				By:    "ID",
+			},
 		})
 		if err != nil {
 			return nil, nil, err
 		}
 		inkExportDetailResults := make([]*InkExportDetail, 0)
 		for _, inkExportDetail := range inkExportDetails {
-			inkData, _ := p.inkRepo.FindByID(ctx, inkExportDetail.InkID)
+			inkData, _ := p.inkRepo.FindByID(ctx, inkExportDetail.InkID) // todo refactor this. p.inkExportDetailRepo.Search should return inkData
 			dataDetail := &InkExportDetail{
 				ID:          inkExportDetail.ID,
 				InkExportID: inkExportDetail.InkExportID,

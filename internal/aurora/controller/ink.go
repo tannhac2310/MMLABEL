@@ -216,6 +216,7 @@ func toInkExportResp(f *ink_export.InkExportData) *dto.InkExport {
 		inkData := &dto.InkDataExportDetail{
 			Name:         d.Name,
 			Code:         d.Code,
+			Quantity:     d.Quantity,
 			ProductCodes: d.ProductCodes,
 			Position:     d.Position,
 			Location:     d.Location,
