@@ -88,3 +88,5 @@ logs:
 	docker-compose --file ./deployments/docker-compose.yml logs -f $(service)
 destroy:
 	docker-compose --file ./deployments/docker-compose.yml down --remove-orphans
+stop:
+	docker-compose --file ./deployments/docker-compose.yml stop
