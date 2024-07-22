@@ -176,6 +176,7 @@ type InkDataExportDetail struct {
 	Name         string                 `json:"name"`
 	Code         string                 `json:"code"`
 	ProductCodes []string               `json:"productCodes"`
+	Quantity     float64                `json:"quantity"`
 	Position     string                 `json:"position"`
 	Location     string                 `json:"location"`
 	Manufacturer string                 `json:"manufacturer"`
