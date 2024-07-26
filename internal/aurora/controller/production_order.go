@@ -232,6 +232,7 @@ func (s productionOrderController) FindProductionOrdersWithNoPermission(c *gin.C
 		Total:            cnt.Count,
 	})
 }
+
 func (s productionOrderController) FindProductionOrders(c *gin.Context) {
 	req := &dto.FindProductionOrdersRequest{}
 	err := c.ShouldBind(req)
