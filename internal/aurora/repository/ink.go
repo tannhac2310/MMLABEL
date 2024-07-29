@@ -12,6 +12,7 @@ import (
 )
 
 type SearchInkOpts struct {
+	IDs          []string
 	ID           string
 	Name         string
 	Code         string
@@ -112,6 +113,11 @@ func (i *SearchInkOpts) buildQuery(isCount bool) (string, []interface{}) {
 	if i.Status > 0 {
 		args = append(args, i.Status)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkFieldStatus, len(args))
+	}
+
+	if len(i.IDs) > 0 {
+		args = append(args, i.IDs)
+		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.InkFieldID, len(args))
 	}
 
 	b := &model.Ink{}

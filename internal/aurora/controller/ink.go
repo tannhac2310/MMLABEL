@@ -29,6 +29,10 @@ type InkController interface {
 	ReturnInk(c *gin.Context)
 	FindInkReturn(c *gin.Context)
 	EditInkReturn(c *gin.Context)
+	// ink mixing
+	MixInk(c *gin.Context)
+	EditInkMixing(c *gin.Context)
+	FindInkMixing(c *gin.Context)
 }
 
 type inkController struct {
@@ -688,5 +692,32 @@ func RegisterInkController(
 		&dto.FindInkReturnsRequest{},
 		&dto.FindInkReturnsResponse{},
 		"Find return ink",
+	)
+
+	routeutil.AddEndpoint(
+		g,
+		"mix-ink",
+		c.MixInk,
+		&dto.CreateInkMixingRequest{},
+		&dto.CreateInkMixingResponse{},
+		"mix ink",
+	)
+
+	routeutil.AddEndpoint(
+		g,
+		"edit-ink-mixing",
+		c.EditInkMixing,
+		&dto.EditInkMixingRequest{},
+		&dto.EditInkMixingResponse{},
+		"edit ink mixing",
+	)
+
+	routeutil.AddEndpoint(
+		g,
+		"find-ink-mixing",
+		c.FindInkMixing,
+		&dto.FindInkMixingRequest{},
+		&dto.FindInkMixingResponse{},
+		"find ink mixing",
 	)
 }

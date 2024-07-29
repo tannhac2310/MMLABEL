@@ -57,6 +57,9 @@ type Service interface {
 	Edit(ctx context.Context, opt *EditInkOpts) error
 	Create(ctx context.Context, opt *CreateInkOpts) (string, error)
 	Delete(ctx context.Context, id string) error
+	MixInk(ctx context.Context, opt *CreateInkMixingOpts) (string, error)
+	EditInkMixing(ctx context.Context, opt *EditInkMixingOpts) error
+	FindInkMixing(ctx context.Context, opt *FindInkMixingOpts) ([]*InkMixingData, *repository.CountResult, error)
 	Find(ctx context.Context, opt *FindInkOpts, sort *repository.Sort, limit, offset int64) ([]*InkData, *repository.CountResult, error)
 	CalculateInkQuantity(ctx context.Context, inkID string) (float64, float64, float64, error)
 }
@@ -68,6 +71,8 @@ type inkService struct {
 	inkExportDetailRepo repository.InkExportDetailRepo
 	inkImportDetailRepo repository.InkImportDetailRepo
 	historyRepo         repository.HistoryRepo
+	inkMixingRepo       repository.InkMixingRepo
+	inkMixingDetailRepo repository.InkMixingDetailRepo
 }
 
 func (p inkService) CalculateInkQuantity(ctx context.Context, inkID string) (float64, float64, float64, error) {

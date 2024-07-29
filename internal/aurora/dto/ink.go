@@ -331,3 +331,87 @@ type FindInkExportByPORequest struct {
 type FindInkExportByPOResponse struct {
 	InkExportDetail []*InkExportDetail `json:"inkExportDetail"`
 }
+
+type CreateInkMixingFormulation struct {
+	InkID       string  `json:"inkID"`
+	Quantity    float64 `json:"quantity"`
+	Description string  `json:"description"`
+}
+
+// create mix-ink
+type CreateInkMixingRequest struct {
+	Name           string                       `json:"name" binding:"required"`
+	Code           string                       `json:"inkCode" binding:"required"`
+	ProductCodes   []string                     `json:"productCodes"`
+	Quantity       float64                      `json:"quantity" binding:"required"`
+	ExpirationDate string                       `json:"expirationDate"`
+	Position       string                       `json:"position"`
+	Location       string                       `json:"location"`
+	Description    string                       `json:"description"`
+	InkFormulation []CreateInkMixingFormulation `json:"inkFormulation" binding:"required"`
+}
+
+type CreateInkMixingResponse struct {
+	ID string `json:"id"`
+}
+
+type EditMixInkResponse struct{}
+
+// find mix-ink
+type FindInkMixingRequest struct {
+	Filter *MixInkFilter     `json:"filter" binding:"required"`
+	Paging *commondto.Paging `json:"paging" binding:"required"`
+}
+
+type MixInkFilter struct {
+	Search string   `json:"search"`
+	IDs    []string `json:"ids"`
+	InkID  string   `json:"inkID"`
+}
+
+type MixInk struct {
+	ID             string                 `json:"id"`
+	Name           string                 `json:"name"`
+	Code           string                 `json:"inkCode"`
+	Quantity       float64                `json:"quantity"`
+	ExpirationDate string                 `json:"expirationDate"`
+	ProductCodes   []string               `json:"productCodes"`
+	Position       string                 `json:"position"`
+	Location       string                 `json:"location"`
+	Description    string                 `json:"description"`
+	CreatedBy      string                 `json:"createdBy"`
+	CreatedAt      time.Time              `json:"createdAt"`
+	UpdatedBy      string                 `json:"updatedBy"`
+	UpdatedAt      time.Time              `json:"updatedAt"`
+	CreatedByName  string                 `json:"createdByName"`
+	UpdatedByName  string                 `json:"updatedByName"`
+	InkFormulation []InkMixingFormulation `json:"inkFormulation"`
+	Status         enum.CommonStatus
+}
+
+type FindInkMixingResponse struct {
+	MixInk []*MixInk `json:"mixInk"`
+	Total  int64     `json:"total"`
+}
+
+type InkMixingFormulation struct {
+	ID          string  `json:"id"`
+	InkID       string  `json:"inkID"`
+	Quantity    float64 `json:"quantity"`
+	Description string  `json:"description"`
+}
+
+type EditInkMixingRequest struct {
+	ID             string                 `json:"id" binding:"required"`
+	Name           string                 `json:"name" binding:"required"`
+	Code           string                 `json:"inkCode" binding:"required"`
+	ProductCodes   []string               `json:"productCodes"`
+	Quantity       float64                `json:"quantity" binding:"required"`
+	ExpirationDate string                 `json:"expirationDate"`
+	Position       string                 `json:"position"`
+	Location       string                 `json:"location"`
+	Description    string                 `json:"description"`
+	InkFormulation []InkMixingFormulation `json:"inkFormulation" binding:"required"`
+}
+
+type EditInkMixingResponse struct{}
