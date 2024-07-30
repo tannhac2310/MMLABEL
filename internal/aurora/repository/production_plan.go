@@ -8,6 +8,7 @@ import (
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
 type ProductionPlanRepo interface {
@@ -65,11 +66,14 @@ func (r *sProductionPlanRepo) SoftDelete(ctx context.Context, id string) error {
 
 // SearchProductionPlanOpts all params is options
 type SearchProductionPlanOpts struct {
-	IDs []string
-	// todo add more search options
-	Limit  int64
-	Offset int64
-	Sort   *Sort
+	IDs        []string
+	CustomerID string
+	Name       string
+	Statuses   []enum.ProductionOrderStatus
+	UserID     string
+	Limit      int64
+	Offset     int64
+	Sort       *Sort
 }
 
 func (s *SearchProductionPlanOpts) buildQuery(isCount bool) (string, []interface{}) {
@@ -81,16 +85,14 @@ func (s *SearchProductionPlanOpts) buildQuery(isCount bool) (string, []interface
 		args = append(args, s.IDs)
 		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.ProductionPlanFieldID)
 	}
-	// todo add more search options example:
-	//if s.Name != "" {
-	//	args = append(args, "%"+s.Name+"%")
-	//	conds += fmt.Sprintf(" AND (b.%[2]s ILIKE $%[1]d OR b.%[3]s ILIKE $%[1]d)",
-	//		len(args), model.ProductionPlanFieldName, model.ProductionPlanFieldCode)
-	//}
-	//if s.Code != "" {
-	//	args = append(args, s.Code)
-	//	conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.ProductionPlanFieldCode, len(args))
-	//}
+	if s.Name != "" {
+		args = append(args, "%"+s.Name+"%")
+		conds += fmt.Sprintf(" AND b.%[2]s ILIKE $%[1]d", len(args), model.ProductionPlanFieldName)
+	}
+	if len(s.Statuses) > 0 {
+		args = append(args, s.Statuses)
+		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.ProductionPlanFieldStatus, len(args))
+	}
 
 	b := &model.ProductionPlan{}
 	fields, _ := b.FieldMap()

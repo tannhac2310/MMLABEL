@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/device_config"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_plan"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/service/role"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/option"
@@ -127,6 +128,7 @@ func Run(ctx context.Context, configPath string) {
 			repository.NewPermissionRepo,
 			repository2.NewCustomerRepo,
 			repository2.NewProductionOrderRepo,
+			repository2.NewProductionPlanRepo,
 			repository2.NewProductionOrderStageRepo,
 			repository2.NewStageRepo,
 			repository2.NewDeviceRepo,
@@ -161,6 +163,7 @@ func Run(ctx context.Context, configPath string) {
 			},
 			customer.NewService,
 			production_order.NewService,
+			production_plan.NewService,
 			stage.NewService,
 			device.NewService,
 			department.NewService,
