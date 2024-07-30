@@ -204,6 +204,7 @@ func Run(ctx context.Context, configPath string) {
 			controller.RegisterConfigController,
 			controller.RegisterCustomerController,
 			controller.RegisterProductionOrderController,
+			controller.RegisterProductionPlanController,
 			controller.RegisterStageController,
 			controller.RegisterDepartmentController,
 			controller.RegisterDeviceController,
