@@ -88,6 +88,9 @@ func (p inkService) MixInk(ctx context.Context, opt *CreateInkMixingOpts) (strin
 		count, err := p.inkMixingRepo.Count(ctx, &repository.SearchInkMixingOpts{
 			MixingDate: nowDate,
 		})
+		if err != nil {
+			return fmt.Errorf("error counting ink mixing: %w", err)
+		}
 
 		err = p.inkMixingRepo.Insert(ctx, &model.InkMixing{
 			ID:          inkMixingID,

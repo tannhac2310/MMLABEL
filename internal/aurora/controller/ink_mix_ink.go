@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink"
@@ -39,6 +41,7 @@ func (s inkController) MixInk(c *gin.Context) {
 		Status:         enum.CommonStatusActive,
 		CreatedBy:      userID,
 	}
+	fmt.Println("==============>>, ", s.inkService)
 	inkMixingID, err := s.inkService.MixInk(c, inkMixingData)
 	if err != nil {
 		transportutil.Error(c, err)

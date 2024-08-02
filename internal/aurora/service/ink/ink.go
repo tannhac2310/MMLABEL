@@ -281,6 +281,8 @@ func NewService(
 	inkExportDetailRepo repository.InkExportDetailRepo,
 	inkImportDetailRepo repository.InkImportDetailRepo,
 	historyRepo repository.HistoryRepo,
+	inkMixingRepo repository.InkMixingRepo,
+	inkMixingDetailRepo repository.InkMixingDetailRepo,
 ) Service {
 	return &inkService{
 		inkReturnRepo:       inkReturnRepo,
@@ -289,6 +291,8 @@ func NewService(
 		inkImportDetailRepo: inkImportDetailRepo,
 		inkRepo:             inkRepo,
 		historyRepo:         historyRepo,
+		inkMixingRepo:       inkMixingRepo,
+		inkMixingDetailRepo: inkMixingDetailRepo,
 	}
 
 }

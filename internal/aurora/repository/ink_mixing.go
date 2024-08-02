@@ -75,7 +75,7 @@ type SearchInkMixingOpts struct {
 func (s *SearchInkMixingOpts) buildQuery(isCount bool) (string, []interface{}) {
 	var args []interface{}
 	conds := ""
-	joins := " users AS u ON u.id = b.created_by LEFT JOIN users AS u2 ON u2.id = b.updated_by "
+	joins := " LEFT JOIN users AS u ON u.id = b.created_by LEFT JOIN users AS u2 ON u2.id = b.updated_by "
 
 	if len(s.IDs) > 0 {
 		args = append(args, s.IDs)
