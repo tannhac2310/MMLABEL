@@ -20,7 +20,7 @@ type EditInkOpts struct {
 	ProductCodes   []string
 	Position       string
 	Location       string
-	Quantity       int64
+	Quantity       float64
 	Manufacturer   string
 	ColorDetail    map[string]interface{}
 	ExpirationDate string // DD-MM-YYYY
