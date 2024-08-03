@@ -61,12 +61,11 @@ type EditInkRequest struct {
 	Description    string                 `json:"description"`
 	Data           map[string]interface{} `json:"data"`
 	Status         enum.CommonStatus      `json:"status"`
-	Quantity       int64                  `json:"quantity"`
+	Quantity       float64                `json:"quantity"`
 }
 
 type EditInkResponse struct{}
 
-// dto for ink_import.create
 type CreateInkImportRequest struct {
 	Name            string                   `json:"name" binding:"required"`
 	Code            string                   `json:"code" binding:"required"`

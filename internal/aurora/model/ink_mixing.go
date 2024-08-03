@@ -8,11 +8,10 @@ import (
 )
 
 const (
-	InkMixingFieldID    = "id"
-	InkMixingFieldName  = "name"
-	InkMixingFieldCode  = "code"
-	InkMixingFieldInkID = "ink_id"
-	//InkMixingFieldMixingDate  = "mixing_date"
+	InkMixingFieldID          = "id"
+	InkMixingFieldName        = "name"
+	InkMixingFieldCode        = "code"
+	InkMixingFieldInkID       = "ink_id"
 	InkMixingFieldDescription = "description"
 	InkMixingFieldStatus      = "status"
 	InkMixingFieldData        = "data"
@@ -24,11 +23,10 @@ const (
 )
 
 type InkMixing struct {
-	ID    string `db:"id"`
-	Name  string `db:"name"`
-	Code  string `db:"code"`
-	InkID string `db:"ink_id"`
-	//MixingDate  string                 `db:"mixing_date"`
+	ID          string                 `db:"id"`
+	Name        string                 `db:"name"`
+	Code        string                 `db:"code"`
+	InkID       string                 `db:"ink_id"`
 	Description string                 `db:"description"`
 	Status      enum.CommonStatus      `db:"status"`
 	Data        map[string]interface{} `db:"data"`
@@ -45,7 +43,6 @@ func (rcv *InkMixing) FieldMap() (fields []string, values []interface{}) {
 		InkMixingFieldName,
 		InkMixingFieldCode,
 		InkMixingFieldInkID,
-		//InkMixingFieldMixingDate,
 		InkMixingFieldDescription,
 		InkMixingFieldStatus,
 		InkMixingFieldData,
@@ -61,7 +58,6 @@ func (rcv *InkMixing) FieldMap() (fields []string, values []interface{}) {
 		&rcv.Name,
 		&rcv.Code,
 		&rcv.InkID,
-		//&rcv.MixingDate,
 		&rcv.Description,
 		&rcv.Status,
 		&rcv.Data,

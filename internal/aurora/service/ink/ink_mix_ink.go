@@ -29,6 +29,7 @@ type CreateInkMixingOpts struct {
 	Name           string
 	Code           string
 	ProductCodes   []string
+	Manufacturer   string
 	Quantity       float64
 	ExpirationDate string
 	Position       string
@@ -70,6 +71,7 @@ func (p inkService) MixInk(ctx context.Context, opt *CreateInkMixingOpts) (strin
 		err := p.inkRepo.Insert(c, &model.Ink{
 			ID:             newInkID,
 			Name:           opt.Name,
+			Manufacturer:   opt.Manufacturer,
 			Code:           opt.Code,
 			MixingID:       cockroach.String(inkMixingID),
 			ProductCodes:   opt.ProductCodes,

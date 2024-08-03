@@ -88,6 +88,7 @@ func (s inkController) EditInkMixing(c *gin.Context) {
 		transportutil.Error(c, err)
 		return
 	}
+	transportutil.SendJSONResponse(c, &dto.EditInkMixingResponse{})
 
 }
 

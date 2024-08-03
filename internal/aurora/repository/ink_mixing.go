@@ -14,7 +14,7 @@ type InkMixingRepo interface {
 	Insert(ctx context.Context, e *model.InkMixing) error
 	Update(ctx context.Context, e *model.InkMixing) error
 	SoftDelete(ctx context.Context, id string) error
-	FindByID(ctx context.Context, id string) (*InkMixingData, error)
+	FindByID(ctx context.Context, id string) (*model.InkMixing, error)
 	Search(ctx context.Context, s *SearchInkMixingOpts) ([]*InkMixingData, error)
 	Count(ctx context.Context, s *SearchInkMixingOpts) (*CountResult, error)
 }
@@ -35,13 +35,13 @@ func (r *sInkMixingRepo) Insert(ctx context.Context, e *model.InkMixing) error {
 	return nil
 }
 
-func (r *sInkMixingRepo) FindByID(ctx context.Context, id string) (*InkMixingData, error) {
-	e := &InkMixingData{}
+func (r *sInkMixingRepo) FindByID(ctx context.Context, id string) (*model.InkMixing, error) {
+	e := &model.InkMixing{}
 	err := cockroach.FindOne(ctx, e, "id = $1", id)
 	if err != nil {
+		fmt.Println(err)
 		return nil, fmt.Errorf("sInkMixingRepo.cockroach.FindOne: %w", err)
 	}
-
 	return e, nil
 }
 func (r *sInkMixingRepo) Update(ctx context.Context, e *model.InkMixing) error {
