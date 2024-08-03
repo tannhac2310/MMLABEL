@@ -39,6 +39,7 @@ func (c *productionPlanService) CreateProductionPlan(ctx context.Context, opt *C
 		Note:       cockroach.String(opt.Note),
 		CreatedBy:  opt.CreatedBy,
 		CreatedAt:  now,
+		UpdatedBy:  opt.CreatedBy,
 		UpdatedAt:  now,
 		Name:       opt.Name,
 	}

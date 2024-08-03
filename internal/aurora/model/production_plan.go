@@ -16,6 +16,7 @@ const (
 	ProductionPlanFieldNote       = "note"
 	ProductionPlanFieldCreatedBy  = "created_by"
 	ProductionPlanFieldCreatedAt  = "created_at"
+	ProductionPlanFieldUpdatedBy  = "updated_by"
 	ProductionPlanFieldUpdatedAt  = "updated_at"
 	ProductionPlanFieldDeletedAt  = "deleted_at"
 	ProductionPlanFieldName       = "name"
@@ -30,12 +31,13 @@ type ProductionPlan struct {
 	Note       sql.NullString            `db:"note"`
 	CreatedBy  string                    `db:"created_by"`
 	CreatedAt  time.Time                 `db:"created_at"`
+	UpdatedBy  string                    `db:"updated_by"`
 	UpdatedAt  time.Time                 `db:"updated_at"`
 	DeletedAt  sql.NullTime              `db:"deleted_at"`
 	Name       string                    `db:"name"`
 }
 
-func (rcv *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
+func (p *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
 	fields = []string{
 		ProductionPlanFieldID,
 		ProductionPlanFieldCustomerID,
@@ -45,28 +47,64 @@ func (rcv *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
 		ProductionPlanFieldNote,
 		ProductionPlanFieldCreatedBy,
 		ProductionPlanFieldCreatedAt,
+		ProductionPlanFieldUpdatedBy,
 		ProductionPlanFieldUpdatedAt,
 		ProductionPlanFieldDeletedAt,
 		ProductionPlanFieldName,
 	}
 
 	values = []interface{}{
-		&rcv.ID,
-		&rcv.CustomerID,
-		&rcv.SalesID,
-		&rcv.Thumbnail,
-		&rcv.Status,
-		&rcv.Note,
-		&rcv.CreatedBy,
-		&rcv.CreatedAt,
-		&rcv.UpdatedAt,
-		&rcv.DeletedAt,
-		&rcv.Name,
+		&p.ID,
+		&p.CustomerID,
+		&p.SalesID,
+		&p.Thumbnail,
+		&p.Status,
+		&p.Note,
+		&p.CreatedBy,
+		&p.CreatedAt,
+		&p.UpdatedBy,
+		&p.UpdatedAt,
+		&p.DeletedAt,
+		&p.Name,
 	}
 
 	return
 }
 
-func (*ProductionPlan) TableName() string {
+func (p *ProductionPlan) TableName() string {
 	return "production_plans"
+}
+
+func (p *ProductionPlan) Editable() bool {
+	switch p.Status {
+	case enum.ProductionPlanStatusWaiting,
+		enum.ProductionPlanStatusDoing,
+		enum.ProductionPlanStatusPause,
+		enum.ProductionPlanStatusComplete,
+		enum.ProductionPlanStatusCancel:
+		return true
+	default:
+		return false
+	}
+}
+
+func (p *ProductionPlan) CanChangeStatusTo(s enum.ProductionPlanStatus) bool {
+	if p.Status == s {
+		return true
+	}
+
+	switch p.Status {
+	case enum.ProductionPlanStatusWaiting:
+		return s == enum.ProductionPlanStatusDoing || s == enum.ProductionPlanStatusPause || s == enum.ProductionPlanStatusCancel
+	case enum.ProductionPlanStatusDoing:
+		return s == enum.ProductionPlanStatusPause || s == enum.ProductionPlanStatusCancel || s == enum.ProductionPlanStatusComplete
+	case enum.ProductionPlanStatusPause:
+		return s == enum.ProductionPlanStatusDoing || s == enum.ProductionPlanStatusCancel
+	case enum.ProductionPlanStatusComplete:
+		return false
+	case enum.ProductionPlanStatusCancel:
+		return false
+	default:
+		return false
+	}
 }

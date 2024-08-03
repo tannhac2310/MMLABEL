@@ -57,6 +57,7 @@ type ProductionPlan struct {
 	Note       string                    `json:"note,omitempty"`
 	CreatedBy  string                    `json:"createdBy,omitempty"`
 	CreatedAt  time.Time                 `json:"createdAt,omitempty"`
+	UpdatedBy  string                    `json:"updatedBy,omitempty"`
 	UpdatedAt  time.Time                 `json:"updatedAt,omitempty"`
 	DeletedAt  time.Time                 `json:"deletedAt,omitempty"`
 	Name       string                    `json:"name,omitempty"`

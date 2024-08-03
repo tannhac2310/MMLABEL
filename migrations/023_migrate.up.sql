@@ -43,18 +43,11 @@ create table production_plans
 	note STRING NULL,
 	created_by VARCHAR(50) NOT NULL,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now():::TIMESTAMPTZ,
+    updated_by VARCHAR(50) NOT NULL,
 	updated_at TIMESTAMPTZ NOT NULL DEFAULT now():::TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ NULL,
 	name VARCHAR(255) NOT NULL,
 	CONSTRAINT pk_production_plans PRIMARY KEY (id ASC)
-);
-
-create table production_plan_details
-(
-    id VARCHAR(50) not null,
-    production_plan_id VARCHAR(50) not null,
-    production_plan_attribute_id VARCHAR(50) not null,
-    constraint pk_production_plan_details primary key (id asc)
 );
 
 create table production_plan_attributes
