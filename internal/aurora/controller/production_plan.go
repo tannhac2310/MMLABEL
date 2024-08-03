@@ -6,6 +6,7 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_plan"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/apperror"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/generic"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/interceptor"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/routeutil"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/transportutil"
@@ -66,38 +67,23 @@ func (s productionPlanController) EditProductionPlan(c *gin.Context) {
 		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
 		return
 	}
-	// write code to edit production order and production order stage
-	// todo implement later
-	//productionOderStage := make([]*production_order.ProductionOrderStage, 0)
-	//for idx, stage := range req.ProductionOrderStages {
-	//	productionOderStage = append(productionOderStage, &production_order.ProductionOrderStage{
-	//		ID:                  stage.ID,
-	//		StageID:             stage.StageID,
-	//		EstimatedStartAt:    stage.EstimatedStartAt,
-	//		EstimatedCompleteAt: stage.EstimatedCompleteAt,
-	//		StartedAt:           stage.StartedAt,
-	//		CompletedAt:         stage.CompletedAt,
-	//		Status:              stage.Status,
-	//		Condition:           stage.Condition,
-	//		Note:                stage.Note,
-	//		Data:                stage.Data,
-	//		Sorting:             int16(len(req.ProductionOrderStages) - idx),
-	//	})
-	//}
+
+	userID := interceptor.UserIDFromCtx(c)
+
 	err = s.productionPlanService.EditProductionPlan(c, &production_plan.EditProductionPlanOpts{
-		// ID:                  req.ID,
-		// Name:                req.Name,
-		// QtyPaper:            req.QtyPaper,
-		// QtyFinished:         req.QtyFinished,
-		// QtyDelivered:        req.QtyDelivered,
-		// EstimatedStartAt:    req.EstimatedStartAt,
-		// EstimatedCompleteAt: req.EstimatedCompleteAt,
-		// Status:              req.Status,
-		// DeliveryDate:        req.DeliveryDate,
-		// DeliveryImage:       req.DeliveryImage,
-		// Note:                req.Note,
-		//ProductionOrderStage: productionOderStage,
-		//CustomData: nil,
+		ID:         req.ID,
+		Name:       req.Name,
+		CustomerID: req.CustomerID,
+		SalesID:    req.SalesID,
+		Status:     req.Status,
+		Note:       req.Note,
+		CustomField: generic.Map(req.CustomField, func(f *dto.CustomField) *production_plan.CustomField {
+			return &production_plan.CustomField{
+				Field: f.Key,
+				Value: f.Value,
+			}
+		}),
+		CreatedBy: userID,
 	})
 	if err != nil {
 		transportutil.Error(c, err)

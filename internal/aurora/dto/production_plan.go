@@ -40,7 +40,17 @@ type CreateProductionPlanResponse struct {
 	ID string `json:"id"`
 }
 
-type EditProductionPlanRequest struct{}
+type EditProductionPlanRequest struct {
+	ID          string                    `json:"id,omitempty"`
+	Name        string                    `json:"name,omitempty"`
+	CustomerID  string                    `json:"customerID,omitempty"`
+	SalesID     string                    `json:"salesID,omitempty"`
+	Thumbnail   string                    `json:"thumbnail,omitempty"`
+	Status      enum.ProductionPlanStatus `json:"status,omitempty"`
+	Note        string                    `json:"note,omitempty"`
+	CustomField []*CustomField            `json:"customField,omitempty"`
+	CreatedBy   string                    `json:"createdBy,omitempty"`
+}
 
 type EditProductionPlanResponse struct{}
 
