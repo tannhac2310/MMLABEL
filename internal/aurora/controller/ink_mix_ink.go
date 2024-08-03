@@ -80,6 +80,7 @@ func (s inkController) EditInkMixing(c *gin.Context) {
 		Location:       req.Location,
 		Description:    req.Description,
 		InkFormula:     inkFormulation,
+		Manufacturer:   req.Manufacturer,
 		Status:         enum.CommonStatusActive,
 		UpdatedBy:      userID,
 	}
