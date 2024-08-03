@@ -48,6 +48,8 @@ type DeleteProductionPlanRequest struct {
 	ID string `json:"id"`
 }
 
+type DeleteProductionPlanResponse struct{}
+
 type ProductionPlan struct {
 	ID         string                    `json:"id,omitempty"`
 	CustomerID string                    `json:"customerID,omitempty"`

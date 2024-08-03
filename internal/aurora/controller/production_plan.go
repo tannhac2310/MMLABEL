@@ -121,7 +121,7 @@ func (s productionPlanController) DeleteProductionPlan(c *gin.Context) {
 		return
 	}
 
-	transportutil.SendJSONResponse(c, &dto.DeleteProductionOrderResponse{})
+	transportutil.SendJSONResponse(c, &dto.DeleteProductionPlanResponse{})
 }
 
 func (s productionPlanController) FindProductionPlansWithNoPermission(c *gin.Context) {
@@ -237,56 +237,56 @@ func (s productionPlanController) FindProductionPlans(c *gin.Context) {
 
 func RegisterProductionPlanController(
 	r *gin.RouterGroup,
-	productionOrderService production_plan.Service,
+	productionPlanService production_plan.Service,
 ) {
-	g := r.Group("production-order")
+	g := r.Group("production-plan")
 
 	var c ProductionPlanController = &productionPlanController{
-		productionPlanService: productionOrderService,
+		productionPlanService: productionPlanService,
 	}
 
 	routeutil.AddEndpoint(
 		g,
 		"create",
 		c.CreateProductionPlan,
-		&dto.CreateProductionOrderRequest{},
-		&dto.CreateProductionOrderResponse{},
-		"Create productionOrder",
+		&dto.CreateProductionPlanRequest{},
+		&dto.CreateProductionPlanResponse{},
+		"Create productionPlan",
 	)
 
 	routeutil.AddEndpoint(
 		g,
 		"edit",
 		c.EditProductionPlan,
-		&dto.EditProductionOrderRequest{},
-		&dto.EditProductionOrderResponse{},
-		"Edit productionOrder",
+		&dto.EditProductionPlanRequest{},
+		&dto.EditProductionPlanResponse{},
+		"Edit productionPlan",
 	)
 
 	routeutil.AddEndpoint(
 		g,
 		"delete",
 		c.DeleteProductionPlan,
-		&dto.DeleteProductionOrderRequest{},
-		&dto.DeleteProductionOrderResponse{},
-		"delete productionOrder",
+		&dto.DeleteProductionPlanRequest{},
+		&dto.DeleteProductionPlanResponse{},
+		"delete productionPlan",
 	)
 
 	routeutil.AddEndpoint(
 		g,
 		"find",
 		c.FindProductionPlans,
-		&dto.FindProductionOrdersRequest{},
-		&dto.FindProductionOrdersResponse{},
-		"Find productionOrders",
+		&dto.FindProductionPlansRequest{},
+		&dto.FindProductionPlansResponse{},
+		"Find productionPlans",
 	)
 
 	routeutil.AddEndpoint(
 		g,
 		"find-with-no-permission",
 		c.FindProductionPlansWithNoPermission,
-		&dto.FindProductionOrdersRequest{},
-		&dto.FindProductionOrdersResponse{},
-		"Find productionOrders",
+		&dto.FindProductionPlansRequest{},
+		&dto.FindProductionPlansResponse{},
+		"Find productionPlans",
 	)
 }
