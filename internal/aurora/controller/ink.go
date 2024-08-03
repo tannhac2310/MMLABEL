@@ -7,6 +7,7 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_export"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_import"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_return"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/interceptor"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
@@ -557,12 +558,46 @@ func (s inkController) EditInk(c *gin.Context) {
 }
 
 func toInkResp(f *ink.InkData) *dto.Ink {
+	var mixingData *dto.MixInk = nil
+	if f.MixingData != nil && f.MixingData.ID != "" {
+		inkFormula := make([]dto.InkMixingFormulation, 0)
+		for _, detail := range f.MixingData.InkFormula {
+			inkFormula = append(inkFormula, dto.InkMixingFormulation{
+				ID:          detail.ID,
+				InkID:       detail.InkID,
+				Quantity:    detail.Quantity,
+				Description: detail.Description,
+				InkCode:     detail.InkCode,
+				InkName:     detail.InkName,
+			})
+		}
+		mixingData = &dto.MixInk{
+			ID:             f.MixingData.ID,
+			Name:           f.MixingData.Name,
+			Code:           f.MixingData.Code,
+			InkID:          f.MixingData.InkID,
+			Quantity:       f.MixingData.Quantity,
+			ExpirationDate: f.MixingData.ExpirationDate,
+			ProductCodes:   f.MixingData.ProductCodes,
+			Position:       f.MixingData.Position,
+			Location:       f.MixingData.Location,
+			Description:    f.MixingData.Description,
+			CreatedBy:      f.MixingData.CreatedBy,
+			CreatedAt:      f.MixingData.CreatedAt,
+			UpdatedAt:      f.MixingData.UpdatedAt,
+			CreatedByName:  f.MixingData.CreatedByName,
+			UpdatedByName:  f.MixingData.UpdatedByName,
+			InkFormulation: inkFormula,
+			Status:         enum.CommonStatusActive,
+		}
+	}
 	return &dto.Ink{
 		ID:             f.ID,
 		ImportID:       f.ImportID.String,
 		Name:           f.Name,
 		Code:           f.Code,
 		ProductCodes:   f.ProductCodes,
+		MixInk:         mixingData,
 		Position:       f.Position,
 		Location:       f.Location,
 		Manufacturer:   f.Manufacturer,

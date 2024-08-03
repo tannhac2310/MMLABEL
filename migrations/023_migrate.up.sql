@@ -29,3 +29,5 @@ CREATE TABLE ink_mixing_detail
     deleted_at    TIMESTAMPTZ,
     CONSTRAINT ink_mixing_detail_pk PRIMARY KEY (id)
 );
+
+ALTER TABLE ink ADD COLUMN mixing_id VARCHAR(50);

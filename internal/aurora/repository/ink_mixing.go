@@ -75,17 +75,17 @@ type SearchInkMixingOpts struct {
 func (s *SearchInkMixingOpts) buildQuery(isCount bool) (string, []interface{}) {
 	var args []interface{}
 	conds := ""
-	joins := " users AS u ON u.id = b.created_by LEFT JOIN users AS u2 ON u2.id = b.updated_by "
+	joins := " LEFT JOIN users AS u ON u.id = b.created_by LEFT JOIN users AS u2 ON u2.id = b.updated_by "
 
 	if len(s.IDs) > 0 {
 		args = append(args, s.IDs)
 		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.InkMixingFieldID)
 	}
 
-	if s.MixingDate != "" {
-		args = append(args, s.MixingDate)
-		conds += fmt.Sprintf(" AND b.%s = $%d", model.InkMixingFieldMixingDate, len(args))
-	}
+	//if s.MixingDate != "" {
+	//	args = append(args, s.MixingDate)
+	//	conds += fmt.Sprintf(" AND b.%s = $%d", model.InkMixingFieldMixingDate, len(args))
+	//}
 
 	b := &model.InkMixing{}
 	fields, _ := b.FieldMap()
@@ -112,6 +112,7 @@ type InkMixingData struct {
 func (r *sInkMixingRepo) Search(ctx context.Context, s *SearchInkMixingOpts) ([]*InkMixingData, error) {
 	InkMixing := make([]*InkMixingData, 0)
 	sql, args := s.buildQuery(false)
+	fmt.Println("=============>>", sql, args)
 	err := cockroach.Select(ctx, sql, args...).ScanAll(&InkMixing)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.Select: %w", err)
