@@ -62,7 +62,7 @@ type InkMixingData struct {
 func (p inkService) MixInk(ctx context.Context, opt *CreateInkMixingOpts) (string, error) {
 	// Create ink mixing
 	now := time.Now()
-	nowDate := now.Format("2006-01-02")
+	//nowDate := now.Format("2006-01-02")
 	newInkID := idutil.ULIDNow()
 	inkMixingID := idutil.ULIDNow()
 	errTx := cockroach.ExecInTx(ctx, func(c context.Context) error {
@@ -88,18 +88,10 @@ func (p inkService) MixInk(ctx context.Context, opt *CreateInkMixingOpts) (strin
 			return fmt.Errorf("error creating ink: %w", err)
 		}
 
-		// create ink mixing
-		count, err := p.inkMixingRepo.Count(c, &repository.SearchInkMixingOpts{
-			MixingDate: nowDate,
-		})
-		if err != nil {
-			return fmt.Errorf("error counting ink mixing: %w", err)
-		}
-
 		err = p.inkMixingRepo.Insert(c, &model.InkMixing{
 			ID:    inkMixingID,
-			Name:  fmt.Sprintf("Pha màu %s", opt.Name),
-			Code:  opt.Code + fmt.Sprintf("%03d", count.Count+1), // hopefully we don't face race condition
+			Name:  opt.Name,
+			Code:  opt.Code,
 			InkID: newInkID,
 			//MixingDate:  nowDate,
 			Description: opt.Description,
