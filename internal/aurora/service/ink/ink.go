@@ -188,6 +188,7 @@ func (p inkService) Delete(ctx context.Context, id string) error {
 
 type InkData struct {
 	*repository.InkData
+	MixingData *InkMixingData
 }
 
 func (p inkService) Find(ctx context.Context, opt *FindInkOpts, sort *repository.Sort, limit, offset int64) ([]*InkData, *repository.CountResult, error) {
@@ -205,9 +206,37 @@ func (p inkService) Find(ctx context.Context, opt *FindInkOpts, sort *repository
 	if err != nil {
 		return nil, nil, err
 	}
+
+	mixingIDs := make([]string, 0)
+
+	for _, ink := range inks {
+		if ink.MixingID.String != "" {
+			mixingIDs = append(mixingIDs, ink.MixingID.String)
+		}
+	}
+
+	// get ink mixing detail
+	inkMixing, _, err := p.FindInkMixing(ctx, &FindInkMixingOpts{
+		IDs:    mixingIDs,
+		Limit:  int64(len(mixingIDs)),
+		Offset: 0,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+	fmt.Println("inkMixingDetailsinkMixingDetails============================>", inkMixing)
+	// map ink mixing detail
+	inkMixingMap := make(map[string]*InkMixingData)
+	for _, f := range inkMixing {
+		inkMixingMap[f.ID] = f
+	}
+
 	results := make([]*InkData, 0)
 	for _, ink := range inks {
-		results = append(results, &InkData{ink})
+		results = append(results, &InkData{
+			InkData:    ink,
+			MixingData: inkMixingMap[ink.MixingID.String],
+		})
 	}
 
 	total, err := p.inkRepo.Count(ctx, filter)

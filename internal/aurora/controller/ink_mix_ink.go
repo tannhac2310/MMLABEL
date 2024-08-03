@@ -98,9 +98,9 @@ func (s inkController) FindInkMixing(c *gin.Context) {
 		return
 	}
 	inkMixingData, count, err := s.inkService.FindInkMixing(c, &ink.FindInkMixingOpts{
-		IDs:    req.Filter.IDs,
-		Search: req.Filter.Search,
-		InkID:  req.Filter.InkID,
+		IDs: req.Filter.IDs,
+		//Search: req.Filter.Search,
+		//InkID:  req.Filter.InkID,
 		Limit:  req.Paging.Limit,
 		Offset: req.Paging.Offset,
 	})

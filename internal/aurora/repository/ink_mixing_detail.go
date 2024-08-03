@@ -76,7 +76,7 @@ type SearchInkMixingDetailOpts struct {
 func (s *SearchInkMixingDetailOpts) buildQuery(isCount bool) (string, []interface{}) {
 	var args []interface{}
 	conds := ""
-	joins := ""
+	joins := " LEFT JOIN ink AS i ON i.id = b.ink_id"
 
 	if len(s.IDs) > 0 {
 		args = append(args, s.IDs)
@@ -102,11 +102,15 @@ func (s *SearchInkMixingDetailOpts) buildQuery(isCount bool) (string, []interfac
 	if s.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", s.Sort.By, s.Sort.Order)
 	}
-	return fmt.Sprintf("SELECT b.%s FROM %s AS b %s WHERE TRUE %s AND b.deleted_at IS NULL %s LIMIT %d OFFSET %d", strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
+	return fmt.Sprintf(`
+SELECT i.name as ink_name, i.code as ink_code , b.%s FROM %s AS b %s WHERE TRUE %s AND b.deleted_at IS NULL %s LIMIT %d OFFSET %d
+`, strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
 }
 
 type InkMixingDetailData struct {
 	*model.InkMixingDetail
+	InkName string `json:"ink_name"`
+	InkCode string `json:"ink_code"`
 }
 
 func (r *sInkMixingDetailRepo) Search(ctx context.Context, s *SearchInkMixingDetailOpts) ([]*InkMixingDetailData, error) {

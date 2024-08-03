@@ -17,6 +17,8 @@ type InkFormulation struct {
 	InkID       string
 	Quantity    float64
 	Description string
+	InkCode     string
+	InkName     string
 }
 type CreateFormulation struct {
 	InkID       string
@@ -41,6 +43,7 @@ type InkMixingData struct {
 	ID             string
 	Name           string
 	Code           string
+	InkID          string
 	ProductCodes   []string
 	Quantity       float64
 	ExpirationDate string
@@ -64,10 +67,11 @@ func (p inkService) MixInk(ctx context.Context, opt *CreateInkMixingOpts) (strin
 	inkMixingID := idutil.ULIDNow()
 	errTx := cockroach.ExecInTx(ctx, func(c context.Context) error {
 		// create new ink
-		err := p.inkRepo.Insert(ctx, &model.Ink{
+		err := p.inkRepo.Insert(c, &model.Ink{
 			ID:             newInkID,
 			Name:           opt.Name,
 			Code:           opt.Code,
+			MixingID:       cockroach.String(inkMixingID),
 			ProductCodes:   opt.ProductCodes,
 			Position:       opt.Position,
 			Location:       opt.Location,
@@ -85,19 +89,19 @@ func (p inkService) MixInk(ctx context.Context, opt *CreateInkMixingOpts) (strin
 		}
 
 		// create ink mixing
-		count, err := p.inkMixingRepo.Count(ctx, &repository.SearchInkMixingOpts{
+		count, err := p.inkMixingRepo.Count(c, &repository.SearchInkMixingOpts{
 			MixingDate: nowDate,
 		})
 		if err != nil {
 			return fmt.Errorf("error counting ink mixing: %w", err)
 		}
 
-		err = p.inkMixingRepo.Insert(ctx, &model.InkMixing{
-			ID:          inkMixingID,
-			Name:        fmt.Sprintf("Pha màu %s", opt.Name),
-			Code:        opt.Code + fmt.Sprintf("%03d", count.Count+1), // hopefully we don't face race condition
-			InkID:       newInkID,
-			MixingDate:  nowDate,
+		err = p.inkMixingRepo.Insert(c, &model.InkMixing{
+			ID:    inkMixingID,
+			Name:  fmt.Sprintf("Pha màu %s", opt.Name),
+			Code:  opt.Code + fmt.Sprintf("%03d", count.Count+1), // hopefully we don't face race condition
+			InkID: newInkID,
+			//MixingDate:  nowDate,
 			Description: opt.Description,
 			Status:      enum.CommonStatusActive,
 			CreatedBy:   opt.CreatedBy,
@@ -112,18 +116,23 @@ func (p inkService) MixInk(ctx context.Context, opt *CreateInkMixingOpts) (strin
 		// create ink mixing detail
 		for _, ink := range opt.InkFormula {
 			// minus ink quantity
-			inkData, err := p.inkRepo.FindByID(ctx, ink.InkID)
+			inkData, err := p.inkRepo.FindByID(c, ink.InkID)
 			if err != nil {
-				return fmt.Errorf("error finding ink: %w", err)
+				return fmt.Errorf("Không tìm thấy mực: %w", err)
 			}
-			inkData.Ink.Quantity -= ink.Quantity
-			err = p.inkRepo.Update(ctx, inkData.Ink)
+			fmt.Println("inkData: ", inkData.Ink.Name, inkData.Ink.Quantity, ink.Quantity)
+			newValue := inkData.Ink.Quantity - ink.Quantity
+			if newValue < 0 {
+				return fmt.Errorf("số lượng mực không đủ, inkName: %s, Tồn kho: %v, Cần dùng: %v", inkData.Ink.Name, inkData.Ink.Quantity, ink.Quantity)
+			}
+			inkData.Ink.Quantity = newValue
+			err = p.inkRepo.Update(c, inkData.Ink)
 			if err != nil {
 				return fmt.Errorf("error updating ink: %w", err)
 			}
 
 			// create ink mixing detail
-			err = p.inkMixingDetailRepo.Insert(ctx, &model.InkMixingDetail{
+			err = p.inkMixingDetailRepo.Insert(c, &model.InkMixingDetail{
 				ID:          idutil.ULIDNow(),
 				InkMixingID: inkMixingID,
 				InkID:       ink.InkID,
@@ -140,23 +149,27 @@ func (p inkService) MixInk(ctx context.Context, opt *CreateInkMixingOpts) (strin
 		return nil
 	})
 	if errTx != nil {
-		return "", fmt.Errorf("error creating ink mixing, %w", errTx)
+		return "", fmt.Errorf("Pha mực lỗi, %w", errTx)
 	}
 	return inkMixingID, nil
 }
 
 // find ink mixing
 type FindInkMixingOpts struct {
-	IDs    []string
-	Search string
-	InkID  string
+	IDs []string
+	//Search string
+	//InkID  string
+	//InkIDs []string
 	Limit  int64
 	Offset int64
 }
 
 func (p inkService) FindInkMixing(ctx context.Context, opt *FindInkMixingOpts) ([]*InkMixingData, *repository.CountResult, error) {
 	filter := &repository.SearchInkMixingOpts{
-		IDs:    opt.IDs,
+		IDs: opt.IDs,
+		//Search: opt.Search,
+		//InkID:  opt.InkID,
+		//InkIDs: opt.InkIDs,
 		Limit:  opt.Limit,
 		Offset: opt.Offset,
 	}
@@ -201,40 +214,43 @@ func (p inkService) FindInkMixing(ctx context.Context, opt *FindInkMixingOpts) (
 		inkMixingDetailMap[detail.InkMixingID] = append(inkMixingDetailMap[detail.InkMixingID], detail)
 	}
 	results := make([]*InkMixingData, 0)
-	for _, ink := range inkMixing {
-		_inkDetail, ok := inkDataMap[ink.InkID]
+	for _, im := range inkMixing {
+		_inkDetail, ok := inkDataMap[im.InkID]
 		if !ok {
 			continue
 		}
 		inkFormula := make([]InkFormulation, 0)
-		if details, ok := inkMixingDetailMap[ink.ID]; ok {
+		if details, ok := inkMixingDetailMap[im.ID]; ok {
 			for _, detail := range details {
 				inkFormula = append(inkFormula, InkFormulation{
 					ID:          detail.ID,
 					InkID:       detail.InkID,
 					Quantity:    detail.Quantity,
 					Description: detail.Description,
+					InkName:     detail.InkName,
+					InkCode:     detail.InkCode,
 				})
 			}
 		}
 
 		results = append(results, &InkMixingData{
-			ID:             ink.ID,
-			Name:           ink.Name,
-			Code:           ink.Code,
+			ID:             im.ID,
+			Name:           im.Name,
+			Code:           im.Code,
+			InkID:          im.InkID,
 			ProductCodes:   _inkDetail.ProductCodes,
 			Quantity:       _inkDetail.Quantity,
 			ExpirationDate: _inkDetail.ExpirationDate,
 			Position:       _inkDetail.Position,
 			Location:       _inkDetail.Location,
-			Description:    ink.Description,
+			Description:    im.Description,
 			InkFormula:     inkFormula,
-			Status:         ink.Status,
-			CreatedBy:      ink.CreatedBy,
-			CreatedAt:      ink.CreatedAt,
-			UpdatedAt:      ink.UpdatedAt,
-			CreatedByName:  ink.CreatedByName,
-			UpdatedByName:  ink.UpdatedByName,
+			Status:         im.Status,
+			CreatedBy:      im.CreatedBy,
+			CreatedAt:      im.CreatedAt,
+			UpdatedAt:      im.UpdatedAt,
+			CreatedByName:  im.CreatedByName,
+			UpdatedByName:  im.UpdatedByName,
 		})
 	}
 	return results, count, nil

@@ -2,8 +2,9 @@ package model
 
 import (
 	"database/sql"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
 const (
@@ -11,6 +12,7 @@ const (
 	InkFieldImportID       = "import_id"
 	InkFieldName           = "name"
 	InkFieldCode           = "code"
+	InkFieldMixingID       = "mixing_id"
 	InkFieldProductCodes   = "product_codes"
 	InkFieldPosition       = "position"
 	InkFieldLocation       = "location"
@@ -33,6 +35,7 @@ type Ink struct {
 	ImportID       sql.NullString         `db:"import_id"`
 	Name           string                 `db:"name"`
 	Code           string                 `db:"code"`
+	MixingID       sql.NullString         `db:"mixing_id"`
 	ProductCodes   []string               `db:"product_codes"`
 	Position       string                 `db:"position"`
 	Location       string                 `db:"location"`
@@ -56,6 +59,7 @@ func (rcv *Ink) FieldMap() (fields []string, values []interface{}) {
 		InkFieldImportID,
 		InkFieldName,
 		InkFieldCode,
+		InkFieldMixingID,
 		InkFieldProductCodes,
 		InkFieldPosition,
 		InkFieldLocation,
@@ -78,6 +82,7 @@ func (rcv *Ink) FieldMap() (fields []string, values []interface{}) {
 		&rcv.ImportID,
 		&rcv.Name,
 		&rcv.Code,
+		&rcv.MixingID,
 		&rcv.ProductCodes,
 		&rcv.Position,
 		&rcv.Location,

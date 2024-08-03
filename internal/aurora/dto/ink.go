@@ -13,6 +13,7 @@ type Ink struct {
 	ImportID       string                 `json:"importID"`
 	Name           string                 `json:"name"`
 	Code           string                 `json:"code"`
+	MixInk         *MixInk                `json:"mixInk"`
 	ProductCodes   []string               `json:"productCodes"`
 	Position       string                 `json:"position"`
 	Location       string                 `json:"location"`
@@ -372,7 +373,8 @@ type MixInkFilter struct {
 type MixInk struct {
 	ID             string                 `json:"id"`
 	Name           string                 `json:"name"`
-	Code           string                 `json:"inkCode"`
+	Code           string                 `json:"code"`
+	InkID          string                 `json:"inkID"`
 	Quantity       float64                `json:"quantity"`
 	ExpirationDate string                 `json:"expirationDate"`
 	ProductCodes   []string               `json:"productCodes"`
@@ -386,7 +388,7 @@ type MixInk struct {
 	CreatedByName  string                 `json:"createdByName"`
 	UpdatedByName  string                 `json:"updatedByName"`
 	InkFormulation []InkMixingFormulation `json:"inkFormulation"`
-	Status         enum.CommonStatus
+	Status         enum.CommonStatus      `json:"status"`
 }
 
 type FindInkMixingResponse struct {
@@ -399,6 +401,8 @@ type InkMixingFormulation struct {
 	InkID       string  `json:"inkID"`
 	Quantity    float64 `json:"quantity"`
 	Description string  `json:"description"`
+	InkName     string  `json:"inkName"`
+	InkCode     string  `json:"inkCode"`
 }
 
 type EditInkMixingRequest struct {
