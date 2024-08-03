@@ -33,6 +33,7 @@ type Ink struct {
 type InkFilter struct {
 	Name   string            `json:"name"`
 	ID     string            `json:"id"`
+	NotIDs []string          `json:"notIDs"`
 	Code   string            `json:"code"`
 	Status enum.CommonStatus `json:"status"`
 }

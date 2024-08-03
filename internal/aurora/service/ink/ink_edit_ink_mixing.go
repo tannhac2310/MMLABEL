@@ -44,6 +44,8 @@ func (p inkService) EditInkMixing(ctx context.Context, opt *EditInkMixingOpts) e
 		if err != nil {
 			return fmt.Errorf("find ink mixing, %w", err)
 		}
+		inkMixing.Code = opt.Code
+		inkMixing.Name = opt.Name
 		inkMixing.InkMixing.Description = opt.Description
 		inkMixing.InkMixing.UpdatedBy = opt.UpdatedBy
 		inkMixing.InkMixing.UpdatedAt = now

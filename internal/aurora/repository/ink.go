@@ -16,6 +16,7 @@ type SearchInkOpts struct {
 	ID           string
 	Name         string
 	Code         string
+	NotIDs       []string
 	Manufacturer string
 	Expiration   string
 	Status       enum.CommonStatus
@@ -120,6 +121,10 @@ func (i *SearchInkOpts) buildQuery(isCount bool) (string, []interface{}) {
 		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.InkFieldID, len(args))
 	}
 
+	if len(i.NotIDs) > 0 {
+		args = append(args, i.NotIDs)
+		conds += fmt.Sprintf(" AND b.%s != ALL($%d)", model.InkFieldID, len(args))
+	}
 	b := &model.Ink{}
 	fields, _ := b.FieldMap()
 	if isCount {

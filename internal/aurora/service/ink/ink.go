@@ -50,6 +50,7 @@ type FindInkOpts struct {
 	Name   string
 	ID     string
 	Code   string
+	NotIDs []string
 	Status enum.CommonStatus
 }
 
@@ -196,6 +197,7 @@ func (p inkService) Find(ctx context.Context, opt *FindInkOpts, sort *repository
 		Name:   opt.Name,
 		Status: opt.Status,
 		ID:     opt.ID,
+		NotIDs: opt.NotIDs,
 		Code:   opt.Code,
 		Limit:  limit,
 		Offset: offset,
