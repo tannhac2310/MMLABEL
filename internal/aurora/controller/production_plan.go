@@ -210,6 +210,7 @@ func (s productionPlanController) FindProductionPlans(c *gin.Context) {
 			UpdatedAt:  f.UpdatedAt,
 			DeletedAt:  f.DeletedAt.Time,
 			Name:       f.Name,
+			CustomData: f.CustomData,
 		}
 
 		productionPlanResp = append(productionPlanResp, data)

@@ -101,7 +101,7 @@ func (s *SearchProductionPlanOpts) buildQuery(isCount bool) (string, []interface
 	}
 
 	order := " ORDER BY b.id DESC "
-	if s.Sort != nil {
+	if s.Sort != nil && s.Sort.By != "" && s.Sort.Order != "" {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", s.Sort.By, s.Sort.Order)
 	}
 	return fmt.Sprintf("SELECT b.%s FROM %s AS b %s WHERE TRUE %s AND b.deleted_at IS NULL %s LIMIT %d OFFSET %d", strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args

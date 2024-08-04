@@ -50,7 +50,10 @@ func NewService(
 
 func (c *productionPlanService) GetCustomField() []string {
 	// TODO update this
-	return []string{}
+	return []string{
+		"a",
+		"b",
+	}
 }
 
 type Data struct {
