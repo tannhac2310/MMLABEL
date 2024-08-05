@@ -106,6 +106,7 @@ services:
     entrypoint: modd --file=modd_aurora.conf
     ports:
       - "6100:6100"
+      - 2345:2345
   mock_gen:
     image: vektra/mockery
     volumes:

@@ -415,6 +415,7 @@ type EditInkMixingRequest struct {
 	Position       string                 `json:"position"`
 	Location       string                 `json:"location"`
 	Description    string                 `json:"description"`
+	Manufacturer   string                 `json:"manufacturer"`
 	InkFormulation []InkMixingFormulation `json:"inkFormulation" binding:"required"`
 }
 
