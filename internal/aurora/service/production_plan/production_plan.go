@@ -49,10 +49,40 @@ func NewService(
 }
 
 func (c *productionPlanService) GetCustomField() []string {
-	// TODO update this
 	return []string{
-		"a",
-		"b",
+		"ten_sp",
+		"ma_sp",
+		"ma_sp_phu",
+		"dvt",
+		"dai",
+		"rong",
+		"don_vi_dvt",
+		"so_luong_mau",
+		"so_lan_in",
+		"chat_lieu_in",
+		"ma_chat_lieu_in",
+		"vat_lieu_thay_the",
+		"keo_2_mat",
+		"ma_keo_2_mat",
+		"so_luong_keo_2_mat",
+		"mieu_ta",
+		"chat_luong_kp",
+		"van_chuyen",
+		"chi_tiet_van_chuyen",
+		"ghi_chu_van_chuyen",
+		"ten_mau_sp",
+		"hinh_mau_sp",
+		"loai_hinh",
+		"hinh_sp",
+		"hinh_thuc_in",
+		"loai_in",
+		"film",
+		"hinh_dang",
+		"keo_dan",
+		"ghi_chu_keo_dan",
+		"bdc",
+		"epoxy",
+		"ghi_chu_epoxy",
 	}
 }
 
