@@ -22,6 +22,13 @@ const (
 	ProductionPlanFieldName       = "name"
 )
 
+const (
+	ProductionPlanStageSale    = 1 // 0001
+	ProductionPlanStageRAndD   = 2 // 0010
+	ProductionPlanStageDesign  = 4 // 0100
+	ProductionPlanStageFinance = 8 // 1000
+)
+
 type ProductionPlan struct {
 	ID         string                    `db:"id"`
 	CustomerID string                    `db:"customer_id"`
@@ -107,4 +114,16 @@ func (p *ProductionPlan) CanChangeStatusTo(s enum.ProductionPlanStatus) bool {
 	default:
 		return false
 	}
+}
+
+type ProductionPlanStage struct {
+	ID                  string    `json:"id,omitempty"`
+	ProductionPlanID    string    `json:"productionPlanID,omitempty"`
+	StageID             string    `json:"stageID,omitempty"`
+	Note                string    `json:"note,omitempty"`
+	CreatedAt           time.Time `json:"createdAt,omitempty"`
+	UpdatedAt           time.Time `json:"updatedAt,omitempty"`
+	EstimatedStartAt    time.Time `json:"estimatedStartAt,omitempty"`
+	EstimatedCompleteAt time.Time `json:"estimatedCompleteAt,omitempty"`
+	Sorting             int16     `json:"sorting,omitempty"`
 }

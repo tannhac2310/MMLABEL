@@ -70,20 +70,22 @@ func (s productionPlanController) EditProductionPlan(c *gin.Context) {
 
 	userID := interceptor.UserIDFromCtx(c)
 
+	customField := generic.Map(req.CustomField, func(f *dto.CustomField) *production_plan.CustomField {
+		return &production_plan.CustomField{
+			Field: f.Key,
+			Value: f.Value,
+		}
+	})
+
 	err = s.productionPlanService.EditProductionPlan(c, &production_plan.EditProductionPlanOpts{
-		ID:         req.ID,
-		Name:       req.Name,
-		CustomerID: req.CustomerID,
-		SalesID:    req.SalesID,
-		Status:     req.Status,
-		Note:       req.Note,
-		CustomField: generic.Map(req.CustomField, func(f *dto.CustomField) *production_plan.CustomField {
-			return &production_plan.CustomField{
-				Field: f.Key,
-				Value: f.Value,
-			}
-		}),
-		CreatedBy: userID,
+		ID:          req.ID,
+		Name:        req.Name,
+		CustomerID:  req.CustomerID,
+		SalesID:     req.SalesID,
+		Status:      req.Status,
+		Note:        req.Note,
+		CustomField: customField,
+		CreatedBy:   userID,
 	})
 	if err != nil {
 		transportutil.Error(c, err)

@@ -37,7 +37,9 @@ func (r *sProductionPlanRepo) Insert(ctx context.Context, e *model.ProductionPla
 }
 
 func (r *sProductionPlanRepo) FindByID(ctx context.Context, id string) (*ProductionPlanData, error) {
-	e := &ProductionPlanData{}
+	e := &ProductionPlanData{
+		&model.ProductionPlan{},
+	}
 	err := cockroach.FindOne(ctx, e, "id = $1", id)
 	if err != nil {
 		return nil, fmt.Errorf("sProductionPlanRepo.cockroach.FindOne: %w", err)
