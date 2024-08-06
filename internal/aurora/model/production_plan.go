@@ -2,46 +2,46 @@ package model
 
 import (
 	"database/sql"
+	"database/sql/driver"
+	"encoding/json"
+	"math"
 	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
 const (
-	ProductionPlanFieldID         = "id"
-	ProductionPlanFieldCustomerID = "customer_id"
-	ProductionPlanFieldSalesID    = "sales_id"
-	ProductionPlanFieldThumbnail  = "thumbnail"
-	ProductionPlanFieldStatus     = "status"
-	ProductionPlanFieldNote       = "note"
-	ProductionPlanFieldCreatedBy  = "created_by"
-	ProductionPlanFieldCreatedAt  = "created_at"
-	ProductionPlanFieldUpdatedBy  = "updated_by"
-	ProductionPlanFieldUpdatedAt  = "updated_at"
-	ProductionPlanFieldDeletedAt  = "deleted_at"
-	ProductionPlanFieldName       = "name"
-)
-
-const (
-	ProductionPlanStageSale    = 1 // 0001
-	ProductionPlanStageRAndD   = 2 // 0010
-	ProductionPlanStageDesign  = 4 // 0100
-	ProductionPlanStageFinance = 8 // 1000
+	ProductionPlanFieldID           = "id"
+	ProductionPlanFieldCustomerID   = "customer_id"
+	ProductionPlanFieldSalesID      = "sales_id"
+	ProductionPlanFieldThumbnail    = "thumbnail"
+	ProductionPlanFieldStatus       = "status"
+	ProductionPlanFieldNote         = "note"
+	ProductionPlanFieldCreatedBy    = "created_by"
+	ProductionPlanFieldCreatedAt    = "created_at"
+	ProductionPlanFieldUpdatedBy    = "updated_by"
+	ProductionPlanFieldUpdatedAt    = "updated_at"
+	ProductionPlanFieldDeletedAt    = "deleted_at"
+	ProductionPlanFieldName         = "name"
+	ProductionPlanFieldPoStages     = "po_stages"
+	ProductionPlanFieldCurrentStage = "current_stage"
 )
 
 type ProductionPlan struct {
-	ID         string                    `db:"id"`
-	CustomerID string                    `db:"customer_id"`
-	SalesID    string                    `db:"sales_id"`
-	Thumbnail  sql.NullString            `db:"thumbnail"`
-	Status     enum.ProductionPlanStatus `db:"status"`
-	Note       sql.NullString            `db:"note"`
-	CreatedBy  string                    `db:"created_by"`
-	CreatedAt  time.Time                 `db:"created_at"`
-	UpdatedBy  string                    `db:"updated_by"`
-	UpdatedAt  time.Time                 `db:"updated_at"`
-	DeletedAt  sql.NullTime              `db:"deleted_at"`
-	Name       string                    `db:"name"`
+	ID           string                    `db:"id"`
+	CustomerID   string                    `db:"customer_id"`
+	SalesID      string                    `db:"sales_id"`
+	Thumbnail    sql.NullString            `db:"thumbnail"`
+	Status       enum.ProductionPlanStatus `db:"status"`
+	Note         sql.NullString            `db:"note"`
+	CreatedBy    string                    `db:"created_by"`
+	CreatedAt    time.Time                 `db:"created_at"`
+	UpdatedBy    string                    `db:"updated_by"`
+	UpdatedAt    time.Time                 `db:"updated_at"`
+	DeletedAt    sql.NullTime              `db:"deleted_at"`
+	Name         string                    `db:"name"`
+	PoStagesInfo ProductionStageInfo       `db:"po_stages"`
+	CurrentStage int                       `db:"current_stage"`
 }
 
 func (p *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
@@ -58,6 +58,8 @@ func (p *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
 		ProductionPlanFieldUpdatedAt,
 		ProductionPlanFieldDeletedAt,
 		ProductionPlanFieldName,
+		ProductionPlanFieldPoStages,
+		ProductionPlanFieldCurrentStage,
 	}
 
 	values = []interface{}{
@@ -73,6 +75,8 @@ func (p *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
 		&p.UpdatedAt,
 		&p.DeletedAt,
 		&p.Name,
+		&p.PoStagesInfo,
+		&p.CurrentStage,
 	}
 
 	return
@@ -82,41 +86,19 @@ func (p *ProductionPlan) TableName() string {
 	return "production_plans"
 }
 
-func (p *ProductionPlan) Editable() bool {
-	switch p.Status {
-	case enum.ProductionPlanStatusWaiting,
-		enum.ProductionPlanStatusDoing,
-		enum.ProductionPlanStatusPause,
-		enum.ProductionPlanStatusComplete,
-		enum.ProductionPlanStatusCancel:
-		return true
-	default:
-		return false
-	}
-}
-
 func (p *ProductionPlan) CanChangeStatusTo(s enum.ProductionPlanStatus) bool {
 	if p.Status == s {
 		return true
 	}
 
-	switch p.Status {
-	case enum.ProductionPlanStatusWaiting:
-		return s == enum.ProductionPlanStatusDoing || s == enum.ProductionPlanStatusPause || s == enum.ProductionPlanStatusCancel
-	case enum.ProductionPlanStatusDoing:
-		return s == enum.ProductionPlanStatusPause || s == enum.ProductionPlanStatusCancel || s == enum.ProductionPlanStatusComplete
-	case enum.ProductionPlanStatusPause:
-		return s == enum.ProductionPlanStatusDoing || s == enum.ProductionPlanStatusCancel
-	case enum.ProductionPlanStatusComplete:
-		return false
-	case enum.ProductionPlanStatusCancel:
-		return false
-	default:
-		return false
-	}
+	return math.Abs(float64(p.Status)-float64(s)) <= 1
 }
 
-type ProductionPlanStage struct {
+type ProductionStageInfo struct {
+	Items []*ProductionStageItem `json:"items,omitempty"`
+}
+
+type ProductionStageItem struct {
 	ID                  string    `json:"id,omitempty"`
 	ProductionPlanID    string    `json:"productionPlanID,omitempty"`
 	StageID             string    `json:"stageID,omitempty"`
@@ -126,4 +108,21 @@ type ProductionPlanStage struct {
 	EstimatedStartAt    time.Time `json:"estimatedStartAt,omitempty"`
 	EstimatedCompleteAt time.Time `json:"estimatedCompleteAt,omitempty"`
 	Sorting             int16     `json:"sorting,omitempty"`
+}
+
+// implement Scanner for the element type of the slice
+func (s *ProductionStageInfo) Scan(src any) error {
+	var data []byte
+	switch v := src.(type) {
+	case string:
+		data = []byte(v)
+	case []byte:
+		data = v
+	}
+	return json.Unmarshal(data, s)
+}
+
+// Value implements the [driver.Valuer] interface.
+func (s ProductionStageInfo) Value() (driver.Value, error) {
+	return json.Marshal(s)
 }

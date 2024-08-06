@@ -71,8 +71,9 @@ type SearchProductionPlanOpts struct {
 	IDs        []string
 	CustomerID string
 	Name       string
-	Statuses   []enum.ProductionOrderStatus
+	Statuses   []enum.ProductionPlanStatus
 	UserID     string
+	Stage      int
 	Limit      int64
 	Offset     int64
 	Sort       *Sort
@@ -94,6 +95,13 @@ func (s *SearchProductionPlanOpts) buildQuery(isCount bool) (string, []interface
 	if len(s.Statuses) > 0 {
 		args = append(args, s.Statuses)
 		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.ProductionPlanFieldStatus, len(args))
+	}
+	if s.Stage > 0 {
+		args = append(args, s.Stage, s.Stage)
+		conds += fmt.Sprintf(" AND b.%s & %d = %d", model.ProductionPlanFieldCurrentStage, len(args)-1, len(args))
+	} else {
+		args = append(args, 1, 1)
+		conds += fmt.Sprintf(" AND b.%s & $%d = $%d", model.ProductionPlanFieldCurrentStage, len(args)-1, len(args))
 	}
 
 	b := &model.ProductionPlan{}

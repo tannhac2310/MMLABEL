@@ -16,8 +16,9 @@ type FindProductionPlansOpts struct {
 	IDs        []string
 	CustomerID string
 	Name       string
-	Statuses   []enum.ProductionOrderStatus
+	Statuses   []enum.ProductionPlanStatus
 	UserID     string
+	Stage      int
 }
 
 func (c *productionPlanService) FindProductionPlans(ctx context.Context, opts *FindProductionPlansOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error) {

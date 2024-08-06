@@ -31,17 +31,18 @@ func (c *productionPlanService) CreateProductionPlan(ctx context.Context, opt *C
 	now := time.Now()
 	id := idutil.ULIDNow()
 	productionPlan := &model.ProductionPlan{
-		ID:         id,
-		CustomerID: opt.CustomerID,
-		SalesID:    opt.SalesID,
-		Thumbnail:  cockroach.String(opt.Thumbnail),
-		Status:     opt.Status,
-		Note:       cockroach.String(opt.Note),
-		CreatedBy:  opt.CreatedBy,
-		CreatedAt:  now,
-		UpdatedBy:  opt.CreatedBy,
-		UpdatedAt:  now,
-		Name:       opt.Name,
+		ID:           id,
+		CustomerID:   opt.CustomerID,
+		SalesID:      opt.SalesID,
+		Thumbnail:    cockroach.String(opt.Thumbnail),
+		Status:       opt.Status,
+		Note:         cockroach.String(opt.Note),
+		CreatedBy:    opt.CreatedBy,
+		CreatedAt:    now,
+		UpdatedBy:    opt.CreatedBy,
+		UpdatedAt:    now,
+		Name:         opt.Name,
+		CurrentStage: enum.ProductionPlanStageSale,
 	}
 
 	errTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {

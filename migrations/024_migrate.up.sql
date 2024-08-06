@@ -12,18 +12,20 @@ create table production_plans
 	updated_at TIMESTAMPTZ NOT NULL DEFAULT now():::TIMESTAMPTZ,
 	deleted_at TIMESTAMPTZ NULL,
 	name VARCHAR(255) NOT NULL,
+    po_stages JSONB NOT NULL DEFAULT '{}':::JSONB,
+    current_stage INT8 NOT NULL DEFAULT 1:::INT8,
 	CONSTRAINT pk_production_plans PRIMARY KEY (id ASC)
 );
 
 create table production_plan_attributes
 (
     id VARCHAR(50) not null,
-    kind INT2 default 1,
+    kind INT2 default 1:::INT8,
     display_name text not null,
     attribute_value text not null,
     note text,
     data JSONB,
-    status smallint default 1,
+    status INT2 default 1:::INT8,
     created_by VARCHAR(50) not null,
     created_at timestamptz not null default now():::timestamptz,
     updated_by VARCHAR(50) not null,
@@ -32,5 +34,8 @@ create table production_plan_attributes
     constraint pk_production_plan_attributes primary key (id asc)
 );
 
-alter table production_plans add column po_stages jsonb default '{}';
-alter table production_plans add column stages_info int4 default 1;
+create table production_plan_stages
+(
+    id VARCHAR(50) not null,
+
+)

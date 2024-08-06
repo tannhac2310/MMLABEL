@@ -29,8 +29,6 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 	plan, err := c.productionPlanRepo.FindByID(ctx, opt.ID)
 	if err != nil {
 		return err
-	} else if !plan.Editable() {
-		return fmt.Errorf("production plan cannot be edit")
 	}
 
 	execTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
@@ -41,6 +39,9 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 		if !plan.CanChangeStatusTo(opt.Status) {
 			return fmt.Errorf("cannot change production plan status to %s", enum.ProductionPlanStatusName[opt.Status])
 		}
+		plan.Status = opt.Status
+		currentStage := enum.ProductionPlanStatusSage[plan.Status]
+		plan.CurrentStage = int(enum.ProductionPlanStageSale) | currentStage // only sale and current stage can view the production plan
 
 		if err := c.productionPlanRepo.Update(ctx2, plan.ProductionPlan); err != nil {
 			return fmt.Errorf("update production plan failed: %w", err)
