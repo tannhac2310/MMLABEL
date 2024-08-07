@@ -115,6 +115,7 @@ type OrderStageDevice struct {
 	ProductionOrderStageID string                                `json:"productionOrderStageID"`
 	DeviceID               string                                `json:"deviceID"`
 	DeviceName             string                                `json:"deviceName"`
+	DeviceData             any                                   `json:"deviceData"`
 	ResponsibleObject      []*User                               `json:"responsibleObject"`
 	Quantity               int64                                 `json:"quantity"`
 	ProcessStatus          enum.ProductionOrderStageDeviceStatus `json:"processStatus"`
