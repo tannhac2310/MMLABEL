@@ -3,9 +3,10 @@ package repository
 import (
 	"context"
 	"fmt"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"strings"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
@@ -35,6 +36,7 @@ type EventLogData struct {
 type ProductionOrderStageDeviceData struct {
 	*model.ProductionOrderStageDevice
 	DeviceName        string `db:"device_name"`
+	DeviceData        any    `db:"device_data"`
 	ProductionOrderID string `db:"production_order_id"`
 	ResponsibleObject []*model2.User
 }
@@ -189,7 +191,7 @@ func (s *SearchProductionOrderStageDevicesOpts) buildQuery(isCount bool) (string
 	if s.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s ", s.Sort.By, s.Sort.Order)
 	}
-	return fmt.Sprintf(`SELECT b.%s, pos.production_order_id as production_order_id, COALESCE (d.name,'N/A') as device_name
+	return fmt.Sprintf(`SELECT b.%s, pos.production_order_id as production_order_id, COALESCE (d.name,'N/A') as device_name, d.data as device_data
 		FROM %s AS b %s
 		JOIN devices d ON d.id = b.device_id
 		JOIN production_order_stages AS pos ON pos.id = b.production_order_stage_id

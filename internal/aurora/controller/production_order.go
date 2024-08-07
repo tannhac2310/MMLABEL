@@ -317,6 +317,7 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 				ProductionOrderStageID: device.ProductionOrderStageID,
 				DeviceID:               device.DeviceID,
 				DeviceName:             device.DeviceName,
+				DeviceData:             device.DeviceData,
 				ResponsibleObject:      responsibleObject,
 				Quantity:               device.Quantity,
 				ProcessStatus:          device.ProcessStatus,
