@@ -9,10 +9,12 @@ type CustomFieldType uint8
 
 const (
 	CustomFieldTypeProductionOrder CustomFieldType = iota + 1
+	CustomFieldTypeProductionPlan
 )
 
 var CustomFieldTypeName = map[CustomFieldType]string{
 	CustomFieldTypeProductionOrder: "production_order",
+	CustomFieldTypeProductionPlan:  "production_plan",
 }
 
 var CustomFieldTypeValue = func() map[string]CustomFieldType {
