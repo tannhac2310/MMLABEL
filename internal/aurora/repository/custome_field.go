@@ -3,15 +3,17 @@ package repository
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
-	"strings"
 )
 
 type CustomFieldRepo interface {
 	Insert(ctx context.Context, e *model.CustomField) error
 	Update(ctx context.Context, e *model.CustomField) error
+	Delete(ctx context.Context, id string) error
 	DeleteByEntity(ctx context.Context, entityType enum.CustomFieldType, entityId string) error
 	Search(ctx context.Context, s *SearchCustomFieldsOpts) ([]*CustomFieldData, error)
 	Count(ctx context.Context, s *SearchCustomFieldsOpts) (*CountResult, error)
@@ -35,6 +37,20 @@ func (r *customFieldsRepo) Insert(ctx context.Context, e *model.CustomField) err
 
 func (r *customFieldsRepo) Update(ctx context.Context, e *model.CustomField) error {
 	return cockroach.Update(ctx, e)
+}
+
+func (r *customFieldsRepo) Delete(ctx context.Context, id string) error {
+	sql := "UPDATE custom_fields SET deleted_at = NOW() WHERE id = $1;"
+
+	cmd, err := cockroach.Exec(ctx, sql, id)
+	if err != nil {
+		return fmt.Errorf("cockroach.Exec: %w", err)
+	}
+	if cmd.RowsAffected() == 0 {
+		return fmt.Errorf("not found any records to delete")
+	}
+
+	return nil
 }
 
 func (r *customFieldsRepo) DeleteByEntity(ctx context.Context, entityType enum.CustomFieldType, entityId string) error {

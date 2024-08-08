@@ -6,8 +6,10 @@ import (
 	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/generic"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/idutil"
 )
 
@@ -31,6 +33,41 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 		return err
 	}
 
+	customFields, err := c.customFieldRepo.Search(ctx, &repository.SearchCustomFieldsOpts{
+		EntityId:   plan.ID,
+		EntityType: enum.CustomFieldTypeProductionPlan,
+		Limit:      1000,
+		Offset:     0,
+	})
+	if err != nil {
+		return err
+	}
+	customFieldMap := generic.ToMap(customFields, func(f *repository.CustomFieldData) string {
+		return f.Field
+	})
+
+	newCustomFields := make([]*model.CustomField, 0)
+	updatedCustomFields := make([]*model.CustomField, 0)
+	for _, field := range opt.CustomField {
+		if _, ok := customFieldMap[field.Field]; ok {
+			customFieldMap[field.Field].Value = field.Value
+			updatedCustomFields = append(updatedCustomFields, customFieldMap[field.Field].CustomField)
+			delete(customFieldMap, field.Field)
+		} else {
+			newCustomFields = append(newCustomFields, &model.CustomField{
+				ID:         idutil.ULIDNow(),
+				EntityID:   plan.ID,
+				EntityType: enum.CustomFieldTypeProductionPlan,
+				Field:      field.Field,
+				Value:      field.Value,
+			})
+		}
+	}
+	deletedCustomFields := make([]*model.CustomField, 0)
+	for _, field := range customFieldMap {
+		deletedCustomFields = append(deletedCustomFields, field.CustomField)
+	}
+
 	execTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
 		plan.UpdatedBy = opt.CreatedBy
 		plan.UpdatedAt = now
@@ -47,19 +84,19 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 			return fmt.Errorf("update production plan failed: %w", err)
 		}
 
-		if err := c.customFieldRepo.DeleteByEntity(ctx, enum.CustomFieldTypeProductionPlan, plan.ID); err != nil {
-			return fmt.Errorf("override existing custom fields for production plan failed: %w", err)
+		for _, field := range updatedCustomFields {
+			if err := c.customFieldRepo.Update(ctx, field); err != nil {
+				return fmt.Errorf("update custom field for production plan failed: %w", err)
+			}
 		}
-
-		for _, field := range opt.CustomField {
-			if err := c.customFieldRepo.Insert(ctx2, &model.CustomField{
-				ID:         idutil.ULIDNow(),
-				EntityID:   plan.ID,
-				EntityType: enum.CustomFieldTypeProductionPlan,
-				Field:      field.Field,
-				Value:      field.Value,
-			}); err != nil {
-				return fmt.Errorf("create new custom field for production plan failed: %w", err)
+		for _, field := range newCustomFields {
+			if err := c.customFieldRepo.Insert(ctx, field); err != nil {
+				return fmt.Errorf("create custom field for production plan failed: %w", err)
+			}
+		}
+		for _, field := range deletedCustomFields {
+			if err := c.customFieldRepo.Delete(ctx, field.ID); err != nil {
+				return fmt.Errorf("delete custom field for production plan failed: %w", err)
 			}
 		}
 
