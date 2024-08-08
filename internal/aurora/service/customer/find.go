@@ -28,9 +28,6 @@ func (c *customerService) FindCustomers(ctx context.Context, opts *FindCustomers
 
 	results := make([]*Data, 0, len(customers))
 	for _, customer := range customers {
-		if err != nil {
-			return nil, nil, err
-		}
 		results = append(results, &Data{
 			CustomerData: customer,
 		})

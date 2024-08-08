@@ -34,8 +34,23 @@ func (s customerController) CreateCustomer(c *gin.Context) {
 	userID := interceptor.UserIDFromCtx(c)
 
 	id, err := s.customerService.CreateCustomer(c, &customer.CreateCustomerOpts{
-		Name:      req.Name,
-		CreatedBy: userID,
+		Name:               req.Name,
+		Tax:                req.Tax,
+		Code:               req.Code,
+		Country:            req.Country,
+		Province:           req.Province,
+		Address:            req.Address,
+		PhoneNumber:        req.PhoneNumber,
+		Fax:                req.Fax,
+		CompanyWebsite:     req.CompanyWebsite,
+		CompanyPhone:       req.CompanyPhone,
+		ContactPersonName:  req.ContactPersonName,
+		ContactPersonEmail: req.ContactPersonEmail,
+		ContactPersonPhone: req.ContactPersonPhone,
+		ContactPersonRole:  req.ContactPersonRole,
+		Note:               req.Note,
+		Status:             req.Status,
+		CreatedBy:          userID,
 	})
 	if err != nil {
 		transportutil.Error(c, err)

@@ -3,6 +3,8 @@ package model
 import (
 	"database/sql"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
 const (
@@ -30,27 +32,27 @@ const (
 )
 
 type Customer struct {
-	ID                 string         `db:"id"`
-	Name               string         `db:"name"`
-	Tax                sql.NullString `db:"tax"`
-	Code               string         `db:"code"`
-	Country            string         `db:"country"`
-	Province           string         `db:"province"`
-	Address            string         `db:"address"`
-	PhoneNumber        string         `db:"phone_number"`
-	Fax                sql.NullString `db:"fax"`
-	CompanyWebsite     sql.NullString `db:"company_website"`
-	CompanyPhone       sql.NullString `db:"company_phone"`
-	ContactPersonName  string         `db:"contact_person_name"`
-	ContactPersonEmail string         `db:"contact_person_email"`
-	ContactPersonPhone string         `db:"contact_person_phone"`
-	ContactPersonRole  string         `db:"contact_person_role"`
-	Note               sql.NullString `db:"note"`
-	Status             int16          `db:"status"`
-	CreatedBy          string         `db:"created_by"`
-	CreatedAt          time.Time      `db:"created_at"`
-	UpdatedAt          time.Time      `db:"updated_at"`
-	DeletedAt          sql.NullTime   `db:"deleted_at"`
+	ID                 string              `db:"id"`
+	Name               string              `db:"name"`
+	Tax                sql.NullString      `db:"tax"`
+	Code               string              `db:"code"`
+	Country            string              `db:"country"`
+	Province           string              `db:"province"`
+	Address            string              `db:"address"`
+	PhoneNumber        string              `db:"phone_number"`
+	Fax                sql.NullString      `db:"fax"`
+	CompanyWebsite     sql.NullString      `db:"company_website"`
+	CompanyPhone       sql.NullString      `db:"company_phone"`
+	ContactPersonName  string              `db:"contact_person_name"`
+	ContactPersonEmail string              `db:"contact_person_email"`
+	ContactPersonPhone string              `db:"contact_person_phone"`
+	ContactPersonRole  string              `db:"contact_person_role"`
+	Note               sql.NullString      `db:"note"`
+	Status             enum.CustomerStatus `db:"status"`
+	CreatedBy          string              `db:"created_by"`
+	CreatedAt          time.Time           `db:"created_at"`
+	UpdatedAt          time.Time           `db:"updated_at"`
+	DeletedAt          sql.NullTime        `db:"deleted_at"`
 }
 
 func (rcv *Customer) FieldMap() (fields []string, values []interface{}) {

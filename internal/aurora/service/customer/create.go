@@ -7,6 +7,7 @@ import (
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/idutil"
 )
 
@@ -66,6 +67,6 @@ type CreateCustomerOpts struct {
 	ContactPersonPhone string
 	ContactPersonRole  string
 	Note               string
-	Status             int16
+	Status             enum.CustomerStatus
 	CreatedBy          string
 }

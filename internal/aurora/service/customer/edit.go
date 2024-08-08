@@ -7,6 +7,7 @@ import (
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
 func (c *customerService) EditCustomer(ctx context.Context, opt *EditCustomerOpts) error {
@@ -63,6 +64,6 @@ type EditCustomerOpts struct {
 	ContactPersonPhone string
 	ContactPersonRole  string
 	Note               string
-	Status             int16
+	Status             enum.CustomerStatus
 	CreatedBy          string
 }
