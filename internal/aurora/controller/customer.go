@@ -34,14 +34,23 @@ func (s customerController) CreateCustomer(c *gin.Context) {
 	userID := interceptor.UserIDFromCtx(c)
 
 	id, err := s.customerService.CreateCustomer(c, &customer.CreateCustomerOpts{
-		Name:        req.Name,
-		Avatar:      req.Avatar,
-		PhoneNumber: req.PhoneNumber,
-		Email:       req.Email,
-		Status:      req.Status,
-		Type:        req.Type,
-		Address:     req.Address,
-		CreatedBy:   userID,
+		Name:               req.Name,
+		Tax:                req.Tax,
+		Code:               req.Code,
+		Country:            req.Country,
+		Province:           req.Province,
+		Address:            req.Address,
+		PhoneNumber:        req.PhoneNumber,
+		Fax:                req.Fax,
+		CompanyWebsite:     req.CompanyWebsite,
+		CompanyPhone:       req.CompanyPhone,
+		ContactPersonName:  req.ContactPersonName,
+		ContactPersonEmail: req.ContactPersonEmail,
+		ContactPersonPhone: req.ContactPersonPhone,
+		ContactPersonRole:  req.ContactPersonRole,
+		Note:               req.Note,
+		Status:             req.Status,
+		CreatedBy:          userID,
 	})
 	if err != nil {
 		transportutil.Error(c, err)
@@ -61,15 +70,27 @@ func (s customerController) EditCustomer(c *gin.Context) {
 		return
 	}
 
+	userID := interceptor.UserIDFromCtx(c)
+
 	err = s.customerService.EditCustomer(c, &customer.EditCustomerOpts{
-		ID:          req.ID,
-		Name:        req.Name,
-		Avatar:      req.Avatar,
-		PhoneNumber: req.PhoneNumber,
-		Email:       req.Email,
-		Status:      req.Status,
-		Type:        req.Type,
-		Address:     req.Address,
+		ID:                 req.ID,
+		Name:               req.Name,
+		Tax:                req.Tax,
+		Code:               req.Code,
+		Country:            req.Country,
+		Province:           req.Province,
+		Address:            req.Address,
+		PhoneNumber:        req.PhoneNumber,
+		Fax:                req.Fax,
+		CompanyWebsite:     req.CompanyWebsite,
+		CompanyPhone:       req.CompanyPhone,
+		ContactPersonName:  req.ContactPersonName,
+		ContactPersonEmail: req.ContactPersonEmail,
+		ContactPersonPhone: req.ContactPersonPhone,
+		ContactPersonRole:  req.ContactPersonRole,
+		Note:               req.Note,
+		Status:             req.Status,
+		CreatedBy:          userID,
 	})
 	if err != nil {
 		transportutil.Error(c, err)
@@ -128,14 +149,23 @@ func (s customerController) FindCustomers(c *gin.Context) {
 
 func toCustomerResp(f *customer.Data) *dto.Customer {
 	return &dto.Customer{
-		ID:          f.ID,
-		Name:        f.Name,
-		Avatar:      f.Avatar.String,
-		PhoneNumber: f.PhoneNumber.String,
-		Email:       f.Email.String,
-		Status:      f.Status,
-		Type:        f.Type,
-		Address:     f.Address.String,
+		ID:                 f.ID,
+		Name:               f.Name,
+		Tax:                f.Tax.String,
+		Code:               f.Code,
+		Country:            f.Country,
+		Province:           f.Province,
+		Address:            f.Address,
+		PhoneNumber:        f.PhoneNumber,
+		Fax:                f.Fax.String,
+		CompanyWebsite:     f.CompanyWebsite.String,
+		CompanyPhone:       f.CompanyPhone.String,
+		ContactPersonName:  f.ContactPersonName,
+		ContactPersonPhone: f.ContactPersonPhone,
+		ContactPersonEmail: f.ContactPersonEmail,
+		ContactPersonRole:  f.ContactPersonRole,
+		Note:               f.Note.String,
+		Status:             f.Status,
 	}
 }
 

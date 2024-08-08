@@ -7,10 +7,11 @@ import (
 )
 
 func (c *customerService) FindCustomers(ctx context.Context, opts *FindCustomersOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error) {
-	filter := &repository.SearchCustomersOpts{
+	filter := &repository.SearchCustomerOpts{
 		IDs:    opts.IDs,
 		Name:   opts.Name,
 		Phone:  opts.Phone,
+		Code:   opts.Code,
 		Limit:  limit,
 		Offset: offset,
 		Sort:   sort,
@@ -27,9 +28,6 @@ func (c *customerService) FindCustomers(ctx context.Context, opts *FindCustomers
 
 	results := make([]*Data, 0, len(customers))
 	for _, customer := range customers {
-		if err != nil {
-			return nil, nil, err
-		}
 		results = append(results, &Data{
 			CustomerData: customer,
 		})
@@ -41,4 +39,5 @@ type FindCustomersOpts struct {
 	IDs   []string
 	Name  string
 	Phone string
+	Code  string
 }
