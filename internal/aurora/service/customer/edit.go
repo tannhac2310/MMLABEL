@@ -10,34 +10,59 @@ import (
 )
 
 func (c *customerService) EditCustomer(ctx context.Context, opt *EditCustomerOpts) error {
-	var err error
-	table := model.Customer{}
-	updater := cockroach.NewUpdater(table.TableName(), model.CustomerFieldID, opt.ID)
-
-	updater.Set(model.CustomerFieldName, opt.Name)
-	updater.Set(model.CustomerFieldAvatar, opt.Avatar)
-	updater.Set(model.CustomerFieldPhoneNumber, opt.PhoneNumber)
-	updater.Set(model.CustomerFieldEmail, opt.Email)
-	updater.Set(model.CustomerFieldStatus, opt.Status)
-	updater.Set(model.CustomerFieldType, opt.Type)
-	updater.Set(model.CustomerFieldAddress, opt.Address)
-
-	updater.Set(model.CustomerFieldUpdatedAt, time.Now())
-
-	err = cockroach.UpdateFields(ctx, updater)
-	if err != nil {
-		return fmt.Errorf("update customer failed %w", err)
+	customer := model.Customer{
+		ID:                 opt.ID,
+		Name:               opt.Name,
+		Tax:                cockroach.String(opt.Tax),
+		Code:               opt.Code,
+		Country:            opt.Country,
+		Province:           opt.Province,
+		Address:            opt.Address,
+		PhoneNumber:        opt.PhoneNumber,
+		Fax:                cockroach.String(opt.Fax),
+		CompanyWebsite:     cockroach.String(opt.CompanyWebsite),
+		CompanyPhone:       cockroach.String(opt.CompanyPhone),
+		ContactPersonName:  opt.ContactPersonName,
+		ContactPersonEmail: opt.ContactPersonEmail,
+		ContactPersonPhone: opt.ContactPersonPhone,
+		ContactPersonRole:  opt.ContactPersonRole,
+		Note:               cockroach.String(opt.Note),
+		Status:             opt.Status,
+		UpdatedAt:          time.Now(),
 	}
+
+	errTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
+		err := c.customerRepo.Update(ctx2, &customer)
+		if err != nil {
+			return fmt.Errorf("c.customerRepo.Update: %w", err)
+		}
+
+		return nil
+	})
+	if errTx != nil {
+		return errTx
+	}
+
 	return nil
 }
 
 type EditCustomerOpts struct {
-	ID          string
-	Name        string
-	Avatar      string
-	PhoneNumber string
-	Email       string
-	Status      int16
-	Type        int16
-	Address     string
+	ID                 string
+	Name               string
+	Tax                string
+	Code               string
+	Country            string
+	Province           string
+	Address            string
+	PhoneNumber        string
+	Fax                string
+	CompanyWebsite     string
+	CompanyPhone       string
+	ContactPersonName  string
+	ContactPersonEmail string
+	ContactPersonPhone string
+	ContactPersonRole  string
+	Note               string
+	Status             int16
+	CreatedBy          string
 }
