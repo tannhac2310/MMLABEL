@@ -4,6 +4,10 @@ import uuid
 from datetime import datetime
 import sys
 
+# make sure install psycopg2 before run
+# pip3 install psycopg2
+# python3 tools/script/migrate-customers.py ./tools/script/output.sql
+
 # Database connection parameters
 db_config = {
     'dbname': 'postgres',
