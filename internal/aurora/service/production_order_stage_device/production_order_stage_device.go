@@ -159,6 +159,9 @@ func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditPr
 	if opt.AssignedQuantity > 0 {
 		updater.Set(model.ProductionOrderStageDeviceFieldAssignedQuantity, opt.AssignedQuantity)
 	}
+	if opt.Note != "" {
+		updater.Set(model.ProductionOrderStageDeviceFieldNote, cockroach.String(opt.Note))
+	}
 
 	updater.Set(model.ProductionOrderStageDeviceFieldUpdatedAt, time.Now())
 
