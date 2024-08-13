@@ -57,11 +57,11 @@ func (c *productionPlanService) FindProductionPlans(ctx context.Context, opts *F
 
 		poCustomFields := c.GetCustomField()
 		customFieldMap := make(map[string]string)
-		for _, customField := range poCustomFields {
-			customFieldMap[customField] = ""
+		for key := range poCustomFields {
+			customFieldMap[key] = ""
 			for _, datum := range customFieldData {
-				if datum.Field == customField {
-					customFieldMap[customField] = datum.Value
+				if datum.Field == key {
+					customFieldMap[key] = datum.Value
 					break
 				}
 			}

@@ -61,6 +61,17 @@ type DeleteProductionPlanRequest struct {
 
 type DeleteProductionPlanResponse struct{}
 
+type ProcessProductionOrderRequest struct {
+	ID                  string             `json:"id"`
+	Stages              []CreateOrderStage `json:"productionOrderStages"`
+	EstimatedStartAt    time.Time          `json:"estimatedStartAt"`
+	EstimatedCompleteAt time.Time          `json:"estimatedCompleteAt"`
+}
+
+type ProcessProductionOrderResponse struct {
+	ID string `json:"id"` // production order id
+}
+
 type ProductionPlan struct {
 	ID         string                    `json:"id,omitempty"`
 	CustomerID string                    `json:"customerID,omitempty"`

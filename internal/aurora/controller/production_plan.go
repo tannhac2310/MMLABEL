@@ -18,6 +18,7 @@ type ProductionPlanController interface {
 	DeleteProductionPlan(c *gin.Context)
 	FindProductionPlans(c *gin.Context)
 	FindProductionPlansWithNoPermission(c *gin.Context)
+	ProcessProductionOrder(c *gin.Context)
 }
 
 type productionPlanController struct {
@@ -223,6 +224,49 @@ func (s productionPlanController) FindProductionPlans(c *gin.Context) {
 	transportutil.SendJSONResponse(c, &dto.FindProductionPlansResponse{
 		ProductionPlans: productionPlanResp,
 		Total:           cnt.Count,
+	})
+}
+
+func (s productionPlanController) ProcessProductionOrder(c *gin.Context) {
+	req := &dto.ProcessProductionOrderRequest{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+
+	userID := interceptor.UserIDFromCtx(c)
+
+	orderStages := make([]*production_plan.ProductionOrderStage, 0)
+	for idx, stage := range req.Stages {
+		orderStages = append(orderStages, &production_plan.ProductionOrderStage{
+			StageID:             stage.StageID,
+			EstimatedStartAt:    stage.EstimatedStartAt,
+			EstimatedCompleteAt: stage.EstimatedCompleteAt,
+			StartedAt:           stage.StartedAt,
+			CompletedAt:         stage.CompletedAt,
+			Status:              stage.Status,
+			Condition:           stage.Condition,
+			Note:                stage.Note,
+			Data:                stage.Data,
+			Sorting:             int16(len(req.Stages) - idx),
+		})
+	}
+
+	id, err := s.productionPlanService.ProcessProductionOrder(c, &production_plan.ProcessProductionOrderOpts{
+		ID:                  req.ID,
+		Stages:              orderStages,
+		EstimatedStartAt:    req.EstimatedStartAt,
+		EstimatedCompleteAt: req.EstimatedCompleteAt,
+		CreatedBy:           userID,
+	})
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+
+	transportutil.SendJSONResponse(c, &dto.ProcessProductionOrderResponse{
+		ID: id,
 	})
 }
 
