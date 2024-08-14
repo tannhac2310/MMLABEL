@@ -45,6 +45,13 @@ func (c *productionPlanService) CreateProductionPlan(ctx context.Context, opt *C
 		CurrentStage: enum.ProductionPlanStageSale,
 	}
 
+	requiredCustomFields := c.GetCustomField()
+	for _, val := range opt.CustomField {
+		if _, ok := requiredCustomFields[val.Field]; !ok {
+			return "", fmt.Errorf("thông tin %s không hợp lệ", val.Field)
+		}
+	}
+
 	errTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
 		if err := c.productionPlanRepo.Insert(ctx2, productionPlan); err != nil {
 			return fmt.Errorf("c.productionPlanRepo.Insert: %w", err)

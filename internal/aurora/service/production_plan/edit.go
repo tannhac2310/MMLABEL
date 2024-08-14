@@ -42,6 +42,13 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 	if err != nil {
 		return err
 	}
+	requiredCustomFields := c.GetCustomField()
+	for _, val := range opt.CustomField {
+		if _, ok := requiredCustomFields[val.Field]; !ok {
+			return fmt.Errorf("thông tin %s không hợp lệ", val.Field)
+		}
+	}
+
 	customFieldMap := generic.ToMap(customFields, func(f *repository.CustomFieldData) string {
 		return f.Field
 	})

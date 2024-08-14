@@ -324,4 +324,13 @@ func RegisterProductionPlanController(
 		&dto.FindProductionPlansResponse{},
 		"Find productionPlans",
 	)
+
+	routeutil.AddEndpoint(
+		g,
+		"process-production-order",
+		c.ProcessProductionOrder,
+		&dto.ProcessProductionOrderRequest{},
+		&dto.ProcessProductionOrderResponse{},
+		"Process Production Order",
+	)
 }
