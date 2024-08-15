@@ -29,6 +29,8 @@ def process_database(output: str):
         cursor.execute(fetch_query)
         rows = cursor.fetchall()
 
+        po_customers = {}
+        disctinct_customers = {}
         inserts = []
         updates = []
         for row in rows:
@@ -37,13 +39,23 @@ def process_database(output: str):
 
             # Generate a new UUID
             new_id = str(uuid.uuid4())
+            po_customers[old_id] = name
+            if name not in disctinct_customers:
+                disctinct_customers[name] = new_id
 
+        for name, new_id in disctinct_customers.items():
             # Insert into the second table
             inserts.append("\
 INSERT INTO public.customers\r\
 (id, 'name', tax, code, country, province, address, phone_number, fax, company_website, company_phone, contact_person_name, contact_person_email, contact_person_phone, contact_person_role, note, 'status', created_by, created_at, updated_at, deleted_at)\r\
 VALUES ('{id}', '{name}', '{tax}', '{code}', 'Việt Nam', 'Hồ Chí Minh', 'Quận 1', 0, '{fax}', '', 0, '{contact_person_name}', '{contact_person_email}', 0, 'Nhân viên', '', 1, '{created_by}', now(), now(), NULL);"
                            .format(id=new_id, name=name, tax=name + '-tax', code=name + '-code',  fax=name + '-fax', contact_person_name=name, contact_person_email=name + '@emal.com', created_by='5782eebb-1311-4fea-9fd7-c00ad2489318'))
+            
+        for old_id, name in po_customers.items():
+            if name not in disctinct_customers:
+                print("error")
+                return
+            new_id = disctinct_customers[name]
 
             # Update the original table with the new UUID
             updates.append("\
