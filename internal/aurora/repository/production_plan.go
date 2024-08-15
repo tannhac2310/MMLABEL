@@ -108,7 +108,7 @@ func (s *SearchProductionPlanOpts) buildQuery(isCount bool) (string, []interface
 	}
 	if s.Stage > 0 {
 		args = append(args, s.Stage, s.Stage)
-		conds += fmt.Sprintf(" AND b.%s & %d = %d", model.ProductionPlanFieldCurrentStage, len(args)-1, len(args))
+		conds += fmt.Sprintf(" AND b.%s & $%d = $%d", model.ProductionPlanFieldCurrentStage, len(args)-1, len(args))
 	} else {
 		args = append(args, 1, 1)
 		conds += fmt.Sprintf(" AND b.%s & $%d = $%d", model.ProductionPlanFieldCurrentStage, len(args)-1, len(args))
