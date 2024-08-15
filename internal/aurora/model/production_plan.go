@@ -25,6 +25,8 @@ const (
 	ProductionPlanFieldName         = "name"
 	ProductionPlanFieldPoStages     = "po_stages"
 	ProductionPlanFieldCurrentStage = "current_stage"
+	ProductionPlanFieldProductName  = "product_name"
+	ProductionPlanFieldProductCode  = "product_code"
 )
 
 type ProductionPlan struct {
@@ -40,11 +42,13 @@ type ProductionPlan struct {
 	UpdatedAt    time.Time                 `db:"updated_at"`
 	DeletedAt    sql.NullTime              `db:"deleted_at"`
 	Name         string                    `db:"name"`
-	PoStagesInfo ProductionStageInfo       `db:"po_stages"`
+	PoStages     ProductionStageInfo       `db:"po_stages"`
 	CurrentStage int                       `db:"current_stage"`
+	ProductName  string                    `db:"product_name"`
+	ProductCode  string                    `db:"product_code"`
 }
 
-func (p *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
+func (rcv *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
 	fields = []string{
 		ProductionPlanFieldID,
 		ProductionPlanFieldCustomerID,
@@ -60,38 +64,42 @@ func (p *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
 		ProductionPlanFieldName,
 		ProductionPlanFieldPoStages,
 		ProductionPlanFieldCurrentStage,
+		ProductionPlanFieldProductName,
+		ProductionPlanFieldProductCode,
 	}
 
 	values = []interface{}{
-		&p.ID,
-		&p.CustomerID,
-		&p.SalesID,
-		&p.Thumbnail,
-		&p.Status,
-		&p.Note,
-		&p.CreatedBy,
-		&p.CreatedAt,
-		&p.UpdatedBy,
-		&p.UpdatedAt,
-		&p.DeletedAt,
-		&p.Name,
-		&p.PoStagesInfo,
-		&p.CurrentStage,
+		&rcv.ID,
+		&rcv.CustomerID,
+		&rcv.SalesID,
+		&rcv.Thumbnail,
+		&rcv.Status,
+		&rcv.Note,
+		&rcv.CreatedBy,
+		&rcv.CreatedAt,
+		&rcv.UpdatedBy,
+		&rcv.UpdatedAt,
+		&rcv.DeletedAt,
+		&rcv.Name,
+		&rcv.PoStages,
+		&rcv.CurrentStage,
+		&rcv.ProductName,
+		&rcv.ProductCode,
 	}
 
 	return
 }
 
-func (p *ProductionPlan) TableName() string {
+func (rcv *ProductionPlan) TableName() string {
 	return "production_plans"
 }
 
-func (p *ProductionPlan) CanChangeStatusTo(s enum.ProductionPlanStatus) bool {
-	if p.Status == s {
+func (rcv *ProductionPlan) CanChangeStatusTo(s enum.ProductionPlanStatus) bool {
+	if rcv.Status == s {
 		return true
 	}
 
-	return math.Abs(float64(p.Status)-float64(s)) <= 1
+	return math.Abs(float64(rcv.Status)-float64(s)) <= 1
 }
 
 type ProductionStageInfo struct {
