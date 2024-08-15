@@ -1,5 +1,8 @@
 alter table public.production_plans add column product_name varchar(500) not null default '';
 alter table public.production_plans add column product_code varchar(255) not null default '';
+alter table public.production_plans add qty_paper int8 null default 0;
+alter table public.production_plans add qty_finished int8 null default 0;
+alter table public.production_plans add qty_delivered int8 null default 0;
 
 update public.production_plans set product_code = s.value
 from (

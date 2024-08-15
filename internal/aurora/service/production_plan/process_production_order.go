@@ -9,7 +9,6 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/generic"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/idutil"
 )
 
@@ -53,19 +52,16 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 	if err != nil {
 		return "", fmt.Errorf("query custom fields for production plan %s failed: %w", plan.ID, err)
 	}
-	customFieldMap := generic.ToMap(customFields, func(f *repository.CustomFieldData) string {
-		return f.Field
-	})
 
 	productionOrder := &model.ProductionOrder{
 		ID:                  id,
-		ProductCode:         customFieldMap[ProductionPlanCustomField_ma_sp].Value,
-		ProductName:         plan.ProductionPlan.Name,
+		ProductCode:         plan.ProductCode,
+		ProductName:         plan.ProductName,
 		CustomerID:          plan.CustomerID,
 		SalesID:             plan.SalesID,
-		QtyPaper:            0, // FIXME
-		QtyFinished:         0,
-		QtyDelivered:        0,
+		QtyPaper:            plan.QtyPaper,
+		QtyFinished:         plan.QtyFinished,
+		QtyDelivered:        plan.QtyDelivered,
 		DeliveryDate:        time.Time{},
 		DeliveryImage:       plan.Thumbnail,
 		Status:              enum.ProductionOrderStatusWaiting,
@@ -83,9 +79,28 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 		if err != nil {
 			return fmt.Errorf("c.productionOrderRepo.Insert: %w", err)
 		}
+
+		plan.PoStages = model.ProductionStageInfo{
+			Items: make([]*model.ProductionStageItem, 0),
+		}
 		for _, orderStage := range opt.Stages {
+			stageID := idutil.ULIDNow()
+
+			// update stages of production plan
+			plan.PoStages.Items = append(plan.PoStages.Items, &model.ProductionStageItem{
+				ID:                  stageID,
+				ProductionPlanID:    plan.ID,
+				StageID:             orderStage.StageID,
+				Note:                orderStage.Note,
+				CreatedAt:           now,
+				UpdatedAt:           now,
+				EstimatedStartAt:    orderStage.EstimatedStartAt,
+				EstimatedCompleteAt: orderStage.EstimatedCompleteAt,
+				Sorting:             orderStage.Sorting,
+			})
+
 			err = c.productionOrderStageRepo.Insert(ctx2, &model.ProductionOrderStage{
-				ID:                  idutil.ULIDNow(),
+				ID:                  stageID,
 				ProductionOrderID:   id,
 				Sorting:             orderStage.Sorting,
 				StageID:             orderStage.StageID,
@@ -117,6 +132,15 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 				return fmt.Errorf("c.customFieldRepo.Insert: %w", err)
 			}
 		}
+
+		// update production plan
+		plan.CurrentStage = enum.ProductionPlanStageSale | enum.ProductionPlanStageProduction
+		plan.Status = enum.ProductionPlanStatus_PO_Processing
+		plan.UpdatedAt = now
+		if err := c.productionPlanRepo.Update(ctx, plan.ProductionPlan); err != nil {
+			return fmt.Errorf("c.productionPlanRepo.Update: %w", err)
+		}
+
 		return nil
 	})
 	if errTx != nil {

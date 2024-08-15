@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"encoding/json"
-	"math"
 	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
@@ -27,6 +26,9 @@ const (
 	ProductionPlanFieldCurrentStage = "current_stage"
 	ProductionPlanFieldProductName  = "product_name"
 	ProductionPlanFieldProductCode  = "product_code"
+	ProductionPlanFieldQtyPaper     = "qty_paper"
+	ProductionPlanFieldQtyFinished  = "qty_finished"
+	ProductionPlanFieldQtyDelivered = "qty_delivered"
 )
 
 type ProductionPlan struct {
@@ -46,6 +48,9 @@ type ProductionPlan struct {
 	CurrentStage int                       `db:"current_stage"`
 	ProductName  string                    `db:"product_name"`
 	ProductCode  string                    `db:"product_code"`
+	QtyPaper     int64                     `db:"qty_paper"`
+	QtyFinished  int64                     `db:"qty_finished"`
+	QtyDelivered int64                     `db:"qty_delivered"`
 }
 
 func (rcv *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
@@ -66,6 +71,9 @@ func (rcv *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
 		ProductionPlanFieldCurrentStage,
 		ProductionPlanFieldProductName,
 		ProductionPlanFieldProductCode,
+		ProductionPlanFieldQtyPaper,
+		ProductionPlanFieldQtyFinished,
+		ProductionPlanFieldQtyDelivered,
 	}
 
 	values = []interface{}{
@@ -85,6 +93,9 @@ func (rcv *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
 		&rcv.CurrentStage,
 		&rcv.ProductName,
 		&rcv.ProductCode,
+		&rcv.QtyPaper,
+		&rcv.QtyFinished,
+		&rcv.QtyDelivered,
 	}
 
 	return
@@ -94,12 +105,8 @@ func (rcv *ProductionPlan) TableName() string {
 	return "production_plans"
 }
 
-func (rcv *ProductionPlan) CanChangeStatusTo(s enum.ProductionPlanStatus) bool {
-	if rcv.Status == s {
-		return true
-	}
-
-	return math.Abs(float64(rcv.Status)-float64(s)) <= 1
+func (rcv *ProductionPlan) Editable() bool {
+	return rcv.CurrentStage != enum.ProductionPlanStageProduction
 }
 
 type ProductionStageInfo struct {

@@ -12,14 +12,19 @@ import (
 )
 
 type CreateProductionPlanOpts struct {
-	Name        string
-	CustomerID  string
-	SalesID     string
-	Thumbnail   string
-	Status      enum.ProductionPlanStatus
-	Note        string
-	CustomField []*CustomField
-	CreatedBy   string
+	Name         string
+	CustomerID   string
+	SalesID      string
+	ProductName  string
+	ProductCode  string
+	QtyPaper     int64
+	QtyFinished  int64
+	QtyDelivered int64
+	Thumbnail    string
+	Status       enum.ProductionPlanStatus
+	Note         string
+	CustomField  []*CustomField
+	CreatedBy    string
 }
 
 type CustomField struct {
@@ -34,6 +39,11 @@ func (c *productionPlanService) CreateProductionPlan(ctx context.Context, opt *C
 		ID:           id,
 		CustomerID:   opt.CustomerID,
 		SalesID:      opt.SalesID,
+		ProductName:  opt.ProductName,
+		ProductCode:  opt.ProductCode,
+		QtyPaper:     opt.QtyPaper,
+		QtyFinished:  opt.QtyFinished,
+		QtyDelivered: opt.QtyDelivered,
 		Thumbnail:    cockroach.String(opt.Thumbnail),
 		Status:       opt.Status,
 		Note:         cockroach.String(opt.Note),
