@@ -34,7 +34,6 @@ type CreateProductionPlanRequest struct {
 	Status      enum.ProductionPlanStatus `json:"status,omitempty"`
 	Note        string                    `json:"note,omitempty"`
 	CustomField []*CustomField            `json:"customField,omitempty"`
-	CreatedBy   string                    `json:"createdBy,omitempty"`
 }
 
 type CreateProductionPlanResponse struct {

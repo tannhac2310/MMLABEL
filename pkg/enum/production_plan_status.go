@@ -33,10 +33,10 @@ const (
 
 var ProductionPlanStatusName = map[ProductionPlanStatus]string{
 	ProductionPlanStatus_Sale_CollectInfo:        "sale_collect_info",
-	ProductionPlanStatus_Develope_New:            "develope_new",
-	ProductionPlanStatus_Develope_Feedback:       "develope_feedback",
-	ProductionPlanStatus_Develope_Feedbacked:     "develope_feedbacked",
-	ProductionPlanStatus_Develope_Done:           "develope_done",
+	ProductionPlanStatus_Develope_New:            "develop_new",
+	ProductionPlanStatus_Develope_Feedback:       "develop_feedback",
+	ProductionPlanStatus_Develope_Feedbacked:     "develop_feedbacked",
+	ProductionPlanStatus_Develope_Done:           "develop_done",
 	ProductionPlanStatus_Design_New:              "design_new",
 	ProductionPlanStatus_Design_Processing:       "design_processing",
 	ProductionPlanStatus_Design_Done:             "design_done",
