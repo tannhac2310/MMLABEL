@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"encoding/json"
-	"math"
 	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
@@ -25,6 +24,11 @@ const (
 	ProductionPlanFieldName         = "name"
 	ProductionPlanFieldPoStages     = "po_stages"
 	ProductionPlanFieldCurrentStage = "current_stage"
+	ProductionPlanFieldProductName  = "product_name"
+	ProductionPlanFieldProductCode  = "product_code"
+	ProductionPlanFieldQtyPaper     = "qty_paper"
+	ProductionPlanFieldQtyFinished  = "qty_finished"
+	ProductionPlanFieldQtyDelivered = "qty_delivered"
 )
 
 type ProductionPlan struct {
@@ -40,11 +44,16 @@ type ProductionPlan struct {
 	UpdatedAt    time.Time                 `db:"updated_at"`
 	DeletedAt    sql.NullTime              `db:"deleted_at"`
 	Name         string                    `db:"name"`
-	PoStagesInfo ProductionStageInfo       `db:"po_stages"`
+	PoStages     ProductionStageInfo       `db:"po_stages"`
 	CurrentStage int                       `db:"current_stage"`
+	ProductName  string                    `db:"product_name"`
+	ProductCode  string                    `db:"product_code"`
+	QtyPaper     int64                     `db:"qty_paper"`
+	QtyFinished  int64                     `db:"qty_finished"`
+	QtyDelivered int64                     `db:"qty_delivered"`
 }
 
-func (p *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
+func (rcv *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
 	fields = []string{
 		ProductionPlanFieldID,
 		ProductionPlanFieldCustomerID,
@@ -60,38 +69,44 @@ func (p *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
 		ProductionPlanFieldName,
 		ProductionPlanFieldPoStages,
 		ProductionPlanFieldCurrentStage,
+		ProductionPlanFieldProductName,
+		ProductionPlanFieldProductCode,
+		ProductionPlanFieldQtyPaper,
+		ProductionPlanFieldQtyFinished,
+		ProductionPlanFieldQtyDelivered,
 	}
 
 	values = []interface{}{
-		&p.ID,
-		&p.CustomerID,
-		&p.SalesID,
-		&p.Thumbnail,
-		&p.Status,
-		&p.Note,
-		&p.CreatedBy,
-		&p.CreatedAt,
-		&p.UpdatedBy,
-		&p.UpdatedAt,
-		&p.DeletedAt,
-		&p.Name,
-		&p.PoStagesInfo,
-		&p.CurrentStage,
+		&rcv.ID,
+		&rcv.CustomerID,
+		&rcv.SalesID,
+		&rcv.Thumbnail,
+		&rcv.Status,
+		&rcv.Note,
+		&rcv.CreatedBy,
+		&rcv.CreatedAt,
+		&rcv.UpdatedBy,
+		&rcv.UpdatedAt,
+		&rcv.DeletedAt,
+		&rcv.Name,
+		&rcv.PoStages,
+		&rcv.CurrentStage,
+		&rcv.ProductName,
+		&rcv.ProductCode,
+		&rcv.QtyPaper,
+		&rcv.QtyFinished,
+		&rcv.QtyDelivered,
 	}
 
 	return
 }
 
-func (p *ProductionPlan) TableName() string {
+func (rcv *ProductionPlan) TableName() string {
 	return "production_plans"
 }
 
-func (p *ProductionPlan) CanChangeStatusTo(s enum.ProductionPlanStatus) bool {
-	if p.Status == s {
-		return true
-	}
-
-	return math.Abs(float64(p.Status)-float64(s)) <= 1
+func (rcv *ProductionPlan) Editable() bool {
+	return rcv.CurrentStage != enum.ProductionPlanStageProduction
 }
 
 type ProductionStageInfo struct {

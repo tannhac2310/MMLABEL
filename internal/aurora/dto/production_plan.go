@@ -8,11 +8,13 @@ import (
 )
 
 type ProductionPlanFilter struct {
-	IDs        []string                    `json:"ids"`
-	Name       string                      `json:"name"`
-	CustomerID string                      `json:"customerID"`
-	Statuses   []enum.ProductionPlanStatus `json:"statuses"`
-	Stage      int                         `json:"stage"`
+	IDs         []string                    `json:"ids"`
+	Name        string                      `json:"name"`
+	CustomerID  string                      `json:"customerID"`
+	ProductName string                      `json:"productName"`
+	ProductCode string                      `json:"productCode"`
+	Statuses    []enum.ProductionPlanStatus `json:"statuses"`
+	Stage       int                         `json:"stage"`
 }
 
 type FindProductionPlansRequest struct {
@@ -27,13 +29,19 @@ type FindProductionPlansResponse struct {
 }
 
 type CreateProductionPlanRequest struct {
-	Name        string                    `json:"name,omitempty"`
-	CustomerID  string                    `json:"customerID,omitempty"`
-	SalesID     string                    `json:"salesID,omitempty"`
-	Thumbnail   string                    `json:"thumbnail,omitempty"`
-	Status      enum.ProductionPlanStatus `json:"status,omitempty"`
-	Note        string                    `json:"note,omitempty"`
-	CustomField []*CustomField            `json:"customField,omitempty"`
+	Name         string                    `json:"name,omitempty"`
+	CustomerID   string                    `json:"customerID,omitempty"`
+	SalesID      string                    `json:"salesID,omitempty"`
+	ProductName  string                    `json:"productName,omitempty"`
+	ProductCode  string                    `json:"productCode,omitempty"`
+	QtyPaper     int64                     `json:"qtyPaper,omitempty"`
+	QtyFinished  int64                     `json:"qtyFinished,omitempty"`
+	QtyDelivered int64                     `json:"qtyDelivered,omitempty"`
+	Thumbnail    string                    `json:"thumbnail,omitempty"`
+	Status       enum.ProductionPlanStatus `json:"status,omitempty"`
+	Note         string                    `json:"note,omitempty"`
+	CustomField  []*CustomField            `json:"customField,omitempty"`
+	CreatedBy    string                    `json:"createdBy,omitempty"`
 }
 
 type CreateProductionPlanResponse struct {
@@ -41,15 +49,20 @@ type CreateProductionPlanResponse struct {
 }
 
 type EditProductionPlanRequest struct {
-	ID          string                    `json:"id,omitempty"`
-	Name        string                    `json:"name,omitempty"`
-	CustomerID  string                    `json:"customerID,omitempty"`
-	SalesID     string                    `json:"salesID,omitempty"`
-	Thumbnail   string                    `json:"thumbnail,omitempty"`
-	Status      enum.ProductionPlanStatus `json:"status,omitempty"`
-	Note        string                    `json:"note,omitempty"`
-	CustomField []*CustomField            `json:"customField,omitempty"`
-	CreatedBy   string                    `json:"createdBy,omitempty"`
+	ID           string                    `json:"id,omitempty"`
+	Name         string                    `json:"name,omitempty"`
+	CustomerID   string                    `json:"customerID,omitempty"`
+	SalesID      string                    `json:"salesID,omitempty"`
+	ProductName  string                    `json:"productName,omitempty"`
+	ProductCode  string                    `json:"productCode,omitempty"`
+	QtyPaper     int64                     `json:"qtyPaper,omitempty"`
+	QtyFinished  int64                     `json:"qtyFinished,omitempty"`
+	QtyDelivered int64                     `json:"qtyDelivered,omitempty"`
+	Thumbnail    string                    `json:"thumbnail,omitempty"`
+	Status       enum.ProductionPlanStatus `json:"status,omitempty"`
+	Note         string                    `json:"note,omitempty"`
+	CustomField  []*CustomField            `json:"customField,omitempty"`
+	CreatedBy    string                    `json:"createdBy,omitempty"`
 }
 
 type EditProductionPlanResponse struct{}
@@ -60,18 +73,34 @@ type DeleteProductionPlanRequest struct {
 
 type DeleteProductionPlanResponse struct{}
 
+type ProcessProductionOrderRequest struct {
+	ID                  string             `json:"id"`
+	Stages              []CreateOrderStage `json:"productionOrderStages"`
+	EstimatedStartAt    time.Time          `json:"estimatedStartAt"`
+	EstimatedCompleteAt time.Time          `json:"estimatedCompleteAt"`
+}
+
+type ProcessProductionOrderResponse struct {
+	ID string `json:"id"` // production order id
+}
+
 type ProductionPlan struct {
-	ID         string                    `json:"id,omitempty"`
-	CustomerID string                    `json:"customerID,omitempty"`
-	SalesID    string                    `json:"salesID,omitempty"`
-	Thumbnail  string                    `json:"thumbnail,omitempty"`
-	Status     enum.ProductionPlanStatus `json:"status,omitempty"`
-	Note       string                    `json:"note,omitempty"`
-	CreatedBy  string                    `json:"createdBy,omitempty"`
-	CreatedAt  time.Time                 `json:"createdAt,omitempty"`
-	UpdatedBy  string                    `json:"updatedBy,omitempty"`
-	UpdatedAt  time.Time                 `json:"updatedAt,omitempty"`
-	DeletedAt  time.Time                 `json:"deletedAt,omitempty"`
-	Name       string                    `json:"name,omitempty"`
-	CustomData map[string]string         `json:"customData,omitempty"`
+	ID           string                    `json:"id,omitempty"`
+	CustomerID   string                    `json:"customerID,omitempty"`
+	SalesID      string                    `json:"salesID,omitempty"`
+	ProductName  string                    `json:"productName,omitempty"`
+	ProductCode  string                    `json:"productCode,omitempty"`
+	QtyPaper     int64                     `json:"qtyPaper,omitempty"`
+	QtyFinished  int64                     `json:"qtyFinished,omitempty"`
+	QtyDelivered int64                     `json:"qtyDelivered,omitempty"`
+	Thumbnail    string                    `json:"thumbnail,omitempty"`
+	Status       enum.ProductionPlanStatus `json:"status,omitempty"`
+	Note         string                    `json:"note,omitempty"`
+	CreatedBy    string                    `json:"createdBy,omitempty"`
+	CreatedAt    time.Time                 `json:"createdAt,omitempty"`
+	UpdatedBy    string                    `json:"updatedBy,omitempty"`
+	UpdatedAt    time.Time                 `json:"updatedAt,omitempty"`
+	DeletedAt    time.Time                 `json:"deletedAt,omitempty"`
+	Name         string                    `json:"name,omitempty"`
+	CustomData   map[string]string         `json:"customData,omitempty"`
 }

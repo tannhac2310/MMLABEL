@@ -33,9 +33,3 @@ create table production_plan_attributes
     deleted_at timestamptz,
     constraint pk_production_plan_attributes primary key (id asc)
 );
-
-create table production_plan_stages
-(
-    id VARCHAR(50) not null,
-
-)

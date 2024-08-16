@@ -1,0 +1,508 @@
+{
+	"info": {
+		"_postman_id": "e7e4535e-dcf6-4eaa-86f0-caaffe9fdf82",
+		"name": "MM",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19531415"
+	},
+	"item": [
+		{
+			"name": "ink_export",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json, text/plain, */*"
+							},
+							{
+								"key": "accept-language",
+								"value": "en-US,en;q=0.9,vi;q=0.8"
+							},
+							{
+								"key": "authorization",
+								"value": "Bearer {{accesstoken}}"
+							},
+							{
+								"key": "content-type",
+								"value": "application/json"
+							},
+							{
+								"key": "cookie",
+								"value": "profile=%7B%22id%22%3A%225782eebb-1311-4fea-9fd7-c00ad2489318%22%2C%22name%22%3A%22NGUY%E1%BB%84N%20V%C4%82N%20M%E1%BA%AAN%22%2C%22code%22%3A%2210100001%22%2C%22departments%22%3A%22BGD%22%2C%22avatar%22%3A%22%22%2C%22phoneNumber%22%3A%22%22%2C%22email%22%3A%22%22%2C%22type%22%3A%22manager_level_1%22%2C%22roleIds%22%3Anull%2C%22permissions%22%3Anull%7D; token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsibW1wcmludGluZyJdLCJjbGFpbXMiOnsiZ3JvdXBzIjpbXSwicm9sZXMiOlsibmhhbi12aWVuIl19LCJleHAiOjE3MjIxMDg3OTMsImlhdCI6MTcyMDc5NDc5MywiaXNzIjoiaHlkcmEvbW1wcmludGluZyIsInN1YiI6IjU3ODJlZWJiLTEzMTEtNGZlYS05ZmQ3LWMwMGFkMjQ4OTMxOCJ9.qFrRgbjz0eG8Cxdfg_FkqkFEAtWVTfpa8-GTqxBSrxo; userDepartments5782eebb-1311-4fea-9fd7-c00ad2489318=[%22XK%22%2C%22XFDC%22%2C%22XF%22%2C%22UDE%22%2C%22TK%22%2C%22R&D%22%2C%22QA%22%2C%22PM%22%2C%22PCN%22%2C%22NLT%22%2C%22NLC%22%2C%22KTO%22%2C%22KPC%22%2C%22KP%22%2C%22KO%22%2C%22KH%22%2C%22KD%22%2C%22ITC%22%2C%22IOT%22%2C%22IOC%22%2C%22IO%22%2C%22ING%22%2C%22IM%22%2C%22ILT%22%2C%22ILK%22%2C%22ILCU%22%2C%22ILC%22%2C%22IL%22%2C%22IKTS%22%2C%22IKLT%22%2C%22IKK%22%2C%22IKH%22%2C%22IGC%22%2C%22ICODE%22%2C%22IC%22%2C%22HTK%22%2C%22HCNS%22%2C%22ENN%22%2C%22DNN%22%2C%22DNKT%22%2C%22DN%22%2C%22DM%22%2C%22DK%22%2C%22DHSX%22%2C%22DD%22%2C%22DA%22%2C%22CVTT%22%2C%22CVT%22%2C%22CTP%22%2C%22CTAY%22%2C%22CNO%22%2C%22CNG%22%2C%22CM%22%2C%22CLS%22%2C%22CLM%22%2C%22CLD%22%2C%22CF%22%2C%22CBD%22%2C%22CB%22%2C%22CA%22%2C%22BTM%22%2C%22BTD%22%2C%22BT%22%2C%22BKE%22%2C%22BET%22%2C%22BEC%22%2C%22BCM%22%2C%22BCD%22]"
+							},
+							{
+								"key": "origin",
+								"value": "https://dev.mmlabel.buonho.vn"
+							},
+							{
+								"key": "priority",
+								"value": "u=1, i"
+							},
+							{
+								"key": "referer",
+								"value": "https://dev.mmlabel.buonho.vn/process/MHQLKM/form-xk"
+							},
+							{
+								"key": "sec-ch-ua",
+								"value": "\"Not/A)Brand\";v=\"8\", \"Chromium\";v=\"126\", \"Google Chrome\";v=\"126\""
+							},
+							{
+								"key": "sec-ch-ua-mobile",
+								"value": "?0"
+							},
+							{
+								"key": "sec-ch-ua-platform",
+								"value": "\"macOS\""
+							},
+							{
+								"key": "sec-fetch-dest",
+								"value": "empty"
+							},
+							{
+								"key": "sec-fetch-mode",
+								"value": "cors"
+							},
+							{
+								"key": "sec-fetch-site",
+								"value": "same-origin"
+							},
+							{
+								"key": "user-agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"XK-20240714-Rc-\",\n    \"data\": {},\n    \"exportDate\": \"2024-07-14\",\n    \"inkExportDetail\": [\n        {\n            \"inkID\": \"01HJ4ZN3PWMVBF8MAVAC129FYB\",\n            \"quantity\": 92\n        },\n        {\n            \"inkID\": \"01HJ4ZEKJS8H53GXEPTMQX9WYT\",\n            \"quantity\": 37\n        },\n        {\n            \"inkID\": \"01HJ37YFZDN46Y2CNB74PXXNV1\",\n            \"quantity\": 91\n        }\n    ],\n    \"name\": \"Xuất kho mực GC008/1339/0424 Gia công ngoài 2024-07-14 20:07\",\n    \"productionOrderID\": \"01HV320KBQSHY5232ECX2T01EX\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{auroraHost}}/aurora/ink/export",
+							"host": [
+								"{{auroraHost}}"
+							],
+							"path": [
+								"aurora",
+								"ink",
+								"export"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "production_plan",
+			"item": [
+				{
+					"name": "find",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filter\": {\n        \"stage\": 1,\n        \"statuses\": [\"sale_collect_info\", \"po_processing\"]\n    },\n    \"paging\": {\n        \"limit\": 10,\n        \"offset\": 0\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{auroraHost}}/aurora/production-plan/find",
+							"host": [
+								"{{auroraHost}}"
+							],
+							"path": [
+								"aurora",
+								"production-plan",
+								"find"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Plan1\",\n    \"customerID\": \"111\",\n    \"salesID\": \"111\",\n    \"thumbnail\": \"test-image.png\",\n    \"status\": 1,\n    \"note\": \"test note\",\n    \"customField\": [\n        {\n            \"key\": \"bdc\",\n            \"value\": \"Bế tờ\"\n        },\n        {\n            \"key\": \"chat_lieu_in\",\n            \"value\": \"Nhựa polime\"\n        },\n        {\n            \"key\": \"chat_luong_kp\",\n            \"value\": \"A, B\"\n        },\n        {\n            \"key\": \"chi_tiet_van_chuyen\",\n            \"value\": \"Di dời vào ngày 12/04/2024\"\n        },\n        {\n            \"key\": \"dai\",\n            \"value\": \"11cm\"\n        },\n        {\n            \"key\": \"don_vi_dvt\",\n            \"value\": \"mm\"\n        },\n        {\n            \"key\": \"dvt\",\n            \"value\": \"11\"\n        },\n        {\n            \"key\": \"epoxy\",\n            \"value\": \"Epoxy Indoor\"\n        },\n        {\n            \"key\": \"film\",\n            \"value\": \"new\"\n        },\n        {\n            \"key\": \"ghi_chu_epoxy\",\n            \"value\": \"Dễ bị tan chảy\"\n        },\n        {\n            \"key\": \"ghi_chu_keo_dan\",\n            \"value\": \"\"\n        },\n        {\n            \"key\": \"ghi_chu_van_chuyen\",\n            \"value\": \"Hàng dễ vỡ\"\n        },\n        {\n            \"key\": \"hinh_dang\",\n            \"value\": \"Laser, cvt, ctp\"\n        },\n        {\n            \"key\": \"hinh_mau_sp\",\n            \"value\": \"image.png\"\n        },\n        {\n            \"key\": \"hinh_sp\",\n            \"value\": \"image.png\"\n        },\n        {\n            \"key\": \"hinh_thuc_in\",\n            \"value\": \"1, 2, 3\"\n        },\n        {\n            \"key\": \"keo_2_mat\",\n            \"value\": \"Foreigner Tape\"\n        },\n        {\n            \"key\": \"keo_dan\",\n            \"value\": \"Mảng bảo vệ\"\n        },\n        {\n            \"key\": \"loai_hinh\",\n            \"value\": \"image.png\"\n        },\n        {\n            \"key\": \"ma_chat_lieu_in\",\n            \"value\": \"Polime01\"\n        },\n        {\n            \"key\": \"ma_keo_2_mat\",\n            \"value\": \"tape01\"\n        },\n        {\n            \"key\": \"ma_sp\",\n            \"value\": \"Code-V89459400\"\n        },\n        {\n            \"key\": \"ma_sp_phu\",\n            \"value\": \"Code-V89459400\"\n        },\n        {\n            \"key\": \"mieu_ta\",\n            \"value\": \"\"\n        },\n        {\n            \"key\": \"rong\",\n            \"value\": \"20cm\"\n        },\n        {\n            \"key\": \"so_lan_in\",\n            \"value\": \"40\"\n        },\n        {\n            \"key\": \"so_luong_keo_2_mat\",\n            \"value\": \"10\"\n        },\n        {\n            \"key\": \"so_luong_mau\",\n            \"value\": \"10\"\n        },\n        {\n            \"key\": \"ten_mau_sp\",\n            \"value\": \"San pham a\"\n        },\n        {\n            \"key\": \"ten_sp\",\n            \"value\": \"San pham a\"\n        },\n        {\n            \"key\": \"van_chuyen\",\n            \"value\": \"Packing\"\n        },\n        {\n            \"key\": \"vat_lieu_thay_the\",\n            \"value\": \"Iron\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{auroraHost}}/aurora/production-plan/create",
+							"host": [
+								"{{auroraHost}}"
+							],
+							"path": [
+								"aurora",
+								"production-plan",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"01J4M6S9NZRY34FXB6DD3F0MND\",\n    \"name\": \"test\",\n    \"customerID\": \"111\",\n    \"salesID\": \"111\",\n    \"thumbnail\": \"test-image.png\",\n    \"status\": 2,\n    \"note\": \"test note update 2\",\n    \"customField\": [\n        {\n            \"key\": \"ten_sp\",\n            \"value\": \"San pham a ne\"\n        },\n        {\n            \"key\": \"ma_sp\",\n            \"value\": \"aabb\"\n        },\n        {\n            \"key\": \"ma_sp_phu\",\n            \"value\": \"aab\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{auroraHost}}/aurora/production-plan/edit",
+							"host": [
+								"{{auroraHost}}"
+							],
+							"path": [
+								"aurora",
+								"production-plan",
+								"edit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "process production order",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"01J58SHW7W3Y1D047CPZJJCZK6\",\n    \"productionOrderStages\": [\n        {\n            \"stageID\": \"BTD\",\n            \"estimatedStartAt\": \"2023-11-24T00:00:00+07:00\",\n            \"estimatedCompleteAt\": \"2023-12-07T00:00:00+07:00\",\n            \"status\": 1,\n            \"note\": \"\"\n        },\n        {\n            \"stageID\": \"KPC\",\n            \"estimatedStartAt\": \"2023-11-24T00:00:00+07:00\",\n            \"estimatedCompleteAt\": \"2023-12-07T00:00:00+07:00\",\n            \"status\": 1,\n            \"note\": \"\"\n        }\n    ],\n    \"estimatedStartAt\": \"2023-11-24T00:00:00+07:00\",\n    \"estimatedCompleteAt\": \"2023-12-07T00:00:00+07:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{auroraHost}}/aurora/production-plan/process-production-order",
+							"host": [
+								"{{auroraHost}}"
+							],
+							"path": [
+								"aurora",
+								"production-plan",
+								"process-production-order"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "login",
+			"item": [
+				{
+					"name": "login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//Fixed the condition for response status",
+									"pm.test(\"Response status code is 200\", function () {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Stores the token from the response data in an environment variable",
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"accessToken\", jsonData.data.token);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json, text/plain, */*",
+								"disabled": true
+							},
+							{
+								"key": "accept-language",
+								"value": "en-US,en;q=0.9,vi;q=0.8",
+								"disabled": true
+							},
+							{
+								"key": "content-type",
+								"value": "application/json",
+								"disabled": true
+							},
+							{
+								"key": "origin",
+								"value": "http://localhost:4100",
+								"disabled": true
+							},
+							{
+								"key": "priority",
+								"value": "u=1, i",
+								"disabled": true
+							},
+							{
+								"key": "referer",
+								"value": "http://localhost:4100/login",
+								"disabled": true
+							},
+							{
+								"key": "sec-ch-ua",
+								"value": "\"Not)A;Brand\";v=\"99\", \"Google Chrome\";v=\"127\", \"Chromium\";v=\"127\"",
+								"disabled": true
+							},
+							{
+								"key": "sec-ch-ua-mobile",
+								"value": "?0",
+								"disabled": true
+							},
+							{
+								"key": "sec-ch-ua-platform",
+								"value": "\"macOS\"",
+								"disabled": true
+							},
+							{
+								"key": "sec-fetch-dest",
+								"value": "empty",
+								"disabled": true
+							},
+							{
+								"key": "sec-fetch-mode",
+								"value": "cors",
+								"disabled": true
+							},
+							{
+								"key": "sec-fetch-site",
+								"value": "same-origin",
+								"disabled": true
+							},
+							{
+								"key": "user-agent",
+								"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userName\": \"{{userName}}\",\n    \"password\": \"{{password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{hydraHost}}/hydra/auth/login-username-password",
+							"host": [
+								"{{hydraHost}}"
+							],
+							"path": [
+								"hydra",
+								"auth",
+								"login-username-password"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "customer",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Hiếu Nguyễn\",\n    \"tax\": \"123456789\",\n    \"code\": \"CUS1\",\n    \"country\": \"Viet Nam\",\n    \"province\": \"Ho Chi Minh\",\n    \"address\": \"Linh Xuan, Thu Duc\",\n    \"phoneNumber\": \"0334097514\",\n    \"fax\": \"\",\n    \"contactPersonName\": \"Hieu Tran\",\n    \"contactPersonEmail\": \"hieutran@gmail.com\",\n    \"contactPersonPhone\": \"0334097514\",\n    \"contactPersonRole\": \"Nhan vien\",\n    \"email\": \"hieunguyen1815@gmail.com\",\n    \"status\": 1,\n    \"note\": \"hello\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{auroraHost}}/aurora/customer/create",
+							"host": [
+								"{{auroraHost}}"
+							],
+							"path": [
+								"aurora",
+								"customer",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "find",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Hiếu Nguyễn\",\n    \"tax\": \"123456789\",\n    \"code\": \"CUS1\",\n    \"country\": \"Viet Nam\",\n    \"province\": \"Ho Chi Minh\",\n    \"address\": \"Linh Xuan, Thu Duc\",\n    \"phoneNumber\": \"0334097514\",\n    \"fax\": \"\",\n    \"contactPersonName\": \"Hieu Tran\",\n    \"contactPersonEmail\": \"hieutran@gmail.com\",\n    \"contactPersonPhone\": \"0334097514\",\n    \"contactPersonRole\": \"Nhan vien\",\n    \"email\": \"hieunguyen1815@gmail.com\",\n    \"status\": 1,\n    \"note\": \"hello\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{auroraHost}}/aurora/customer/find",
+							"host": [
+								"{{auroraHost}}"
+							],
+							"path": [
+								"aurora",
+								"customer",
+								"find"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"01J4S98T5W3WNDFASVEWX3KXCC\",\n    \"name\": \"Hiếu Nguyễn\",\n    \"tax\": \"123456789\",\n    \"code\": \"CUS1\",\n    \"country\": \"Viet Nam\",\n    \"province\": \"Ho Chi Minh\",\n    \"address\": \"Linh Xuan, Thu Duc\",\n    \"phoneNumber\": \"0334097514\",\n    \"fax\": \"\",\n    \"contactPersonName\": \"Hieu Tran Ne\",\n    \"contactPersonEmail\": \"hieutran@gmail.com\",\n    \"contactPersonPhone\": \"0334097514\",\n    \"contactPersonRole\": \"Nhan vien\",\n    \"email\": \"hieunguyen1815@gmail.com\",\n    \"status\": 1,\n    \"note\": \"hello\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{auroraHost}}/aurora/customer/edit",
+							"host": [
+								"{{auroraHost}}"
+							],
+							"path": [
+								"aurora",
+								"customer",
+								"edit"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

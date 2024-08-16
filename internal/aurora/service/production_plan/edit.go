@@ -14,15 +14,20 @@ import (
 )
 
 type EditProductionPlanOpts struct {
-	ID          string
-	Name        string
-	CustomerID  string
-	SalesID     string
-	Thumbnail   string
-	Status      enum.ProductionPlanStatus
-	Note        string
-	CustomField []*CustomField
-	CreatedBy   string
+	ID           string
+	Name         string
+	CustomerID   string
+	SalesID      string
+	ProductName  string
+	ProductCode  string
+	QtyPaper     int64
+	QtyFinished  int64
+	QtyDelivered int64
+	Thumbnail    string
+	Status       enum.ProductionPlanStatus
+	Note         string
+	CustomField  []*CustomField
+	CreatedBy    string
 }
 
 func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *EditProductionPlanOpts) error {
@@ -31,6 +36,9 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 	plan, err := c.productionPlanRepo.FindByID(ctx, opt.ID)
 	if err != nil {
 		return err
+	}
+	if plan.ProductionPlan.Editable() {
+		return fmt.Errorf("không thể chỉnh sửa kế hoạch đã được đưa vào sản xuất")
 	}
 
 	customFields, err := c.customFieldRepo.Search(ctx, &repository.SearchCustomFieldsOpts{
@@ -42,6 +50,13 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 	if err != nil {
 		return err
 	}
+	requiredCustomFields := c.GetCustomField()
+	for _, val := range opt.CustomField {
+		if _, ok := requiredCustomFields[val.Field]; !ok {
+			return fmt.Errorf("thông tin %s không hợp lệ", val.Field)
+		}
+	}
+
 	customFieldMap := generic.ToMap(customFields, func(f *repository.CustomFieldData) string {
 		return f.Field
 	})
@@ -71,14 +86,14 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 	execTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
 		plan.UpdatedBy = opt.CreatedBy
 		plan.UpdatedAt = now
+		plan.QtyPaper = opt.QtyPaper
+		plan.QtyFinished = opt.QtyFinished
+		plan.QtyDelivered = opt.QtyDelivered
 		plan.Thumbnail = cockroach.String(opt.Thumbnail)
 		plan.Note = cockroach.String(opt.Note)
-		if !plan.CanChangeStatusTo(opt.Status) {
-			return fmt.Errorf("cannot change production plan status to %s", enum.ProductionPlanStatusName[opt.Status])
-		}
 		plan.Status = opt.Status
 		currentStage := enum.ProductionPlanStatusSage[plan.Status]
-		plan.CurrentStage = int(enum.ProductionPlanStageSale) | currentStage // only sale and current stage can view the production plan
+		plan.CurrentStage = enum.ProductionPlanStageSale | currentStage // only sale and current stage can view the production plan
 
 		if err := c.productionPlanRepo.Update(ctx2, plan.ProductionPlan); err != nil {
 			return fmt.Errorf("update production plan failed: %w", err)

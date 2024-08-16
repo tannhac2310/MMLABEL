@@ -13,24 +13,29 @@ type Analysis struct {
 }
 
 type FindProductionPlansOpts struct {
-	IDs        []string
-	CustomerID string
-	Name       string
-	Statuses   []enum.ProductionPlanStatus
-	UserID     string
-	Stage      int
+	IDs         []string
+	CustomerID  string
+	Name        string
+	ProductName string
+	ProductCode string
+	Statuses    []enum.ProductionPlanStatus
+	UserID      string
+	Stage       int
 }
 
 func (c *productionPlanService) FindProductionPlans(ctx context.Context, opts *FindProductionPlansOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error) {
 	filter := &repository.SearchProductionPlanOpts{
-		IDs:        opts.IDs,
-		CustomerID: opts.CustomerID,
-		Name:       opts.Name,
-		Statuses:   opts.Statuses,
-		UserID:     opts.UserID,
-		Limit:      limit,
-		Offset:     offset,
-		Sort:       sort,
+		IDs:         opts.IDs,
+		CustomerID:  opts.CustomerID,
+		Name:        opts.Name,
+		ProductName: opts.ProductName,
+		ProductCode: opts.ProductCode,
+		Statuses:    opts.Statuses,
+		UserID:      opts.UserID,
+		Stage:       opts.Stage,
+		Limit:       limit,
+		Offset:      offset,
+		Sort:        sort,
 	}
 	productionPlans, err := c.productionPlanRepo.Search(ctx, filter)
 	if err != nil {
@@ -57,11 +62,11 @@ func (c *productionPlanService) FindProductionPlans(ctx context.Context, opts *F
 
 		poCustomFields := c.GetCustomField()
 		customFieldMap := make(map[string]string)
-		for _, customField := range poCustomFields {
-			customFieldMap[customField] = ""
+		for key := range poCustomFields {
+			customFieldMap[key] = ""
 			for _, datum := range customFieldData {
-				if datum.Field == customField {
-					customFieldMap[customField] = datum.Value
+				if datum.Field == key {
+					customFieldMap[key] = datum.Value
 					break
 				}
 			}
@@ -78,14 +83,17 @@ func (c *productionPlanService) FindProductionPlans(ctx context.Context, opts *F
 
 func (c *productionPlanService) FindProductionPlansWithNoPermission(ctx context.Context, opts *FindProductionPlansOpts, sort *repository.Sort, limit, offset int64) ([]*DataWithNoPermission, *repository.CountResult, error) {
 	filter := &repository.SearchProductionPlanOpts{
-		IDs:        opts.IDs,
-		CustomerID: opts.CustomerID,
-		Name:       opts.Name,
-		Statuses:   opts.Statuses,
-		UserID:     opts.UserID,
-		Limit:      limit,
-		Offset:     offset,
-		Sort:       sort,
+		IDs:         opts.IDs,
+		CustomerID:  opts.CustomerID,
+		Name:        opts.Name,
+		ProductName: opts.ProductName,
+		ProductCode: opts.ProductCode,
+		Statuses:    opts.Statuses,
+		UserID:      opts.UserID,
+		Stage:       opts.Stage,
+		Limit:       limit,
+		Offset:      offset,
+		Sort:        sort,
 	}
 	productionPlans, err := c.productionPlanRepo.Search(ctx, filter)
 	if err != nil {

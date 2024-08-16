@@ -18,6 +18,7 @@ type ProductionPlanController interface {
 	DeleteProductionPlan(c *gin.Context)
 	FindProductionPlans(c *gin.Context)
 	FindProductionPlansWithNoPermission(c *gin.Context)
+	ProcessProductionOrder(c *gin.Context)
 }
 
 type productionPlanController struct {
@@ -42,13 +43,18 @@ func (s productionPlanController) CreateProductionPlan(c *gin.Context) {
 		})
 	}
 	id, err := s.productionPlanService.CreateProductionPlan(c, &production_plan.CreateProductionPlanOpts{
-		Name:        req.Name,
-		CustomerID:  req.CustomerID,
-		SalesID:     req.SalesID,
-		Status:      req.Status,
-		Note:        req.Note,
-		CustomField: customField,
-		CreatedBy:   userID,
+		Name:         req.Name,
+		CustomerID:   req.CustomerID,
+		SalesID:      req.SalesID,
+		ProductName:  req.ProductName,
+		ProductCode:  req.ProductCode,
+		QtyPaper:     req.QtyPaper,
+		QtyFinished:  req.QtyFinished,
+		QtyDelivered: req.QtyDelivered,
+		Status:       req.Status,
+		Note:         req.Note,
+		CustomField:  customField,
+		CreatedBy:    userID,
 	})
 	if err != nil {
 		transportutil.Error(c, err)
@@ -78,14 +84,19 @@ func (s productionPlanController) EditProductionPlan(c *gin.Context) {
 	})
 
 	err = s.productionPlanService.EditProductionPlan(c, &production_plan.EditProductionPlanOpts{
-		ID:          req.ID,
-		Name:        req.Name,
-		CustomerID:  req.CustomerID,
-		SalesID:     req.SalesID,
-		Status:      req.Status,
-		Note:        req.Note,
-		CustomField: customField,
-		CreatedBy:   userID,
+		ID:           req.ID,
+		Name:         req.Name,
+		CustomerID:   req.CustomerID,
+		SalesID:      req.SalesID,
+		ProductName:  req.ProductName,
+		ProductCode:  req.ProductCode,
+		QtyPaper:     req.QtyPaper,
+		QtyFinished:  req.QtyFinished,
+		QtyDelivered: req.QtyDelivered,
+		Status:       req.Status,
+		Note:         req.Note,
+		CustomField:  customField,
+		CreatedBy:    userID,
 	})
 	if err != nil {
 		transportutil.Error(c, err)
@@ -131,12 +142,14 @@ func (s productionPlanController) FindProductionPlansWithNoPermission(c *gin.Con
 		}
 	}
 	productionPlans, cnt, err := s.productionPlanService.FindProductionPlansWithNoPermission(c, &production_plan.FindProductionPlansOpts{
-		IDs:        req.Filter.IDs,
-		CustomerID: req.Filter.CustomerID,
-		Name:       req.Filter.Name,
-		Statuses:   req.Filter.Statuses,
-		UserID:     interceptor.UserIDFromCtx(c),
-		Stage:      req.Filter.Stage,
+		IDs:         req.Filter.IDs,
+		CustomerID:  req.Filter.CustomerID,
+		Name:        req.Filter.Name,
+		ProductName: req.Filter.ProductName,
+		ProductCode: req.Filter.ProductCode,
+		Statuses:    req.Filter.Statuses,
+		UserID:      interceptor.UserIDFromCtx(c),
+		Stage:       req.Filter.Stage,
 	}, sort, req.Paging.Limit, req.Paging.Offset)
 	if err != nil {
 		transportutil.Error(c, err)
@@ -146,18 +159,23 @@ func (s productionPlanController) FindProductionPlansWithNoPermission(c *gin.Con
 	productionPlanResp := make([]*dto.ProductionPlan, 0, len(productionPlans))
 	for _, f := range productionPlans {
 		data := &dto.ProductionPlan{
-			ID:         f.ID,
-			CustomerID: f.CustomerID,
-			SalesID:    f.SalesID,
-			Thumbnail:  f.Thumbnail.String,
-			Status:     f.Status,
-			Note:       f.Note.String,
-			CreatedBy:  f.CreatedBy,
-			CreatedAt:  f.CreatedAt,
-			UpdatedBy:  f.UpdatedBy,
-			UpdatedAt:  f.UpdatedAt,
-			DeletedAt:  f.DeletedAt.Time,
-			Name:       f.Name,
+			ID:           f.ID,
+			CustomerID:   f.CustomerID,
+			SalesID:      f.SalesID,
+			ProductName:  f.ProductName,
+			ProductCode:  f.ProductCode,
+			QtyPaper:     f.QtyPaper,
+			QtyFinished:  f.QtyFinished,
+			QtyDelivered: f.QtyDelivered,
+			Thumbnail:    f.Thumbnail.String,
+			Status:       f.Status,
+			Note:         f.Note.String,
+			CreatedBy:    f.CreatedBy,
+			CreatedAt:    f.CreatedAt,
+			UpdatedBy:    f.UpdatedBy,
+			UpdatedAt:    f.UpdatedAt,
+			DeletedAt:    f.DeletedAt.Time,
+			Name:         f.Name,
 		}
 		productionPlanResp = append(productionPlanResp, data)
 	}
@@ -187,12 +205,14 @@ func (s productionPlanController) FindProductionPlans(c *gin.Context) {
 		}
 	}
 	productionPlans, cnt, err := s.productionPlanService.FindProductionPlans(c, &production_plan.FindProductionPlansOpts{
-		IDs:        req.Filter.IDs,
-		CustomerID: req.Filter.CustomerID,
-		Name:       req.Filter.Name,
-		Statuses:   req.Filter.Statuses,
-		UserID:     interceptor.UserIDFromCtx(c),
-		Stage:      req.Filter.Stage,
+		IDs:         req.Filter.IDs,
+		CustomerID:  req.Filter.CustomerID,
+		Name:        req.Filter.Name,
+		ProductName: req.Filter.ProductName,
+		ProductCode: req.Filter.ProductCode,
+		Statuses:    req.Filter.Statuses,
+		UserID:      interceptor.UserIDFromCtx(c),
+		Stage:       req.Filter.Stage,
 	}, sort, req.Paging.Limit, req.Paging.Offset)
 	if err != nil {
 		transportutil.Error(c, err)
@@ -202,19 +222,24 @@ func (s productionPlanController) FindProductionPlans(c *gin.Context) {
 	productionPlanResp := make([]*dto.ProductionPlan, 0, len(productionPlans))
 	for _, f := range productionPlans {
 		data := &dto.ProductionPlan{
-			ID:         f.ID,
-			CustomerID: f.CustomerID,
-			SalesID:    f.SalesID,
-			Thumbnail:  f.Thumbnail.String,
-			Status:     f.Status,
-			Note:       f.Note.String,
-			CreatedBy:  f.CreatedBy,
-			CreatedAt:  f.CreatedAt,
-			UpdatedBy:  f.UpdatedBy,
-			UpdatedAt:  f.UpdatedAt,
-			DeletedAt:  f.DeletedAt.Time,
-			Name:       f.Name,
-			CustomData: f.CustomData,
+			ID:           f.ID,
+			CustomerID:   f.CustomerID,
+			SalesID:      f.SalesID,
+			ProductName:  f.ProductName,
+			ProductCode:  f.ProductCode,
+			QtyPaper:     f.QtyPaper,
+			QtyFinished:  f.QtyFinished,
+			QtyDelivered: f.QtyDelivered,
+			Thumbnail:    f.Thumbnail.String,
+			Status:       f.Status,
+			Note:         f.Note.String,
+			CreatedBy:    f.CreatedBy,
+			CreatedAt:    f.CreatedAt,
+			UpdatedBy:    f.UpdatedBy,
+			UpdatedAt:    f.UpdatedAt,
+			DeletedAt:    f.DeletedAt.Time,
+			Name:         f.Name,
+			CustomData:   f.CustomData,
 		}
 
 		productionPlanResp = append(productionPlanResp, data)
@@ -223,6 +248,49 @@ func (s productionPlanController) FindProductionPlans(c *gin.Context) {
 	transportutil.SendJSONResponse(c, &dto.FindProductionPlansResponse{
 		ProductionPlans: productionPlanResp,
 		Total:           cnt.Count,
+	})
+}
+
+func (s productionPlanController) ProcessProductionOrder(c *gin.Context) {
+	req := &dto.ProcessProductionOrderRequest{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+
+	userID := interceptor.UserIDFromCtx(c)
+
+	orderStages := make([]*production_plan.ProductionOrderStage, 0)
+	for idx, stage := range req.Stages {
+		orderStages = append(orderStages, &production_plan.ProductionOrderStage{
+			StageID:             stage.StageID,
+			EstimatedStartAt:    stage.EstimatedStartAt,
+			EstimatedCompleteAt: stage.EstimatedCompleteAt,
+			StartedAt:           stage.StartedAt,
+			CompletedAt:         stage.CompletedAt,
+			Status:              stage.Status,
+			Condition:           stage.Condition,
+			Note:                stage.Note,
+			Data:                stage.Data,
+			Sorting:             int16(len(req.Stages) - idx),
+		})
+	}
+
+	id, err := s.productionPlanService.ProcessProductionOrder(c, &production_plan.ProcessProductionOrderOpts{
+		ID:                  req.ID,
+		Stages:              orderStages,
+		EstimatedStartAt:    req.EstimatedStartAt,
+		EstimatedCompleteAt: req.EstimatedCompleteAt,
+		CreatedBy:           userID,
+	})
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+
+	transportutil.SendJSONResponse(c, &dto.ProcessProductionOrderResponse{
+		ID: id,
 	})
 }
 
@@ -279,5 +347,14 @@ func RegisterProductionPlanController(
 		&dto.FindProductionPlansRequest{},
 		&dto.FindProductionPlansResponse{},
 		"Find productionPlans",
+	)
+
+	routeutil.AddEndpoint(
+		g,
+		"process-production-order",
+		c.ProcessProductionOrder,
+		&dto.ProcessProductionOrderRequest{},
+		&dto.ProcessProductionOrderResponse{},
+		"Process Production Order",
 	)
 }

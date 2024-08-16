@@ -12,14 +12,19 @@ import (
 )
 
 type CreateProductionPlanOpts struct {
-	Name        string
-	CustomerID  string
-	SalesID     string
-	Thumbnail   string
-	Status      enum.ProductionPlanStatus
-	Note        string
-	CustomField []*CustomField
-	CreatedBy   string
+	Name         string
+	CustomerID   string
+	SalesID      string
+	ProductName  string
+	ProductCode  string
+	QtyPaper     int64
+	QtyFinished  int64
+	QtyDelivered int64
+	Thumbnail    string
+	Status       enum.ProductionPlanStatus
+	Note         string
+	CustomField  []*CustomField
+	CreatedBy    string
 }
 
 type CustomField struct {
@@ -34,6 +39,11 @@ func (c *productionPlanService) CreateProductionPlan(ctx context.Context, opt *C
 		ID:           id,
 		CustomerID:   opt.CustomerID,
 		SalesID:      opt.SalesID,
+		ProductName:  opt.ProductName,
+		ProductCode:  opt.ProductCode,
+		QtyPaper:     opt.QtyPaper,
+		QtyFinished:  opt.QtyFinished,
+		QtyDelivered: opt.QtyDelivered,
 		Thumbnail:    cockroach.String(opt.Thumbnail),
 		Status:       opt.Status,
 		Note:         cockroach.String(opt.Note),
@@ -43,6 +53,13 @@ func (c *productionPlanService) CreateProductionPlan(ctx context.Context, opt *C
 		UpdatedAt:    now,
 		Name:         opt.Name,
 		CurrentStage: enum.ProductionPlanStageSale,
+	}
+
+	requiredCustomFields := c.GetCustomField()
+	for _, val := range opt.CustomField {
+		if _, ok := requiredCustomFields[val.Field]; !ok {
+			return "", fmt.Errorf("thông tin %s không hợp lệ", val.Field)
+		}
 	}
 
 	errTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {

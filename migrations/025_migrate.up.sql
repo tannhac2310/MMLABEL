@@ -25,3 +25,9 @@ create table customers
     deleted_at timestamptz,
     constraint pk_customers primary key (id asc)
 );
+
+alter table production_plans add column product_name varchar(500) not null default '';
+alter table production_plans add column product_code varchar(255) not null default '';
+alter table production_plans add qty_paper int8 null default 0;
+alter table production_plans add qty_finished int8 null default 0;
+alter table production_plans add qty_delivered int8 null default 0;
