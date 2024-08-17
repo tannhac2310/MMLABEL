@@ -60,6 +60,7 @@ type productionPlanService struct {
 	productionOrderRepo      repository.ProductionOrderRepo
 	productionOrderStageRepo repository.ProductionOrderStageRepo
 	customFieldRepo          repository.CustomFieldRepo
+	customerRepo             repository.CustomerRepo
 	userRepo                 repository2.UserRepo
 	roleService              role.Service
 	cfg                      *configs.Config
@@ -71,6 +72,7 @@ func NewService(
 	productionOrderRepo repository.ProductionOrderRepo,
 	productionOrderStageRepo repository.ProductionOrderStageRepo,
 	customFieldRepo repository.CustomFieldRepo,
+	customerRepo repository.CustomerRepo,
 	userRepo repository2.UserRepo,
 	roleService role.Service,
 	cfg *configs.Config,
@@ -81,6 +83,7 @@ func NewService(
 		productionOrderRepo:      productionOrderRepo,
 		productionOrderStageRepo: productionOrderStageRepo,
 		customFieldRepo:          customFieldRepo,
+		customerRepo:             customerRepo,
 		userRepo:                 userRepo,
 		roleService:              roleService,
 		cfg:                      cfg,
@@ -128,9 +131,11 @@ func (c *productionPlanService) GetCustomField() map[string]bool {
 
 type Data struct {
 	*repository.ProductionPlanData
-	CustomData map[string]string
+	CustomData   map[string]string
+	CustomerData *repository.CustomerData
 }
 
 type DataWithNoPermission struct {
 	*repository.ProductionPlanData
+	CustomerData *repository.CustomerData
 }

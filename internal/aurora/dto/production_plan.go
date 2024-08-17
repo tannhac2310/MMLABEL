@@ -24,24 +24,23 @@ type FindProductionPlansRequest struct {
 }
 
 type FindProductionPlansResponse struct {
-	ProductionPlans []*ProductionPlan
-	Total           int64
+	ProductionPlans []*ProductionPlan `json:"productionPlans"`
+	Total           int64             `json:"total"`
 }
 
 type CreateProductionPlanRequest struct {
-	Name         string                    `json:"name,omitempty"`
-	CustomerID   string                    `json:"customerID,omitempty"`
-	SalesID      string                    `json:"salesID,omitempty"`
-	ProductName  string                    `json:"productName,omitempty"`
-	ProductCode  string                    `json:"productCode,omitempty"`
+	Name         string                    `json:"name" binding:"required"`
+	CustomerID   string                    `json:"customerID" binding:"required"`
+	SalesID      string                    `json:"salesID" binding:"required"`
+	ProductName  string                    `json:"productName" binding:"required"`
+	ProductCode  string                    `json:"productCode" binding:"required"`
 	QtyPaper     int64                     `json:"qtyPaper,omitempty"`
 	QtyFinished  int64                     `json:"qtyFinished,omitempty"`
 	QtyDelivered int64                     `json:"qtyDelivered,omitempty"`
 	Thumbnail    string                    `json:"thumbnail,omitempty"`
-	Status       enum.ProductionPlanStatus `json:"status,omitempty"`
+	Status       enum.ProductionPlanStatus `json:"status" binding:"required"`
 	Note         string                    `json:"note,omitempty"`
-	CustomField  []*CustomField            `json:"customField,omitempty"`
-	CreatedBy    string                    `json:"createdBy,omitempty"`
+	CustomField  []*CustomField            `json:"customField" binding:"required"`
 }
 
 type CreateProductionPlanResponse struct {
@@ -50,11 +49,11 @@ type CreateProductionPlanResponse struct {
 
 type EditProductionPlanRequest struct {
 	ID           string                    `json:"id,omitempty"`
-	Name         string                    `json:"name,omitempty"`
-	CustomerID   string                    `json:"customerID,omitempty"`
-	SalesID      string                    `json:"salesID,omitempty"`
-	ProductName  string                    `json:"productName,omitempty"`
-	ProductCode  string                    `json:"productCode,omitempty"`
+	Name         string                    `json:"name" binding:"required"`
+	CustomerID   string                    `json:"customerID" binding:"required"`
+	SalesID      string                    `json:"salesID" binding:"required"`
+	ProductName  string                    `json:"productName" binding:"required"`
+	ProductCode  string                    `json:"productCode" binding:"required"`
 	QtyPaper     int64                     `json:"qtyPaper,omitempty"`
 	QtyFinished  int64                     `json:"qtyFinished,omitempty"`
 	QtyDelivered int64                     `json:"qtyDelivered,omitempty"`
@@ -87,6 +86,7 @@ type ProcessProductionOrderResponse struct {
 type ProductionPlan struct {
 	ID           string                    `json:"id,omitempty"`
 	CustomerID   string                    `json:"customerID,omitempty"`
+	CustomerData *Customer                 `json:"customerData,omitempty"`
 	SalesID      string                    `json:"salesID,omitempty"`
 	ProductName  string                    `json:"productName,omitempty"`
 	ProductCode  string                    `json:"productCode,omitempty"`
@@ -100,7 +100,6 @@ type ProductionPlan struct {
 	CreatedAt    time.Time                 `json:"createdAt,omitempty"`
 	UpdatedBy    string                    `json:"updatedBy,omitempty"`
 	UpdatedAt    time.Time                 `json:"updatedAt,omitempty"`
-	DeletedAt    time.Time                 `json:"deletedAt,omitempty"`
 	Name         string                    `json:"name,omitempty"`
 	CustomData   map[string]string         `json:"customData,omitempty"`
 }

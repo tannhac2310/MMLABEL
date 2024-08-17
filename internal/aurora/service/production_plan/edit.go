@@ -53,7 +53,7 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 	requiredCustomFields := c.GetCustomField()
 	for _, val := range opt.CustomField {
 		if _, ok := requiredCustomFields[val.Field]; !ok {
-			return fmt.Errorf("thông tin %s không hợp lệ", val.Field)
+			//return fmt.Errorf("thông tin %s không hợp lệ", val.Field)
 		}
 	}
 
