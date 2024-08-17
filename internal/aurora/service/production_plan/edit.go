@@ -37,7 +37,7 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 	if err != nil {
 		return err
 	}
-	if plan.ProductionPlan.Editable() {
+	if !plan.ProductionPlan.Editable() {
 		return fmt.Errorf("không thể chỉnh sửa kế hoạch đã được đưa vào sản xuất")
 	}
 
@@ -49,12 +49,6 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 	})
 	if err != nil {
 		return err
-	}
-	requiredCustomFields := c.GetCustomField()
-	for _, val := range opt.CustomField {
-		if _, ok := requiredCustomFields[val.Field]; !ok {
-			//return fmt.Errorf("thông tin %s không hợp lệ", val.Field)
-		}
 	}
 
 	customFieldMap := generic.ToMap(customFields, func(f *repository.CustomFieldData) string {
@@ -84,6 +78,12 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 	}
 
 	execTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
+		plan.ProductionPlan.Name = opt.Name
+		plan.ProductionPlan.CustomerID = opt.CustomerID
+		plan.ProductionPlan.SalesID = opt.SalesID
+		plan.ProductionPlan.ProductName = opt.ProductName
+		plan.ProductionPlan.ProductCode = opt.ProductCode
+
 		plan.UpdatedBy = opt.CreatedBy
 		plan.UpdatedAt = now
 		plan.QtyPaper = opt.QtyPaper

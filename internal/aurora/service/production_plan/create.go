@@ -35,6 +35,13 @@ type CustomField struct {
 func (c *productionPlanService) CreateProductionPlan(ctx context.Context, opt *CreateProductionPlanOpts) (string, error) {
 	now := time.Now()
 	id := idutil.ULIDNow()
+
+	// check if customer exists
+	customer, err := c.customerRepo.FindByID(ctx, opt.CustomerID)
+	if err != nil || customer == nil {
+		return "", fmt.Errorf("Thông tin khách hàng không hợp lệ: %s", opt.CustomerID)
+	}
+
 	productionPlan := &model.ProductionPlan{
 		ID:           id,
 		CustomerID:   opt.CustomerID,
@@ -53,13 +60,6 @@ func (c *productionPlanService) CreateProductionPlan(ctx context.Context, opt *C
 		UpdatedAt:    now,
 		Name:         opt.Name,
 		CurrentStage: enum.ProductionPlanStageSale,
-	}
-
-	requiredCustomFields := c.GetCustomField()
-	for _, val := range opt.CustomField {
-		if _, ok := requiredCustomFields[val.Field]; !ok {
-			//return "", fmt.Errorf("thông tin %s không hợp lệ", val.Field)
-		}
 	}
 
 	errTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {

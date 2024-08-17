@@ -22,10 +22,10 @@ func (c *customerService) CreateCustomer(ctx context.Context, opt *CreateCustome
 		Country:            opt.Country,
 		Province:           opt.Province,
 		Address:            opt.Address,
-		PhoneNumber:        opt.PhoneNumber,
 		Fax:                cockroach.String(opt.Fax),
 		CompanyWebsite:     cockroach.String(opt.CompanyWebsite),
 		CompanyPhone:       cockroach.String(opt.CompanyPhone),
+		CompanyEmail:       cockroach.String(opt.CompanyEmail),
 		ContactPersonName:  opt.ContactPersonName,
 		ContactPersonEmail: opt.ContactPersonEmail,
 		ContactPersonPhone: opt.ContactPersonPhone,
@@ -58,10 +58,10 @@ type CreateCustomerOpts struct {
 	Country            string
 	Province           string
 	Address            string
-	PhoneNumber        string
 	Fax                string
 	CompanyWebsite     string
 	CompanyPhone       string
+	CompanyEmail       string
 	ContactPersonName  string
 	ContactPersonEmail string
 	ContactPersonPhone string
