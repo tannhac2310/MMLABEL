@@ -27,6 +27,7 @@ type EditProductionPlanOpts struct {
 	Status       enum.ProductionPlanStatus
 	Note         string
 	CustomField  []*CustomField
+	Workflow     any
 	CreatedBy    string
 }
 
@@ -83,6 +84,7 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 		plan.ProductionPlan.SalesID = opt.SalesID
 		plan.ProductionPlan.ProductName = opt.ProductName
 		plan.ProductionPlan.ProductCode = opt.ProductCode
+		plan.ProductionPlan.Workflow = opt.Workflow
 
 		plan.UpdatedBy = opt.CreatedBy
 		plan.UpdatedAt = now
