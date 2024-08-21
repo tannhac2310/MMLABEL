@@ -51,6 +51,8 @@ func (s productionPlanController) CreateProductionPlan(c *gin.Context) {
 		QtyPaper:     req.QtyPaper,
 		QtyFinished:  req.QtyFinished,
 		QtyDelivered: req.QtyDelivered,
+		Thumbnail:    req.Thumbnail,
+		Workflow:     req.Workflow,
 		Status:       req.Status,
 		Note:         req.Note,
 		CustomField:  customField,
@@ -96,6 +98,7 @@ func (s productionPlanController) EditProductionPlan(c *gin.Context) {
 		Status:       req.Status,
 		Note:         req.Note,
 		CustomField:  customField,
+		Workflow:     req.Workflow,
 		CreatedBy:    userID,
 	})
 	if err != nil {
@@ -170,6 +173,7 @@ func (s productionPlanController) FindProductionPlansWithNoPermission(c *gin.Con
 			Thumbnail:    f.Thumbnail.String,
 			Status:       f.Status,
 			Note:         f.Note.String,
+			Workflow:     f.Workflow,
 			CreatedBy:    f.CreatedBy,
 			CreatedAt:    f.CreatedAt,
 			UpdatedBy:    f.UpdatedBy,
@@ -253,6 +257,7 @@ func (s productionPlanController) FindProductionPlans(c *gin.Context) {
 			Thumbnail:     f.Thumbnail.String,
 			Status:        f.Status,
 			Note:          f.Note.String,
+			Workflow:      f.Workflow,
 			CreatedBy:     f.CreatedBy,
 			CreatedAt:     f.CreatedAt,
 			UpdatedBy:     f.UpdatedBy,
