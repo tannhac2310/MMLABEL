@@ -8,6 +8,7 @@ import (
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/device_config"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_plan"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/workflow_template"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/service/role"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/option"
@@ -153,6 +154,7 @@ func Run(ctx context.Context, configPath string) {
 			repository.NewRolePermissionRepo,
 			repository2.NewInkMixingRepo,
 			repository2.NewInkMixingDetailRepo,
+			repository2.NewWorkflowTemplateRepo,
 		),
 		// services
 		fx.Provide(
@@ -176,6 +178,7 @@ func Run(ctx context.Context, configPath string) {
 			option.NewService,
 			device_config.NewService,
 			role.NewService,
+			workflow_template.NewService,
 		),
 		// nats streaming
 		fx.Provide(func(cfg *pkgConfig.BaseConfig, zapLogger *zap.Logger) (nats.BusFactory, error) {
@@ -214,6 +217,7 @@ func Run(ctx context.Context, configPath string) {
 			controller.RegisterProductQualityController,
 			controller.RegisterOptionController,
 			controller.RegisterDeviceConfigController,
+			controller.RegisterWorkflowTemplateController,
 		),
 	}
 
