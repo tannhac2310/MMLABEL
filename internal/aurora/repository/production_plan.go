@@ -38,7 +38,7 @@ func (r *sProductionPlanRepo) Insert(ctx context.Context, e *model.ProductionPla
 
 func (r *sProductionPlanRepo) FindByID(ctx context.Context, id string) (*ProductionPlanData, error) {
 	e := &ProductionPlanData{
-		&model.ProductionPlan{},
+		ProductionPlan: &model.ProductionPlan{},
 	}
 	err := cockroach.FindOne(ctx, e, "id = $1", id)
 	if err != nil {
@@ -84,7 +84,7 @@ type SearchProductionPlanOpts struct {
 func (s *SearchProductionPlanOpts) buildQuery(isCount bool) (string, []interface{}) {
 	var args []interface{}
 	conds := ""
-	joins := ""
+	joins := " LEFT JOIN users AS cu ON b.created_by = cu.id LEFT JOIN users AS uu ON b.updated_by = uu.id "
 
 	if len(s.IDs) > 0 {
 		args = append(args, s.IDs)
@@ -124,11 +124,13 @@ func (s *SearchProductionPlanOpts) buildQuery(isCount bool) (string, []interface
 	if s.Sort != nil && s.Sort.By != "" && s.Sort.Order != "" {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", s.Sort.By, s.Sort.Order)
 	}
-	return fmt.Sprintf("SELECT b.%s FROM %s AS b %s WHERE TRUE %s AND b.deleted_at IS NULL %s LIMIT %d OFFSET %d", strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
+	return fmt.Sprintf("SELECT b.%s, cu.name as created_by_name, uu.name as updated_by_name FROM %s AS b %s WHERE TRUE %s AND b.deleted_at IS NULL %s LIMIT %d OFFSET %d", strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
 }
 
 type ProductionPlanData struct {
 	*model.ProductionPlan
+	CreatedByName string `db:"created_by_name"`
+	UpdatedByName string `db:"updated_by_name"`
 }
 
 func (r *sProductionPlanRepo) Search(ctx context.Context, s *SearchProductionPlanOpts) ([]*ProductionPlanData, error) {

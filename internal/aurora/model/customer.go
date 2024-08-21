@@ -15,10 +15,10 @@ const (
 	CustomerFieldCountry            = "country"
 	CustomerFieldProvince           = "province"
 	CustomerFieldAddress            = "address"
-	CustomerFieldPhoneNumber        = "phone_number"
 	CustomerFieldFax                = "fax"
 	CustomerFieldCompanyWebsite     = "company_website"
 	CustomerFieldCompanyPhone       = "company_phone"
+	CustomerFieldCompanyEmail       = "company_email"
 	CustomerFieldContactPersonName  = "contact_person_name"
 	CustomerFieldContactPersonEmail = "contact_person_email"
 	CustomerFieldContactPersonPhone = "contact_person_phone"
@@ -39,10 +39,10 @@ type Customer struct {
 	Country            string              `db:"country"`
 	Province           string              `db:"province"`
 	Address            string              `db:"address"`
-	PhoneNumber        string              `db:"phone_number"`
 	Fax                sql.NullString      `db:"fax"`
 	CompanyWebsite     sql.NullString      `db:"company_website"`
 	CompanyPhone       sql.NullString      `db:"company_phone"`
+	CompanyEmail       sql.NullString      `db:"company_email"`
 	ContactPersonName  string              `db:"contact_person_name"`
 	ContactPersonEmail string              `db:"contact_person_email"`
 	ContactPersonPhone string              `db:"contact_person_phone"`
@@ -64,10 +64,10 @@ func (rcv *Customer) FieldMap() (fields []string, values []interface{}) {
 		CustomerFieldCountry,
 		CustomerFieldProvince,
 		CustomerFieldAddress,
-		CustomerFieldPhoneNumber,
 		CustomerFieldFax,
 		CustomerFieldCompanyWebsite,
 		CustomerFieldCompanyPhone,
+		CustomerFieldCompanyEmail,
 		CustomerFieldContactPersonName,
 		CustomerFieldContactPersonEmail,
 		CustomerFieldContactPersonPhone,
@@ -88,10 +88,10 @@ func (rcv *Customer) FieldMap() (fields []string, values []interface{}) {
 		&rcv.Country,
 		&rcv.Province,
 		&rcv.Address,
-		&rcv.PhoneNumber,
 		&rcv.Fax,
 		&rcv.CompanyWebsite,
 		&rcv.CompanyPhone,
+		&rcv.CompanyEmail,
 		&rcv.ContactPersonName,
 		&rcv.ContactPersonEmail,
 		&rcv.ContactPersonPhone,

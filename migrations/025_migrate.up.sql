@@ -13,6 +13,7 @@ create table customers
     fax VARCHAR(255) null,
     company_website VARCHAR(255) null,
     company_phone VARCHAR(50) null,
+    company_email VARCHAR(50) null,
     contact_person_name VARCHAR(255) not null,
     contact_person_email VARCHAR(255) not null,
     contact_person_phone VARCHAR(50) not null,
