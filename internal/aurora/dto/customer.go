@@ -28,7 +28,6 @@ type Customer struct {
 	Country            string              `json:"country,omitempty"`
 	Province           string              `json:"province,omitempty"`
 	Address            string              `json:"address,omitempty"`
-	PhoneNumber        string              `json:"phoneNumber,omitempty"`
 	Fax                string              `json:"fax,omitempty"`
 	CompanyWebsite     string              `json:"companyWebsite,omitempty"`
 	CompanyPhone       string              `json:"companyPhone,omitempty"`
@@ -47,15 +46,15 @@ type CreateCustomerRequest struct {
 	Country            string              `json:"country,omitempty" binding:"required"`
 	Province           string              `json:"province,omitempty" binding:"required"`
 	Address            string              `json:"address,omitempty" binding:"required"`
-	PhoneNumber        string              `json:"phoneNumber,omitempty" binding:"required"`
 	Fax                string              `json:"fax,omitempty"`
 	CompanyWebsite     string              `json:"companyWebsite,omitempty"`
 	CompanyPhone       string              `json:"companyPhone,omitempty"`
+	CompanyEmail       string              `json:"companyEmail,omitempty"`
 	ContactPersonName  string              `json:"contactPersonName,omitempty" binding:"required"`
 	ContactPersonEmail string              `json:"contactPersonEmail,omitempty" binding:"required"`
 	ContactPersonPhone string              `json:"contactPersonPhone,omitempty" binding:"required"`
 	ContactPersonRole  string              `json:"contactPersonRole,omitempty" binding:"required"`
-	Note               string              `json:"note,omitempty" binding:"required"`
+	Note               string              `json:"note,omitempty""`
 	Status             enum.CustomerStatus `json:"status,omitempty" binding:"required"`
 }
 
@@ -71,10 +70,10 @@ type EditCustomerRequest struct {
 	Country            string              `json:"country,omitempty" binding:"required"`
 	Province           string              `json:"province,omitempty" binding:"required"`
 	Address            string              `json:"address,omitempty" binding:"required"`
-	PhoneNumber        string              `json:"phoneNumber,omitempty" binding:"required"`
 	Fax                string              `json:"fax,omitempty"`
 	CompanyWebsite     string              `json:"companyWebsite,omitempty"`
 	CompanyPhone       string              `json:"companyPhone,omitempty"`
+	CompanyEmail       string              `json:"companyEmail,omitempty"`
 	ContactPersonName  string              `json:"contactPersonName,omitempty" binding:"required"`
 	ContactPersonEmail string              `json:"contactPersonEmail,omitempty" binding:"required"`
 	ContactPersonPhone string              `json:"contactPersonPhone,omitempty" binding:"required"`

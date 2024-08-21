@@ -174,7 +174,6 @@ func (s productionPlanController) FindProductionPlansWithNoPermission(c *gin.Con
 			CreatedAt:    f.CreatedAt,
 			UpdatedBy:    f.UpdatedBy,
 			UpdatedAt:    f.UpdatedAt,
-			DeletedAt:    f.DeletedAt.Time,
 			Name:         f.Name,
 		}
 		productionPlanResp = append(productionPlanResp, data)
@@ -221,25 +220,48 @@ func (s productionPlanController) FindProductionPlans(c *gin.Context) {
 
 	productionPlanResp := make([]*dto.ProductionPlan, 0, len(productionPlans))
 	for _, f := range productionPlans {
+		customerData := &dto.Customer{}
+		if f.CustomerData != nil {
+			customerData = &dto.Customer{
+				ID:                 f.CustomerData.ID,
+				Name:               f.CustomerData.Name,
+				Tax:                f.CustomerData.Tax.String,
+				Code:               f.CustomerData.Code,
+				Country:            f.CustomerData.Country,
+				Province:           f.CustomerData.Province,
+				Address:            f.CustomerData.Address,
+				Fax:                f.CustomerData.Fax.String,
+				CompanyWebsite:     f.CustomerData.CompanyWebsite.String,
+				CompanyPhone:       f.CustomerData.CompanyPhone.String,
+				ContactPersonName:  f.CustomerData.ContactPersonName,
+				ContactPersonEmail: f.CustomerData.ContactPersonEmail,
+				ContactPersonPhone: f.CustomerData.ContactPersonPhone,
+				ContactPersonRole:  f.CustomerData.ContactPersonRole,
+				Note:               f.CustomerData.Note.String,
+				Status:             f.CustomerData.Status,
+			}
+		}
 		data := &dto.ProductionPlan{
-			ID:           f.ID,
-			CustomerID:   f.CustomerID,
-			SalesID:      f.SalesID,
-			ProductName:  f.ProductName,
-			ProductCode:  f.ProductCode,
-			QtyPaper:     f.QtyPaper,
-			QtyFinished:  f.QtyFinished,
-			QtyDelivered: f.QtyDelivered,
-			Thumbnail:    f.Thumbnail.String,
-			Status:       f.Status,
-			Note:         f.Note.String,
-			CreatedBy:    f.CreatedBy,
-			CreatedAt:    f.CreatedAt,
-			UpdatedBy:    f.UpdatedBy,
-			UpdatedAt:    f.UpdatedAt,
-			DeletedAt:    f.DeletedAt.Time,
-			Name:         f.Name,
-			CustomData:   f.CustomData,
+			ID:            f.ID,
+			CustomerID:    f.CustomerID,
+			SalesID:       f.SalesID,
+			ProductName:   f.ProductName,
+			ProductCode:   f.ProductCode,
+			QtyPaper:      f.QtyPaper,
+			QtyFinished:   f.QtyFinished,
+			QtyDelivered:  f.QtyDelivered,
+			Thumbnail:     f.Thumbnail.String,
+			Status:        f.Status,
+			Note:          f.Note.String,
+			CreatedBy:     f.CreatedBy,
+			CreatedAt:     f.CreatedAt,
+			UpdatedBy:     f.UpdatedBy,
+			UpdatedAt:     f.UpdatedAt,
+			CreatedByName: f.CreatedByName,
+			UpdatedByName: f.UpdatedByName,
+			Name:          f.Name,
+			CustomData:    f.CustomData,
+			CustomerData:  customerData,
 		}
 
 		productionPlanResp = append(productionPlanResp, data)

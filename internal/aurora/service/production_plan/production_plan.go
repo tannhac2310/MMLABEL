@@ -52,7 +52,6 @@ type Service interface {
 	EditProductionPlan(ctx context.Context, opt *EditProductionPlanOpts) error
 	DeleteProductionPlan(ctx context.Context, id string) error
 	ProcessProductionOrder(ctx context.Context, opt *ProcessProductionOrderOpts) (string, error)
-	GetCustomField() map[string]bool
 }
 
 type productionPlanService struct {
@@ -60,6 +59,7 @@ type productionPlanService struct {
 	productionOrderRepo      repository.ProductionOrderRepo
 	productionOrderStageRepo repository.ProductionOrderStageRepo
 	customFieldRepo          repository.CustomFieldRepo
+	customerRepo             repository.CustomerRepo
 	userRepo                 repository2.UserRepo
 	roleService              role.Service
 	cfg                      *configs.Config
@@ -71,6 +71,7 @@ func NewService(
 	productionOrderRepo repository.ProductionOrderRepo,
 	productionOrderStageRepo repository.ProductionOrderStageRepo,
 	customFieldRepo repository.CustomFieldRepo,
+	customerRepo repository.CustomerRepo,
 	userRepo repository2.UserRepo,
 	roleService role.Service,
 	cfg *configs.Config,
@@ -81,6 +82,7 @@ func NewService(
 		productionOrderRepo:      productionOrderRepo,
 		productionOrderStageRepo: productionOrderStageRepo,
 		customFieldRepo:          customFieldRepo,
+		customerRepo:             customerRepo,
 		userRepo:                 userRepo,
 		roleService:              roleService,
 		cfg:                      cfg,
@@ -88,49 +90,13 @@ func NewService(
 	}
 }
 
-func (c *productionPlanService) GetCustomField() map[string]bool {
-	return map[string]bool{
-		"ten_sp":              true,
-		"ma_sp":               true,
-		"ma_sp_phu":           true,
-		"dvt":                 true,
-		"dai":                 true,
-		"rong":                true,
-		"don_vi_dvt":          true,
-		"so_luong_mau":        true,
-		"so_lan_in":           true,
-		"chat_lieu_in":        true,
-		"ma_chat_lieu_in":     true,
-		"vat_lieu_thay_the":   true,
-		"keo_2_mat":           true,
-		"ma_keo_2_mat":        true,
-		"so_luong_keo_2_mat":  true,
-		"mieu_ta":             true,
-		"chat_luong_kp":       true,
-		"van_chuyen":          true,
-		"chi_tiet_van_chuyen": true,
-		"ghi_chu_van_chuyen":  true,
-		"ten_mau_sp":          true,
-		"hinh_mau_sp":         true,
-		"loai_hinh":           true,
-		"hinh_sp":             true,
-		"hinh_thuc_in":        true,
-		"loai_in":             true,
-		"film":                true,
-		"hinh_dang":           true,
-		"keo_dan":             true,
-		"ghi_chu_keo_dan":     true,
-		"bdc":                 true,
-		"epoxy":               true,
-		"ghi_chu_epoxy":       true,
-	}
-}
-
 type Data struct {
 	*repository.ProductionPlanData
-	CustomData map[string]string
+	CustomData   map[string]string
+	CustomerData *repository.CustomerData
 }
 
 type DataWithNoPermission struct {
 	*repository.ProductionPlanData
+	CustomerData *repository.CustomerData
 }

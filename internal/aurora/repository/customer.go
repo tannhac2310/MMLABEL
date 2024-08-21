@@ -14,7 +14,7 @@ type CustomerRepo interface {
 	Insert(ctx context.Context, e *model.Customer) error
 	Update(ctx context.Context, e *model.Customer) error
 	SoftDelete(ctx context.Context, id string) error
-	FindByID(ctx context.Context, id string) (*CustomerData, error)
+	FindByID(ctx context.Context, id string) (*model.Customer, error)
 	Search(ctx context.Context, s *SearchCustomerOpts) ([]*CustomerData, error)
 	Count(ctx context.Context, s *SearchCustomerOpts) (*CountResult, error)
 }
@@ -35,8 +35,8 @@ func (r *sCustomerRepo) Insert(ctx context.Context, e *model.Customer) error {
 	return nil
 }
 
-func (r *sCustomerRepo) FindByID(ctx context.Context, id string) (*CustomerData, error) {
-	e := &CustomerData{}
+func (r *sCustomerRepo) FindByID(ctx context.Context, id string) (*model.Customer, error) {
+	e := &model.Customer{}
 	err := cockroach.FindOne(ctx, e, "id = $1", id)
 	if err != nil {
 		return nil, fmt.Errorf("sCustomerRepo.cockroach.FindOne: %w", err)
@@ -95,7 +95,7 @@ func (s *SearchCustomerOpts) buildQuery(isCount bool) (string, []interface{}) {
 	}
 	if s.Phone != "" {
 		args = append(args, s.Phone)
-		conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.CustomerFieldPhoneNumber, len(args))
+		conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.CustomerFieldCompanyPhone, len(args))
 	}
 
 	b := &model.Customer{}
