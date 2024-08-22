@@ -3,9 +3,10 @@ package production_order
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	model2 "mmlabel.gitlab.com/mm-printing-backend/pkg/model"
-	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 )
@@ -81,6 +82,25 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 
 	results := make([]*Data, 0, len(productionOrders))
 	idMap := make(map[string]bool)
+	customerIds := make([]string, 0, len(productionOrders))
+
+	for _, productionOrder := range productionOrders {
+		customerIds = append(customerIds, productionOrder.CustomerID)
+	}
+	// find customer name
+	customerData, err := c.customerRepo.Search(ctx, &repository.SearchCustomerOpts{
+		IDs:    customerIds,
+		Limit:  int64(len(customerIds)),
+		Offset: 0,
+	})
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("c.customerRepo.FindByIDs: %w", err)
+	}
+
+	customerMap := make(map[string]*repository.CustomerData)
+	for _, customer := range customerData {
+		customerMap[customer.ID] = customer
+	}
 
 	for _, productionOrder := range productionOrders {
 		if _, ok := idMap[productionOrder.ID]; ok {
@@ -152,11 +172,11 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 				}
 			}
 		}
-
 		results = append(results, &Data{
 			ProductionOrderData:  productionOrder,
 			ProductionOrderStage: stageData,
 			CustomData:           customFieldMap,
+			CustomerData:         customerMap[productionOrder.CustomerID],
 		})
 	}
 

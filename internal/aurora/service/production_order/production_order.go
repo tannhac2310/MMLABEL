@@ -2,6 +2,7 @@ package production_order
 
 import (
 	"context"
+
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/service/role"
 
 	"github.com/go-redis/redis"
@@ -30,6 +31,7 @@ type productionOrderService struct {
 	productionOrderStageRepo       repository.ProductionOrderStageRepo
 	productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo
 	customFieldRepo                repository.CustomFieldRepo
+	customerRepo                   repository.CustomerRepo
 	userRepo                       repository2.UserRepo
 	roleService                    role.Service
 	cfg                            *configs.Config
@@ -112,6 +114,7 @@ func NewService(
 	productionOrderStageRepo repository.ProductionOrderStageRepo,
 	productOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo,
 	customFieldRepo repository.CustomFieldRepo,
+	customerRepo repository.CustomerRepo,
 	userRepo repository2.UserRepo,
 	cfg *configs.Config,
 	redisDB redis.Cmdable,
@@ -122,6 +125,7 @@ func NewService(
 		productionOrderStageRepo:       productionOrderStageRepo,
 		productionOrderStageDeviceRepo: productOrderStageDeviceRepo,
 		customFieldRepo:                customFieldRepo,
+		customerRepo:                   customerRepo,
 		userRepo:                       userRepo,
 		cfg:                            cfg,
 		redisDB:                        redisDB,
@@ -133,6 +137,7 @@ type Data struct {
 	*repository.ProductionOrderData
 	ProductionOrderStage []*ProductionOrderStageData
 	CustomData           map[string]string
+	CustomerData         *repository.CustomerData
 }
 type DataWithNoPermission struct {
 	*repository.ProductionOrderData

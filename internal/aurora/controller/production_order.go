@@ -353,6 +353,27 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 			OrderStageDevices:      productionOrderStageDevice,
 		})
 	}
+	customerData := &dto.Customer{}
+	if f.CustomerData != nil {
+		customerData = &dto.Customer{
+			ID:                 f.CustomerData.ID,
+			Name:               f.CustomerData.Name,
+			Tax:                f.CustomerData.Tax.String,
+			Code:               f.CustomerData.Code,
+			Country:            f.CustomerData.Country,
+			Province:           f.CustomerData.Province,
+			Address:            f.CustomerData.Address,
+			Fax:                f.CustomerData.Fax.String,
+			CompanyWebsite:     f.CustomerData.CompanyWebsite.String,
+			CompanyPhone:       f.CustomerData.CompanyPhone.String,
+			ContactPersonName:  f.CustomerData.ContactPersonName,
+			ContactPersonEmail: f.CustomerData.ContactPersonEmail,
+			ContactPersonPhone: f.CustomerData.ContactPersonPhone,
+			ContactPersonRole:  f.CustomerData.ContactPersonRole,
+			Note:               f.CustomerData.Note.String,
+			Status:             f.CustomerData.Status,
+		}
+	}
 	return &dto.ProductionOrder{
 		ID:                    f.ID,
 		Name:                  f.Name,
@@ -371,6 +392,7 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 		Note:                  f.Note.String,
 		ProductionOrderStages: orderStage,
 		CustomData:            f.CustomData,
+		CustomerData:          customerData,
 		CreatedBy:             f.CreatedBy,
 		CreatedAt:             f.CreatedAt,
 		UpdatedAt:             f.UpdatedAt,
