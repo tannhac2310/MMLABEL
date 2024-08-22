@@ -82,6 +82,7 @@ type ProductionOrder struct {
 	Note                  string                     `json:"note"`
 	ProductionOrderStages []*OrderStage              `json:"production_order_stages"`
 	CustomData            map[string]string          `json:"customData"`
+	CustomerData          *Customer                  `json:"customerData"`
 	CreatedBy             string                     `json:"createdBy"`
 	CreatedAt             time.Time                  `json:"createdAt"`
 	UpdatedAt             time.Time                  `json:"updatedAt"`
