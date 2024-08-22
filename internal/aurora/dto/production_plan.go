@@ -40,6 +40,7 @@ type CreateProductionPlanRequest struct {
 	Thumbnail    string                    `json:"thumbnail,omitempty"`
 	Status       enum.ProductionPlanStatus `json:"status" binding:"required"`
 	Note         string                    `json:"note,omitempty"`
+	Workflow     any                       `json:"workflow"`
 	CustomField  []*CustomField            `json:"customField" binding:"required"`
 }
 
@@ -61,6 +62,7 @@ type EditProductionPlanRequest struct {
 	Status       enum.ProductionPlanStatus `json:"status,omitempty"`
 	Note         string                    `json:"note,omitempty"`
 	CustomField  []*CustomField            `json:"customField,omitempty"`
+	Workflow     any                       `json:"workflow"`
 }
 
 type EditProductionPlanResponse struct{}
@@ -103,4 +105,5 @@ type ProductionPlan struct {
 	UpdatedByName string                    `json:"updatedByName,omitempty"`
 	Name          string                    `json:"name,omitempty"`
 	CustomData    map[string]string         `json:"customData,omitempty"`
+	Workflow      any                       `json:"workflow"`
 }

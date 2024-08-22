@@ -29,6 +29,7 @@ const (
 	ProductionPlanFieldQtyPaper     = "qty_paper"
 	ProductionPlanFieldQtyFinished  = "qty_finished"
 	ProductionPlanFieldQtyDelivered = "qty_delivered"
+	ProductionPlanFieldWorkflow     = "workflow"
 )
 
 type ProductionPlan struct {
@@ -51,6 +52,7 @@ type ProductionPlan struct {
 	QtyPaper     int64                     `db:"qty_paper"`
 	QtyFinished  int64                     `db:"qty_finished"`
 	QtyDelivered int64                     `db:"qty_delivered"`
+	Workflow     any                       `db:"workflow"`
 }
 
 func (rcv *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
@@ -74,6 +76,7 @@ func (rcv *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
 		ProductionPlanFieldQtyPaper,
 		ProductionPlanFieldQtyFinished,
 		ProductionPlanFieldQtyDelivered,
+		ProductionPlanFieldWorkflow,
 	}
 
 	values = []interface{}{
@@ -96,6 +99,7 @@ func (rcv *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
 		&rcv.QtyPaper,
 		&rcv.QtyFinished,
 		&rcv.QtyDelivered,
+		&rcv.Workflow,
 	}
 
 	return
