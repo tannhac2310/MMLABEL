@@ -125,3 +125,42 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 
 	return nil
 }
+
+func (c *productionPlanService) UpdateCustomField(ctx context.Context, productionPlanID, customFieldKey, customFieldValue string) error {
+	plan, err := c.productionPlanRepo.FindByID(ctx, productionPlanID)
+	if err != nil {
+		return err
+	}
+	if !plan.ProductionPlan.Editable() {
+		return fmt.Errorf("không thể chỉnh sửa kế hoạch đã được đưa vào sản xuất")
+	}
+
+	customFields, err := c.customFieldRepo.Search(ctx, &repository.SearchCustomFieldsOpts{
+		EntityId:   plan.ID,
+		EntityType: enum.CustomFieldTypeProductionPlan,
+		Field:      customFieldKey,
+		Limit:      1000,
+		Offset:     0,
+	})
+
+	if err != nil {
+		return fmt.Errorf("search custom fields failed: %w", err)
+	}
+
+	customFieldMap := generic.ToMap(customFields, func(f *repository.CustomFieldData) string {
+		return f.Field
+	})
+
+	if customField, ok := customFieldMap[customFieldKey]; ok {
+		customField.Value = customFieldValue
+		return c.customFieldRepo.Update(ctx, customField.CustomField)
+	}
+
+	return c.customFieldRepo.Insert(ctx, &model.CustomField{
+		ID:         idutil.ULIDNow(),
+		EntityID:   plan.ID,
+		EntityType: enum.CustomFieldTypeProductionPlan,
+		Field:      customFieldKey,
+		Value:      customFieldValue,
+	})
+}
