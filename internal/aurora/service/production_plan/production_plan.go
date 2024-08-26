@@ -3,13 +3,13 @@ package production_plan
 import (
 	"context"
 
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/service/role"
-
 	"github.com/go-redis/redis"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/configs"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	repository2 "mmlabel.gitlab.com/mm-printing-backend/pkg/repository"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/service/role"
 )
 
 type Service interface {
@@ -20,6 +20,7 @@ type Service interface {
 	DeleteProductionPlan(ctx context.Context, id string) error
 	ProcessProductionOrder(ctx context.Context, opt *ProcessProductionOrderOpts) (string, error)
 	UpdateCustomFields(ctx context.Context, productionPlanID string, values []*CustomField) error
+	UpdateCurrentStage(ctx context.Context, productionPlanID string, stageID enum.ProductionPlanStage) error
 }
 
 type productionPlanService struct {

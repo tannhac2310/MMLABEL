@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_plan"
@@ -20,12 +21,29 @@ type ProductionPlanController interface {
 	FindProductionPlansWithNoPermission(c *gin.Context)
 	ProcessProductionOrder(c *gin.Context)
 	UpdateCustomFields(c *gin.Context)
+	UpdateCurrentStage(c *gin.Context)
 }
 
 type productionPlanController struct {
 	productionPlanService production_plan.Service
 }
 
+func (s productionPlanController) UpdateCurrentStage(c *gin.Context) {
+	req := &dto.UpdateCurrentStageRequest{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+
+	err = s.productionPlanService.UpdateCurrentStage(c, req.ProductionPlanID, req.CurrentStage)
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+
+	transportutil.SendJSONResponse(c, &dto.UpdateCurrentStageResponse{})
+}
 func (s productionPlanController) UpdateCustomFields(c *gin.Context) {
 	req := &dto.UpdateCustomFieldPLValuesRequest{}
 	err := c.ShouldBind(req)
@@ -417,5 +435,14 @@ func RegisterProductionPlanController(
 		&dto.UpdateCustomFieldPLValuesRequest{},
 		&dto.UpdateCustomFieldPLValuesResponse{},
 		"Update PL custom field",
+	)
+
+	routeutil.AddEndpoint(
+		g,
+		"update-current-stage",
+		c.UpdateCurrentStage,
+		&dto.UpdateCurrentStageRequest{},
+		&dto.UpdateCurrentStageResponse{},
+		"Update current stage",
 	)
 }

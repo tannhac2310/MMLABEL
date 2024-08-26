@@ -109,8 +109,15 @@ type ProductionPlan struct {
 }
 
 type UpdateCustomFieldPLValuesRequest struct {
-	ProductionPlanID string `json:"productionPlanID"`
-	CustomField      []*CustomField
+	ProductionPlanID string         `json:"productionPlanID" binding:"required"`
+	CustomField      []*CustomField `json:"customField" binding:"required"`
 }
 
 type UpdateCustomFieldPLValuesResponse struct{}
+
+type UpdateCurrentStageRequest struct {
+	ProductionPlanID string                   `json:"productionPlanID" binding:"required"`
+	CurrentStage     enum.ProductionPlanStage `json:"currentStage" binding:"required"`
+}
+
+type UpdateCurrentStageResponse struct{}

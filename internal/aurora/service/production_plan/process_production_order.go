@@ -134,8 +134,8 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 		}
 
 		// update production plan
-		plan.CurrentStage = enum.ProductionPlanStageProduction
-		plan.Status = enum.ProductionPlanStatus_PO_Processing
+		plan.CurrentStage = enum.ProductionPlanStagePOProcessing
+		plan.Status = enum.ProductionPlanStatusPOProcessing
 		plan.UpdatedAt = now
 		if err := c.productionPlanRepo.Update(ctx, plan.ProductionPlan); err != nil {
 			return fmt.Errorf("c.productionPlanRepo.Update: %w", err)
