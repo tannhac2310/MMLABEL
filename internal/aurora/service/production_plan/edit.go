@@ -94,8 +94,11 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 		plan.Thumbnail = cockroach.String(opt.Thumbnail)
 		plan.Note = cockroach.String(opt.Note)
 		plan.Status = opt.Status
-		currentStage := enum.ProductionPlanStatusSage[plan.Status]
-		plan.CurrentStage = enum.ProductionPlanStageSale | currentStage // only sale and current stage can view the production plan
+		currentStage, ok := enum.ProductionPlanStatusSage[plan.Status]
+		if !ok {
+			return fmt.Errorf("invalid plan status: %v", plan.Status)
+		}
+		plan.CurrentStage = currentStage // only current stage can view the production plan
 
 		if err := c.productionPlanRepo.Update(ctx2, plan.ProductionPlan); err != nil {
 			return fmt.Errorf("update production plan failed: %w", err)
