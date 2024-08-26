@@ -7,8 +7,8 @@ import (
 )
 
 type DeviceConfigFilter struct {
-	Search string `json:"search"`
-	ProductionOrderID   string     `json:"productionOrderID"`
+	Search            string `json:"search"`
+	ProductionOrderID string `json:"productionOrderID"`
 }
 
 type FindDeviceConfigsRequest struct {
@@ -23,6 +23,7 @@ type FindDeviceConfigsResponse struct {
 type DeviceConfig struct {
 	ID                  string                 `json:"id"`
 	ProductionOrderID   string                 `json:"productionOrderID"`
+	ProductionPlanID    string                 `json:"productionPlanID"`
 	ProductionOrderName string                 `json:"productionOrderName"`
 	DeviceID            string                 `json:"deviceID"`
 	DeviceConfig        map[string]interface{} `json:"deviceConfig"`
@@ -34,7 +35,8 @@ type DeviceConfig struct {
 }
 
 type CreateDeviceConfigRequest struct {
-	ProductionOrderID string                 `json:"productionOrderID" binding:"required"`
+	ProductionOrderID string                 `json:"productionOrderID"`
+	ProductionPlanID  string                 `json:"productionPlanID"`
 	DeviceID          string                 `json:"deviceID"`
 	DeviceConfig      map[string]interface{} `json:"deviceConfig" binding:"required"`
 	Color             string                 `json:"color" binding:"required"`

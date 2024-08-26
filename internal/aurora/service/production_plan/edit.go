@@ -126,7 +126,7 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 	return nil
 }
 
-func (c *productionPlanService) UpdateCustomField(ctx context.Context, productionPlanID, customFieldKey, customFieldValue string) error {
+func (c *productionPlanService) UpdateCustomFields(ctx context.Context, productionPlanID string, fieldValues []*CustomField) error {
 	plan, err := c.productionPlanRepo.FindByID(ctx, productionPlanID)
 	if err != nil {
 		return err
@@ -134,33 +134,58 @@ func (c *productionPlanService) UpdateCustomField(ctx context.Context, productio
 	if !plan.ProductionPlan.Editable() {
 		return fmt.Errorf("không thể chỉnh sửa kế hoạch đã được đưa vào sản xuất")
 	}
+	errTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
 
-	customFields, err := c.customFieldRepo.Search(ctx, &repository.SearchCustomFieldsOpts{
-		EntityId:   plan.ID,
-		EntityType: enum.CustomFieldTypeProductionPlan,
-		Field:      customFieldKey,
-		Limit:      1000,
-		Offset:     0,
+		customFields, err := c.customFieldRepo.Search(ctx, &repository.SearchCustomFieldsOpts{
+			EntityId:   plan.ID,
+			EntityType: enum.CustomFieldTypeProductionPlan,
+			Limit:      1000,
+			Offset:     0,
+		})
+
+		if err != nil {
+			return fmt.Errorf("search custom fields failed: %w", err)
+		}
+
+		customFieldMap := generic.ToMap(customFields, func(f *repository.CustomFieldData) string {
+			return f.Field
+		})
+
+		newCustomFields := make([]*model.CustomField, 0)
+		updatedCustomFields := make([]*model.CustomField, 0)
+		for _, field := range fieldValues {
+			if _, ok := customFieldMap[field.Field]; ok {
+				customFieldMap[field.Field].Value = field.Value
+				updatedCustomFields = append(updatedCustomFields, customFieldMap[field.Field].CustomField)
+				delete(customFieldMap, field.Field)
+			} else {
+				newCustomFields = append(newCustomFields, &model.CustomField{
+					ID:         idutil.ULIDNow(),
+					EntityID:   plan.ID,
+					EntityType: enum.CustomFieldTypeProductionPlan,
+					Field:      field.Field,
+					Value:      field.Value,
+				})
+			}
+		}
+		for _, field := range updatedCustomFields {
+			if err := c.customFieldRepo.Update(ctx, field); err != nil {
+				return fmt.Errorf("update custom field for production plan failed: %w", err)
+			}
+		}
+		for _, field := range newCustomFields {
+			if err := c.customFieldRepo.Insert(ctx, field); err != nil {
+				return fmt.Errorf("create custom field for production plan failed: %w", err)
+			}
+		}
+
+		return nil
+
 	})
 
-	if err != nil {
-		return fmt.Errorf("search custom fields failed: %w", err)
+	if errTx != nil {
+		return fmt.Errorf("update custom fields failed: %w", errTx)
 	}
 
-	customFieldMap := generic.ToMap(customFields, func(f *repository.CustomFieldData) string {
-		return f.Field
-	})
-
-	if customField, ok := customFieldMap[customFieldKey]; ok {
-		customField.Value = customFieldValue
-		return c.customFieldRepo.Update(ctx, customField.CustomField)
-	}
-
-	return c.customFieldRepo.Insert(ctx, &model.CustomField{
-		ID:         idutil.ULIDNow(),
-		EntityID:   plan.ID,
-		EntityType: enum.CustomFieldTypeProductionPlan,
-		Field:      customFieldKey,
-		Value:      customFieldValue,
-	})
+	return nil
 }

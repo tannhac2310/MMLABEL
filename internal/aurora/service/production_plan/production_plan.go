@@ -19,7 +19,7 @@ type Service interface {
 	EditProductionPlan(ctx context.Context, opt *EditProductionPlanOpts) error
 	DeleteProductionPlan(ctx context.Context, id string) error
 	ProcessProductionOrder(ctx context.Context, opt *ProcessProductionOrderOpts) (string, error)
-	UpdateCustomField(ctx context.Context, productionPlanID, customFieldKey, customFieldValue string) error
+	UpdateCustomFields(ctx context.Context, productionPlanID string, values []*CustomField) error
 }
 
 type productionPlanService struct {

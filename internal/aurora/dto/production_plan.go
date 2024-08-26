@@ -107,3 +107,10 @@ type ProductionPlan struct {
 	CustomData    map[string]string         `json:"customData,omitempty"`
 	Workflow      any                       `json:"workflow"`
 }
+
+type UpdateCustomFieldPLValuesRequest struct {
+	ProductionPlanID string `json:"productionPlanID"`
+	CustomField      []*CustomField
+}
+
+type UpdateCustomFieldPLValuesResponse struct{}

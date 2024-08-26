@@ -21,6 +21,7 @@ const (
 	ProductionPlanStatus_Price_Done
 	ProductionPlanStatus_PO_Processing
 	ProductionPlanStatus_PO_Done
+	ProductionPlanStatus_PO_Archived
 )
 
 const (
@@ -45,6 +46,7 @@ var ProductionPlanStatusName = map[ProductionPlanStatus]string{
 	ProductionPlanStatus_Price_Done:              "price_done",
 	ProductionPlanStatus_PO_Processing:           "po_processing",
 	ProductionPlanStatus_PO_Done:                 "po_done",
+	ProductionPlanStatus_PO_Archived:             "po_archived",
 }
 
 var ProductionPlanStatusSage = map[ProductionPlanStatus]int{
@@ -61,6 +63,7 @@ var ProductionPlanStatusSage = map[ProductionPlanStatus]int{
 	ProductionPlanStatus_Price_Done:              ProductionPlanStageFinance,
 	ProductionPlanStatus_PO_Processing:           ProductionPlanStageProduction,
 	ProductionPlanStatus_PO_Done:                 ProductionPlanStageProduction,
+	ProductionPlanStatus_PO_Archived:             ProductionPlanStageProduction,
 }
 
 var ProductionPlanStatusValue = func() map[string]ProductionPlanStatus {

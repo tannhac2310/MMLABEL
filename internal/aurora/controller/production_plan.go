@@ -19,12 +19,37 @@ type ProductionPlanController interface {
 	FindProductionPlans(c *gin.Context)
 	FindProductionPlansWithNoPermission(c *gin.Context)
 	ProcessProductionOrder(c *gin.Context)
+	UpdateCustomFields(c *gin.Context)
 }
 
 type productionPlanController struct {
 	productionPlanService production_plan.Service
 }
 
+func (s productionPlanController) UpdateCustomFields(c *gin.Context) {
+	req := &dto.UpdateCustomFieldPLValuesRequest{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+
+	values := make([]*production_plan.CustomField, 0)
+	for _, v := range req.CustomField {
+		values = append(values, &production_plan.CustomField{
+			Field: v.Key,
+			Value: v.Value,
+		})
+	}
+
+	err = s.productionPlanService.UpdateCustomFields(c, req.ProductionPlanID, values)
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+
+	transportutil.SendJSONResponse(c, &dto.UpdateCustomFieldPLValuesResponse{})
+}
 func (s productionPlanController) CreateProductionPlan(c *gin.Context) {
 	req := &dto.CreateProductionPlanRequest{}
 	err := c.ShouldBind(req)
@@ -383,5 +408,14 @@ func RegisterProductionPlanController(
 		&dto.ProcessProductionOrderRequest{},
 		&dto.ProcessProductionOrderResponse{},
 		"Process Production Order",
+	)
+
+	routeutil.AddEndpoint(
+		g,
+		"update-custom-field",
+		c.UpdateCustomFields,
+		&dto.UpdateCustomFieldPLValuesRequest{},
+		&dto.UpdateCustomFieldPLValuesResponse{},
+		"Update PL custom field",
 	)
 }
