@@ -8,6 +8,7 @@ import (
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
 type CommentRepo interface {
@@ -65,11 +66,12 @@ func (r *sCommentRepo) SoftDelete(ctx context.Context, id string) error {
 
 // SearchCommentOpts all params is options
 type SearchCommentOpts struct {
-	IDs      []string
-	TargetID string
-	Limit    int64
-	Offset   int64
-	Sort     *Sort
+	IDs        []string
+	TargetID   string
+	TargetType enum.CommentTarget
+	Limit      int64
+	Offset     int64
+	Sort       *Sort
 }
 
 func (s *SearchCommentOpts) buildQuery(isCount bool) (string, []interface{}) {
@@ -84,6 +86,10 @@ func (s *SearchCommentOpts) buildQuery(isCount bool) (string, []interface{}) {
 	if s.TargetID != "" {
 		args = append(args, s.TargetID)
 		conds += fmt.Sprintf(" AND b.%[2]s = $%[1]d", len(args), model.CommentFieldTargetID)
+	}
+	if s.TargetType > enum.CommentTarget_Unknown {
+		args = append(args, s.TargetType)
+		conds += fmt.Sprintf(" AND b.%[2]s = $%[1]d", len(args), model.CommentFieldTargetType)
 	}
 
 	b := &model.Comment{}

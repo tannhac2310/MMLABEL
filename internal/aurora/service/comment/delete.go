@@ -14,7 +14,6 @@ func (c *commentService) DeleteComment(ctx context.Context, id string) error {
 		if err != nil {
 			return fmt.Errorf("c.commentRepo.SoftDelete: %w", err)
 		}
-
 		return nil
 	})
 }

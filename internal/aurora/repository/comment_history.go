@@ -44,11 +44,11 @@ func (r *sCommentHistoryRepo) FindByID(ctx context.Context, id string) (*Comment
 
 // SearchCommentHistoryOpts all params is options
 type SearchCommentHistoryOpts struct {
-	IDs []string
-	// todo add more search options
-	Limit  int64
-	Offset int64
-	Sort   *Sort
+	IDs       []string
+	CommentID string
+	Limit     int64
+	Offset    int64
+	Sort      *Sort
 }
 
 func (s *SearchCommentHistoryOpts) buildQuery(isCount bool) (string, []interface{}) {
@@ -60,16 +60,10 @@ func (s *SearchCommentHistoryOpts) buildQuery(isCount bool) (string, []interface
 		args = append(args, s.IDs)
 		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.CommentHistoryFieldID)
 	}
-	// todo add more search options example:
-	//if s.Name != "" {
-	//	args = append(args, "%"+s.Name+"%")
-	//	conds += fmt.Sprintf(" AND (b.%[2]s ILIKE $%[1]d OR b.%[3]s ILIKE $%[1]d)",
-	//		len(args), model.CommentHistoryFieldName, model.CommentHistoryFieldCode)
-	//}
-	//if s.Code != "" {
-	//	args = append(args, s.Code)
-	//	conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.CommentHistoryFieldCode, len(args))
-	//}
+	if s.CommentID != "" {
+		args = append(args, s.CommentID)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.CommentHistoryFieldCommentID, len(args))
+	}
 
 	b := &model.CommentHistory{}
 	fields, _ := b.FieldMap()
