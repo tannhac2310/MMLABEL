@@ -15,6 +15,7 @@ func (c *deviceConfigService) EditDeviceConfig(ctx context.Context, opt *EditDev
 	updater := cockroach.NewUpdater(table.TableName(), model.ProductionOrderDeviceConfigFieldID, opt.ID)
 
 	updater.Set(model.ProductionOrderDeviceConfigFieldProductionOrderID, opt.ProductionOrderID)
+	updater.Set(model.ProductionOrderDeviceConfigFieldProductionPlanID, opt.ProductionPlanID)
 	updater.Set(model.ProductionOrderDeviceConfigFieldDeviceID, opt.DeviceID)
 	updater.Set(model.ProductionOrderDeviceConfigFieldDeviceConfig, opt.DeviceConfig)
 	updater.Set(model.ProductionOrderDeviceConfigFieldColor, opt.Color)
@@ -34,6 +35,7 @@ func (c *deviceConfigService) EditDeviceConfig(ctx context.Context, opt *EditDev
 type EditDeviceConfigOpts struct {
 	ID                string
 	ProductionOrderID string
+	ProductionPlanID  string
 	DeviceID          string
 	DeviceConfig      map[string]interface{}
 	Color             string

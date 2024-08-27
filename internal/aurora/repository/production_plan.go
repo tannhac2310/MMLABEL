@@ -75,7 +75,7 @@ type SearchProductionPlanOpts struct {
 	ProductCode string
 	Statuses    []enum.ProductionPlanStatus
 	UserID      string
-	Stage       int
+	Stage       enum.ProductionPlanStage
 	Limit       int64
 	Offset      int64
 	Sort        *Sort
@@ -99,7 +99,7 @@ func (s *SearchProductionPlanOpts) buildQuery(isCount bool) (string, []interface
 		conds += fmt.Sprintf(" AND b.%[2]s ILIKE $%[1]d", len(args), model.ProductionPlanFieldProductName)
 	}
 	if s.ProductCode != "" {
-		args = append(args, "%"+s.ProductCode+"%")
+		args = append(args, s.ProductCode)
 		conds += fmt.Sprintf(" AND b.%[2]s ILIKE $%[1]d", len(args), model.ProductionPlanFieldProductCode)
 	}
 	if len(s.Statuses) > 0 {
@@ -107,11 +107,13 @@ func (s *SearchProductionPlanOpts) buildQuery(isCount bool) (string, []interface
 		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.ProductionPlanFieldStatus, len(args))
 	}
 	if s.Stage > 0 {
-		args = append(args, s.Stage, s.Stage)
-		conds += fmt.Sprintf(" AND b.%s & $%d = $%d", model.ProductionPlanFieldCurrentStage, len(args)-1, len(args))
-	} else {
-		args = append(args, 1, 1)
-		conds += fmt.Sprintf(" AND b.%s & $%d = $%d", model.ProductionPlanFieldCurrentStage, len(args)-1, len(args))
+		args = append(args, s.Stage)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionPlanFieldCurrentStage, len(args))
+	}
+
+	if s.CustomerID != "" {
+		args = append(args, s.CustomerID)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionPlanFieldCustomerID, len(args))
 	}
 
 	b := &model.ProductionPlan{}

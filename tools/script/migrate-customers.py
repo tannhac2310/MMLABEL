@@ -47,8 +47,8 @@ def process_database(output: str):
             # Insert into the second table
             inserts.append("\
 INSERT INTO public.customers\r\
-(id, 'name', tax, code, country, province, address, phone_number, fax, company_website, company_phone, contact_person_name, contact_person_email, contact_person_phone, contact_person_role, note, 'status', created_by, created_at, updated_at, deleted_at)\r\
-VALUES ('{id}', '{name}', '{tax}', '{code}', 'Việt Nam', 'Hồ Chí Minh', 'Quận 1', 0, '{fax}', '', 0, '{contact_person_name}', '{contact_person_email}', 0, 'Nhân viên', '', 1, '{created_by}', now(), now(), NULL);"
+(id, name, tax, code, country, province, address, fax, company_website, company_phone, contact_person_name, contact_person_email, contact_person_phone, contact_person_role, note, status, created_by, created_at, updated_at, deleted_at)\r\
+VALUES ('{id}', '{name}', '{tax}', '{code}', 'Việt Nam', 'Hồ Chí Minh', 'Quận 1','{fax}', '', 0, '{contact_person_name}', '{contact_person_email}', 0, 'Nhân viên', '', 1, '{created_by}', now(), now(), NULL);"
                            .format(id=new_id, name=name, tax=name + '-tax', code=name + '-code',  fax=name + '-fax', contact_person_name=name, contact_person_email=name + '@emal.com', created_by='5782eebb-1311-4fea-9fd7-c00ad2489318'))
             
         for old_id, name in po_customers.items():

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/device_config"
@@ -32,6 +33,7 @@ func (s deviceConfigController) CreateDeviceConfig(c *gin.Context) {
 	userId := interceptor.UserIDFromCtx(c)
 	id, err := s.deviceConfigService.CreateDeviceConfig(c, &device_config.CreateDeviceConfigOpts{
 		ProductionOrderID: req.ProductionOrderID,
+		ProductionPlanID:  req.ProductionPlanID,
 		DeviceID:          req.DeviceID,
 		DeviceConfig:      req.DeviceConfig,
 		Color:             req.Color,
@@ -60,6 +62,7 @@ func (s deviceConfigController) EditDeviceConfig(c *gin.Context) {
 	err = s.deviceConfigService.EditDeviceConfig(c, &device_config.EditDeviceConfigOpts{
 		ID:                req.ID,
 		ProductionOrderID: req.ProductionOrderID,
+		ProductionPlanID:  req.ProductionPlanID,
 		DeviceID:          req.DeviceID,
 		DeviceConfig:      req.DeviceConfig,
 		Color:             req.Color,
@@ -101,8 +104,10 @@ func (s deviceConfigController) FindDeviceConfigs(c *gin.Context) {
 	}
 
 	deviceConfigs, cnt, err := s.deviceConfigService.FindDeviceConfigs(c, &device_config.FindDeviceConfigsOpts{
-		Search: req.Filter.Search,
+		IDs:               req.Filter.IDs,
+		Search:            req.Filter.Search,
 		ProductionOrderID: req.Filter.ProductionOrderID,
+		ProductionPlanID:  req.Filter.ProductionPlanID,
 	}, &repository.Sort{
 		Order: repository.SortOrderDESC,
 		By:    "ID",
@@ -127,8 +132,10 @@ func toDeviceConfigResp(f *device_config.Data) *dto.DeviceConfig {
 	return &dto.DeviceConfig{
 		ID:                  f.ID,
 		ProductionOrderID:   f.ProductionOrderID,
-		ProductionOrderName: f.ProductionOrderName,
+		ProductionOrderName: f.ProductionOrderName.String,
 		DeviceID:            f.DeviceID.String,
+		DeviceCode:          f.DeviceCode.String,
+		DeviceName:          f.DeviceName.String,
 		DeviceConfig:        f.DeviceConfig,
 		Color:               f.Color.String,
 		Description:         f.Description.String,

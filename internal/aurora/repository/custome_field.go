@@ -40,8 +40,8 @@ func (r *customFieldsRepo) Update(ctx context.Context, e *model.CustomField) err
 }
 
 func (r *customFieldsRepo) Delete(ctx context.Context, id string) error {
-	sql := "UPDATE custom_fields SET deleted_at = NOW() WHERE id = $1;"
-
+	//sql := "UPDATE custom_fields SET deleted_at = NOW() WHERE id = $1;"
+	sql := "DELETE FROM custom_fields WHERE id = $1;" // should be hard delete
 	cmd, err := cockroach.Exec(ctx, sql, id)
 	if err != nil {
 		return fmt.Errorf("cockroach.Exec: %w", err)

@@ -46,7 +46,7 @@ type ProductionPlan struct {
 	DeletedAt    sql.NullTime              `db:"deleted_at"`
 	Name         string                    `db:"name"`
 	PoStages     ProductionStageInfo       `db:"po_stages"`
-	CurrentStage int                       `db:"current_stage"`
+	CurrentStage enum.ProductionPlanStage  `db:"current_stage"`
 	ProductName  string                    `db:"product_name"`
 	ProductCode  string                    `db:"product_code"`
 	QtyPaper     int64                     `db:"qty_paper"`
@@ -110,7 +110,7 @@ func (rcv *ProductionPlan) TableName() string {
 }
 
 func (rcv *ProductionPlan) Editable() bool {
-	return rcv.CurrentStage != enum.ProductionPlanStageProduction
+	return rcv.CurrentStage == enum.ProductionPlanStageSale || rcv.CurrentStage == enum.ProductionPlanStageDesign || rcv.CurrentStage == enum.ProductionPlanStageRandD
 }
 
 type ProductionStageInfo struct {

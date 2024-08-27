@@ -15,7 +15,7 @@ func (c *productQualityService) CreateProductQuality(ctx context.Context, opt *C
 
 	productQuality := &model.ProductQuality{
 		ID:                idutil.ULIDNow(),
-		ProductionOrderID: opt.ProductionOrderID,
+		ProductionOrderID: cockroach.String(opt.ProductionOrderID),
 		ProductID:         cockroach.String(opt.ProductID),
 		DeviceIDs:         opt.DeviceIDs,
 		DefectType:        cockroach.String(opt.DefectType),

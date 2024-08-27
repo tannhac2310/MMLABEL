@@ -7,8 +7,10 @@ import (
 )
 
 type DeviceConfigFilter struct {
-	Search string `json:"search"`
-	ProductionOrderID   string     `json:"productionOrderID"`
+	IDs               []string `json:"IDs"`
+	Search            string   `json:"search"`
+	ProductionOrderID string   `json:"productionOrderID"`
+	ProductionPlanID  string   `json:"productionPlanID"`
 }
 
 type FindDeviceConfigsRequest struct {
@@ -23,8 +25,11 @@ type FindDeviceConfigsResponse struct {
 type DeviceConfig struct {
 	ID                  string                 `json:"id"`
 	ProductionOrderID   string                 `json:"productionOrderID"`
+	ProductionPlanID    string                 `json:"productionPlanID"`
 	ProductionOrderName string                 `json:"productionOrderName"`
 	DeviceID            string                 `json:"deviceID"`
+	DeviceCode          string                 `json:"deviceCode"`
+	DeviceName          string                 `json:"deviceName"`
 	DeviceConfig        map[string]interface{} `json:"deviceConfig"`
 	Color               string                 `json:"color"`
 	Description         string                 `json:"description"`
@@ -34,11 +39,12 @@ type DeviceConfig struct {
 }
 
 type CreateDeviceConfigRequest struct {
-	ProductionOrderID string                 `json:"productionOrderID" binding:"required"`
+	ProductionOrderID string                 `json:"productionOrderID"`
+	ProductionPlanID  string                 `json:"productionPlanID"`
 	DeviceID          string                 `json:"deviceID"`
 	DeviceConfig      map[string]interface{} `json:"deviceConfig" binding:"required"`
-	Color             string                 `json:"color" binding:"required"`
-	Description       string                 `json:"description" binding:"required"`
+	Color             string                 `json:"color"`
+	Description       string                 `json:"description"`
 	Search            string                 `json:"search"`
 }
 
@@ -48,11 +54,12 @@ type CreateDeviceConfigResponse struct {
 
 type EditDeviceConfigRequest struct {
 	ID                string                 `json:"id" binding:"required"`
-	ProductionOrderID string                 `json:"productionOrderID" binding:"required"`
+	ProductionOrderID string                 `json:"productionOrderID"`
+	ProductionPlanID  string                 `json:"productionPlanID"`
 	DeviceID          string                 `json:"deviceID"`
 	DeviceConfig      map[string]interface{} `json:"deviceConfig" binding:"required"`
-	Color             string                 `json:"color" binding:"required"`
-	Description       string                 `json:"description" binding:"required"`
+	Color             string                 `json:"color"`
+	Description       string                 `json:"description"`
 	Search            string                 `json:"search"`
 }
 

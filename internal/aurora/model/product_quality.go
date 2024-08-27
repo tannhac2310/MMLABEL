@@ -25,7 +25,7 @@ const (
 
 type ProductQuality struct {
 	ID                string         `db:"id"`
-	ProductionOrderID string         `db:"production_order_id"`
+	ProductionOrderID sql.NullString `db:"production_order_id"`
 	ProductID         sql.NullString `db:"product_id"`
 	DefectType        sql.NullString `db:"defect_type"`
 	DefectCode        sql.NullString `db:"defect_code"`
