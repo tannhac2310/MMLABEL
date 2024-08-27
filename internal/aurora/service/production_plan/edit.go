@@ -115,7 +115,9 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 			// if field.key contains sale_survey then ignore delete
 
 			if strings.Contains(field.Field, "sale_survey") {
-				//continue
+				// Todo: this hard code is not good, but we have to do it,
+				// because there are 2 forms: production plan and sale survey ( Thu thap thong tin sale)
+				continue
 			}
 
 			if err := c.customFieldRepo.Delete(ctx, field.ID); err != nil {
