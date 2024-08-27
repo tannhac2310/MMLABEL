@@ -154,7 +154,7 @@ func toProductQualityResp(f *product_quality.Data) *dto.ProductQuality {
 	}
 	return &dto.ProductQuality{
 		ID:                      f.ID,
-		ProductionOrderID:       f.ProductionOrderID,
+		ProductionOrderID:       f.ProductionOrderID.String,
 		ProductionOrderName:     f.ProductionOrderName,
 		ProductionOrderQtyPaper: f.ProductionOrderQtyPaper,
 		DeviceIDs:               f.DeviceIDs,

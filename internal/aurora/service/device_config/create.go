@@ -16,6 +16,7 @@ func (c *deviceConfigService) CreateDeviceConfig(ctx context.Context, opt *Creat
 	deviceConfig := &model.ProductionOrderDeviceConfig{
 		ID:                idutil.ULIDNow(),
 		ProductionOrderID: opt.ProductionOrderID,
+		ProductionPlanID:  cockroach.String(opt.ProductionPlanID),
 		DeviceID:          cockroach.String(opt.DeviceID),
 		Color:             cockroach.String(opt.Color),
 		Description:       cockroach.String(opt.Description),
@@ -44,6 +45,7 @@ func (c *deviceConfigService) CreateDeviceConfig(ctx context.Context, opt *Creat
 
 type CreateDeviceConfigOpts struct {
 	ProductionOrderID string
+	ProductionPlanID  string
 	DeviceID          string
 	DeviceConfig      map[string]interface{}
 	Color             string

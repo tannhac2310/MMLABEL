@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"strings"
 	"time"
@@ -55,19 +56,23 @@ func (r *sProductionOrderDeviceConfigRepo) SoftDelete(ctx context.Context, id st
 
 // SearchProductionOrderDeviceConfigOpts all params is options
 type SearchProductionOrderDeviceConfigOpts struct {
-	IDs    []string
-	Search string
+	IDs               []string
+	Search            string
 	ProductionOrderID string
-	// todo add more search options
-	Limit  int64
-	Offset int64
-	Sort   *Sort
+	ProductionPlanID  string
+	Limit             int64
+	Offset            int64
+	Sort              *Sort
 }
 
 func (s *SearchProductionOrderDeviceConfigOpts) buildQuery(isCount bool) (string, []interface{}) {
 	var args []interface{}
 	conds := ""
-	joins := " JOIN production_orders AS po ON po.id = b.production_order_id"
+	joins := " Left JOIN production_orders AS po ON po.id = b.production_order_id"
+	// join production_plans table
+	joins += " Left JOIN production_plans AS pp ON pp.id = b.production_plan_id"
+	// join devices table
+	joins += " JOIN devices AS d ON d.id = b.device_id"
 
 	if s.ProductionOrderID != "" {
 		args = append(args, s.ProductionOrderID)
@@ -77,11 +82,14 @@ func (s *SearchProductionOrderDeviceConfigOpts) buildQuery(isCount bool) (string
 		args = append(args, s.IDs)
 		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.ProductionOrderDeviceConfigFieldID)
 	}
-	// todo add more search options example:
+	if s.ProductionPlanID != "" {
+		args = append(args, s.ProductionPlanID)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderDeviceConfigFieldProductionPlanID, len(args))
+	}
+
 	if s.Search != "" {
 		args = append(args, "%"+s.Search+"%")
-		conds += fmt.Sprintf(" AND (b.%[2]s ILIKE $%[1]d OR b.%[3]s ILIKE $%[1]d OR po.name ILIKE $%[1]d)",
-			len(args), model.ProductionOrderDeviceConfigFieldSearch, model.ProductionOrderDeviceConfigFieldColor)
+		conds += fmt.Sprintf(" AND (b.color ILIKE $%[1]d OR d.name ILIKE $%[1]d OR d.code ILIKE $%[1]d OR po.name ILIKE $%[1]d) or pp.name ILIKE $%[1]d", len(args))
 	}
 
 	b := &model.ProductionOrderDeviceConfig{}
@@ -95,13 +103,17 @@ func (s *SearchProductionOrderDeviceConfigOpts) buildQuery(isCount bool) (string
 		order = fmt.Sprintf(" ORDER BY b.%s %s", s.Sort.By, s.Sort.Order)
 	}
 
-	return fmt.Sprintf(`SELECT b.%s, po.name as production_order_name 
+	return fmt.Sprintf(`SELECT b.%s, po.name as production_order_name, 
+       d.name as device_name, d.code as device_code, pp.name as production_plan_name
 FROM %s AS b %s WHERE TRUE %s AND b.deleted_at IS NULL %s LIMIT %d OFFSET %d`, strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
 }
 
 type ProductionOrderDeviceConfigData struct {
 	*model.ProductionOrderDeviceConfig
-	ProductionOrderName string `db:"production_order_name"`
+	ProductionOrderName sql.NullString `db:"production_order_name"`
+	DeviceName          sql.NullString `db:"device_name"`
+	DeviceCode          sql.NullString `db:"device_code"`
+	ProductionPlanName  sql.NullString `db:"production_plan_name"`
 }
 
 func (r *sProductionOrderDeviceConfigRepo) Search(ctx context.Context, s *SearchProductionOrderDeviceConfigOpts) ([]*ProductionOrderDeviceConfigData, error) {

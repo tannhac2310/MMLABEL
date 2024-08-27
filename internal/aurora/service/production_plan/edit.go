@@ -3,6 +3,7 @@ package production_plan
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
@@ -111,6 +112,12 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 			}
 		}
 		for _, field := range deletedCustomFields {
+			// if field.key contains sale_survey then ignore delete
+
+			if strings.Contains(field.Field, "sale_survey") {
+				//continue
+			}
+
 			if err := c.customFieldRepo.Delete(ctx, field.ID); err != nil {
 				return fmt.Errorf("delete custom field for production plan failed: %w", err)
 			}

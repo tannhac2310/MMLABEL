@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/idutil"
 	"net/http"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/idutil"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -17,7 +18,7 @@ import (
 func (u *uploadService) Upload(ctx context.Context, uploadType, originName string, file *bytes.Buffer) (string, error) {
 	dateStr := time.Now().Format("2006-01-02")
 
-	fileName := fmt.Sprintf("%s/%s/origin/%sss1%sss1%s", uploadType, dateStr, idutil.ULIDNow(), time.Now().Nanosecond(), originName)
+	fileName := fmt.Sprintf("%s/%s/origin/%sss1%sss1/%s", uploadType, dateStr, idutil.ULIDNow(), time.Now().Nanosecond(), originName)
 	//fmt.Println(fileName)
 	url, err := u.uploadToS3(ctx, u.cfg.S3Storage.Bucket, file, fileName)
 	if err != nil {

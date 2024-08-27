@@ -14,7 +14,7 @@ type ProductionPlanFilter struct {
 	ProductName string                      `json:"productName"`
 	ProductCode string                      `json:"productCode"`
 	Statuses    []enum.ProductionPlanStatus `json:"statuses"`
-	Stage       int                         `json:"stage"`
+	Stage       enum.ProductionPlanStage    `json:"stage"`
 }
 
 type FindProductionPlansRequest struct {
@@ -95,7 +95,8 @@ type ProductionPlan struct {
 	QtyFinished   int64                     `json:"qtyFinished,omitempty"`
 	QtyDelivered  int64                     `json:"qtyDelivered,omitempty"`
 	Thumbnail     string                    `json:"thumbnail,omitempty"`
-	Status        enum.ProductionPlanStatus `json:"status,omitempty"`
+	Status        enum.ProductionPlanStatus `json:"status"`
+	CurrentStage  enum.ProductionPlanStage  `json:"currentStage"`
 	Note          string                    `json:"note,omitempty"`
 	CreatedBy     string                    `json:"createdBy"`
 	CreatedAt     time.Time                 `json:"createdAt"`

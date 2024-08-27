@@ -299,6 +299,7 @@ func (s productionPlanController) FindProductionPlans(c *gin.Context) {
 			QtyDelivered:  f.QtyDelivered,
 			Thumbnail:     f.Thumbnail.String,
 			Status:        f.Status,
+			CurrentStage:  f.CurrentStage,
 			Note:          f.Note.String,
 			Workflow:      f.Workflow,
 			CreatedBy:     f.CreatedBy,
