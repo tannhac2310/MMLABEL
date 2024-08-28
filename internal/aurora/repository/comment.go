@@ -37,7 +37,9 @@ func (r *sCommentRepo) Insert(ctx context.Context, e *model.Comment) error {
 }
 
 func (r *sCommentRepo) FindByID(ctx context.Context, id string) (*CommentData, error) {
-	e := &CommentData{}
+	e := &CommentData{
+		Comment: &model.Comment{},
+	}
 	err := cockroach.FindOne(ctx, e, "id = $1", id)
 	if err != nil {
 		return nil, fmt.Errorf("sCommentRepo.cockroach.FindOne: %w", err)

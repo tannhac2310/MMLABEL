@@ -503,6 +503,201 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "comment",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"target_id\": \"01J4M6S9NZRY34FXB6DD3F0MND\",\n    \"content\": \"need improve\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{auroraHost}}/aurora/comment/create",
+							"host": [
+								"{{auroraHost}}"
+							],
+							"path": [
+								"aurora",
+								"comment",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "find",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filter\": {\n        \"target_id\": \"01J4M6S9NZRY34FXB6DD3F0MND\"\n    },\n    \"paging\": {\n        \"limit\": 10,\n        \"offset\": 0\n    },\n    \"sort\": {}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{auroraHost}}/aurora/comment/find",
+							"host": [
+								"{{auroraHost}}"
+							],
+							"path": [
+								"aurora",
+								"comment",
+								"find"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "find history",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filter\": {\n        \"comment_id\": \"01J6CRW4JXVDASQF2PG5TNQBTW\"\n    },\n    \"paging\": {\n        \"limit\": 10,\n        \"offset\": 0\n    },\n    \"sort\": {}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{auroraHost}}/aurora/comment/find-history",
+							"host": [
+								"{{auroraHost}}"
+							],
+							"path": [
+								"aurora",
+								"comment",
+								"find-history"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"01J6CRW4JXVDASQF2PG5TNQBTW\",\n    \"target_id\": \"01J4M6S9NZRY34FXB6DD3F0MND\",\n    \"content\": \"nice product (updated)\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{auroraHost}}/aurora/comment/edit",
+							"host": [
+								"{{auroraHost}}"
+							],
+							"path": [
+								"aurora",
+								"comment",
+								"edit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"01J6CSKNJ86743D3770S4Q6ZCD\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{auroraHost}}/aurora/comment/delete",
+							"host": [
+								"{{auroraHost}}"
+							],
+							"path": [
+								"aurora",
+								"comment",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }

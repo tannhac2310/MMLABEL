@@ -169,7 +169,7 @@ func (s *commentController) FindCommentHistories(c *gin.Context) {
 	}
 
 	commentHistoriesResp := make([]*dto.CommentHistory, 0, len(commentHistories))
-	for _, f := range commentHistoriesResp {
+	for _, f := range commentHistories {
 		data := &dto.CommentHistory{
 			ID:        f.ID,
 			CommentID: f.CommentID,
