@@ -68,14 +68,14 @@ func (s *SearchCommentHistoryOpts) buildQuery(isCount bool) (string, []interface
 	b := &model.CommentHistory{}
 	fields, _ := b.FieldMap()
 	if isCount {
-		return fmt.Sprintf("SELECT count(*) as cnt FROM %s AS b %s WHERE TRUE %s AND b.deleted_at IS NULL", b.TableName(), joins, conds), args
+		return fmt.Sprintf("SELECT count(*) as cnt FROM %s AS b %s WHERE TRUE %s", b.TableName(), joins, conds), args
 	}
 
 	order := " ORDER BY b.id DESC "
 	if s.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", s.Sort.By, s.Sort.Order)
 	}
-	return fmt.Sprintf("SELECT b.%s FROM %s AS b %s WHERE TRUE %s AND b.deleted_at IS NULL %s LIMIT %d OFFSET %d", strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
+	return fmt.Sprintf("SELECT b.%s FROM %s AS b %s WHERE TRUE %s %s LIMIT %d OFFSET %d", strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
 }
 
 type CommentHistoryData struct {

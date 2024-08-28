@@ -2,7 +2,6 @@ package comment
 
 import (
 	"context"
-	"fmt"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
@@ -22,7 +21,7 @@ func (c *commentService) FindComments(ctx context.Context, opts FindCommentsOpts
 		Offset:     offset,
 		Sort: &repository.Sort{
 			Order: repository.SortOrderDESC,
-			By:    fmt.Sprintf("b.%s", model.CommentFieldCreatedAt),
+			By:    model.CommentFieldCreatedAt,
 		},
 	}
 
@@ -53,7 +52,7 @@ func (c *commentService) FindCommentHistories(ctx context.Context, commentId str
 		Offset:    0,
 		Sort: &repository.Sort{
 			Order: repository.SortOrderDESC,
-			By:    fmt.Sprintf("b.%s", model.CommentHistoryFieldCreatedAt),
+			By:    model.CommentHistoryFieldCreatedAt,
 		},
 	}
 
