@@ -96,7 +96,6 @@ func (s productionPlanController) CreateProductionPlan(c *gin.Context) {
 		QtyDelivered: req.QtyDelivered,
 		Thumbnail:    req.Thumbnail,
 		Workflow:     req.Workflow,
-		Status:       req.Status,
 		Note:         req.Note,
 		CustomField:  customField,
 		CreatedBy:    userID,

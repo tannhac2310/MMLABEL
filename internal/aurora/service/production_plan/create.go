@@ -22,7 +22,6 @@ type CreateProductionPlanOpts struct {
 	QtyDelivered int64
 	Thumbnail    string
 	Workflow     any
-	Status       enum.ProductionPlanStatus
 	Note         string
 	CustomField  []*CustomField
 	CreatedBy    string
@@ -54,7 +53,7 @@ func (c *productionPlanService) CreateProductionPlan(ctx context.Context, opt *C
 		QtyDelivered: opt.QtyDelivered,
 		Workflow:     opt.Workflow,
 		Thumbnail:    cockroach.String(opt.Thumbnail),
-		Status:       opt.Status,
+		Status:       enum.ProductionPlanStatusSaleNew,
 		Note:         cockroach.String(opt.Note),
 		CreatedBy:    opt.CreatedBy,
 		CreatedAt:    now,
