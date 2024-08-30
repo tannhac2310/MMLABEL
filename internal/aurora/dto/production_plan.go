@@ -29,19 +29,18 @@ type FindProductionPlansResponse struct {
 }
 
 type CreateProductionPlanRequest struct {
-	Name         string                    `json:"name" binding:"required"`
-	CustomerID   string                    `json:"customerID" binding:"required"`
-	SalesID      string                    `json:"salesID" binding:"required"`
-	ProductName  string                    `json:"productName" binding:"required"`
-	ProductCode  string                    `json:"productCode" binding:"required"`
-	QtyPaper     int64                     `json:"qtyPaper,omitempty"`
-	QtyFinished  int64                     `json:"qtyFinished,omitempty"`
-	QtyDelivered int64                     `json:"qtyDelivered,omitempty"`
-	Thumbnail    string                    `json:"thumbnail,omitempty"`
-	Status       enum.ProductionPlanStatus `json:"status" binding:"required"`
-	Note         string                    `json:"note,omitempty"`
-	Workflow     any                       `json:"workflow"`
-	CustomField  []*CustomField            `json:"customField" binding:"required"`
+	Name         string         `json:"name" binding:"required"`
+	CustomerID   string         `json:"customerID" binding:"required"`
+	SalesID      string         `json:"salesID"`
+	ProductName  string         `json:"productName" binding:"required"`
+	ProductCode  string         `json:"productCode" binding:"required"`
+	QtyPaper     int64          `json:"qtyPaper,omitempty"`
+	QtyFinished  int64          `json:"qtyFinished,omitempty"`
+	QtyDelivered int64          `json:"qtyDelivered,omitempty"`
+	Thumbnail    string         `json:"thumbnail,omitempty"`
+	Note         string         `json:"note,omitempty"`
+	Workflow     any            `json:"workflow"`
+	CustomField  []*CustomField `json:"customField" binding:"required"`
 }
 
 type CreateProductionPlanResponse struct {

@@ -40,22 +40,21 @@ type Customer struct {
 }
 
 type CreateCustomerRequest struct {
-	Name               string              `json:"name,omitempty" binding:"required"`
-	Tax                string              `json:"tax,omitempty"`
-	Code               string              `json:"code,omitempty" binding:"required"`
-	Country            string              `json:"country,omitempty" binding:"required"`
-	Province           string              `json:"province,omitempty" binding:"required"`
-	Address            string              `json:"address,omitempty" binding:"required"`
-	Fax                string              `json:"fax,omitempty"`
-	CompanyWebsite     string              `json:"companyWebsite,omitempty"`
-	CompanyPhone       string              `json:"companyPhone,omitempty"`
-	CompanyEmail       string              `json:"companyEmail,omitempty"`
-	ContactPersonName  string              `json:"contactPersonName,omitempty" binding:"required"`
-	ContactPersonEmail string              `json:"contactPersonEmail,omitempty" binding:"required"`
-	ContactPersonPhone string              `json:"contactPersonPhone,omitempty" binding:"required"`
-	ContactPersonRole  string              `json:"contactPersonRole,omitempty" binding:"required"`
-	Note               string              `json:"note,omitempty""`
-	Status             enum.CustomerStatus `json:"status,omitempty" binding:"required"`
+	Name               string `json:"name,omitempty" binding:"required"`
+	Tax                string `json:"tax,omitempty"`
+	Code               string `json:"code,omitempty"`
+	Country            string `json:"country,omitempty" `
+	Province           string `json:"province,omitempty" `
+	Address            string `json:"address,omitempty" `
+	Fax                string `json:"fax,omitempty"`
+	CompanyWebsite     string `json:"companyWebsite,omitempty"`
+	CompanyPhone       string `json:"companyPhone,omitempty"`
+	CompanyEmail       string `json:"companyEmail,omitempty"`
+	ContactPersonName  string `json:"contactPersonName,omitempty" `
+	ContactPersonEmail string `json:"contactPersonEmail,omitempty" `
+	ContactPersonPhone string `json:"contactPersonPhone,omitempty" `
+	ContactPersonRole  string `json:"contactPersonRole,omitempty"`
+	Note               string `json:"note,omitempty"`
 }
 
 type CreateCustomerResponse struct {
@@ -63,23 +62,22 @@ type CreateCustomerResponse struct {
 }
 
 type EditCustomerRequest struct {
-	ID                 string              `json:"id,omitempty" binding:"required"`
-	Name               string              `json:"name,omitempty" binding:"required"`
-	Tax                string              `json:"tax,omitempty"`
-	Code               string              `json:"code,omitempty" binding:"required"`
-	Country            string              `json:"country,omitempty" binding:"required"`
-	Province           string              `json:"province,omitempty" binding:"required"`
-	Address            string              `json:"address,omitempty" binding:"required"`
-	Fax                string              `json:"fax,omitempty"`
-	CompanyWebsite     string              `json:"companyWebsite,omitempty"`
-	CompanyPhone       string              `json:"companyPhone,omitempty"`
-	CompanyEmail       string              `json:"companyEmail,omitempty"`
-	ContactPersonName  string              `json:"contactPersonName,omitempty" binding:"required"`
-	ContactPersonEmail string              `json:"contactPersonEmail,omitempty" binding:"required"`
-	ContactPersonPhone string              `json:"contactPersonPhone,omitempty" binding:"required"`
-	ContactPersonRole  string              `json:"contactPersonRole,omitempty" binding:"required"`
-	Note               string              `json:"note,omitempty" binding:"required"`
-	Status             enum.CustomerStatus `json:"status,omitempty" binding:"required"`
+	ID                 string `json:"id,omitempty" binding:"required"`
+	Name               string `json:"name,omitempty" binding:"required"`
+	Tax                string `json:"tax,omitempty"`
+	Code               string `json:"code,omitempty"`
+	Country            string `json:"country,omitempty" `
+	Province           string `json:"province,omitempty" `
+	Address            string `json:"address,omitempty" `
+	Fax                string `json:"fax,omitempty"`
+	CompanyWebsite     string `json:"companyWebsite,omitempty"`
+	CompanyPhone       string `json:"companyPhone,omitempty"`
+	CompanyEmail       string `json:"companyEmail,omitempty"`
+	ContactPersonName  string `json:"contactPersonName,omitempty" `
+	ContactPersonEmail string `json:"contactPersonEmail,omitempty" `
+	ContactPersonPhone string `json:"contactPersonPhone,omitempty" `
+	ContactPersonRole  string `json:"contactPersonRole,omitempty"`
+	Note               string `json:"note,omitempty"`
 }
 
 type EditCustomerResponse struct {

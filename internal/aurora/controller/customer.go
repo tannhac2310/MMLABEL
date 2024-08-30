@@ -7,6 +7,7 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/customer"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/apperror"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/interceptor"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/routeutil"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/transportutil"
@@ -49,7 +50,7 @@ func (s customerController) CreateCustomer(c *gin.Context) {
 		ContactPersonPhone: req.ContactPersonPhone,
 		ContactPersonRole:  req.ContactPersonRole,
 		Note:               req.Note,
-		Status:             req.Status,
+		Status:             enum.CustomerStatusActivate,
 		CreatedBy:          userID,
 	})
 	if err != nil {
@@ -89,7 +90,7 @@ func (s customerController) EditCustomer(c *gin.Context) {
 		ContactPersonPhone: req.ContactPersonPhone,
 		ContactPersonRole:  req.ContactPersonRole,
 		Note:               req.Note,
-		Status:             req.Status,
+		Status:             enum.CustomerStatusActivate,
 		CreatedBy:          userID,
 	})
 	if err != nil {
