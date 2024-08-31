@@ -9,11 +9,17 @@ type CommentTarget uint8
 
 const (
 	CommentTarget_Unknown CommentTarget = iota
-	CommentTarget_ProductionPlan
+	CommentTarget_ProductionPlanStageSale
+	CommentTarget_ProductionPlanStageRandD
+	CommentTarget_ProductionPlanStageDesign
+	CommentTarget_ProductionPlanStagePrice
 )
 
 var CommentTargetName = map[CommentTarget]string{
-	CommentTarget_ProductionPlan: "production_plan",
+	CommentTarget_ProductionPlanStageSale:   "pl_sale",
+	CommentTarget_ProductionPlanStageRandD:  "pl_r_and_d",
+	CommentTarget_ProductionPlanStageDesign: "pl_design",
+	CommentTarget_ProductionPlanStagePrice:  "pl_price",
 }
 
 var CommentTargetValue = func() map[string]CommentTarget {
