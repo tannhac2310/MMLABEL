@@ -524,7 +524,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"target_id\": \"01J4M6S9NZRY34FXB6DD3F0MND\",\n    \"content\": \"need improve\"\n}",
+							"raw": "{\n    \"targetID\": \"01J4M6S9NZRY34FXB6DD3F0MND\",\n    \"targetType\": \"pl_r_and_d\",\n    \"content\": \"test new target type\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -562,7 +562,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"filter\": {\n        \"target_id\": \"01J4M6S9NZRY34FXB6DD3F0MND\"\n    },\n    \"paging\": {\n        \"limit\": 10,\n        \"offset\": 0\n    },\n    \"sort\": {}\n}",
+							"raw": "{\n    \"filter\": {\n        \"targetID\": \"01J4M6S9NZRY34FXB6DD3F0MND\",\n        \"targetType\": \"pl_r_and_d\"\n    },\n    \"paging\": {\n        \"limit\": 10,\n        \"offset\": 0\n    },\n    \"sort\": {}\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -600,7 +600,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"filter\": {\n        \"comment_id\": \"01J6CRW4JXVDASQF2PG5TNQBTW\"\n    },\n    \"paging\": {\n        \"limit\": 10,\n        \"offset\": 0\n    },\n    \"sort\": {}\n}",
+							"raw": "{\n    \"filter\": {\n        \"commentID\": \"01J6K6Z6M7KHC3FYNDAS8Z0CE0\"\n    },\n    \"paging\": {\n        \"limit\": 10,\n        \"offset\": 0\n    },\n    \"sort\": {}\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -638,7 +638,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": \"01J6CRW4JXVDASQF2PG5TNQBTW\",\n    \"target_id\": \"01J4M6S9NZRY34FXB6DD3F0MND\",\n    \"content\": \"nice product (updated)\"\n}",
+							"raw": "{\n    \"id\": \"01J6K6Z6M7KHC3FYNDAS8Z0CE0\",\n    \"targetID\": \"01J4M6S9NZRY34FXB6DD3F0MND\",\n    \"targetType\": \"pl_r_and_d\",\n    \"content\": \"nice product (updated)\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"

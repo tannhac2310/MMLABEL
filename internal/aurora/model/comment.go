@@ -3,6 +3,8 @@ package model
 import (
 	"database/sql"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
 const (
@@ -17,14 +19,14 @@ const (
 )
 
 type Comment struct {
-	ID         string       `db:"id"`
-	UserID     string       `db:"user_id"`
-	TargetID   string       `db:"target_id"`
-	TargetType int16        `db:"target_type"`
-	Content    string       `db:"content"`
-	CreatedAt  time.Time    `db:"created_at"`
-	UpdatedAt  time.Time    `db:"updated_at"`
-	DeletedAt  sql.NullTime `db:"deleted_at"`
+	ID         string             `db:"id"`
+	UserID     string             `db:"user_id"`
+	TargetID   string             `db:"target_id"`
+	TargetType enum.CommentTarget `db:"target_type"`
+	Content    string             `db:"content"`
+	CreatedAt  time.Time          `db:"created_at"`
+	UpdatedAt  time.Time          `db:"updated_at"`
+	DeletedAt  sql.NullTime       `db:"deleted_at"`
 }
 
 func (rcv *Comment) FieldMap() (fields []string, values []interface{}) {

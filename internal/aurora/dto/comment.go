@@ -8,7 +8,8 @@ import (
 )
 
 type CommentFilter struct {
-	TargetId string `json:"targetId,omitempty"`
+	TargetId   string             `json:"targetId,omitempty" binding:"required"`
+	TargetType enum.CommentTarget `json:"targetType,omitempty" binding:"required"`
 }
 
 type FindCommentsRequest struct {
@@ -42,8 +43,8 @@ type Attachment struct {
 }
 
 type CreateCommentRequest struct {
-	TargetID    string             `json:"targetID,omitempty"`
-	TargetType  enum.CommentTarget `json:"targetType,omitempty"`
+	TargetID    string             `json:"targetID,omitempty" binding:"required"`
+	TargetType  enum.CommentTarget `json:"targetType,omitempty" binding:"required"`
 	Content     string             `json:"content,omitempty" binding:"required"`
 	Attachments []*Attachment      `json:"attachments,omitempty"`
 }
@@ -53,10 +54,11 @@ type CreateCommentResponse struct {
 }
 
 type EditCommentRequest struct {
-	ID          string        `json:"id"`
-	TargetID    string        `json:"targetID,omitempty"`
-	Content     string        `json:"content,omitempty" binding:"required"`
-	Attachments []*Attachment `json:"attachments,omitempty"`
+	ID          string             `json:"id,omitempty" binding:"required"`
+	TargetID    string             `json:"targetID,omitempty" binding:"required"`
+	TargetType  enum.CommentTarget `json:"targetType,omitempty" binding:"required"`
+	Content     string             `json:"content,omitempty" binding:"required"`
+	Attachments []*Attachment      `json:"attachments,omitempty"`
 }
 
 type EditCommentResponse struct{}
@@ -68,15 +70,15 @@ type DeleteCommentRequest struct {
 type DeleteCommentResponse struct{}
 
 type Comment struct {
-	ID         string    `json:"id,omitempty"`
-	UserID     string    `json:"userID,omitempty"`
-	TargetID   string    `json:"targetID,omitempty"`
-	TargetType int16     `json:"targetType,omitempty"`
-	Content    string    `json:"content,omitempty"`
-	CreatedAt  time.Time `json:"createdAt,omitempty"`
-	UpdatedAt  time.Time `json:"updatedAt,omitempty"`
-	DeletedAt  time.Time `json:"deletedAt,omitempty"`
-	UserName   string    `json:"userName,omitempty"`
+	ID         string             `json:"id,omitempty"`
+	UserID     string             `json:"userID,omitempty"`
+	TargetID   string             `json:"targetID,omitempty"`
+	TargetType enum.CommentTarget `json:"targetType,omitempty"`
+	Content    string             `json:"content,omitempty"`
+	CreatedAt  time.Time          `json:"createdAt,omitempty"`
+	UpdatedAt  time.Time          `json:"updatedAt,omitempty"`
+	DeletedAt  time.Time          `json:"deletedAt,omitempty"`
+	UserName   string             `json:"userName,omitempty"`
 }
 
 type CommentHistory struct {

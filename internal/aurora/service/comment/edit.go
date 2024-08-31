@@ -34,7 +34,7 @@ func (c *commentService) EditComment(ctx context.Context, opt *EditCommentOpts) 
 	if comment.UserID != opt.UserID {
 		return fmt.Errorf("user is forbidden")
 	}
-	if comment.TargetID != opt.TargetID || comment.TargetType != int16(opt.TargetType) {
+	if comment.TargetID != opt.TargetID || comment.TargetType != opt.TargetType {
 		return fmt.Errorf("comment is invalid")
 	}
 	if comment.Content == opt.Content {
