@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_order"
@@ -334,6 +335,7 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 			ID:                     item.ID,
 			ProductionOrderID:      item.ProductionOrderID,
 			StageID:                item.StageID,
+			StageName:              item.StageName,
 			StartedAt:              item.StartedAt.Time,
 			CompletedAt:            item.CompletedAt.Time,
 			Status:                 item.Status,

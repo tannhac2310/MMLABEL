@@ -3,10 +3,10 @@ package production_order
 import (
 	"context"
 
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/service/role"
 
 	"github.com/go-redis/redis"
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/configs"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
@@ -33,6 +33,7 @@ type productionOrderService struct {
 	customFieldRepo                repository.CustomFieldRepo
 	customerRepo                   repository.CustomerRepo
 	userRepo                       repository2.UserRepo
+	stageRepo                      repository.StageRepo
 	roleService                    role.Service
 	cfg                            *configs.Config
 	redisDB                        redis.Cmdable
@@ -116,6 +117,7 @@ func NewService(
 	customFieldRepo repository.CustomFieldRepo,
 	customerRepo repository.CustomerRepo,
 	userRepo repository2.UserRepo,
+	stageRepo repository.StageRepo,
 	cfg *configs.Config,
 	redisDB redis.Cmdable,
 	roleService role.Service,
@@ -127,6 +129,7 @@ func NewService(
 		customFieldRepo:                customFieldRepo,
 		customerRepo:                   customerRepo,
 		userRepo:                       userRepo,
+		stageRepo:                      stageRepo,
 		cfg:                            cfg,
 		redisDB:                        redisDB,
 		roleService:                    roleService,
@@ -145,5 +148,6 @@ type DataWithNoPermission struct {
 
 type ProductionOrderStageData struct {
 	*model.ProductionOrderStage
+	StageName                  string
 	ProductionOrderStageDevice []*repository.ProductionOrderStageDeviceData
 }

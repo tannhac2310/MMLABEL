@@ -109,11 +109,14 @@ func (s stageController) FindStages(c *gin.Context) {
 		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
 		return
 	}
-
+	userId := interceptor.UserIDFromCtx(c)
+	if interceptor.IsAdmin(c) {
+		userId = ""
+	}
 	stages, cnt, err := s.stageService.FindStages(c, &stage.FindStagesOpts{
 		Name:   req.Filter.Name,
 		Code:   req.Filter.Code,
-		UserID: interceptor.UserIDFromCtx(c),
+		UserID: userId,
 	}, &repository.Sort{
 		Order: repository.SortOrderDESC,
 		By:    "ID",

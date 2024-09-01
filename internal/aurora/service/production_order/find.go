@@ -102,13 +102,25 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 		customerMap[customer.ID] = customer
 	}
 
+	// find stage for each production order
+	allStages, err := c.stageRepo.Search(ctx, &repository.SearchStagesOpts{
+		Limit:  1000,
+		Offset: 0,
+	})
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	stageMap := make(map[string]string)
+	for _, stage := range allStages {
+		stageMap[stage.ID] = stage.Name
+	}
 	for _, productionOrder := range productionOrders {
 		if _, ok := idMap[productionOrder.ID]; ok {
 			continue
 		}
 		idMap[productionOrder.ID] = true
 		//find stage
-		stages, err := c.productionOrderStageRepo.Search(ctx, &repository.SearchProductionOrderStagesOpts{
+		wf, err := c.productionOrderStageRepo.Search(ctx, &repository.SearchProductionOrderStagesOpts{
 			ProductionOrderID: productionOrder.ID,
 			Limit:             1000,
 			Offset:            0,
@@ -116,7 +128,7 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		stageData := make([]*ProductionOrderStageData, 0, len(stages))
+		stageData := make([]*ProductionOrderStageData, 0, len(wf))
 		stageDevicesOfPO, err := c.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
 			ProductionOrderID: productionOrder.ID,
 			Limit:             1000,
@@ -127,7 +139,7 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 			mapStageDevices[stageDevice.ProductionOrderStageID] = append(mapStageDevices[stageDevice.ProductionOrderStageID], stageDevice)
 		}
 		// find production order stage device for each stage
-		for _, stage := range stages {
+		for _, stage := range wf {
 			stageDevices := mapStageDevices[stage.ID]
 			// consolidate responsibility information from user table
 			users := make([]*model2.User, 0)
@@ -149,6 +161,7 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 			}
 			stageData = append(stageData, &ProductionOrderStageData{
 				ProductionOrderStage:       stage,
+				StageName:                  stageMap[stage.StageID],
 				ProductionOrderStageDevice: stageDevices,
 			})
 		}

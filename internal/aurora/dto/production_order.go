@@ -137,6 +137,7 @@ type OrderStage struct {
 	ID                     string                          `json:"id"`
 	ProductionOrderID      string                          `json:"productionOrderID"`
 	StageID                string                          `json:"stageID"`
+	StageName              string                          `json:"stageName"`
 	StartedAt              time.Time                       `json:"startedAt"`
 	CompletedAt            time.Time                       `json:"completedAt"`
 	Status                 enum.ProductionOrderStageStatus `json:"status"`

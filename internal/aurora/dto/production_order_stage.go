@@ -1,9 +1,10 @@
 package dto
 
 import (
+	"time"
+
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/commondto"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
-	"time"
 )
 
 type ProductionOrderStageFilter struct {
@@ -55,6 +56,7 @@ type CreateProductionOrderStageResponse struct {
 
 type EditProductionOrderStageRequest struct {
 	ID                  string                          `json:"id" binding:"required"`
+	StageID             string                          `json:"stageID" binding:"required"`
 	EstimatedStartAt    time.Time                       `json:"estimatedStartAt"`
 	EstimatedCompleteAt time.Time                       `json:"estimatedCompleteAt"`
 	StartedAt           time.Time                       `json:"startedAt"`

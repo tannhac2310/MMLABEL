@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_order"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/apperror"
@@ -57,6 +58,7 @@ func (s productionOrderStageController) EditProductionOrderStage(c *gin.Context)
 	}
 
 	err = s.productionOrderStageService.EditProductionOrderStage(c, &production_order.ProductionOrderStage{
+		StageID:             req.StageID,
 		EstimatedStartAt:    req.EstimatedStartAt,
 		EstimatedCompleteAt: req.EstimatedCompleteAt,
 		StartedAt:           req.StartedAt,
