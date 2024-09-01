@@ -18,6 +18,7 @@ type ProductionPlanRepo interface {
 	FindByID(ctx context.Context, id string) (*ProductionPlanData, error)
 	Search(ctx context.Context, s *SearchProductionPlanOpts) ([]*ProductionPlanData, error)
 	Count(ctx context.Context, s *SearchProductionPlanOpts) (*CountResult, error)
+	Summary(ctx context.Context, s *SummaryProductionPlanOpts) ([]*SummaryProductionPlanData, error)
 }
 
 type sProductionPlanRepo struct {
@@ -47,6 +48,7 @@ func (r *sProductionPlanRepo) FindByID(ctx context.Context, id string) (*Product
 
 	return e, nil
 }
+
 func (r *sProductionPlanRepo) Update(ctx context.Context, e *model.ProductionPlan) error {
 	e.UpdatedAt = time.Now()
 	return cockroach.Update(ctx, e)
@@ -64,6 +66,46 @@ func (r *sProductionPlanRepo) SoftDelete(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+type SummaryProductionPlanOpts struct {
+	StartDate time.Time
+	EndDate   time.Time
+}
+
+func (s *SummaryProductionPlanOpts) buildQuery() (string, []interface{}) {
+	var args []interface{}
+	conds := ""
+	if !s.StartDate.IsZero() && !s.EndDate.IsZero() {
+		args = append(args, s.StartDate, s.EndDate)
+		conds += fmt.Sprintf(" AND b.%s BETWEEN $%d AND $%d", model.ProductionPlanFieldCreatedAt, len(args)-1, len(args))
+	} else if !s.StartDate.IsZero() {
+		args = append(args, s.StartDate)
+		conds += fmt.Sprintf(" AND b.%s >= $%d", model.ProductionPlanFieldCreatedAt, len(args))
+	} else if !s.EndDate.IsZero() {
+		args = append(args, s.EndDate)
+		conds += fmt.Sprintf(" AND b.%s <= $%d", model.ProductionPlanFieldCreatedAt, len(args))
+	}
+
+	b := &model.ProductionPlan{}
+	return fmt.Sprintf("SELECT b.current_stage, b.status, count(1) AS count FROM %s AS b WHERE TRUE %s AND b.deleted_at IS NULL group by b.current_stage, b.status", b.TableName(), conds), args
+}
+
+type SummaryProductionPlanData struct {
+	Stage  enum.ProductionPlanStage  `db:"current_stage"`
+	Status enum.ProductionPlanStatus `db:"status"`
+	Count  int64                     `db:"count"`
+}
+
+func (r *sProductionPlanRepo) Summary(ctx context.Context, s *SummaryProductionPlanOpts) ([]*SummaryProductionPlanData, error) {
+	SummaryProductionPlan := make([]*SummaryProductionPlanData, 0)
+	sql, args := s.buildQuery()
+	err := cockroach.Select(ctx, sql, args...).ScanAll(&SummaryProductionPlan)
+	if err != nil {
+		return nil, fmt.Errorf("cockroach.Select: %w", err)
+	}
+
+	return SummaryProductionPlan, nil
 }
 
 // SearchProductionPlanOpts all params is options

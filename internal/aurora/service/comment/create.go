@@ -43,7 +43,7 @@ func (c *commentService) CreateComment(ctx context.Context, opt *CreateCommentOp
 			ID:         id,
 			UserID:     user.ID,
 			TargetID:   opt.TargetID,
-			TargetType: int16(opt.TargetType),
+			TargetType: opt.TargetType,
 			Content:    opt.Content,
 			CreatedAt:  now,
 			UpdatedAt:  now,

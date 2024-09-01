@@ -6,7 +6,6 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/comment"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/apperror"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/interceptor"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/routeutil"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/transportutil"
@@ -37,7 +36,7 @@ func (s *commentController) CreateComment(c *gin.Context) {
 	id, err := s.commentService.CreateComment(c, &comment.CreateCommentOpts{
 		UserID:      userID,
 		TargetID:    req.TargetID,
-		TargetType:  enum.CommentTarget_ProductionPlan, // TODO move it into request
+		TargetType:  req.TargetType,
 		Content:     req.Content,
 		Attachments: []*comment.CreateCommentAttachment{},
 	})
@@ -65,7 +64,7 @@ func (s *commentController) EditComment(c *gin.Context) {
 		ID:          req.ID,
 		UserID:      userID,
 		TargetID:    req.TargetID,
-		TargetType:  enum.CommentTarget_ProductionPlan, // TODO move it into request
+		TargetType:  req.TargetType,
 		Content:     req.Content,
 		Attachments: []*comment.EditCommentAttachment{},
 	})
@@ -114,7 +113,7 @@ func (s *commentController) FindComments(c *gin.Context) {
 	}
 	comments, cnt, err := s.commentService.FindComments(c, comment.FindCommentsOpts{
 		TargetID:   req.Filter.TargetId,
-		TargetType: enum.CommentTarget_ProductionPlan,
+		TargetType: req.Filter.TargetType,
 	}, sort, req.Paging.Limit, req.Paging.Offset)
 	if err != nil {
 		transportutil.Error(c, err)
@@ -152,16 +151,6 @@ func (s *commentController) FindCommentHistories(c *gin.Context) {
 		return
 	}
 
-	// sort := &repository.Sort{
-	// 	Order: repository.SortOrderDESC,
-	// 	By:    "ID",
-	// }
-	// if req.Sort != nil {
-	// 	sort = &repository.Sort{
-	// 		Order: repository.SortOrder(req.Sort.Order),
-	// 		By:    req.Sort.By,
-	// 	}
-	// }
 	commentHistories, cnt, err := s.commentService.FindCommentHistories(c, req.Filter.ID)
 	if err != nil {
 		transportutil.Error(c, err)
