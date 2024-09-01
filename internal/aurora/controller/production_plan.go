@@ -22,6 +22,7 @@ type ProductionPlanController interface {
 	ProcessProductionOrder(c *gin.Context)
 	UpdateCustomFields(c *gin.Context)
 	UpdateCurrentStage(c *gin.Context)
+	SummaryProductionPlan(c *gin.Context)
 }
 
 type productionPlanController struct {
@@ -364,6 +365,42 @@ func (s productionPlanController) ProcessProductionOrder(c *gin.Context) {
 	})
 }
 
+func (s productionPlanController) SummaryProductionPlan(c *gin.Context) {
+	req := &dto.SummaryProductionPlanRequest{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+
+	summary, err := s.productionPlanService.SummaryProductionPlans(c, &production_plan.SummaryProductionPlanOpts{
+		StartDate: req.StartDate,
+		EndDate:   req.EndDate,
+	})
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+
+	var total int64
+	summaryResponse := make([]*dto.SummaryProductionPlanItem, 0, len(summary))
+	for _, f := range summary {
+		data := &dto.SummaryProductionPlanItem{
+			Stage:  f.Stage,
+			Status: f.Status,
+			Count:  f.Count,
+		}
+
+		summaryResponse = append(summaryResponse, data)
+		total += f.Count
+	}
+
+	transportutil.SendJSONResponse(c, &dto.SummaryProductionPlanResponse{
+		Items: summaryResponse,
+		Total: total,
+	})
+}
+
 func RegisterProductionPlanController(
 	r *gin.RouterGroup,
 	productionPlanService production_plan.Service,
@@ -380,7 +417,7 @@ func RegisterProductionPlanController(
 		c.CreateProductionPlan,
 		&dto.CreateProductionPlanRequest{},
 		&dto.CreateProductionPlanResponse{},
-		"Create productionPlan",
+		"Create production plan",
 	)
 
 	routeutil.AddEndpoint(
@@ -389,7 +426,7 @@ func RegisterProductionPlanController(
 		c.EditProductionPlan,
 		&dto.EditProductionPlanRequest{},
 		&dto.EditProductionPlanResponse{},
-		"Edit productionPlan",
+		"Edit production plan",
 	)
 
 	routeutil.AddEndpoint(
@@ -398,7 +435,7 @@ func RegisterProductionPlanController(
 		c.DeleteProductionPlan,
 		&dto.DeleteProductionPlanRequest{},
 		&dto.DeleteProductionPlanResponse{},
-		"delete productionPlan",
+		"delete production plan",
 	)
 
 	routeutil.AddEndpoint(
@@ -407,7 +444,7 @@ func RegisterProductionPlanController(
 		c.FindProductionPlans,
 		&dto.FindProductionPlansRequest{},
 		&dto.FindProductionPlansResponse{},
-		"Find productionPlans",
+		"Find production plans",
 	)
 
 	routeutil.AddEndpoint(
@@ -416,7 +453,7 @@ func RegisterProductionPlanController(
 		c.FindProductionPlansWithNoPermission,
 		&dto.FindProductionPlansRequest{},
 		&dto.FindProductionPlansResponse{},
-		"Find productionPlans",
+		"Find production plans with no permission",
 	)
 
 	routeutil.AddEndpoint(
@@ -425,7 +462,7 @@ func RegisterProductionPlanController(
 		c.ProcessProductionOrder,
 		&dto.ProcessProductionOrderRequest{},
 		&dto.ProcessProductionOrderResponse{},
-		"Process Production Order",
+		"Process production order",
 	)
 
 	routeutil.AddEndpoint(
@@ -434,7 +471,7 @@ func RegisterProductionPlanController(
 		c.UpdateCustomFields,
 		&dto.UpdateCustomFieldPLValuesRequest{},
 		&dto.UpdateCustomFieldPLValuesResponse{},
-		"Update PL custom field",
+		"Update production plan custom fields",
 	)
 
 	routeutil.AddEndpoint(
@@ -444,5 +481,14 @@ func RegisterProductionPlanController(
 		&dto.UpdateCurrentStageRequest{},
 		&dto.UpdateCurrentStageResponse{},
 		"Update current stage",
+	)
+
+	routeutil.AddEndpoint(
+		g,
+		"summary",
+		c.SummaryProductionPlan,
+		&dto.SummaryProductionPlanRequest{},
+		&dto.SummaryProductionPlanResponse{},
+		"Summary production plan",
 	)
 }

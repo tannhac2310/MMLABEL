@@ -21,6 +21,7 @@ type Service interface {
 	ProcessProductionOrder(ctx context.Context, opt *ProcessProductionOrderOpts) (string, error)
 	UpdateCustomFields(ctx context.Context, productionPlanID string, values []*CustomField) error
 	UpdateCurrentStage(ctx context.Context, productionPlanID string, stageID enum.ProductionPlanStage) error
+	SummaryProductionPlans(ctx context.Context, opts *SummaryProductionPlanOpts) ([]*SummaryData, error)
 }
 
 type productionPlanService struct {
@@ -68,4 +69,8 @@ type Data struct {
 type DataWithNoPermission struct {
 	*repository.ProductionPlanData
 	CustomerData *repository.CustomerData
+}
+
+type SummaryData struct {
+	*repository.SummaryProductionPlanData
 }

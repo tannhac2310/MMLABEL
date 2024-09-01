@@ -121,3 +121,19 @@ type UpdateCurrentStageRequest struct {
 }
 
 type UpdateCurrentStageResponse struct{}
+
+type SummaryProductionPlanRequest struct {
+	StartDate time.Time `json:"startDate,omitempty"`
+	EndDate   time.Time `json:"endDate,omitempty"`
+}
+
+type SummaryProductionPlanResponse struct {
+	Items []*SummaryProductionPlanItem `json:"items,omitempty"`
+	Total int64                        `json:"total,omitempty"`
+}
+
+type SummaryProductionPlanItem struct {
+	Stage  enum.ProductionPlanStage  `json:"stage,omitempty"`
+	Status enum.ProductionPlanStatus `json:"status,omitempty"`
+	Count  int64                     `json:"count,omitempty"`
+}
