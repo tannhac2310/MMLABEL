@@ -23,6 +23,7 @@ type EditProductionOrderStageDeviceOpts struct {
 	UserID           string
 	Settings         *Settings
 	Note             string
+	SanPhamLoi       int64
 }
 type Settings struct {
 	DefectiveError string
@@ -161,6 +162,14 @@ func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditPr
 	}
 	if opt.Note != "" {
 		updater.Set(model.ProductionOrderStageDeviceFieldNote, cockroach.String(opt.Note))
+	}
+	settings := data.Settings
+	if opt.SanPhamLoi > 0 {
+		if settings == nil {
+			settings = make(map[string]interface{})
+		}
+		settings["san_pham_loi"] = opt.SanPhamLoi
+		updater.Set(model.ProductionOrderStageDeviceFieldSettings, settings)
 	}
 
 	updater.Set(model.ProductionOrderStageDeviceFieldUpdatedAt, time.Now())
