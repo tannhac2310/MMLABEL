@@ -141,10 +141,39 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 			return fmt.Errorf("c.productionPlanRepo.Update: %w", err)
 		}
 
+		// copy production_order_device_config with production_plan_device_config.production_plan_id to production_order_device_config.production_order_id
+		deviceConfigs, err := c.deviceConfigRepo.Search(ctx, &repository.SearchProductionOrderDeviceConfigOpts{
+			ProductionPlanID: plan.ID,
+			Limit:            1000,
+			Offset:           0,
+		})
+		if err != nil {
+			return fmt.Errorf("c.deviceConfigRepo.Search: %w", err)
+		}
+		for _, deviceConfig := range deviceConfigs {
+			err = c.deviceConfigRepo.Insert(ctx2, &model.ProductionOrderDeviceConfig{
+				ID:                idutil.ULIDNow(),
+				ProductionOrderID: id,
+				//ProductionPlanID:  deviceConfig.ProductionPlanID,
+				DeviceID:     deviceConfig.DeviceID,
+				Color:        deviceConfig.Color,
+				Description:  deviceConfig.Description,
+				Search:       deviceConfig.Search,
+				DeviceConfig: deviceConfig.DeviceConfig,
+				CreatedBy:    deviceConfig.CreatedBy,
+				CreatedAt:    now,
+				UpdatedBy:    deviceConfig.UpdatedBy,
+				UpdatedAt:    now,
+			})
+			if err != nil {
+				return fmt.Errorf("c.deviceConfigRepo.Insert: %w", err)
+			}
+		}
+
 		return nil
 	})
 	if errTx != nil {
-		return "", errTx
+		return "", fmt.Errorf("process production order: %w", errTx)
 	}
 	return productionOrder.ID, nil
 }

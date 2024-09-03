@@ -53,7 +53,6 @@ func (c *productionPlanService) FindProductionPlans(ctx context.Context, opts *F
 	for _, productionPlan := range productionPlans {
 		customerIds = append(customerIds, productionPlan.CustomerID)
 	}
-	fmt.Println(" c.customerRepo.========>", c.customerRepo)
 	// find customer name
 	customerData, err := c.customerRepo.Search(ctx, &repository.SearchCustomerOpts{
 		IDs:    customerIds,

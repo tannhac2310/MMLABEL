@@ -31,6 +31,7 @@ type productionPlanService struct {
 	customFieldRepo          repository.CustomFieldRepo
 	customerRepo             repository.CustomerRepo
 	userRepo                 repository2.UserRepo
+	deviceConfigRepo         repository.ProductionOrderDeviceConfigRepo
 	roleService              role.Service
 	cfg                      *configs.Config
 	redisDB                  redis.Cmdable
@@ -44,6 +45,7 @@ func NewService(
 	customerRepo repository.CustomerRepo,
 	userRepo repository2.UserRepo,
 	roleService role.Service,
+	deviceConfigRepo repository.ProductionOrderDeviceConfigRepo,
 	cfg *configs.Config,
 	redisDB redis.Cmdable,
 ) Service {
@@ -54,6 +56,7 @@ func NewService(
 		customFieldRepo:          customFieldRepo,
 		customerRepo:             customerRepo,
 		userRepo:                 userRepo,
+		deviceConfigRepo:         deviceConfigRepo,
 		roleService:              roleService,
 		cfg:                      cfg,
 		redisDB:                  redisDB,
