@@ -10,49 +10,51 @@ import (
 )
 
 const (
-	ProductionPlanFieldID           = "id"
-	ProductionPlanFieldCustomerID   = "customer_id"
-	ProductionPlanFieldSalesID      = "sales_id"
-	ProductionPlanFieldThumbnail    = "thumbnail"
-	ProductionPlanFieldStatus       = "status"
-	ProductionPlanFieldNote         = "note"
-	ProductionPlanFieldCreatedBy    = "created_by"
-	ProductionPlanFieldCreatedAt    = "created_at"
-	ProductionPlanFieldUpdatedBy    = "updated_by"
-	ProductionPlanFieldUpdatedAt    = "updated_at"
-	ProductionPlanFieldDeletedAt    = "deleted_at"
-	ProductionPlanFieldName         = "name"
-	ProductionPlanFieldPoStages     = "po_stages"
-	ProductionPlanFieldCurrentStage = "current_stage"
-	ProductionPlanFieldProductName  = "product_name"
-	ProductionPlanFieldProductCode  = "product_code"
-	ProductionPlanFieldQtyPaper     = "qty_paper"
-	ProductionPlanFieldQtyFinished  = "qty_finished"
-	ProductionPlanFieldQtyDelivered = "qty_delivered"
-	ProductionPlanFieldWorkflow     = "workflow"
+	ProductionPlanFieldID                = "id"
+	ProductionPlanFieldCustomerID        = "customer_id"
+	ProductionPlanFieldSalesID           = "sales_id"
+	ProductionPlanFieldThumbnail         = "thumbnail"
+	ProductionPlanFieldStatus            = "status"
+	ProductionPlanFieldNote              = "note"
+	ProductionPlanFieldCreatedBy         = "created_by"
+	ProductionPlanFieldCreatedAt         = "created_at"
+	ProductionPlanFieldUpdatedBy         = "updated_by"
+	ProductionPlanFieldUpdatedAt         = "updated_at"
+	ProductionPlanFieldDeletedAt         = "deleted_at"
+	ProductionPlanFieldName              = "name"
+	ProductionPlanFieldPoStages          = "po_stages"
+	ProductionPlanFieldCurrentStage      = "current_stage"
+	ProductionPlanFieldProductName       = "product_name"
+	ProductionPlanFieldProductCode       = "product_code"
+	ProductionPlanFieldQtyPaper          = "qty_paper"
+	ProductionPlanFieldQtyFinished       = "qty_finished"
+	ProductionPlanFieldQtyDelivered      = "qty_delivered"
+	ProductionPlanFieldWorkflow          = "workflow"
+	ProductionPlanFieldProductionOrderID = "production_order_id"
 )
 
 type ProductionPlan struct {
-	ID           string                    `db:"id"`
-	CustomerID   string                    `db:"customer_id"`
-	SalesID      string                    `db:"sales_id"`
-	Thumbnail    sql.NullString            `db:"thumbnail"`
-	Status       enum.ProductionPlanStatus `db:"status"`
-	Note         sql.NullString            `db:"note"`
-	CreatedBy    string                    `db:"created_by"`
-	CreatedAt    time.Time                 `db:"created_at"`
-	UpdatedBy    string                    `db:"updated_by"`
-	UpdatedAt    time.Time                 `db:"updated_at"`
-	DeletedAt    sql.NullTime              `db:"deleted_at"`
-	Name         string                    `db:"name"`
-	PoStages     ProductionStageInfo       `db:"po_stages"`
-	CurrentStage enum.ProductionPlanStage  `db:"current_stage"`
-	ProductName  string                    `db:"product_name"`
-	ProductCode  string                    `db:"product_code"`
-	QtyPaper     int64                     `db:"qty_paper"`
-	QtyFinished  int64                     `db:"qty_finished"`
-	QtyDelivered int64                     `db:"qty_delivered"`
-	Workflow     any                       `db:"workflow"`
+	ID                string                    `db:"id"`
+	CustomerID        string                    `db:"customer_id"`
+	SalesID           string                    `db:"sales_id"`
+	Thumbnail         sql.NullString            `db:"thumbnail"`
+	Status            enum.ProductionPlanStatus `db:"status"`
+	Note              sql.NullString            `db:"note"`
+	CreatedBy         string                    `db:"created_by"`
+	CreatedAt         time.Time                 `db:"created_at"`
+	UpdatedBy         string                    `db:"updated_by"`
+	UpdatedAt         time.Time                 `db:"updated_at"`
+	DeletedAt         sql.NullTime              `db:"deleted_at"`
+	Name              string                    `db:"name"`
+	PoStages          ProductionStageInfo       `db:"po_stages"`
+	CurrentStage      enum.ProductionPlanStage  `db:"current_stage"`
+	ProductName       string                    `db:"product_name"`
+	ProductCode       string                    `db:"product_code"`
+	QtyPaper          int64                     `db:"qty_paper"`
+	QtyFinished       int64                     `db:"qty_finished"`
+	QtyDelivered      int64                     `db:"qty_delivered"`
+	Workflow          any                       `db:"workflow"`
+	ProductionOrderID sql.NullString            `db:"production_order_id"`
 }
 
 func (rcv *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
@@ -77,6 +79,7 @@ func (rcv *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
 		ProductionPlanFieldQtyFinished,
 		ProductionPlanFieldQtyDelivered,
 		ProductionPlanFieldWorkflow,
+		ProductionPlanFieldProductionOrderID,
 	}
 
 	values = []interface{}{
@@ -100,6 +103,7 @@ func (rcv *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
 		&rcv.QtyFinished,
 		&rcv.QtyDelivered,
 		&rcv.Workflow,
+		&rcv.ProductionOrderID,
 	}
 
 	return

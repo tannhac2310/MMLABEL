@@ -84,28 +84,29 @@ type ProcessProductionOrderResponse struct {
 }
 
 type ProductionPlan struct {
-	ID            string                    `json:"id,omitempty"`
-	CustomerID    string                    `json:"customerID,omitempty"`
-	CustomerData  *Customer                 `json:"customerData,omitempty"`
-	SalesID       string                    `json:"salesID,omitempty"`
-	ProductName   string                    `json:"productName,omitempty"`
-	ProductCode   string                    `json:"productCode,omitempty"`
-	QtyPaper      int64                     `json:"qtyPaper,omitempty"`
-	QtyFinished   int64                     `json:"qtyFinished,omitempty"`
-	QtyDelivered  int64                     `json:"qtyDelivered,omitempty"`
-	Thumbnail     string                    `json:"thumbnail,omitempty"`
-	Status        enum.ProductionPlanStatus `json:"status"`
-	CurrentStage  enum.ProductionPlanStage  `json:"currentStage"`
-	Note          string                    `json:"note,omitempty"`
-	CreatedBy     string                    `json:"createdBy"`
-	CreatedAt     time.Time                 `json:"createdAt"`
-	UpdatedBy     string                    `json:"updatedBy"`
-	UpdatedAt     time.Time                 `json:"updatedAt"`
-	CreatedByName string                    `json:"createdByName"`
-	UpdatedByName string                    `json:"updatedByName,omitempty"`
-	Name          string                    `json:"name,omitempty"`
-	CustomData    map[string]string         `json:"customData,omitempty"`
-	Workflow      any                       `json:"workflow"`
+	ID                string                    `json:"id,omitempty"`
+	ProductionOrderID string                    `json:"productionOrderID,omitempty"`
+	CustomerID        string                    `json:"customerID,omitempty"`
+	CustomerData      *Customer                 `json:"customerData,omitempty"`
+	SalesID           string                    `json:"salesID,omitempty"`
+	ProductName       string                    `json:"productName,omitempty"`
+	ProductCode       string                    `json:"productCode,omitempty"`
+	QtyPaper          int64                     `json:"qtyPaper,omitempty"`
+	QtyFinished       int64                     `json:"qtyFinished,omitempty"`
+	QtyDelivered      int64                     `json:"qtyDelivered,omitempty"`
+	Thumbnail         string                    `json:"thumbnail,omitempty"`
+	Status            enum.ProductionPlanStatus `json:"status"`
+	CurrentStage      enum.ProductionPlanStage  `json:"currentStage"`
+	Note              string                    `json:"note,omitempty"`
+	CreatedBy         string                    `json:"createdBy"`
+	CreatedAt         time.Time                 `json:"createdAt"`
+	UpdatedBy         string                    `json:"updatedBy"`
+	UpdatedAt         time.Time                 `json:"updatedAt"`
+	CreatedByName     string                    `json:"createdByName"`
+	UpdatedByName     string                    `json:"updatedByName,omitempty"`
+	Name              string                    `json:"name,omitempty"`
+	CustomData        map[string]string         `json:"customData,omitempty"`
+	Workflow          any                       `json:"workflow"`
 }
 
 type UpdateCustomFieldPLValuesRequest struct {

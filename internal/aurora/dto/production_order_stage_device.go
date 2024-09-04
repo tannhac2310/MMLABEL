@@ -65,6 +65,7 @@ type EditProductionOrderStageDeviceRequest struct {
 	Responsible      []string                                `json:"responsible"`
 	Settings         *EditProductionOrderStageDeviceSettings `json:"settings"`
 	Note             string                                  `json:"note"`
+	SanPhamLoi       int64                                   `json:"sanPhamLoi"`
 }
 type EditProductionOrderStageDeviceSettings struct {
 	DefectiveError string `json:"defectiveError"`

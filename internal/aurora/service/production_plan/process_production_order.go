@@ -36,7 +36,7 @@ type ProductionOrderStage struct {
 
 func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt *ProcessProductionOrderOpts) (string, error) {
 	now := time.Now()
-	id := idutil.ULIDNow()
+	newProductionOrderID := idutil.ULIDNow()
 
 	plan, err := c.productionPlanRepo.FindByID(ctx, opt.ID)
 	if err != nil {
@@ -54,7 +54,7 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 	}
 
 	productionOrder := &model.ProductionOrder{
-		ID:                  id,
+		ID:                  newProductionOrderID,
 		ProductCode:         plan.ProductCode,
 		ProductName:         plan.ProductName,
 		CustomerID:          plan.CustomerID,
@@ -101,7 +101,7 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 
 			err = c.productionOrderStageRepo.Insert(ctx2, &model.ProductionOrderStage{
 				ID:                  stageID,
-				ProductionOrderID:   id,
+				ProductionOrderID:   newProductionOrderID,
 				Sorting:             orderStage.Sorting,
 				StageID:             orderStage.StageID,
 				EstimatedStartAt:    cockroach.Time(orderStage.EstimatedStartAt),
@@ -124,7 +124,7 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 			err = c.customFieldRepo.Insert(ctx2, &model.CustomField{
 				ID:         idutil.ULIDNow(),
 				EntityType: enum.CustomFieldTypeProductionOrder,
-				EntityID:   id,
+				EntityID:   newProductionOrderID,
 				Field:      val.Field,
 				Value:      val.Value,
 			})
@@ -153,7 +153,7 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 		for _, deviceConfig := range deviceConfigs {
 			err = c.deviceConfigRepo.Insert(ctx2, &model.ProductionOrderDeviceConfig{
 				ID:                idutil.ULIDNow(),
-				ProductionOrderID: id,
+				ProductionOrderID: newProductionOrderID,
 				//ProductionPlanID:  deviceConfig.ProductionPlanID,
 				DeviceID:     deviceConfig.DeviceID,
 				Color:        deviceConfig.Color,
@@ -168,6 +168,12 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 			if err != nil {
 				return fmt.Errorf("c.deviceConfigRepo.Insert: %w", err)
 			}
+		}
+
+		// update production plan with production order id
+		plan.ProductionOrderID = cockroach.String(newProductionOrderID)
+		if err := c.productionPlanRepo.Update(ctx, plan.ProductionPlan); err != nil {
+			return fmt.Errorf("c.productionPlanRepo.Update: %w", err)
 		}
 
 		return nil

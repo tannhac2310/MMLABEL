@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/interceptor"
@@ -224,6 +225,7 @@ func (s productionOrderStageDeviceController) EditProductionOrderStageDevice(c *
 		AssignedQuantity: req.AssignedQuantity,
 		Settings:         settings,
 		Note:             req.Note,
+		SanPhamLoi:       req.SanPhamLoi,
 		UserID:           interceptor.UserIDFromCtx(c),
 	})
 	if err != nil {
