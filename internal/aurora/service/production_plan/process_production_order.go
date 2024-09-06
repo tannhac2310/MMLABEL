@@ -53,6 +53,12 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 		return "", fmt.Errorf("query custom fields for production plan %s failed: %w", plan.ID, err)
 	}
 
+	deliveryDate := time.Time{}
+	for _, val := range customFields {
+		if val.Field == "delivery_date" && val.Value != "" {
+			deliveryDate, _ = time.Parse(time.RFC3339, val.Value)
+		}
+	}
 	productionOrder := &model.ProductionOrder{
 		ID:                  newProductionOrderID,
 		ProductCode:         plan.ProductCode,
@@ -62,7 +68,7 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 		QtyPaper:            plan.QtyPaper,
 		QtyFinished:         plan.QtyFinished,
 		QtyDelivered:        plan.QtyDelivered,
-		DeliveryDate:        time.Time{},
+		DeliveryDate:        deliveryDate,
 		DeliveryImage:       plan.Thumbnail,
 		Status:              enum.ProductionOrderStatusWaiting,
 		Note:                plan.Note,
