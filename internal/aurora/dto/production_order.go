@@ -16,6 +16,8 @@ type ProductionOrderFilter struct {
 	OrderStageStatus                enum.ProductionOrderStageStatus `json:"orderStageStatus"`
 	EstimatedStartAtTo              time.Time                       `json:"estimatedStartAtTo"`
 	EstimatedStartAtFrom            time.Time                       `json:"estimatedStartAtFrom"`
+	EstimatedCompleteAtFrom         time.Time                       `json:"estimatedCompleteAtFrom"`
+	EstimatedCompleteAtTo           time.Time                       `json:"estimatedCompleteAtTo"`
 	OrderStageEstimatedStartFrom    time.Time                       `json:"orderStageEstimatedStartFrom"`
 	OrderStageEstimatedStartTo      time.Time                       `json:"orderStageEstimatedStartTo"`
 	OrderStageEstimatedCompleteFrom time.Time                       `json:"orderStageEstimatedCompleteFrom"`

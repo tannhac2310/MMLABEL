@@ -19,7 +19,7 @@ services:
       - mm-printing-backenddata:/var/lib/cockroach
     ports:
       - 26257:26257
-      - 8088:8080
+      - 8080:8080
   s3_storage:
     image: minio/minio:RELEASE.2019-08-01T22-18-54Z
     ports:

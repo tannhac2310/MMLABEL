@@ -82,6 +82,8 @@ type SearchProductionOrdersOpts struct {
 	Name                            string
 	EstimatedStartAtFrom            time.Time //planned_production_date
 	EstimatedStartAtTo              time.Time //planned_production_date
+	EstimatedCompletedFrom          time.Time
+	EstimatedCompletedTo            time.Time
 	Status                          enum.ProductionOrderStatus
 	Statuses                        []enum.ProductionOrderStatus
 	OrderStageStatus                enum.ProductionOrderStageStatus
@@ -134,10 +136,18 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (
 		args = append(args, s.EstimatedStartAtFrom)
 		conds += fmt.Sprintf(" AND b.%s >= $%d", model.ProductionOrderFieldEstimatedStartAt, len(args))
 	}
-
 	if !s.EstimatedStartAtTo.IsZero() {
 		args = append(args, s.EstimatedStartAtTo)
-		conds += fmt.Sprintf(" AND b.%s < $%d", model.ProductionOrderFieldEstimatedStartAt, len(args))
+		conds += fmt.Sprintf(" AND b.%s <= $%d", model.ProductionOrderFieldEstimatedStartAt, len(args))
+	}
+
+	if !s.EstimatedCompletedFrom.IsZero() {
+		args = append(args, s.EstimatedCompletedFrom)
+		conds += fmt.Sprintf(" AND b.%s >= $%d", model.ProductionOrderFieldEstimatedCompleteAt, len(args))
+	}
+	if !s.EstimatedCompletedTo.IsZero() {
+		args = append(args, s.EstimatedCompletedTo)
+		conds += fmt.Sprintf(" AND b.%s <= $%d", model.ProductionOrderFieldEstimatedCompleteAt, len(args))
 	}
 
 	if s.OrderStageStatus > 0 && len(s.StageIDs) > 0 {

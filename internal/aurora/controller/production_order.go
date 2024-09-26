@@ -260,6 +260,8 @@ func (s productionOrderController) FindProductionOrders(c *gin.Context) {
 		Statuses:                        req.Filter.Statuses,
 		EstimatedStartAtFrom:            req.Filter.EstimatedStartAtFrom,
 		EstimatedStartAtTo:              req.Filter.EstimatedStartAtTo,
+		EstimatedCompleteAtFrom:         req.Filter.EstimatedCompleteAtFrom,
+		EstimatedCompleteAtTo:           req.Filter.EstimatedCompleteAtTo,
 		OrderStageStatus:                req.Filter.OrderStageStatus,
 		OrderStageEstimatedStartFrom:    req.Filter.OrderStageEstimatedStartFrom,
 		OrderStageEstimatedStartTo:      req.Filter.OrderStageEstimatedStartTo,
