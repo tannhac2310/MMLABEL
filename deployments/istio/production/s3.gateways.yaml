@@ -1,0 +1,62 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: s3-gateway
+  namespace: mm-s3-prod
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "s3.hagi.dev"
+      tls:
+        httpsRedirect: false
+    - port:
+        number: 443
+        name: https-secondary
+        protocol: HTTPS
+      hosts:
+        - "s3.hagi.dev"
+      tls:
+        credentialName: cert-s3.hagi.dev
+        mode: SIMPLE
+        privateKey: sds
+        serverCertificate: sds
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: s3-ingress
+  namespace: mm-s3-prod
+spec:
+  hosts:
+    - "s3.hagi.dev"
+  gateways:
+    - s3-gateway
+  http:
+    - match:
+#        - uri:
+#            prefix: "/"
+      route:
+        - destination:
+            host: minio.mm-s3-prod.svc.cluster.local
+            port:
+              number: 9000
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: s3.hagi.dev
+  namespace: istio-system
+spec:
+  commonName: s3.hagi.dev
+  dnsNames:
+    - s3.hagi.dev
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt
+  secretName: cert-s3.hagi.dev

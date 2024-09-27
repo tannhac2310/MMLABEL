@@ -32,8 +32,8 @@ jwt:
 firebase:
   configPath: /secrets/firebase-adminsdk-creds.json
 s3Storage:
-  region: ap-southeast-1
-  bucket: 'hagi-public'
-  accessKey: "AKIARCAEPCVP4C7RFYW3"
-  secretKey: "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"
-  endpoint: ""
+  region: us-east-1
+  bucket: 'mm-dev'
+  accessKey: "AEdOz31AzzxK7Xjs4OuH"
+  secretKey: "445LyVdtKroiQUBfa0YLWwjr3shQTj4VbjtJSGfE"
+  endpoint: "http://s3.hagi.dev"

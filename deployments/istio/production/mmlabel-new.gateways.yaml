@@ -77,12 +77,14 @@ spec:
               number: 80
     - match:
         - uri:
-            prefix: "/mm-printing-images"
+            prefix: "/mm-s3-prod"
+      rewrite:
+        uri: "/"
       route:
         - destination:
-            host: s3-storage-minio
+            host: minio.mm-s3-prod.svc.cluster.local
             port:
-              number: 9000
+              number: 9001
     - match:
         - uri:
             prefix: "/"

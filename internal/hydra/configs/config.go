@@ -1,9 +1,10 @@
 package configs
 
 import (
-	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"time"
+
+	"gopkg.in/yaml.v3"
 
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/configs"
 )
