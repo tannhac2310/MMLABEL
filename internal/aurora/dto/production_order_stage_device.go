@@ -8,12 +8,18 @@ import (
 )
 
 type ProductionOrderStageDeviceFilter struct {
-	ProcessStatus []int8    `json:"processStatus"`
-	DeviceID      string    `json:"deviceID"`
-	IsResolved    int16     `json:"isResolved"`
-	ErrorCodes    []string  `json:"errorCodes"`
-	CreatedFrom   time.Time `json:"createdFrom"`
-	CreatedTo     time.Time `json:"createdTo"`
+	ID                           string                                  `json:"id"`
+	IDs                          []string                                `json:"ids"`
+	ProductionOrderIDs           []string                                `json:"productionOrderIDs"`
+	DeviceIDs                    []string                                `json:"deviceIDs"`
+	ProductionStageIDs           []string                                `json:"productionStageIDs"`
+	ProductionOrderStageStatuses []enum.ProductionOrderStageStatus       `json:"productionOrderStageStatuses"`
+	Responsible                  []string                                `json:"responsible"`
+	ProcessStatuses              []enum.ProductionOrderStageDeviceStatus `json:"processStatus"`
+	//EstimatedStartAtFrom  time.Time                             `json:"estimatedAtFrom"`
+	//EstimatedCompleteAtTo time.Time                             `json:"estimatedAtTo"`
+	//StartAt               time.Time                             `json:"startAt"`
+	//CompleteAt            time.Time                             `json:"completeAt"`
 }
 
 type FindProductionOrderStageDevicesRequest struct {
@@ -28,15 +34,27 @@ type FindProductionOrderStageDevicesResponse struct {
 type FindWorkingDevice struct {
 }
 type ProductionOrderStageDevice struct {
-	ID                     string                                `json:"id"`
-	ProductionOrderStageID string                                `json:"productionOrderStageID"`
-	DeviceID               string                                `json:"deviceID"`
-	Quantity               int64                                 `json:"quantity"`
-	ProcessStatus          enum.ProductionOrderStageDeviceStatus `json:"processStatus"`
-	Status                 enum.CommonStatus                     `json:"status"`
-	Responsible            []string                              `json:"responsible"`
-	Settings               map[string]interface{}                `json:"settings"`
-	Note                   string                                `json:"note"`
+	ID                                      string                                `json:"id"`
+	ProductionOrderID                       string                                `json:"productionOrderID"`
+	ProductionOrderName                     string                                `json:"productionOrderName"`
+	ProductionOrderStatus                   enum.ProductionOrderStatus            `json:"productionOrderStatus"`
+	ProductionOrderStageName                string                                `json:"productionOrderStageName"`
+	ProductionOrderStageCode                string                                `json:"productionOrderStageCode"`
+	ProductionOrderStageStatus              enum.ProductionOrderStageStatus       `json:"productionOrderStageStatus"`
+	ProductionOrderStageID                  string                                `json:"productionOrderStageID"`
+	ProductionOrderStageStartedAt           time.Time                             `json:"productionOrderStageStartedAt"`
+	ProductionOrderStageCompletedAt         time.Time                             `json:"productionOrderStageCompletedAt"`
+	ProductionOrderStageEstimatedStartAt    time.Time                             `json:"productionOrderStageEstimatedStartAt"`
+	ProductionOrderStageEstimatedCompleteAt time.Time                             `json:"productionOrderStageEstimatedCompleteAt"`
+	DeviceID                                string                                `json:"deviceID"`
+	DeviceName                              string                                `json:"deviceName"`
+	Quantity                                int64                                 `json:"quantity"`
+	AssignedQuantity                        int64                                 `json:"assignedQuantity"`
+	ProcessStatus                           enum.ProductionOrderStageDeviceStatus `json:"processStatus"`
+	Status                                  enum.CommonStatus                     `json:"status"`
+	Responsible                             []string                              `json:"responsible"`
+	Settings                                map[string]interface{}                `json:"settings"`
+	Note                                    string                                `json:"note"`
 }
 
 type CreateProductionOrderStageDeviceRequest struct {
@@ -107,10 +125,19 @@ type DeviceStatusHistoryFilter struct {
 	CreatedTo              time.Time `json:"createdTo"`
 }
 
+type FindDeviceStatusHistoryFilter struct {
+	ProcessStatus []int8    `json:"processStatus"`
+	DeviceID      string    `json:"deviceID"`
+	IsResolved    int16     `json:"isResolved"`
+	ErrorCodes    []string  `json:"errorCodes"`
+	CreatedFrom   time.Time `json:"createdFrom"`
+	CreatedTo     time.Time `json:"createdTo"`
+}
+
 type FindDeviceStatusHistoryRequest struct {
-	Filter *ProductionOrderStageDeviceFilter `json:"filter" binding:"required"`
-	Paging *commondto.Paging                 `json:"paging" binding:"required"`
-	Sort   *commondto.Sort                   `json:"sort"`
+	Filter *FindDeviceStatusHistoryFilter `json:"filter" binding:"required"`
+	Paging *commondto.Paging              `json:"paging" binding:"required"`
+	Sort   *commondto.Sort                `json:"sort"`
 }
 
 type FindDeviceStatusHistoryResponse struct {

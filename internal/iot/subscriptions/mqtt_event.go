@@ -13,6 +13,7 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	"go.uber.org/zap"
+
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
@@ -161,10 +162,10 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				zap.Any("mappingData", item))
 
 			orderStageDevices, err := p.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
-				DeviceID:                   deviceID,
-				ProductionOrderStageStatus: enum.ProductionOrderStageStatusProductionStart,
-				Limit:                      1,
-				Offset:                     0,
+				DeviceIDs:                    []string{deviceID},
+				ProductionOrderStageStatuses: []enum.ProductionOrderStageStatus{enum.ProductionOrderStageStatusProductionStart},
+				Limit:                        1,
+				Offset:                       0,
 			})
 
 			if err != nil {

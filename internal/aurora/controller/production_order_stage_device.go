@@ -18,6 +18,7 @@ type ProductionOrderStageDeviceController interface {
 	CreateProductionOrderStageDevice(c *gin.Context)
 	EditProductionOrderStageDevice(c *gin.Context)
 	DeleteProductionOrderStageDevice(c *gin.Context)
+	Find(c *gin.Context)
 	FindEventLog(c *gin.Context)
 	FindProcessDeviceHistory(c *gin.Context)
 	UpdateProcessDeviceHistoryIsSolved(c *gin.Context)
@@ -29,11 +30,71 @@ type productionOrderStageDeviceController struct {
 	productionOrderStageDeviceService production_order_stage_device.Service
 }
 
+func (s productionOrderStageDeviceController) Find(c *gin.Context) {
+	req := &dto.FindProductionOrderStageDevicesRequest{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+
+	data, total, err := s.productionOrderStageDeviceService.Find(c, &production_order_stage_device.FindProductionOrderStageDeviceOpts{
+		ProductionOrderStageIDs:      req.Filter.ProductionStageIDs,
+		ProductionOrderStageStatuses: req.Filter.ProductionOrderStageStatuses,
+		ProductionOrderIDs:           req.Filter.ProductionOrderIDs,
+		Responsible:                  req.Filter.Responsible,
+		DeviceIDs:                    req.Filter.DeviceIDs,
+		ID:                           req.Filter.ID,
+		IDs:                          req.Filter.IDs,
+		ProcessStatuses:              req.Filter.ProcessStatuses,
+		Limit:                        req.Paging.Limit,
+		Offset:                       req.Paging.Offset,
+	})
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+
+	result := make([]*dto.ProductionOrderStageDevice, 0, len(data))
+	for _, d := range data {
+		result = append(result, &dto.ProductionOrderStageDevice{
+			ID:                                      d.ID,
+			ProductionOrderID:                       d.ProductionOrderID,
+			ProductionOrderName:                     d.ProductionOrderName,
+			ProductionOrderStatus:                   d.ProductionOrderStatus,
+			ProductionOrderStageName:                d.ProductionOrderStageName,
+			ProductionOrderStageCode:                d.ProductionOrderStageCode,
+			ProductionOrderStageStatus:              d.ProductionOrderStageStatus,
+			ProductionOrderStageID:                  d.ProductionOrderStageID,
+			ProductionOrderStageStartedAt:           d.ProductionOrderStageStartedAt.Time,
+			ProductionOrderStageCompletedAt:         d.ProductionOrderStageCompletedAt.Time,
+			ProductionOrderStageEstimatedStartAt:    d.ProductionOrderStageEstimatedStartAt.Time,
+			ProductionOrderStageEstimatedCompleteAt: d.ProductionOrderStageEstimatedCompleteAt.Time,
+			DeviceID:                                d.DeviceID,
+			DeviceName:                              d.DeviceName,
+			Quantity:                                d.Quantity,
+			AssignedQuantity:                        d.AssignedQuantity,
+			ProcessStatus:                           d.ProductionOrderStageDevice.ProcessStatus,
+			Status:                                  d.Status,
+			Responsible:                             d.Responsible,
+			Settings:                                d.Settings,
+			Note:                                    d.Note.String,
+		})
+	}
+
+	transportutil.SendJSONResponse(c, &dto.FindProductionOrderStageDevicesResponse{
+		ProductionOrderStageDevices: result,
+		Total:                       total.Count,
+	})
+}
+
 func (s productionOrderStageDeviceController) FindWorkingDevice(c *gin.Context) {
-	data, err := s.productionOrderStageDeviceService.Find(c, &production_order_stage_device.FindProductionOrderStageDeviceOpts{
-		ProcessStatus: enum.ProductionOrderStageDeviceStatusStart,
-		Limit:         10000,
-		Offset:        0,
+	data, _, err := s.productionOrderStageDeviceService.Find(c, &production_order_stage_device.FindProductionOrderStageDeviceOpts{
+		ProcessStatuses: []enum.ProductionOrderStageDeviceStatus{
+			enum.ProductionOrderStageDeviceStatusStart,
+		},
+		Limit:  10000,
+		Offset: 0,
 	})
 	if err != nil {
 		transportutil.Error(c, err)
@@ -312,6 +373,15 @@ func RegisterProductionOrderStageDeviceController(
 		&dto.CreateProductionOrderStageDeviceRequest{},
 		&dto.CreateProductionOrderStageDeviceResponse{},
 		"Create productionOrderStageDevice",
+	)
+
+	routeutil.AddEndpoint(
+		g,
+		"find",
+		c.Find,
+		&dto.FindProductionOrderStageDevicesRequest{},
+		&dto.FindProductionOrderStageDevicesResponse{},
+		"Find productionOrderStageDevice",
 	)
 
 	routeutil.AddEndpoint(

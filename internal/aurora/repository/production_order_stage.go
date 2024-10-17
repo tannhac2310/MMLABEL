@@ -3,9 +3,10 @@ package repository
 import (
 	"context"
 	"fmt"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"strings"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
@@ -162,7 +163,7 @@ func (r *productionOrderStagesRepo) Count(ctx context.Context, s *SearchProducti
 	sql, args := s.buildQuery(true)
 	err := cockroach.Select(ctx, sql, args...).ScanOne(countResult)
 	if err != nil {
-		return nil, fmt.Errorf("chat.Count: %w", err)
+		return nil, fmt.Errorf("production order stage search: %w", err)
 	}
 
 	return countResult, nil
