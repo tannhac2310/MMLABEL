@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"strings"
 	"time"
@@ -35,10 +36,19 @@ type EventLogData struct {
 }
 type ProductionOrderStageDeviceData struct {
 	*model.ProductionOrderStageDevice
-	DeviceName        string `db:"device_name"`
-	DeviceData        any    `db:"device_data"`
-	ProductionOrderID string `db:"production_order_id"`
-	ResponsibleObject []*model2.User
+	DeviceName                              string                          `db:"device_name"`
+	DeviceData                              any                             `db:"device_data"`
+	ProductionOrderID                       string                          `db:"production_order_id"`
+	ProductionOrderName                     string                          `db:"production_order_name"`
+	ProductionOrderStatus                   enum.ProductionOrderStatus      `db:"production_order_status"`
+	ProductionOrderStageName                string                          `db:"production_order_stage_name"`
+	ProductionOrderStageCode                string                          `db:"production_order_stage_code"`
+	ProductionOrderStageStatus              enum.ProductionOrderStageStatus `db:"production_order_stage_status"`
+	ProductionOrderStageStartedAt           sql.NullTime                    `db:"production_order_stage_started_at"`
+	ProductionOrderStageCompletedAt         sql.NullTime                    `db:"production_order_stage_completed_at"`
+	ProductionOrderStageEstimatedStartAt    sql.NullTime                    `db:"production_order_stage_estimated_start_at"`
+	ProductionOrderStageEstimatedCompleteAt sql.NullTime                    `db:"production_order_stage_estimated_complete_at"`
+	ResponsibleObject                       []*model2.User
 }
 
 type productionOrderStageDevicesRepo struct {
@@ -127,56 +137,54 @@ func (r *productionOrderStageDevicesRepo) SoftDeletes(ctx context.Context, ids [
 
 // SearchProductionOrderStageDevicesOpts all params is options
 type SearchProductionOrderStageDevicesOpts struct {
-	IDs                        []string
-	ProductionOrderStageID     string
-	ProductionOrderID          string
-	ProcessStatus              enum.ProductionOrderStageDeviceStatus
-	DeviceID                   string
-	ProductionOrderStageStatus enum.ProductionOrderStageStatus
-	Status                     enum.CommonStatus
-	Limit                      int64
-	Offset                     int64
-	Sort                       *Sort
+	ID                           string
+	IDs                          []string
+	ProductionOrderStageIDs      []string
+	ProductionOrderIDs           []string
+	ProcessStatuses              []enum.ProductionOrderStageDeviceStatus
+	DeviceIDs                    []string
+	ProductionOrderStageStatuses []enum.ProductionOrderStageStatus
+	Limit                        int64
+	Offset                       int64
+	Sort                         *Sort
 }
 
 func (s *SearchProductionOrderStageDevicesOpts) buildQuery(isCount bool) (string, []interface{}) {
 	var args []interface{}
 	conds := ""
-	joins := ""
+	joins := ` JOIN devices d ON d.id = b.device_id
+		JOIN production_order_stages AS pos ON pos.id = b.production_order_stage_id
+		JOIN production_orders AS po ON po.id = pos.production_order_id 
+		JOIN stages AS s ON s.id = pos.stage_id
+`
 
 	if len(s.IDs) > 0 {
 		args = append(args, s.IDs)
-		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.ProductionOrderStageDeviceFieldID)
+		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.ProductionOrderStageDeviceFieldID, len(args))
 	}
-
-	if s.ProductionOrderID != "" {
-		args = append(args, s.ProductionOrderID)
-		conds += fmt.Sprintf(" AND pos.production_order_id = $%d", len(args))
+	if s.ID != "" {
+		args = append(args, s.ID)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderStageDeviceFieldID, len(args))
 	}
-
-	if s.ProductionOrderStageID != "" {
-		args = append(args, s.ProductionOrderStageID)
-		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderStageDeviceFieldProductionOrderStageID, len(args))
+	if len(s.ProductionOrderStageIDs) > 0 {
+		args = append(args, s.ProductionOrderStageIDs)
+		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.ProductionOrderStageDeviceFieldProductionOrderStageID, len(args))
 	}
-
-	if s.DeviceID != "" {
-		args = append(args, s.DeviceID)
-		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderStageDeviceFieldDeviceID, len(args))
+	if len(s.ProductionOrderIDs) > 0 {
+		args = append(args, s.ProductionOrderIDs)
+		conds += fmt.Sprintf(" AND pos.%s = ANY($%d)", model.ProductionOrderStageFieldProductionOrderID, len(args))
 	}
-
-	if s.Status > 0 {
-		args = append(args, s.Status)
-		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderStageDeviceFieldStatus, len(args))
+	if len(s.ProcessStatuses) > 0 {
+		args = append(args, s.ProcessStatuses)
+		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.ProductionOrderStageDeviceFieldProcessStatus, len(args))
 	}
-
-	if s.ProcessStatus > 0 {
-		args = append(args, s.ProcessStatus)
-		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderStageDeviceFieldProcessStatus, len(args))
+	if len(s.DeviceIDs) > 0 {
+		args = append(args, s.DeviceIDs)
+		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.ProductionOrderStageDeviceFieldDeviceID, len(args))
 	}
-
-	if s.ProductionOrderStageStatus > 0 {
-		args = append(args, s.ProductionOrderStageStatus)
-		conds += fmt.Sprintf(" AND pos.%s = $%d", model.ProductionOrderStageFieldStatus, len(args))
+	if len(s.ProductionOrderStageStatuses) > 0 {
+		args = append(args, s.ProductionOrderStageStatuses)
+		conds += fmt.Sprintf(" AND pos.%s = ANY($%d)", model.ProductionOrderStageFieldStatus, len(args))
 	}
 
 	b := &model.ProductionOrderStageDevice{}
@@ -191,10 +199,16 @@ func (s *SearchProductionOrderStageDevicesOpts) buildQuery(isCount bool) (string
 	if s.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s ", s.Sort.By, s.Sort.Order)
 	}
-	return fmt.Sprintf(`SELECT b.%s, pos.production_order_id as production_order_id, COALESCE (d.name,'N/A') as device_name, d.data as device_data
+	return fmt.Sprintf(`SELECT b.%s, pos.production_order_id as production_order_id, COALESCE (d.name,'N/A') as device_name, d.data as device_data,
+		po.name as production_order_name, po.status as production_order_status, 
+    	pos.status as production_order_stage_status,
+    	pos.started_at as production_order_stage_started_at, pos.completed_at as production_order_stage_completed_at,
+    	pos.estimated_start_at as production_order_stage_estimated_start_at,
+    	pos.estimated_complete_at as production_order_stage_estimated_complete_at,
+    	s.code as production_order_stage_code,
+		s.name as production_order_stage_name
 		FROM %s AS b %s
-		JOIN devices d ON d.id = b.device_id
-		JOIN production_order_stages AS pos ON pos.id = b.production_order_stage_id
+		
 		WHERE TRUE %s AND b.deleted_at IS NULL
 		%s
 		LIMIT %d
@@ -259,7 +273,7 @@ func (r *productionOrderStageDevicesRepo) Count(ctx context.Context, s *SearchPr
 	sql, args := s.buildQuery(true)
 	err := cockroach.Select(ctx, sql, args...).ScanOne(countResult)
 	if err != nil {
-		return nil, fmt.Errorf("chat.Count: %w", err)
+		return nil, fmt.Errorf("productionOrderStageDevicesRepo.Count: %w", err)
 	}
 
 	return countResult, nil

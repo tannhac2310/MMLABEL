@@ -64,7 +64,7 @@ func main() {
 		if tableName.String == "schema_lock" || tableName.String == "schema_migrations" {
 			continue
 		}
-		if tableName.String != "workflow_templates" {
+		if tableName.String != "production_order_stage_responsible" { // TODO update it
 			continue
 		}
 		genRepository(pool, tableName)

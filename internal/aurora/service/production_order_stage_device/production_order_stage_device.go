@@ -42,18 +42,23 @@ type CreateProductionOrderStageDeviceOpts struct {
 }
 
 type FindProductionOrderStageDeviceOpts struct {
-	ProductionOrderStageID string
-	ProductionOrderID      string
-	ProcessStatus          enum.ProductionOrderStageDeviceStatus
-	Limit                  int64
-	Offset                 int64
+	ProductionOrderStageIDs      []string
+	ProductionOrderStageStatuses []enum.ProductionOrderStageStatus
+	ProductionOrderIDs           []string
+	Responsible                  []string
+	DeviceIDs                    []string
+	ID                           string
+	IDs                          []string
+	ProcessStatuses              []enum.ProductionOrderStageDeviceStatus
+	Limit                        int64
+	Offset                       int64
 }
 
 type Service interface {
 	Edit(ctx context.Context, opt *EditProductionOrderStageDeviceOpts) error
 	Create(ctx context.Context, opt *CreateProductionOrderStageDeviceOpts) (string, error)
 	Deletes(ctx context.Context, ids []string) error
-	Find(ctx context.Context, opt *FindProductionOrderStageDeviceOpts) ([]*repository.ProductionOrderStageDeviceData, error)
+	Find(ctx context.Context, opt *FindProductionOrderStageDeviceOpts) ([]*repository.ProductionOrderStageDeviceData, *repository.CountResult, error)
 	FindEventLog(ctx context.Context, opt *FindEventLogOpts) ([]*repository.EventLogData, error)
 	FindProcessDeviceHistory(ctx context.Context, opt *FindProcessDeviceHistoryOpts, sort *repository.Sort, limit, offset int64) ([]*repository.DeviceProgressStatusHistoryData, *repository.CountResult, error)
 	EditDeviceProcessHistoryIsSolved(ctx context.Context, opt *EditDeviceProcessHistoryIsSolvedOpts) error
@@ -182,8 +187,12 @@ func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditPr
 }
 
 func (p productionOrderStageDeviceService) Create(ctx context.Context, opt *CreateProductionOrderStageDeviceOpts) (string, error) {
-	id := idutil.ULIDNow()
-	err := p.productionOrderStageDeviceRepo.Insert(ctx, &model.ProductionOrderStageDevice{
+	cnt, err := p.productionOrderStageDeviceRepo.Count(ctx, &repository.SearchProductionOrderStageDevicesOpts{})
+	if err != nil {
+		return "", fmt.Errorf("p.productionOrderStageDeviceRepo.Count: %w", err)
+	}
+	id := fmt.Sprintf("%d", cnt.Count)
+	err = p.productionOrderStageDeviceRepo.Insert(ctx, &model.ProductionOrderStageDevice{
 		ID:                     id,
 		ProductionOrderStageID: opt.ProductionOrderStageID,
 		DeviceID:               opt.DeviceID,
@@ -286,18 +295,31 @@ func (p productionOrderStageDeviceService) EditDeviceProcessHistoryIsSolved(ctx 
 	return nil
 }
 
-func (p productionOrderStageDeviceService) Find(ctx context.Context, opt *FindProductionOrderStageDeviceOpts) ([]*repository.ProductionOrderStageDeviceData, error) {
-	productionOrderStageDevices, err := p.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
-		ProductionOrderStageID: opt.ProductionOrderStageID,
-		ProductionOrderID:      opt.ProductionOrderID,
-		ProcessStatus:          opt.ProcessStatus,
-		Limit:                  opt.Limit,
-		Offset:                 opt.Offset,
-	})
-	if err != nil {
-		return nil, err
+func (p productionOrderStageDeviceService) Find(ctx context.Context, opt *FindProductionOrderStageDeviceOpts) ([]*repository.ProductionOrderStageDeviceData, *repository.CountResult, error) {
+	searchOpts := &repository.SearchProductionOrderStageDevicesOpts{
+		ID:                           opt.ID,
+		IDs:                          opt.IDs,
+		ProductionOrderStageIDs:      opt.ProductionOrderStageIDs,
+		ProductionOrderIDs:           opt.ProductionOrderIDs,
+		ProcessStatuses:              opt.ProcessStatuses,
+		DeviceIDs:                    opt.DeviceIDs,
+		ProductionOrderStageStatuses: opt.ProductionOrderStageStatuses,
+		Limit:                        opt.Limit,
+		Offset:                       opt.Offset,
+		Sort:                         nil,
 	}
-	return productionOrderStageDevices, nil
+
+	productionOrderStageDevices, err := p.productionOrderStageDeviceRepo.Search(ctx, searchOpts)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	total, err := p.productionOrderStageDeviceRepo.Count(ctx, searchOpts)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return productionOrderStageDevices, total, nil
 }
 
 func NewService(

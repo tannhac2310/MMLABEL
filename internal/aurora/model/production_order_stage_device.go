@@ -22,6 +22,10 @@ const (
 	ProductionOrderStageDeviceFieldResponsible            = "responsible"
 	ProductionOrderStageDeviceFieldEstimatedCompleteAt    = "estimated_complete_at"
 	ProductionOrderStageDeviceFieldAssignedQuantity       = "assigned_quantity"
+	ProductionOrderStageDeviceFieldEstimatedStartAt       = "estimated_start_at"
+	ProductionOrderStageDeviceFieldColor                  = "color"
+	ProductionOrderStageDeviceFieldStartAt                = "start_at"
+	ProductionOrderStageDeviceFieldCompleteAt             = "complete_at"
 )
 
 type ProductionOrderStageDevice struct {
@@ -39,6 +43,10 @@ type ProductionOrderStageDevice struct {
 	Responsible            []string                              `db:"responsible"`
 	EstimatedCompleteAt    sql.NullTime                          `db:"estimated_complete_at"`
 	AssignedQuantity       int64                                 `db:"assigned_quantity"`
+	EstimatedStartAt       sql.NullTime                          `db:"estimated_start_at"`
+	Color                  sql.NullString                        `db:"color"`
+	StartAt                sql.NullTime                          `db:"start_at"`
+	CompleteAt             sql.NullTime                          `db:"complete_at"`
 }
 
 func (rcv *ProductionOrderStageDevice) FieldMap() (fields []string, values []interface{}) {
@@ -57,6 +65,10 @@ func (rcv *ProductionOrderStageDevice) FieldMap() (fields []string, values []int
 		ProductionOrderStageDeviceFieldResponsible,
 		ProductionOrderStageDeviceFieldEstimatedCompleteAt,
 		ProductionOrderStageDeviceFieldAssignedQuantity,
+		ProductionOrderStageDeviceFieldEstimatedStartAt,
+		ProductionOrderStageDeviceFieldColor,
+		ProductionOrderStageDeviceFieldStartAt,
+		ProductionOrderStageDeviceFieldCompleteAt,
 	}
 
 	values = []interface{}{
@@ -74,6 +86,10 @@ func (rcv *ProductionOrderStageDevice) FieldMap() (fields []string, values []int
 		&rcv.Responsible,
 		&rcv.EstimatedCompleteAt,
 		&rcv.AssignedQuantity,
+		&rcv.EstimatedStartAt,
+		&rcv.Color,
+		&rcv.StartAt,
+		&rcv.CompleteAt,
 	}
 
 	return

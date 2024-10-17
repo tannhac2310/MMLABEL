@@ -132,9 +132,9 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 		}
 		stageData := make([]*ProductionOrderStageData, 0, len(wf))
 		stageDevicesOfPO, err := c.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
-			ProductionOrderID: productionOrder.ID,
-			Limit:             1000,
-			Offset:            0,
+			ProductionOrderIDs: []string{productionOrder.ID},
+			Limit:              1000,
+			Offset:             0,
 		})
 		mapStageDevices := make(map[string][]*repository.ProductionOrderStageDeviceData)
 		for _, stageDevice := range stageDevicesOfPO {
