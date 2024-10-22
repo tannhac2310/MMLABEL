@@ -55,6 +55,17 @@ func main() {
 		log.Panic(err.Error())
 	}
 
+	tbls := map[string]bool{
+		"m_khach_hang":        true,
+		"m_thong_so_may_in":   true,
+		"m_thong_so_may_khac": true,
+		"m_khung_in":          true,
+		"m_phim":              true,
+		"m_khuon_be":          true,
+		"m_khuon_dap":         true,
+		"m_nguyen_vat_lieu":   true,
+	}
+
 	for rows.Next() {
 		var tableName pgtype.Text
 		if err := rows.Scan(&tableName); err != nil {
@@ -64,7 +75,7 @@ func main() {
 		if tableName.String == "schema_lock" || tableName.String == "schema_migrations" {
 			continue
 		}
-		if tableName.String != "production_order_stage_responsible" { // TODO update it
+		if _, ok := tbls[tableName.String]; !ok { // TODO update it
 			continue
 		}
 		genRepository(pool, tableName)
