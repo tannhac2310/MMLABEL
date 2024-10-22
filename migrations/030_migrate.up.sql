@@ -26,3 +26,18 @@ ALTER TABLE production_order_stage_devices
 
 ALTER TABLE production_order_stage_devices
     ADD COLUMN complete_at TIMESTAMP;
+
+-- write sql migrate production_order_stage_devices.responsible to production_order_stage_responsible
+WITH production_order_stage_devices AS (
+    SELECT
+        id,
+        unnest(responsible) AS user_id
+    FROM production_order_stage_devices
+    WHERE responsible IS NOT NULL
+)
+INSERT INTO production_order_stage_responsible (id, po_stage_device_id, user_id)
+SELECT
+    uuid_generate_v4(),
+    id,
+    user_id
+FROM production_order_stage_devices;

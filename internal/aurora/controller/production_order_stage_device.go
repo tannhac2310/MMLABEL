@@ -79,6 +79,10 @@ func (s productionOrderStageDeviceController) Find(c *gin.Context) {
 		}
 		result = append(result, &dto.ProductionOrderStageDevice{
 			ID:                                      d.ID,
+			StartedAt:                               d.StartAt.Time,
+			CompleteAt:                              d.CompleteAt.Time,
+			EstimatedStartAt:                        d.EstimatedStartAt.Time,
+			EstimatedCompleteAt:                     d.EstimatedCompleteAt.Time,
 			ProductionOrderID:                       d.ProductionOrderID,
 			ProductionOrderName:                     d.ProductionOrderName,
 			ProductionOrderData:                     productionOrderData,

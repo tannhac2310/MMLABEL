@@ -53,6 +53,10 @@ type ProductionOrderStageDevice struct {
 	ProductionOrderStageCompletedAt         time.Time                             `json:"productionOrderStageCompletedAt"`
 	ProductionOrderStageEstimatedStartAt    time.Time                             `json:"productionOrderStageEstimatedStartAt"`
 	ProductionOrderStageEstimatedCompleteAt time.Time                             `json:"productionOrderStageEstimatedCompleteAt"`
+	EstimatedStartAt                        time.Time                             `json:"estimatedStartAt"`
+	EstimatedCompleteAt                     time.Time                             `json:"estimatedCompleteAt"`
+	StartedAt                               time.Time                             `json:"startedAt"`
+	CompleteAt                              time.Time                             `json:"completeAt"`
 	DeviceID                                string                                `json:"deviceID"`
 	DeviceName                              string                                `json:"deviceName"`
 	Quantity                                int64                                 `json:"quantity"`
