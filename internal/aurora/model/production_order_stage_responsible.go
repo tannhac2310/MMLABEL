@@ -1,45 +1,28 @@
 package model
 
-import (
-	"database/sql"
-	"time"
-)
-
 const (
-	ProductionOrderStageResponsibleFieldID                     = "id"
-	ProductionOrderStageResponsibleFieldProductionOrderStageID = "production_order_stage_id"
-	ProductionOrderStageResponsibleFieldUserID                 = "user_id"
-	ProductionOrderStageResponsibleFieldCreatedAt              = "created_at"
-	ProductionOrderStageResponsibleFieldUpdatedAt              = "updated_at"
-	ProductionOrderStageResponsibleFieldDeletedAt              = "deleted_at"
+	ProductionOrderStageResponsibleFieldID              = "id"
+	ProductionOrderStageResponsibleFieldPOStageDeviceID = "po_stage_device_id"
+	ProductionOrderStageResponsibleFieldUserID          = "user_id"
 )
 
 type ProductionOrderStageResponsible struct {
-	ID                     string       `db:"id"`
-	ProductionOrderStageID string       `db:"production_order_stage_id"`
-	UserID                 string       `db:"user_id"`
-	CreatedAt              time.Time    `db:"created_at"`
-	UpdatedAt              time.Time    `db:"updated_at"`
-	DeletedAt              sql.NullTime `db:"deleted_at"`
+	ID              string `db:"id"`
+	POStageDeviceID string `db:"po_stage_device_id"`
+	UserID          string `db:"user_id"`
 }
 
 func (rcv *ProductionOrderStageResponsible) FieldMap() (fields []string, values []interface{}) {
 	fields = []string{
 		ProductionOrderStageResponsibleFieldID,
-		ProductionOrderStageResponsibleFieldProductionOrderStageID,
+		ProductionOrderStageResponsibleFieldPOStageDeviceID,
 		ProductionOrderStageResponsibleFieldUserID,
-		ProductionOrderStageResponsibleFieldCreatedAt,
-		ProductionOrderStageResponsibleFieldUpdatedAt,
-		ProductionOrderStageResponsibleFieldDeletedAt,
 	}
 
 	values = []interface{}{
 		&rcv.ID,
-		&rcv.ProductionOrderStageID,
+		&rcv.POStageDeviceID,
 		&rcv.UserID,
-		&rcv.CreatedAt,
-		&rcv.UpdatedAt,
-		&rcv.DeletedAt,
 	}
 
 	return

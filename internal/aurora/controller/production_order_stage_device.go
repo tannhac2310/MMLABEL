@@ -57,10 +57,31 @@ func (s productionOrderStageDeviceController) Find(c *gin.Context) {
 
 	result := make([]*dto.ProductionOrderStageDevice, 0, len(data))
 	for _, d := range data {
+		responsible := make([]*dto.POStageDeviceResponsible, 0)
+		for _, r := range d.Responsible {
+			responsible = append(responsible, &dto.POStageDeviceResponsible{
+				ID:              r.ID,
+				POStageDeviceID: r.POStageDeviceID,
+				UserID:          r.UserID,
+				ResponsibleName: r.ResponsibleName,
+			})
+		}
+
+		po := d.ProductionOrderData
+		productionOrderData := &dto.ProductionOrderData{}
+		if po != nil {
+			productionOrderData = &dto.ProductionOrderData{
+				ID:          po.ID,
+				Name:        po.Name,
+				ProductCode: po.ProductCode,
+				ProductName: po.ProductName,
+			}
+		}
 		result = append(result, &dto.ProductionOrderStageDevice{
 			ID:                                      d.ID,
 			ProductionOrderID:                       d.ProductionOrderID,
 			ProductionOrderName:                     d.ProductionOrderName,
+			ProductionOrderData:                     productionOrderData,
 			ProductionOrderStatus:                   d.ProductionOrderStatus,
 			ProductionOrderStageName:                d.ProductionOrderStageName,
 			ProductionOrderStageCode:                d.ProductionOrderStageCode,
@@ -76,7 +97,7 @@ func (s productionOrderStageDeviceController) Find(c *gin.Context) {
 			AssignedQuantity:                        d.AssignedQuantity,
 			ProcessStatus:                           d.ProductionOrderStageDevice.ProcessStatus,
 			Status:                                  d.Status,
-			Responsible:                             d.Responsible,
+			Responsible:                             responsible,
 			Settings:                                d.Settings,
 			Note:                                    d.Note.String,
 		})
@@ -103,6 +124,15 @@ func (s productionOrderStageDeviceController) FindWorkingDevice(c *gin.Context) 
 	result := make([]*dto.ProductionOrderStageDevice, 0, len(data))
 
 	for _, d := range data {
+		responsible := make([]*dto.POStageDeviceResponsible, 0)
+		for _, r := range d.Responsible {
+			responsible = append(responsible, &dto.POStageDeviceResponsible{
+				ID:              r.ID,
+				POStageDeviceID: r.POStageDeviceID,
+				UserID:          r.UserID,
+				ResponsibleName: r.ResponsibleName,
+			})
+		}
 		result = append(result, &dto.ProductionOrderStageDevice{
 			ID:                     d.ID,
 			ProductionOrderStageID: d.ProductionOrderStageID,
@@ -110,7 +140,7 @@ func (s productionOrderStageDeviceController) FindWorkingDevice(c *gin.Context) 
 			Quantity:               d.Quantity,
 			ProcessStatus:          d.ProcessStatus,
 			Status:                 d.Status,
-			Responsible:            d.Responsible,
+			Responsible:            responsible,
 			Settings:               d.Settings,
 			Note:                   d.Note.String,
 		})

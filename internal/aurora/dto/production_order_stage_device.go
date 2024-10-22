@@ -33,10 +33,17 @@ type FindProductionOrderStageDevicesResponse struct {
 }
 type FindWorkingDevice struct {
 }
+type POStageDeviceResponsible struct {
+	ID              string `json:"id"`
+	POStageDeviceID string `json:"poStageDeviceID"`
+	UserID          string `json:"userID"`
+	ResponsibleName string `json:"responsibleName"`
+}
 type ProductionOrderStageDevice struct {
 	ID                                      string                                `json:"id"`
 	ProductionOrderID                       string                                `json:"productionOrderID"`
 	ProductionOrderName                     string                                `json:"productionOrderName"`
+	ProductionOrderData                     *ProductionOrderData                  `json:"productionOrderData"`
 	ProductionOrderStatus                   enum.ProductionOrderStatus            `json:"productionOrderStatus"`
 	ProductionOrderStageName                string                                `json:"productionOrderStageName"`
 	ProductionOrderStageCode                string                                `json:"productionOrderStageCode"`
@@ -52,7 +59,7 @@ type ProductionOrderStageDevice struct {
 	AssignedQuantity                        int64                                 `json:"assignedQuantity"`
 	ProcessStatus                           enum.ProductionOrderStageDeviceStatus `json:"processStatus"`
 	Status                                  enum.CommonStatus                     `json:"status"`
-	Responsible                             []string                              `json:"responsible"`
+	Responsible                             []*POStageDeviceResponsible           `json:"responsible"`
 	Settings                                map[string]interface{}                `json:"settings"`
 	Note                                    string                                `json:"note"`
 }

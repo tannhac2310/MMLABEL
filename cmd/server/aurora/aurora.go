@@ -159,6 +159,7 @@ func Run(ctx context.Context, configPath string) {
 			repository2.NewCommentRepo,
 			repository2.NewCommentHistoryRepo,
 			repository2.NewCommentAttachmentRepo,
+			repository2.NewProductionOrderStageResponsibleRepo,
 		),
 		// services
 		fx.Provide(

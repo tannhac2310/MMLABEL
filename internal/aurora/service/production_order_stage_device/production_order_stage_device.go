@@ -53,21 +53,27 @@ type FindProductionOrderStageDeviceOpts struct {
 	Limit                        int64
 	Offset                       int64
 }
-
+type ProductionOrderStageDeviceData struct {
+	*repository.ProductionOrderStageDeviceData
+	Responsible         []*repository.ProductionOrderStageResponsibleData
+	ProductionOrderData *repository.ProductionOrderData
+}
 type Service interface {
 	Edit(ctx context.Context, opt *EditProductionOrderStageDeviceOpts) error
 	Create(ctx context.Context, opt *CreateProductionOrderStageDeviceOpts) (string, error)
 	Deletes(ctx context.Context, ids []string) error
-	Find(ctx context.Context, opt *FindProductionOrderStageDeviceOpts) ([]*repository.ProductionOrderStageDeviceData, *repository.CountResult, error)
+	Find(ctx context.Context, opt *FindProductionOrderStageDeviceOpts) ([]*ProductionOrderStageDeviceData, *repository.CountResult, error)
 	FindEventLog(ctx context.Context, opt *FindEventLogOpts) ([]*repository.EventLogData, error)
 	FindProcessDeviceHistory(ctx context.Context, opt *FindProcessDeviceHistoryOpts, sort *repository.Sort, limit, offset int64) ([]*repository.DeviceProgressStatusHistoryData, *repository.CountResult, error)
 	EditDeviceProcessHistoryIsSolved(ctx context.Context, opt *EditDeviceProcessHistoryIsSolvedOpts) error
 	FindAvailabilityTime(ctx context.Context, opt *FindLostTimeOpts) (*AvailabilityTime, error)
 }
 type productionOrderStageDeviceService struct {
+	productionOrderRepo              repository.ProductionOrderRepo
 	productionOrderStageDeviceRepo   repository.ProductionOrderStageDeviceRepo
 	sDeviceProgressStatusHistoryRepo repository.DeviceProgressStatusHistoryRepo
 	sDeviceWorkingHistoryRepo        repository.DeviceWorkingHistoryRepo
+	stageResponsibleRepo             repository.ProductionOrderStageResponsibleRepo
 }
 
 func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditProductionOrderStageDeviceOpts) error {
@@ -179,9 +185,32 @@ func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditPr
 
 	updater.Set(model.ProductionOrderStageDeviceFieldUpdatedAt, time.Now())
 
-	err = cockroach.UpdateFields(ctx, updater)
-	if err != nil {
-		return err
+	errTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
+		err = cockroach.UpdateFields(ctx, updater)
+		if err != nil {
+			return fmt.Errorf("update stage device %w", err)
+		}
+		if opt.Responsible != nil {
+			err = p.stageResponsibleRepo.Delete(ctx2, opt.ID)
+			if err != nil {
+				return fmt.Errorf("delete stage responsible %w", err)
+			}
+			for _, userID := range opt.Responsible {
+				err = p.stageResponsibleRepo.Insert(ctx2, &model.ProductionOrderStageResponsible{
+					ID:              idutil.ULIDNow(),
+					POStageDeviceID: opt.ID,
+					UserID:          userID,
+				})
+				if err != nil {
+					return fmt.Errorf("insert stage responsible %w", err)
+				}
+			}
+		}
+		return nil
+	})
+
+	if errTx != nil {
+		return fmt.Errorf("po stage device edit: %w", errTx)
 	}
 	return nil
 }
@@ -192,28 +221,63 @@ func (p productionOrderStageDeviceService) Create(ctx context.Context, opt *Crea
 		return "", fmt.Errorf("p.productionOrderStageDeviceRepo.Count: %w", err)
 	}
 	id := fmt.Sprintf("%d", cnt.Count)
-	err = p.productionOrderStageDeviceRepo.Insert(ctx, &model.ProductionOrderStageDevice{
-		ID:                     id,
-		ProductionOrderStageID: opt.ProductionOrderStageID,
-		DeviceID:               opt.DeviceID,
-		Quantity:               opt.Quantity,
-		ProcessStatus:          opt.ProcessStatus,
-		Status:                 opt.Status,
-		Settings:               opt.Settings,
-		Note:                   cockroach.String(opt.Note),
-		CreatedAt:              time.Now(),
-		UpdatedAt:              time.Now(),
-		Responsible:            opt.Responsible,
-		AssignedQuantity:       opt.AssignedQuantity,
+
+	errTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
+		err = p.productionOrderStageDeviceRepo.Insert(ctx2, &model.ProductionOrderStageDevice{
+			ID:                     id,
+			ProductionOrderStageID: opt.ProductionOrderStageID,
+			DeviceID:               opt.DeviceID,
+			Quantity:               opt.Quantity,
+			ProcessStatus:          opt.ProcessStatus,
+			Status:                 opt.Status,
+			Settings:               opt.Settings,
+			Note:                   cockroach.String(opt.Note),
+			CreatedAt:              time.Now(),
+			UpdatedAt:              time.Now(),
+			Responsible:            opt.Responsible,
+			AssignedQuantity:       opt.AssignedQuantity,
+		})
+		if err != nil {
+			return err
+		}
+
+		for _, userID := range opt.Responsible {
+			err = p.stageResponsibleRepo.Insert(ctx2, &model.ProductionOrderStageResponsible{
+				ID:              idutil.ULIDNow(),
+				POStageDeviceID: id,
+				UserID:          userID,
+			})
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
 	})
-	if err != nil {
-		return "", err
+
+	if errTx != nil {
+		return "", fmt.Errorf("po stage device create: %w", errTx)
 	}
+
 	return id, nil
 }
 
 func (p productionOrderStageDeviceService) Deletes(ctx context.Context, ids []string) error {
-	return p.productionOrderStageDeviceRepo.SoftDeletes(ctx, ids)
+	errTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
+		for _, id := range ids {
+			err := p.stageResponsibleRepo.Delete(ctx2, id)
+			if err != nil {
+				return err
+			}
+		}
+		return p.productionOrderStageDeviceRepo.SoftDeletes(ctx2, ids)
+	})
+
+	if errTx != nil {
+		return fmt.Errorf("po stage device delete: %w", errTx)
+	}
+
+	return nil
 }
 
 func (p productionOrderStageDeviceService) FindProcessDeviceHistory(ctx context.Context, opt *FindProcessDeviceHistoryOpts, sort *repository.Sort, limit, offset int64) ([]*repository.DeviceProgressStatusHistoryData, *repository.CountResult, error) {
@@ -295,10 +359,11 @@ func (p productionOrderStageDeviceService) EditDeviceProcessHistoryIsSolved(ctx 
 	return nil
 }
 
-func (p productionOrderStageDeviceService) Find(ctx context.Context, opt *FindProductionOrderStageDeviceOpts) ([]*repository.ProductionOrderStageDeviceData, *repository.CountResult, error) {
+func (p productionOrderStageDeviceService) Find(ctx context.Context, opt *FindProductionOrderStageDeviceOpts) ([]*ProductionOrderStageDeviceData, *repository.CountResult, error) {
 	searchOpts := &repository.SearchProductionOrderStageDevicesOpts{
 		ID:                           opt.ID,
 		IDs:                          opt.IDs,
+		Responsible:                  opt.Responsible,
 		ProductionOrderStageIDs:      opt.ProductionOrderStageIDs,
 		ProductionOrderIDs:           opt.ProductionOrderIDs,
 		ProcessStatuses:              opt.ProcessStatuses,
@@ -311,26 +376,74 @@ func (p productionOrderStageDeviceService) Find(ctx context.Context, opt *FindPr
 
 	productionOrderStageDevices, err := p.productionOrderStageDeviceRepo.Search(ctx, searchOpts)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("p.productionOrderStageDeviceRepo.Search: %w", err)
 	}
 
 	total, err := p.productionOrderStageDeviceRepo.Count(ctx, searchOpts)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("p.productionOrderStageDeviceRepo.Count: %w", err)
 	}
 
-	return productionOrderStageDevices, total, nil
+	poIds := make([]string, 0, len(productionOrderStageDevices))
+	for _, posd := range productionOrderStageDevices {
+		poIds = append(poIds, posd.ProductionOrderID)
+	}
+
+	poData, err := p.productionOrderRepo.Search(ctx, &repository.SearchProductionOrdersOpts{
+		IDs:    poIds,
+		Limit:  int64(len(poIds)),
+		Offset: 0,
+	})
+
+	if err != nil {
+		return nil, nil, fmt.Errorf("p.productionOrderRepo.Search: %w", err)
+	}
+
+	poDataMap := make(map[string]*repository.ProductionOrderData)
+	for _, po := range poData {
+		poDataMap[po.ID] = po
+	}
+
+	result := make([]*ProductionOrderStageDeviceData, 0, len(productionOrderStageDevices))
+	for _, posd := range productionOrderStageDevices {
+		responsible, err := p.stageResponsibleRepo.Search(ctx, &repository.SearchProductionOrderStageResponsibleOpts{
+			POStageDeviceIDs: []string{posd.ID},
+			Limit:            1000,
+			Offset:           0,
+		})
+
+		if err != nil {
+			return nil, nil, fmt.Errorf("p.stageResponsibleRepo.Search: %w", err)
+		}
+
+		po, ok := poDataMap[posd.ProductionOrderID]
+		if !ok {
+			return nil, nil, fmt.Errorf("production order not found: %s", posd.ProductionOrderID)
+		}
+
+		result = append(result, &ProductionOrderStageDeviceData{
+			ProductionOrderStageDeviceData: posd,
+			Responsible:                    responsible,
+			ProductionOrderData:            po,
+		})
+	}
+
+	return result, total, nil
 }
 
 func NewService(
 	productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo,
 	sDeviceProgressStatusHistoryRepo repository.DeviceProgressStatusHistoryRepo,
 	sDeviceWorkingHistoryRepo repository.DeviceWorkingHistoryRepo,
+	stageResponsibleRepo repository.ProductionOrderStageResponsibleRepo,
+	productionOrderRepo repository.ProductionOrderRepo,
 ) Service {
 	return &productionOrderStageDeviceService{
 		productionOrderStageDeviceRepo:   productionOrderStageDeviceRepo,
 		sDeviceProgressStatusHistoryRepo: sDeviceProgressStatusHistoryRepo,
 		sDeviceWorkingHistoryRepo:        sDeviceWorkingHistoryRepo,
+		stageResponsibleRepo:             stageResponsibleRepo,
+		productionOrderRepo:              productionOrderRepo,
 	}
 
 }

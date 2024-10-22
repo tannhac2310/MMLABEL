@@ -144,6 +144,7 @@ type SearchProductionOrderStageDevicesOpts struct {
 	ProcessStatuses              []enum.ProductionOrderStageDeviceStatus
 	DeviceIDs                    []string
 	ProductionOrderStageStatuses []enum.ProductionOrderStageStatus
+	Responsible                  []string
 	Limit                        int64
 	Offset                       int64
 	Sort                         *Sort
@@ -155,7 +156,8 @@ func (s *SearchProductionOrderStageDevicesOpts) buildQuery(isCount bool) (string
 	joins := ` JOIN devices d ON d.id = b.device_id
 		JOIN production_order_stages AS pos ON pos.id = b.production_order_stage_id
 		JOIN production_orders AS po ON po.id = pos.production_order_id 
-		JOIN stages AS s ON s.id = pos.stage_id
+		JOIN stages AS s ON s.id = pos.stage_id 
+		JOIN production_order_stage_responsible AS posr ON posr.po_stage_device_id = b.id
 `
 
 	if len(s.IDs) > 0 {
@@ -185,6 +187,10 @@ func (s *SearchProductionOrderStageDevicesOpts) buildQuery(isCount bool) (string
 	if len(s.ProductionOrderStageStatuses) > 0 {
 		args = append(args, s.ProductionOrderStageStatuses)
 		conds += fmt.Sprintf(" AND pos.%s = ANY($%d)", model.ProductionOrderStageFieldStatus, len(args))
+	}
+	if len(s.Responsible) > 0 {
+		args = append(args, s.Responsible)
+		conds += fmt.Sprintf(" AND posr.%s = ANY($%d)", model.ProductionOrderStageResponsibleFieldUserID, len(args))
 	}
 
 	b := &model.ProductionOrderStageDevice{}
