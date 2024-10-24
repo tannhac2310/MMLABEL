@@ -8,6 +8,7 @@ import (
 
 type Service interface {
 	FindMasterDatas(ctx context.Context, opt *FindMasterDatasOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error)
+	CreateMasterData(ctx context.Context, opts *CreateProductionOrderOpts) (string, error)
 }
 
 var _ Service = (*masterDataService)(nil)
