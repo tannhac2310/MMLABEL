@@ -106,6 +106,7 @@ type ProductionPlan struct {
 	UpdatedByName     string                    `json:"updatedByName,omitempty"`
 	Name              string                    `json:"name,omitempty"`
 	CustomData        map[string]string         `json:"customData,omitempty"`
+	UserFields        map[string][]*UserField   `json:"userFields,omitempty"`
 	Workflow          any                       `json:"workflow"`
 }
 

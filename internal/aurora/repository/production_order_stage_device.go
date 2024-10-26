@@ -201,7 +201,7 @@ func (s *SearchProductionOrderStageDevicesOpts) buildQuery(isCount bool) (string
 		WHERE TRUE %s AND b.deleted_at IS NULL`, b.TableName(), joins, conds), args
 	}
 
-	order := " ORDER BY b.id DESC "
+	order := " ORDER BY b.estimated_start_at DESC "
 	if s.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s ", s.Sort.By, s.Sort.Order)
 	}
