@@ -289,6 +289,15 @@ func (s productionPlanController) FindProductionPlans(c *gin.Context) {
 				Status:             f.CustomerData.Status,
 			}
 		}
+		userFields := make(map[string][]*dto.UserField)
+		for _, uf := range f.UserFields {
+			for _, v := range uf {
+				userFields[v.Field] = append(userFields[v.Field], &dto.UserField{
+					Key:   v.Field,
+					Value: v.Value,
+				})
+			}
+		}
 		data := &dto.ProductionPlan{
 			ID:                f.ID,
 			CustomerID:        f.CustomerID,
@@ -313,6 +322,7 @@ func (s productionPlanController) FindProductionPlans(c *gin.Context) {
 			Name:              f.Name,
 			CustomData:        f.CustomData,
 			CustomerData:      customerData,
+			UserFields:        userFields,
 		}
 
 		productionPlanResp = append(productionPlanResp, data)

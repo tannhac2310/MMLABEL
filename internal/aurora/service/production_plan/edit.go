@@ -143,7 +143,6 @@ func (c *productionPlanService) UpdateCustomFields(ctx context.Context, producti
 		return fmt.Errorf("không thể chỉnh sửa kế hoạch đã được đưa vào sản xuất")
 	}
 	errTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
-
 		customFields, err := c.customFieldRepo.Search(ctx, &repository.SearchCustomFieldsOpts{
 			EntityId:   plan.ID,
 			EntityType: enum.CustomFieldTypeProductionPlan,

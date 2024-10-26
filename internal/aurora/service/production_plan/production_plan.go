@@ -66,6 +66,7 @@ func NewService(
 type Data struct {
 	*repository.ProductionPlanData
 	CustomData   map[string]string
+	UserFields   map[string][]*repository.CustomFieldData
 	CustomerData *repository.CustomerData
 }
 

@@ -81,13 +81,16 @@ func (c *productionPlanService) FindProductionPlans(ctx context.Context, opts *F
 		}
 
 		customFieldMap := make(map[string]string)
+		userFields := make(map[string][]*repository.CustomFieldData)
 		for _, datum := range customFieldData {
 			customFieldMap[datum.Field] = datum.Value
+			userFields[datum.Field] = append(userFields[datum.Field], datum)
 		}
 		_customerData := customerMap[productionPlan.CustomerID]
 		results = append(results, &Data{
 			ProductionPlanData: productionPlan,
 			CustomData:         customFieldMap,
+			UserFields:         userFields,
 			CustomerData:       _customerData,
 		})
 	}
