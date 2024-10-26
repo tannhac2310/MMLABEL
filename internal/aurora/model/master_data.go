@@ -1,0 +1,64 @@
+package model
+
+import (
+	"database/sql"
+	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
+)
+
+const (
+	MasterDataFieldID          = "id"
+	MasterDataFieldType        = "type"
+	MasterDataFieldName        = "name"
+	MasterDataFieldDescription = "description"
+	MasterDataFieldCreatedAt   = "created_at"
+	MasterDataFieldUpdatedAt   = "updated_at"
+	MasterDataFieldCreatedBy   = "created_by"
+	MasterDataFieldUpdatedBy   = "updated_by"
+	MasterDataFieldDeletedAt   = "deleted_at"
+)
+
+type MasterData struct {
+	ID          string              `db:"id"`
+	Type        enum.MasterDataType `db:"type"`
+	Name        string              `db:"name"`
+	Description string              `db:"description"`
+	CreatedAt   time.Time           `db:"created_at"`
+	UpdatedAt   time.Time           `db:"updated_at"`
+	CreatedBy   string              `db:"created_by"`
+	UpdatedBy   string              `db:"updated_by"`
+	DeletedAt   sql.NullTime        `db:"deleted_at"`
+}
+
+func (rcv *MasterData) FieldMap() (fields []string, values []interface{}) {
+	fields = []string{
+		MasterDataFieldID,
+		MasterDataFieldType,
+		MasterDataFieldName,
+		MasterDataFieldDescription,
+		MasterDataFieldCreatedAt,
+		MasterDataFieldUpdatedAt,
+		MasterDataFieldCreatedBy,
+		MasterDataFieldUpdatedBy,
+		MasterDataFieldDeletedAt,
+	}
+
+	values = []interface{}{
+		&rcv.ID,
+		&rcv.Type,
+		&rcv.Name,
+		&rcv.Description,
+		&rcv.CreatedAt,
+		&rcv.UpdatedAt,
+		&rcv.CreatedBy,
+		&rcv.UpdatedBy,
+		&rcv.DeletedAt,
+	}
+
+	return
+}
+
+func (*MasterData) TableName() string {
+	return "master_data"
+}
