@@ -66,11 +66,13 @@ func (r *sMasterDataRepo) SoftDelete(ctx context.Context, id string) error {
 
 // SearchMasterDataOpts all params is options
 type SearchMasterDataOpts struct {
-	IDs    []string
-	Type   enum.MasterDataType
-	Limit  int64
-	Offset int64
-	Sort   *Sort
+	IDs          []string
+	Type         enum.MasterDataType
+	IsIncludeDel bool
+	Search       string
+	Limit        int64
+	Offset       int64
+	Sort         *Sort
 }
 
 func (s *SearchMasterDataOpts) buildQuery(isCount bool) (string, []interface{}) {
@@ -88,17 +90,25 @@ func (s *SearchMasterDataOpts) buildQuery(isCount bool) (string, []interface{}) 
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.MasterDataFieldType, len(args))
 	}
 
+	if s.Search != "" {
+		args = append(args, "%"+s.Search+"%")
+		conds += fmt.Sprintf(" AND (b.name ILIKE $%d OR b.description ILIKE $%d)", len(args), len(args))
+	}
+	if !s.IsIncludeDel {
+		conds += " AND b.deleted_at IS NULL "
+	}
+
 	b := &model.MasterData{}
 	fields, _ := b.FieldMap()
 	if isCount {
-		return fmt.Sprintf("SELECT count(*) as cnt FROM %s AS b %s WHERE TRUE %s AND b.deleted_at IS NULL", b.TableName(), joins, conds), args
+		return fmt.Sprintf("SELECT count(*) as cnt FROM %s AS b %s WHERE TRUE %s", b.TableName(), joins, conds), args
 	}
 
-	order := " ORDER BY b.id DESC "
+	order := " ORDER BY b.created_at DESC "
 	if s.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", s.Sort.By, s.Sort.Order)
 	}
-	return fmt.Sprintf("SELECT b.%s FROM %s AS b %s WHERE TRUE %s AND b.deleted_at IS NULL %s LIMIT %d OFFSET %d", strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
+	return fmt.Sprintf("SELECT b.%s FROM %s AS b %s WHERE TRUE %s %s LIMIT %d OFFSET %d", strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
 }
 
 type MasterDataData struct {

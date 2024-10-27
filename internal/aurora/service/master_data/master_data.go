@@ -36,6 +36,7 @@ type CreateMasterDataOpts struct {
 	Type        enum.MasterDataType
 	Name        string
 	Description string
+	Status      enum.MasterDataStatus
 	UserFields  []CreateMasterDataUserField
 	CreatedBy   string
 }
@@ -45,6 +46,7 @@ type UpdateMasterDataOpts struct {
 	Name        string
 	Description string
 	UserFields  []CreateMasterDataUserField
+	Status      enum.MasterDataStatus
 	UpdateBy    string
 }
 
@@ -55,6 +57,7 @@ type DeleteMasterDataOpts struct {
 type FindMasterDataOpts struct {
 	ID     string
 	Type   enum.MasterDataType
+	Search string
 	Limit  int64
 	Offset int64
 }
@@ -64,6 +67,7 @@ type MasterData struct {
 	Type        enum.MasterDataType
 	Name        string
 	Description string
+	Status      enum.MasterDataStatus
 	UserFields  []*MasterDataUserField
 	CreatedAt   time.Time
 	UpdatedAt   time.Time

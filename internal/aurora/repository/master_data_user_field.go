@@ -41,7 +41,7 @@ func (r *sMasterDataUserFieldRepo) DeleteByMasterDataIDs(ctx context.Context, ma
 	}
 
 	sql := fmt.Sprintf("DELETE FROM master_data_user_field WHERE master_data_id = ANY($1)")
-	cmd, err := cockroach.Exec(ctx, sql)
+	cmd, err := cockroach.Exec(ctx, sql, masterDataIds)
 	if err != nil {
 		return fmt.Errorf("cockroach.Exec: %w", err)
 	}

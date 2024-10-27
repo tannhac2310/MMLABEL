@@ -40,6 +40,7 @@ func (m masterDataController) InsertMasterData(ctx *gin.Context) {
 		Type:        req.Type,
 		Name:        req.Name,
 		Description: req.Description,
+		Status:      req.Status,
 		UserFields:  uf,
 		CreatedBy:   userID,
 	}
@@ -72,6 +73,7 @@ func (m masterDataController) UpdateMasterData(ctx *gin.Context) {
 		Name:        req.Name,
 		Description: req.Description,
 		UserFields:  uf,
+		Status:      req.Status,
 		UpdateBy:    userID,
 	}
 	err := m.masterDataService.UpdateMasterData(ctx, masterData)
@@ -107,6 +109,7 @@ func (m masterDataController) GetMasterData(ctx *gin.Context) {
 	data, total, err := m.masterDataService.FindMasterData(ctx, &master_data.FindMasterDataOpts{
 		ID:     req.Filter.ID,
 		Type:   req.Filter.Type,
+		Search: req.Filter.Search,
 		Limit:  req.Paging.Limit,
 		Offset: req.Paging.Offset,
 	})
@@ -131,6 +134,7 @@ func (m masterDataController) GetMasterData(ctx *gin.Context) {
 			Type:        d.Type,
 			Name:        d.Name,
 			Description: d.Description,
+			Status:      d.Status,
 			UserFields:  uf,
 			CreatedBy:   d.CreatedBy,
 			CreatedAt:   d.CreatedAt,

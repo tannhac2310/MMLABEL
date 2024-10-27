@@ -6,6 +6,8 @@ CREATE TABLE master_data
     type        string      NOT NULL,
     name        string      NOT NULL,
     description string,
+    data        jsonb,
+    status      int2         NOT NULL,
     created_at  TIMESTAMPTZ,
     updated_at  TIMESTAMPTZ,
     created_by  VARCHAR(50),

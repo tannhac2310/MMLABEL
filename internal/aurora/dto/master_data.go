@@ -20,18 +20,27 @@ type MasterData struct {
 	Name        string                 `json:"name"`
 	UserFields  []*MasterDataUserField `json:"userFields"`
 	Description string                 `json:"description"`
+	Status      enum.MasterDataStatus  `json:"status"`
 	CreatedAt   time.Time              `json:"createdAt"`
 	UpdatedAt   time.Time              `json:"updatedAt"`
 	CreatedBy   string                 `json:"createdBy"`
 	UpdatedBy   string                 `json:"updatedBy"`
 }
 
+type CreateMasterDataUserField struct {
+	ID           string `json:"id"`
+	MasterDataID string `json:"masterDataID"`
+	FieldName    string `json:"fieldName"`
+	FieldValue   string `json:"fieldValue"`
+}
+
 // CreateMasterDataRequest create
 type CreateMasterDataRequest struct {
-	Type        enum.MasterDataType    `json:"type"`
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	UserFields  []*MasterDataUserField `json:"userFields"`
+	Type        enum.MasterDataType          `json:"type" binding:"required"`
+	Name        string                       `json:"name" binding:"required"`
+	Description string                       `json:"description"`
+	UserFields  []*CreateMasterDataUserField `json:"userFields" binding:"required"`
+	Status      enum.MasterDataStatus        `json:"status" binding:"required"`
 }
 
 type CreateMasterDataResponse struct {
@@ -40,10 +49,11 @@ type CreateMasterDataResponse struct {
 
 // UpdateMasterDataRequest update
 type UpdateMasterDataRequest struct {
-	ID          string                 `json:"id"`
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	UserFields  []*MasterDataUserField `json:"userFields"`
+	ID          string                       `json:"id"`
+	Name        string                       `json:"name"`
+	Description string                       `json:"description"`
+	Status      enum.MasterDataStatus        `json:"status"`
+	UserFields  []*CreateMasterDataUserField `json:"userFields"`
 }
 
 type UpdateMasterDataResponse struct {
@@ -59,8 +69,9 @@ type DeleteMasterDataResponse struct {
 
 // SearchMasterDataFilter get
 type SearchMasterDataFilter struct {
-	ID   string              `json:"id"`
-	Type enum.MasterDataType `json:"type"`
+	ID     string              `json:"id"`
+	Type   enum.MasterDataType `json:"type"`
+	Search string              `json:"search"`
 }
 
 type SearchMasterDataRequest struct {

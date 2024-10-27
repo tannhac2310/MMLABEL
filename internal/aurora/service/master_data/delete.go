@@ -19,7 +19,7 @@ func (s *masterDataService) DeleteMasterData(ctx context.Context, opt *DeleteMas
 
 		// 2. Delete user fields
 		if err := s.masterDataUserField.DeleteByMasterDataIDs(ctx, []string{opt.ID}); err != nil {
-			return fmt.Errorf("s.masterDataUserField.DeleteByMasterDataIDs: %w", err)
+			//return fmt.Errorf("s.masterDataUserField.DeleteByMasterDataIDs: %w", err)
 		}
 		return nil
 	})
