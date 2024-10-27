@@ -11,6 +11,7 @@ func (s *masterDataService) FindMasterData(ctx context.Context, opt *FindMasterD
 	filter := repository.SearchMasterDataOpts{
 		Type:   opt.Type,
 		Limit:  opt.Limit,
+		Search: opt.Search,
 		Offset: opt.Offset,
 		Sort:   nil,
 	}
@@ -50,7 +51,7 @@ func (s *masterDataService) FindMasterData(ctx context.Context, opt *FindMasterD
 	for _, md := range masterData {
 		uf, ok := userFieldsMap[md.ID]
 		if !ok {
-			return nil, 0, fmt.Errorf("user fields not found for master data id: %s", md.ID)
+			//return nil, 0, fmt.Errorf("user fields not found for master data id: %s", md.ID)
 		}
 
 		ufData := make([]*MasterDataUserField, 0)
@@ -66,6 +67,7 @@ func (s *masterDataService) FindMasterData(ctx context.Context, opt *FindMasterD
 			ID:          md.ID,
 			Type:        md.Type,
 			Name:        md.Name,
+			Status:      md.Status,
 			Description: md.Description,
 			CreatedAt:   md.CreatedAt,
 			CreatedBy:   md.CreatedBy,

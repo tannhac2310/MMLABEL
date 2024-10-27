@@ -30,7 +30,7 @@ func (s *masterDataService) UpdateMasterData(ctx context.Context, opt *UpdateMas
 
 		// 2. Update user fields
 		if err := s.masterDataUserField.DeleteByMasterDataIDs(ctx, []string{opt.ID}); err != nil {
-			return fmt.Errorf("s.masterDataUserField.DeleteByMasterDataIDs: %w", err)
+			return fmt.Errorf(" delete old user field value : %w", err)
 		}
 
 		for _, userField := range opt.UserFields {
