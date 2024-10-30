@@ -60,6 +60,7 @@ type SearchStagesOpts struct {
 	IDs    []string
 	Name   string
 	Code   string
+	Codes  []string
 	UserID string
 	Limit  int64
 	Offset int64
@@ -84,6 +85,11 @@ func (s *SearchStagesOpts) buildQuery(isCount bool) (string, []interface{}) {
 	if s.Code != "" {
 		args = append(args, s.Code)
 		conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.StageFieldCode, len(args))
+	}
+
+	if len(s.Codes) > 0 {
+		args = append(args, s.Codes)
+		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.StageFieldCode, len(args))
 	}
 
 	if s.UserID != "" {

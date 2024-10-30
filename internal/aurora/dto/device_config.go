@@ -24,6 +24,7 @@ type FindDeviceConfigsResponse struct {
 }
 type DeviceConfig struct {
 	ID                  string                 `json:"id"`
+	Name                string                 `json:"name"`
 	ProductionOrderID   string                 `json:"productionOrderID"`
 	ProductionPlanID    string                 `json:"productionPlanID"`
 	ProductionOrderName string                 `json:"productionOrderName"`

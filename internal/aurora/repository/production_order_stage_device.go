@@ -21,6 +21,7 @@ type ProductionOrderStageDeviceRepo interface {
 	SoftDeletes(ctx context.Context, ids []string) error
 	Search(ctx context.Context, s *SearchProductionOrderStageDevicesOpts) ([]*ProductionOrderStageDeviceData, error)
 	Count(ctx context.Context, s *SearchProductionOrderStageDevicesOpts) (*CountResult, error)
+	CountRows(ctx context.Context) (int64, error)
 	DeleteByProductionOrderStageID(ctx context.Context, poStageID string) error
 	InsertEventLog(ctx context.Context, e *model.EventLog) error
 	FindEventLog(ctx context.Context, s *SearchEventLogOpts) ([]*EventLogData, error)
@@ -74,6 +75,20 @@ func (p *productionOrderStageDevicesRepo) InsertEventLog(ctx context.Context, e 
 	}
 
 	return nil
+}
+
+// CountRows count all rows in the table
+func (p *productionOrderStageDevicesRepo) CountRows(ctx context.Context) (int64, error) {
+	sql := `SELECT count(*) as cnt
+		FROM production_order_stage_devices`
+
+	countResult := &CountResult{}
+	err := cockroach.Select(ctx, sql).ScanOne(countResult)
+	if err != nil {
+		return 0, fmt.Errorf("cockroach.Select: %w", err)
+	}
+
+	return countResult.Count, nil
 }
 func (p *productionOrderStageDevicesRepo) DeleteByProductionOrderStageID(ctx context.Context, poStageID string) error {
 	sql := `UPDATE production_order_stage_devices
@@ -157,7 +172,6 @@ func (s *SearchProductionOrderStageDevicesOpts) buildQuery(isCount bool) (string
 		JOIN production_order_stages AS pos ON pos.id = b.production_order_stage_id
 		JOIN production_orders AS po ON po.id = pos.production_order_id 
 		JOIN stages AS s ON s.id = pos.stage_id 
-		JOIN production_order_stage_responsible AS posr ON posr.po_stage_device_id = b.id
 `
 
 	if len(s.IDs) > 0 {
@@ -190,6 +204,9 @@ func (s *SearchProductionOrderStageDevicesOpts) buildQuery(isCount bool) (string
 	}
 	if len(s.Responsible) > 0 {
 		args = append(args, s.Responsible)
+
+		// JOIN production_order_stage_responsible AS posr ON posr.po_stage_device_id = b.id
+		joins += ` JOIN production_order_stage_responsible AS posr ON posr.po_stage_device_id = b.id `
 		conds += fmt.Sprintf(" AND posr.%s = ANY($%d)", model.ProductionOrderStageResponsibleFieldUserID, len(args))
 	}
 

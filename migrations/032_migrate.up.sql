@@ -1,0 +1,1 @@
+DROP INDEX unique_production_order_state_assignments CASCADE;

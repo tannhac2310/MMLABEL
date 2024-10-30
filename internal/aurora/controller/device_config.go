@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
@@ -131,6 +133,7 @@ func (s deviceConfigController) FindDeviceConfigs(c *gin.Context) {
 func toDeviceConfigResp(f *device_config.Data) *dto.DeviceConfig {
 	return &dto.DeviceConfig{
 		ID:                  f.ID,
+		Name:                fmt.Sprintf("%s - %s", f.DeviceName.String, f.Color.String),
 		ProductionOrderID:   f.ProductionOrderID,
 		ProductionOrderName: f.ProductionOrderName.String,
 		DeviceID:            f.DeviceID.String,

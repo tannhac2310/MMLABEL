@@ -13,17 +13,19 @@ import (
 )
 
 type EditProductionOrderStageDeviceOpts struct {
-	ID               string
-	DeviceID         string
-	Quantity         int64
-	ProcessStatus    enum.ProductionOrderStageDeviceStatus
-	Status           enum.CommonStatus
-	Responsible      []string
-	AssignedQuantity int64
-	UserID           string
-	Settings         *Settings
-	Note             string
-	SanPhamLoi       int64
+	ID                  string
+	DeviceID            string
+	Quantity            int64
+	ProcessStatus       enum.ProductionOrderStageDeviceStatus
+	Status              enum.CommonStatus
+	Responsible         []string
+	AssignedQuantity    int64
+	UserID              string
+	Settings            *Settings
+	Note                string
+	SanPhamLoi          int64
+	EstimatedStartAt    time.Time
+	EstimatedCompleteAt time.Time
 }
 type Settings struct {
 	DefectiveError string
@@ -39,6 +41,8 @@ type CreateProductionOrderStageDeviceOpts struct {
 	Settings               map[string]interface{}
 	Note                   string
 	AssignedQuantity       int64
+	EstimatedStartAt       time.Time
+	EstimatedCompleteAt    time.Time
 }
 
 type FindProductionOrderStageDeviceOpts struct {
@@ -183,6 +187,9 @@ func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditPr
 		updater.Set(model.ProductionOrderStageDeviceFieldSettings, settings)
 	}
 
+	updater.Set(model.ProductionOrderFieldEstimatedStartAt, opt.EstimatedStartAt)
+	updater.Set(model.ProductionOrderFieldEstimatedCompleteAt, opt.EstimatedCompleteAt)
+
 	updater.Set(model.ProductionOrderStageDeviceFieldUpdatedAt, time.Now())
 
 	errTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
@@ -216,11 +223,11 @@ func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditPr
 }
 
 func (p productionOrderStageDeviceService) Create(ctx context.Context, opt *CreateProductionOrderStageDeviceOpts) (string, error) {
-	cnt, err := p.productionOrderStageDeviceRepo.Count(ctx, &repository.SearchProductionOrderStageDevicesOpts{})
+	cnt, err := p.productionOrderStageDeviceRepo.CountRows(ctx)
 	if err != nil {
 		return "", fmt.Errorf("p.productionOrderStageDeviceRepo.Count: %w", err)
 	}
-	id := fmt.Sprintf("%d", cnt.Count)
+	id := fmt.Sprintf("%d", cnt+1)
 
 	errTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
 		err = p.productionOrderStageDeviceRepo.Insert(ctx2, &model.ProductionOrderStageDevice{
@@ -236,6 +243,8 @@ func (p productionOrderStageDeviceService) Create(ctx context.Context, opt *Crea
 			UpdatedAt:              time.Now(),
 			Responsible:            opt.Responsible,
 			AssignedQuantity:       opt.AssignedQuantity,
+			EstimatedCompleteAt:    cockroach.Time(opt.EstimatedCompleteAt),
+			EstimatedStartAt:       cockroach.Time(opt.EstimatedStartAt),
 		})
 		if err != nil {
 			return err
@@ -256,7 +265,7 @@ func (p productionOrderStageDeviceService) Create(ctx context.Context, opt *Crea
 	})
 
 	if errTx != nil {
-		return "", fmt.Errorf("po stage device create: %w", errTx)
+		return "", fmt.Errorf("po stage device create: %w %s cnt.Count %s", errTx, id, cnt)
 	}
 
 	return id, nil

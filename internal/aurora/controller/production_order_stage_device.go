@@ -283,6 +283,8 @@ func (s productionOrderStageDeviceController) CreateProductionOrderStageDevice(c
 		Status:                 req.Status,
 		Responsible:            req.Responsible,
 		AssignedQuantity:       req.AssignedQuantity,
+		EstimatedStartAt:       req.EstimatedStartAt,
+		EstimatedCompleteAt:    req.EstimatedCompleteAt,
 	})
 
 	if err != nil {
@@ -311,17 +313,19 @@ func (s productionOrderStageDeviceController) EditProductionOrderStageDevice(c *
 	}
 
 	err = s.productionOrderStageDeviceService.Edit(c, &production_order_stage_device.EditProductionOrderStageDeviceOpts{
-		ID:               req.ID,
-		DeviceID:         req.DeviceID,
-		Quantity:         req.Quantity,
-		ProcessStatus:    req.ProcessStatus,
-		Status:           req.Status,
-		Responsible:      req.Responsible,
-		AssignedQuantity: req.AssignedQuantity,
-		Settings:         settings,
-		Note:             req.Note,
-		SanPhamLoi:       req.SanPhamLoi,
-		UserID:           interceptor.UserIDFromCtx(c),
+		ID:                  req.ID,
+		DeviceID:            req.DeviceID,
+		Quantity:            req.Quantity,
+		ProcessStatus:       req.ProcessStatus,
+		Status:              req.Status,
+		Responsible:         req.Responsible,
+		AssignedQuantity:    req.AssignedQuantity,
+		EstimatedStartAt:    req.EstimatedStartAt,
+		EstimatedCompleteAt: req.EstimatedCompleteAt,
+		Settings:            settings,
+		Note:                req.Note,
+		SanPhamLoi:          req.SanPhamLoi,
+		UserID:              interceptor.UserIDFromCtx(c),
 	})
 	if err != nil {
 		transportutil.Error(c, err)

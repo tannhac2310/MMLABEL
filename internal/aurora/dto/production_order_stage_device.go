@@ -78,6 +78,8 @@ type CreateProductionOrderStageDeviceRequest struct {
 	Settings               map[string]interface{}                `json:"settings"`
 	Note                   string                                `json:"note"`
 	AssignedQuantity       int64                                 `json:"assignedQuantity"`
+	EstimatedStartAt       time.Time                             `json:"estimatedStartAt"`
+	EstimatedCompleteAt    time.Time                             `json:"estimatedCompleteAt"`
 }
 
 type CreateProductionOrderStageDeviceResponse struct {
@@ -85,16 +87,18 @@ type CreateProductionOrderStageDeviceResponse struct {
 }
 
 type EditProductionOrderStageDeviceRequest struct {
-	ID               string                                  `json:"id" binding:"required"`
-	DeviceID         string                                  `json:"deviceID"`
-	Quantity         int64                                   `json:"quantity"`
-	AssignedQuantity int64                                   `json:"assignedQuantity"`
-	ProcessStatus    enum.ProductionOrderStageDeviceStatus   `json:"processStatus"`
-	Status           enum.CommonStatus                       `json:"status"`
-	Responsible      []string                                `json:"responsible"`
-	Settings         *EditProductionOrderStageDeviceSettings `json:"settings"`
-	Note             string                                  `json:"note"`
-	SanPhamLoi       int64                                   `json:"sanPhamLoi"`
+	ID                  string                                  `json:"id" binding:"required"`
+	DeviceID            string                                  `json:"deviceID"`
+	Quantity            int64                                   `json:"quantity"`
+	AssignedQuantity    int64                                   `json:"assignedQuantity"`
+	ProcessStatus       enum.ProductionOrderStageDeviceStatus   `json:"processStatus"`
+	Status              enum.CommonStatus                       `json:"status"`
+	Responsible         []string                                `json:"responsible"`
+	Settings            *EditProductionOrderStageDeviceSettings `json:"settings"`
+	Note                string                                  `json:"note"`
+	SanPhamLoi          int64                                   `json:"sanPhamLoi"`
+	EstimatedStartAt    time.Time                               `json:"estimatedStartAt"`
+	EstimatedCompleteAt time.Time                               `json:"estimatedCompleteAt"`
 }
 type EditProductionOrderStageDeviceSettings struct {
 	DefectiveError string `json:"defectiveError"`

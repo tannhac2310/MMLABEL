@@ -12,6 +12,7 @@ func (c *stageService) FindStages(ctx context.Context, opts *FindStagesOpts, sor
 		IDs:    opts.IDs,
 		Name:   opts.Name,
 		Code:   opts.Code,
+		Codes:  opts.Codes,
 		UserID: opts.UserID,
 		Limit:  limit,
 		Offset: offset,
@@ -41,6 +42,7 @@ func (c *stageService) FindStages(ctx context.Context, opts *FindStagesOpts, sor
 
 type FindStagesOpts struct {
 	IDs    []string
+	Codes  []string
 	Name   string
 	Code   string
 	UserID string

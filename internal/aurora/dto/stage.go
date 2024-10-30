@@ -1,14 +1,17 @@
 package dto
 
 import (
+	"time"
+
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/commondto"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
-	"time"
 )
 
 type StageFilter struct {
-	Name string `json:"name"`
-	Code string `json:"code"`
+	IDs   []string `json:"ids"`
+	Codes []string `json:"codes"`
+	Name  string   `json:"name"`
+	Code  string   `json:"code"`
 }
 
 type FindStagesRequest struct {
