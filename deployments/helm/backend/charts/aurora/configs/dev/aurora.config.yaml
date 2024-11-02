@@ -23,7 +23,7 @@ nats:
   clusterId: "tech4edu"
   address: "nats-streaming-client.nats-streaming"
 cockroachdb:
-  uri: "postgres://tech4edu:M6763zUnr8tBdwyd@cockroachdb.databases:26257/devmmlabel?pool_max_conns=50&pool_max_conn_lifetime=5m&pool_health_check_period=30s"
+  uri: "cG9zdGdyZXM6Ly90ZWNoNGVkdTpNNjc2M3pVbnI4dEJkd3lkQGNvY2tyb2FjaGRiLmRhdGFiYXNlczoyNjI1Ny9kZXZtbWxhYmVsP3Bvb2xfbWF4X2Nvbm5zPTUwJnBvb2xfbWF4X2Nvbm5fbGlmZXRpbWU9NW0mcG9vbF9oZWFsdGhfY2hlY2tfcGVyaW9kPTMwcw=="
   migrationPath: "file://./migrations"
 iotHub:
   maxIdleConnections: 100

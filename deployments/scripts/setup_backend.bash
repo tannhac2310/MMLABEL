@@ -35,3 +35,6 @@ case $ENV in
 		echo "not register env $ENV"
     ;;
 esac
+
+
+ENV=dev TAG=v1.6.22-rc2 ./deployments/scripts/setup_backend.bash
