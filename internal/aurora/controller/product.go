@@ -116,6 +116,7 @@ func (p productController) FindProduct(c *gin.Context) {
 	}
 
 	filter := product.FindProductOpts{
+		IDs:            req.Filter.IDs,
 		Name:           req.Filter.Name,
 		Code:           req.Filter.Code,
 		CustomerID:     req.Filter.CustomerID,
@@ -135,14 +136,22 @@ func (p productController) FindProduct(c *gin.Context) {
 		return
 	}
 	result := make([]*dto.Product, 0)
+
 	for _, d := range data {
+		uf := make([]*dto.UserField, 0)
+		for _, f := range d.UserFields {
+			uf = append(uf, &dto.UserField{
+				Key:   f.Field,
+				Value: f.Value,
+			})
+		}
 
 		v := &dto.Product{
-			ID:         d.ID,
-			Name:       d.Name,
-			Code:       d.Code,
-			CustomerID: d.CustomerID,
-
+			ID:               d.ID,
+			Name:             d.Name,
+			Code:             d.Code,
+			CustomerID:       d.CustomerID,
+			UserField:        uf,
 			ProductionPlanID: d.ProductionPlanID,
 			SaleID:           d.SaleID,
 			Description:      d.Description,
@@ -169,8 +178,8 @@ func (p productController) FindProduct(c *gin.Context) {
 		result = append(result, v)
 	}
 	transportutil.SendJSONResponse(c, dto.SearchProductResponse{
-		Product: result,
-		Total:   count.Count,
+		Products: result,
+		Total:    count.Count,
 	})
 
 }

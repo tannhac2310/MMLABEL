@@ -63,8 +63,6 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 		ID:                  newProductionOrderID,
 		ProductCode:         plan.ProductCode,
 		ProductName:         plan.ProductName,
-		CustomerID:          plan.CustomerID,
-		SalesID:             plan.SalesID,
 		QtyPaper:            plan.QtyPaper,
 		QtyFinished:         plan.QtyFinished,
 		QtyDelivered:        plan.QtyDelivered,

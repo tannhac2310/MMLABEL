@@ -88,8 +88,6 @@ func (s productionPlanController) CreateProductionPlan(c *gin.Context) {
 	}
 	id, err := s.productionPlanService.CreateProductionPlan(c, &production_plan.CreateProductionPlanOpts{
 		Name:         req.Name,
-		CustomerID:   req.CustomerID,
-		SalesID:      req.SalesID,
 		ProductName:  req.ProductName,
 		ProductCode:  req.ProductCode,
 		QtyPaper:     req.QtyPaper,
@@ -131,8 +129,6 @@ func (s productionPlanController) EditProductionPlan(c *gin.Context) {
 	err = s.productionPlanService.EditProductionPlan(c, &production_plan.EditProductionPlanOpts{
 		ID:           req.ID,
 		Name:         req.Name,
-		CustomerID:   req.CustomerID,
-		SalesID:      req.SalesID,
 		ProductName:  req.ProductName,
 		ProductCode:  req.ProductCode,
 		QtyPaper:     req.QtyPaper,
@@ -188,8 +184,8 @@ func (s productionPlanController) FindProductionPlansWithNoPermission(c *gin.Con
 		}
 	}
 	productionPlans, cnt, err := s.productionPlanService.FindProductionPlansWithNoPermission(c, &production_plan.FindProductionPlansOpts{
-		IDs:         req.Filter.IDs,
-		CustomerID:  req.Filter.CustomerID,
+		IDs: req.Filter.IDs,
+		//CustomerID:  req.Filter.CustomerID,
 		Name:        req.Filter.Name,
 		ProductName: req.Filter.ProductName,
 		ProductCode: req.Filter.ProductCode,
@@ -207,8 +203,6 @@ func (s productionPlanController) FindProductionPlansWithNoPermission(c *gin.Con
 		data := &dto.ProductionPlan{
 			ID:                f.ID,
 			ProductionOrderID: f.ProductionOrderID.String,
-			CustomerID:        f.CustomerID,
-			SalesID:           f.SalesID,
 			ProductName:       f.ProductName,
 			ProductCode:       f.ProductCode,
 			QtyPaper:          f.QtyPaper,
@@ -252,8 +246,8 @@ func (s productionPlanController) FindProductionPlans(c *gin.Context) {
 		}
 	}
 	productionPlans, cnt, err := s.productionPlanService.FindProductionPlans(c, &production_plan.FindProductionPlansOpts{
-		IDs:         req.Filter.IDs,
-		CustomerID:  req.Filter.CustomerID,
+		IDs: req.Filter.IDs,
+		//CustomerID:  req.Filter.CustomerID,
 		Name:        req.Filter.Name,
 		ProductName: req.Filter.ProductName,
 		ProductCode: req.Filter.ProductCode,
@@ -300,9 +294,7 @@ func (s productionPlanController) FindProductionPlans(c *gin.Context) {
 		}
 		data := &dto.ProductionPlan{
 			ID:                f.ID,
-			CustomerID:        f.CustomerID,
 			ProductionOrderID: f.ProductionOrderID.String,
-			SalesID:           f.SalesID,
 			ProductName:       f.ProductName,
 			ProductCode:       f.ProductCode,
 			QtyPaper:          f.QtyPaper,

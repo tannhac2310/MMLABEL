@@ -26,6 +26,7 @@ type Data struct {
 	SaleID             string
 	Description        string
 	Data               any
+	UserFields         []*repository.CustomFieldData // multiple user fields
 	CreatedAt          time.Time
 	UpdatedAt          time.Time
 	CreatedBy          string
@@ -62,6 +63,7 @@ type UpdateProductOpts struct {
 }
 
 type FindProductOpts struct {
+	IDs            []string
 	Name           string
 	Code           string
 	CustomerID     string

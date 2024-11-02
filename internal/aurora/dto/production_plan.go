@@ -8,9 +8,9 @@ import (
 )
 
 type ProductionPlanFilter struct {
-	IDs         []string                    `json:"ids"`
-	Name        string                      `json:"name"`
-	CustomerID  string                      `json:"customerID"`
+	IDs  []string `json:"ids"`
+	Name string   `json:"name"`
+	//CustomerID  string                      `json:"customerID"`
 	ProductName string                      `json:"productName"`
 	ProductCode string                      `json:"productCode"`
 	Statuses    []enum.ProductionPlanStatus `json:"statuses"`
@@ -30,8 +30,6 @@ type FindProductionPlansResponse struct {
 
 type CreateProductionPlanRequest struct {
 	Name         string         `json:"name" binding:"required"`
-	CustomerID   string         `json:"customerID" binding:"required"`
-	SalesID      string         `json:"salesID"`
 	ProductName  string         `json:"productName" binding:"required"`
 	ProductCode  string         `json:"productCode" binding:"required"`
 	QtyPaper     int64          `json:"qtyPaper,omitempty"`
@@ -50,8 +48,6 @@ type CreateProductionPlanResponse struct {
 type EditProductionPlanRequest struct {
 	ID           string                    `json:"id,omitempty"`
 	Name         string                    `json:"name" binding:"required"`
-	CustomerID   string                    `json:"customerID" binding:"required"`
-	SalesID      string                    `json:"salesID" binding:"required"`
 	ProductName  string                    `json:"productName" binding:"required"`
 	ProductCode  string                    `json:"productCode" binding:"required"`
 	QtyPaper     int64                     `json:"qtyPaper,omitempty"`
@@ -86,9 +82,7 @@ type ProcessProductionOrderResponse struct {
 type ProductionPlan struct {
 	ID                string                    `json:"id,omitempty"`
 	ProductionOrderID string                    `json:"productionOrderID,omitempty"`
-	CustomerID        string                    `json:"customerID,omitempty"`
 	CustomerData      *Customer                 `json:"customerData,omitempty"`
-	SalesID           string                    `json:"salesID,omitempty"`
 	ProductName       string                    `json:"productName,omitempty"`
 	ProductCode       string                    `json:"productCode,omitempty"`
 	QtyPaper          int64                     `json:"qtyPaper,omitempty"`

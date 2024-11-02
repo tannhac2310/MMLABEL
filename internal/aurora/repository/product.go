@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"strings"
 	"time"
@@ -88,7 +89,8 @@ func (s *SearchProductOpts) buildQuery(isCount bool) (string, []interface{}) {
 	}
 	if s.Name != "" {
 		args = append(args, "%"+s.Name+"%")
-		conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.ProductFieldName, len(args))
+		// search by name, code, description
+		conds += fmt.Sprintf(" AND (b.%s ILIKE $%d OR b.%s ILIKE $%d OR b.%s ILIKE $%d)", model.ProductFieldName, len(args), model.ProductFieldCode, len(args), model.ProductFieldDescription, len(args))
 	}
 	if s.CustomerID != "" {
 		args = append(args, s.CustomerID)
@@ -118,7 +120,7 @@ func (s *SearchProductOpts) buildQuery(isCount bool) (string, []interface{}) {
 
 type ProductData struct {
 	*model.Product
-	ProductionPlanID string `db:"production_plan_id"`
+	ProductionPlanID sql.NullString `db:"production_plan_id"`
 }
 
 func (r *sProductRepo) Search(ctx context.Context, s *SearchProductOpts) ([]*ProductData, error) {

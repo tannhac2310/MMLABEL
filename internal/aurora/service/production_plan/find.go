@@ -14,8 +14,8 @@ type Analysis struct {
 }
 
 type FindProductionPlansOpts struct {
-	IDs         []string
-	CustomerID  string
+	IDs []string
+	//CustomerID  string
 	Name        string
 	ProductName string
 	ProductCode string
@@ -26,8 +26,8 @@ type FindProductionPlansOpts struct {
 
 func (c *productionPlanService) FindProductionPlans(ctx context.Context, opts *FindProductionPlansOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error) {
 	filter := &repository.SearchProductionPlanOpts{
-		IDs:         opts.IDs,
-		CustomerID:  opts.CustomerID,
+		IDs: opts.IDs,
+		//CustomerID:  opts.CustomerID,
 		Name:        opts.Name,
 		ProductName: opts.ProductName,
 		ProductCode: opts.ProductCode,
@@ -51,7 +51,9 @@ func (c *productionPlanService) FindProductionPlans(ctx context.Context, opts *F
 	customerIds := make([]string, 0, len(productionPlans))
 
 	for _, productionPlan := range productionPlans {
-		customerIds = append(customerIds, productionPlan.CustomerID)
+		// todo
+		fmt.Println(productionPlan)
+		//customerIds = append(customerIds, productionPlan.CustomerID)
 	}
 	// find customer name
 	customerData, err := c.customerRepo.Search(ctx, &repository.SearchCustomerOpts{
@@ -86,12 +88,12 @@ func (c *productionPlanService) FindProductionPlans(ctx context.Context, opts *F
 			customFieldMap[datum.Field] = datum.Value
 			userFields[datum.Field] = append(userFields[datum.Field], datum)
 		}
-		_customerData := customerMap[productionPlan.CustomerID]
+		//_customerData := customerMap[productionPlan.CustomerID]
 		results = append(results, &Data{
 			ProductionPlanData: productionPlan,
 			CustomData:         customFieldMap,
 			UserFields:         userFields,
-			CustomerData:       _customerData,
+			//CustomerData:       _customerData,
 		})
 	}
 
@@ -100,8 +102,8 @@ func (c *productionPlanService) FindProductionPlans(ctx context.Context, opts *F
 
 func (c *productionPlanService) FindProductionPlansWithNoPermission(ctx context.Context, opts *FindProductionPlansOpts, sort *repository.Sort, limit, offset int64) ([]*DataWithNoPermission, *repository.CountResult, error) {
 	filter := &repository.SearchProductionPlanOpts{
-		IDs:         opts.IDs,
-		CustomerID:  opts.CustomerID,
+		IDs: opts.IDs,
+		//CustomerID:  opts.CustomerID,
 		Name:        opts.Name,
 		ProductName: opts.ProductName,
 		ProductCode: opts.ProductCode,
@@ -126,7 +128,9 @@ func (c *productionPlanService) FindProductionPlansWithNoPermission(ctx context.
 	customerIds := make([]string, 0, len(productionPlans))
 
 	for _, productionPlan := range productionPlans {
-		customerIds = append(customerIds, productionPlan.CustomerID)
+		// TODO
+		fmt.Println(productionPlan)
+		//customerIds = append(customerIds, productionPlan.CustomerID)
 	}
 
 	// find customer name
@@ -145,10 +149,10 @@ func (c *productionPlanService) FindProductionPlansWithNoPermission(ctx context.
 	}
 
 	for _, productionPlan := range productionPlans {
-		_customerData := customerMap[productionPlan.CustomerID]
+		//_customerData := customerMap[productionPlan.CustomerID]
 		results = append(results, &DataWithNoPermission{
 			ProductionPlanData: productionPlan,
-			CustomerData:       _customerData,
+			//CustomerData:       _customerData,
 		})
 	}
 

@@ -11,8 +11,6 @@ import (
 
 const (
 	ProductionPlanFieldID                = "id"
-	ProductionPlanFieldCustomerID        = "customer_id"
-	ProductionPlanFieldSalesID           = "sales_id"
 	ProductionPlanFieldThumbnail         = "thumbnail"
 	ProductionPlanFieldStatus            = "status"
 	ProductionPlanFieldNote              = "note"
@@ -35,8 +33,6 @@ const (
 
 type ProductionPlan struct {
 	ID                string                    `db:"id"`
-	CustomerID        string                    `db:"customer_id"`
-	SalesID           string                    `db:"sales_id"`
 	Thumbnail         sql.NullString            `db:"thumbnail"`
 	Status            enum.ProductionPlanStatus `db:"status"`
 	Note              sql.NullString            `db:"note"`
@@ -60,8 +56,6 @@ type ProductionPlan struct {
 func (rcv *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
 	fields = []string{
 		ProductionPlanFieldID,
-		ProductionPlanFieldCustomerID,
-		ProductionPlanFieldSalesID,
 		ProductionPlanFieldThumbnail,
 		ProductionPlanFieldStatus,
 		ProductionPlanFieldNote,
@@ -84,8 +78,6 @@ func (rcv *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
 
 	values = []interface{}{
 		&rcv.ID,
-		&rcv.CustomerID,
-		&rcv.SalesID,
 		&rcv.Thumbnail,
 		&rcv.Status,
 		&rcv.Note,

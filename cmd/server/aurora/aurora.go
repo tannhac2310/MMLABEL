@@ -9,6 +9,7 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/comment"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/device_config"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/master_data"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/product"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_plan"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/workflow_template"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/service/role"
@@ -163,6 +164,7 @@ func Run(ctx context.Context, configPath string) {
 			repository2.NewProductionOrderStageResponsibleRepo,
 			repository2.NewMasterDataUserFieldRepo,
 			repository2.NewMasterDataRepo,
+			repository2.NewProductRepo,
 		),
 		// services
 		fx.Provide(
@@ -189,6 +191,7 @@ func Run(ctx context.Context, configPath string) {
 			workflow_template.NewService,
 			comment.NewService,
 			master_data.NewService,
+			product.NewService,
 		),
 		// nats streaming
 		fx.Provide(func(cfg *pkgConfig.BaseConfig, zapLogger *zap.Logger) (nats.BusFactory, error) {
@@ -230,6 +233,7 @@ func Run(ctx context.Context, configPath string) {
 			controller.RegisterWorkflowTemplateController,
 			controller.RegisterCommentController,
 			controller.RegisterMasterDataController,
+			controller.RegisterProductController,
 		),
 	}
 

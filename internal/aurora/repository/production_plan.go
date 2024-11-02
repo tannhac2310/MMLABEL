@@ -110,8 +110,8 @@ func (r *sProductionPlanRepo) Summary(ctx context.Context, s *SummaryProductionP
 
 // SearchProductionPlanOpts all params is options
 type SearchProductionPlanOpts struct {
-	IDs         []string
-	CustomerID  string
+	IDs []string
+	//CustomerID  string
 	Name        string
 	ProductName string
 	ProductCode string
@@ -152,11 +152,13 @@ func (s *SearchProductionPlanOpts) buildQuery(isCount bool) (string, []interface
 		args = append(args, s.Stage)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionPlanFieldCurrentStage, len(args))
 	}
+	// TODO need to join production_plan_products products
 
-	if s.CustomerID != "" {
-		args = append(args, s.CustomerID)
-		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionPlanFieldCustomerID, len(args))
-	}
+	//if s.CustomerID != "" {
+	//	// customer id in products
+	//	args = append(args, s.CustomerID)
+	//	conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionPlanFieldCustomerID, len(args))
+	//}
 
 	b := &model.ProductionPlan{}
 	fields, _ := b.FieldMap()
@@ -182,7 +184,7 @@ func (r *sProductionPlanRepo) Search(ctx context.Context, s *SearchProductionPla
 	sql, args := s.buildQuery(false)
 	err := cockroach.Select(ctx, sql, args...).ScanAll(&ProductionPlan)
 	if err != nil {
-		return nil, fmt.Errorf("cockroach.Select: %w", err)
+		return nil, fmt.Errorf("production plan search: %w", err)
 	}
 
 	return ProductionPlan, nil

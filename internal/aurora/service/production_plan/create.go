@@ -13,8 +13,6 @@ import (
 
 type CreateProductionPlanOpts struct {
 	Name         string
-	CustomerID   string
-	SalesID      string
 	ProductName  string
 	ProductCode  string
 	QtyPaper     int64
@@ -37,15 +35,13 @@ func (c *productionPlanService) CreateProductionPlan(ctx context.Context, opt *C
 	id := idutil.ULIDNow()
 
 	// check if customer exists
-	customer, err := c.customerRepo.FindByID(ctx, opt.CustomerID)
-	if err != nil || customer == nil {
-		return "", fmt.Errorf("Thông tin khách hàng không hợp lệ: %s", opt.CustomerID)
-	}
+	//customer, err := c.customerRepo.FindByID(ctx, opt.CustomerID)
+	//if err != nil || customer == nil {
+	//	return "", fmt.Errorf("Thông tin khách hàng không hợp lệ: %s", opt.CustomerID)
+	//}
 
 	productionPlan := &model.ProductionPlan{
 		ID:           id,
-		CustomerID:   opt.CustomerID,
-		SalesID:      opt.SalesID,
 		ProductName:  opt.ProductName,
 		ProductCode:  opt.ProductCode,
 		QtyPaper:     opt.QtyPaper,

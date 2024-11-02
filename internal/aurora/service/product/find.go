@@ -5,12 +5,13 @@ import (
 	"fmt"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	repository2 "mmlabel.gitlab.com/mm-printing-backend/pkg/repository"
 )
 
 func (p productService) FindProduct(ctx context.Context, opts *FindProductOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error) {
 	filter := repository.SearchProductOpts{
-		IDs:           nil,
+		IDs:           opts.IDs,
 		Name:          opts.Name,
 		CustomerID:    opts.CustomerID,
 		SaleID:        opts.SaleID,
@@ -34,13 +35,14 @@ func (p productService) FindProduct(ctx context.Context, opts *FindProductOpts, 
 	customerIDs := make([]string, 0)
 	userID := make([]string, 0)
 	productionPlanIDs := make([]string, 0)
-
 	// 3. Collect customerIDs and userIDs
 	for _, product := range products {
 		customerIDs = append(customerIDs, product.CustomerID)
 		userID = append(userID, product.CreatedBy)
 		userID = append(userID, product.UpdatedBy)
-		productionPlanIDs = append(productionPlanIDs, product.ProductionPlanID)
+		if product.ProductionPlanID.String != "" {
+			productionPlanIDs = append(productionPlanIDs, product.ProductionPlanID.String)
+		}
 	}
 
 	// 4. Find customer data
@@ -97,6 +99,22 @@ func (p productService) FindProduct(ctx context.Context, opts *FindProductOpts, 
 	// 10. Map product data
 	var data []*Data
 	for _, product := range products {
+		// 10.1 find custom field value
+		customFieldData, err := p.userFieldRepo.Search(ctx, &repository.SearchCustomFieldsOpts{
+			EntityType: enum.CustomFieldTypeProduct,
+			EntityId:   product.ID,
+			Limit:      1000,
+			Offset:     0,
+		})
+		if err != nil {
+			return nil, nil, err
+		}
+
+		userFields := make([]*repository.CustomFieldData, 0)
+		for _, datum := range customFieldData {
+			userFields = append(userFields, datum)
+		}
+
 		data = append(data, &Data{
 			ID:                 product.ID,
 			Name:               product.Name,
@@ -106,14 +124,15 @@ func (p productService) FindProduct(ctx context.Context, opts *FindProductOpts, 
 			SaleID:             product.SaleID,
 			Description:        product.Description,
 			Data:               product.Data,
+			UserFields:         userFields,
 			CreatedAt:          product.CreatedAt,
 			UpdatedAt:          product.UpdatedAt,
 			CreatedBy:          product.CreatedBy,
 			CreatedByName:      userDataMap[product.CreatedBy].Name,
 			UpdatedBy:          product.UpdatedBy,
 			UpdatedByName:      userDataMap[product.UpdatedBy].Name,
-			ProductionPlanID:   product.ProductionPlanID,
-			ProductionPlanData: productionPlanDataMap[product.ProductionPlanID],
+			ProductionPlanID:   product.ProductionPlanID.String,
+			ProductionPlanData: productionPlanDataMap[product.ProductionPlanID.String],
 		})
 	}
 

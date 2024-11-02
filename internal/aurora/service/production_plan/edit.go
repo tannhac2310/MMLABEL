@@ -17,8 +17,6 @@ import (
 type EditProductionPlanOpts struct {
 	ID           string
 	Name         string
-	CustomerID   string
-	SalesID      string
 	ProductName  string
 	ProductCode  string
 	QtyPaper     int64
@@ -81,8 +79,6 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 
 	execTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
 		plan.ProductionPlan.Name = opt.Name
-		plan.ProductionPlan.CustomerID = opt.CustomerID
-		plan.ProductionPlan.SalesID = opt.SalesID
 		plan.ProductionPlan.ProductName = opt.ProductName
 		plan.ProductionPlan.ProductCode = opt.ProductCode
 		plan.ProductionPlan.Workflow = opt.Workflow

@@ -14,6 +14,7 @@ type Product struct {
 	CustomerData       *Customer       `json:"customerData"`
 	ProductionPlanData *ProductionPlan `json:"productionPlanData"`
 	ProductionPlanID   string          `json:"productionPlanID"`
+	UserField          []*UserField    `json:"userField"`
 	SaleID             string          `json:"saleID"`
 	Description        string          `json:"description"`
 	Data               any             `json:"data"`
@@ -58,12 +59,13 @@ type UpdateProductResponse struct {
 }
 
 type FindProductOpts struct {
-	Name              string `json:"name"`
-	Code              string `json:"code"`
-	CustomerID        string `json:"customerID"`
-	SaleID            string `json:"saleID"`
-	ProductionPlanID  string `json:"productionPlanID"`
-	ProductionOrderID string `json:"productionOrderID"`
+	IDs               []string `json:"ids"`
+	Name              string   `json:"name"`
+	Code              string   `json:"code"`
+	CustomerID        string   `json:"customerID"`
+	SaleID            string   `json:"saleID"`
+	ProductionPlanID  string   `json:"productionPlanID"`
+	ProductionOrderID string   `json:"productionOrderID"`
 }
 type SearchProductFilter struct {
 	Filter FindProductOpts   `json:"filter" binding:"required"`
@@ -71,8 +73,8 @@ type SearchProductFilter struct {
 }
 
 type SearchProductResponse struct {
-	Product []*Product `json:"product"`
-	Total   int64      `json:"total"`
+	Products []*Product `json:"products"`
+	Total    int64      `json:"total"`
 }
 
 type DeleteProductRequest struct {
