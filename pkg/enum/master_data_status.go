@@ -10,11 +10,13 @@ type MasterDataStatus uint8
 const (
 	MasterDataStatusActive MasterDataStatus = iota + 1
 	MasterDataStatusInactive
+	MasterDataStatusNew
 )
 
 var MasterDataStatusName = map[MasterDataStatus]string{
 	MasterDataStatusActive:   "active",
 	MasterDataStatusInactive: "inactive",
+	MasterDataStatusNew:      "new",
 }
 
 var MasterDataStatusValue = func() map[string]MasterDataStatus {

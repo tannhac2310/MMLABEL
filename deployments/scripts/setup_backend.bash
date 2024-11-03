@@ -37,4 +37,4 @@ case $ENV in
 esac
 
 
-ENV=dev TAG=v1.6.22-rc2 ./deployments/scripts/setup_backend.bash
+#ENV=dev TAG=v1.6.22-rc2 ./deployments/scripts/setup_backend.bash
