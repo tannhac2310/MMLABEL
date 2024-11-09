@@ -64,7 +64,7 @@ func main() {
 		if tableName.String == "schema_lock" || tableName.String == "schema_migrations" {
 			continue
 		}
-		if tableName.String != "products" && tableName.String != "production_plan_products" { // TODO update it
+		if tableName.String != "master_data_selection" && tableName.String != "production_plan_products" { // TODO update it
 			continue
 		}
 		genModel(pool, tableName)
