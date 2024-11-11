@@ -68,5 +68,6 @@ type CreateCustomerOpts struct {
 	ContactPersonRole  string
 	Note               string
 	Status             enum.CustomerStatus
+	Data               any
 	CreatedBy          string
 }

@@ -19,6 +19,7 @@ type ProductionOrderStageDeviceController interface {
 	EditProductionOrderStageDevice(c *gin.Context)
 	DeleteProductionOrderStageDevice(c *gin.Context)
 	Find(c *gin.Context)
+	FindByID(c *gin.Context)
 	FindEventLog(c *gin.Context)
 	FindProcessDeviceHistory(c *gin.Context)
 	UpdateProcessDeviceHistoryIsSolved(c *gin.Context)
@@ -28,6 +29,86 @@ type ProductionOrderStageDeviceController interface {
 
 type productionOrderStageDeviceController struct {
 	productionOrderStageDeviceService production_order_stage_device.Service
+}
+
+func (s productionOrderStageDeviceController) FindByID(c *gin.Context) {
+	req := &dto.FindTaskByIDRequest{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+
+	if req.AccessToken != "je0091" {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage("Invalid access token"))
+		return
+	}
+
+	data, _, err := s.productionOrderStageDeviceService.Find(c, &production_order_stage_device.FindProductionOrderStageDeviceOpts{
+		ID:     req.ID,
+		Limit:  1,
+		Offset: 0,
+	})
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+
+	if len(data) == 0 {
+		transportutil.Error(c, apperror.ErrNotFoundOrNotPermission)
+		return
+	}
+
+	d := data[0]
+	responsible := make([]*dto.POStageDeviceResponsible, 0)
+	for _, r := range d.Responsible {
+		responsible = append(responsible, &dto.POStageDeviceResponsible{
+			ID:              r.ID,
+			POStageDeviceID: r.POStageDeviceID,
+			UserID:          r.UserID,
+			ResponsibleName: r.ResponsibleName,
+		})
+	}
+	po := d.ProductionOrderData
+	productionOrderData := &dto.ProductionOrderData{}
+	if po != nil {
+		productionOrderData = &dto.ProductionOrderData{
+			ID:          po.ID,
+			Name:        po.Name,
+			ProductCode: po.ProductCode,
+			ProductName: po.ProductName,
+		}
+	}
+
+	result := &dto.ProductionOrderStageDevice{
+		ID:                                      d.ID,
+		StartedAt:                               d.StartAt.Time,
+		CompleteAt:                              d.CompleteAt.Time,
+		EstimatedStartAt:                        d.EstimatedStartAt.Time,
+		EstimatedCompleteAt:                     d.EstimatedCompleteAt.Time,
+		ProductionOrderID:                       d.ProductionOrderID,
+		ProductionOrderName:                     d.ProductionOrderName,
+		ProductionOrderData:                     productionOrderData,
+		ProductionOrderStatus:                   d.ProductionOrderStatus,
+		ProductionOrderStageName:                d.ProductionOrderStageName,
+		ProductionOrderStageCode:                d.ProductionOrderStageCode,
+		ProductionOrderStageStatus:              d.ProductionOrderStageStatus,
+		ProductionOrderStageID:                  d.ProductionOrderStageID,
+		ProductionOrderStageStartedAt:           d.ProductionOrderStageStartedAt.Time,
+		ProductionOrderStageCompletedAt:         d.ProductionOrderStageCompletedAt.Time,
+		ProductionOrderStageEstimatedStartAt:    d.ProductionOrderStageEstimatedStartAt.Time,
+		ProductionOrderStageEstimatedCompleteAt: d.ProductionOrderStageEstimatedCompleteAt.Time,
+		DeviceID:                                d.DeviceID,
+		DeviceName:                              d.DeviceName,
+		Quantity:                                d.Quantity,
+		AssignedQuantity:                        d.AssignedQuantity,
+		ProcessStatus:                           d.ProductionOrderStageDevice.ProcessStatus,
+		Status:                                  d.Status,
+		Responsible:                             responsible,
+		Settings:                                d.Settings,
+		Note:                                    d.Note.String,
+	}
+	transportutil.SendJSONResponse(c, result)
 }
 
 func (s productionOrderStageDeviceController) Find(c *gin.Context) {
@@ -420,6 +501,17 @@ func RegisterProductionOrderStageDeviceController(
 		&dto.FindProductionOrderStageDevicesRequest{},
 		&dto.FindProductionOrderStageDevicesResponse{},
 		"Find productionOrderStageDevice",
+	)
+
+	// find by id
+	routeutil.AddEndpoint(
+		g,
+		"find-by-id",
+		c.FindByID,
+		&dto.FindTaskByIDRequest{},
+		&dto.ProductionOrderStageDevice{},
+		"Find productionOrderStageDevice by id",
+		routeutil.RegisterOptionSkipAuth,
 	)
 
 	routeutil.AddEndpoint(

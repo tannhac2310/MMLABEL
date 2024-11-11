@@ -22,6 +22,13 @@ type ProductionOrderStageDeviceFilter struct {
 	//CompleteAt            time.Time                             `json:"completeAt"`
 }
 
+type FindTaskByIDRequest struct {
+	ID          string `json:"id"`
+	AccessToken string `json:"accessToken"`
+}
+
+type FindTaskByIDResponse ProductionOrderStageDevice
+
 type FindProductionOrderStageDevicesRequest struct {
 	Filter *ProductionOrderStageDeviceFilter `json:"filter" binding:"required"`
 	Paging *commondto.Paging                 `json:"paging" binding:"required"`
