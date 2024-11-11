@@ -2,6 +2,7 @@ package customer
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -13,7 +14,8 @@ import (
 
 func (c *customerService) CreateCustomer(ctx context.Context, opt *CreateCustomerOpts) (string, error) {
 	now := time.Now()
-
+	b, _ := json.Marshal(opt)
+	searchContent := fmt.Sprintf("%s %s %s", opt.Name, opt.CompanyEmail, string(b))
 	customer := &model.Customer{
 		ID:                 idutil.ULIDNow(),
 		Name:               opt.Name,
@@ -31,6 +33,8 @@ func (c *customerService) CreateCustomer(ctx context.Context, opt *CreateCustome
 		ContactPersonPhone: opt.ContactPersonPhone,
 		ContactPersonRole:  opt.ContactPersonRole,
 		Note:               cockroach.String(opt.Note),
+		SearchContent:      searchContent,
+		Data:               opt.Data,
 		Status:             opt.Status,
 		CreatedBy:          opt.CreatedBy,
 		CreatedAt:          now,

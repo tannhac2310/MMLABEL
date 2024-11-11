@@ -34,6 +34,7 @@ func (s *masterDataService) CreateMasterData(ctx context.Context, opt *CreateMas
 			ID:          masterDataID,
 			Type:        opt.Type,
 			Name:        opt.Name,
+			Code:        opt.Code,
 			Description: opt.Description,
 			Status:      opt.Status,
 			CreatedBy:   opt.CreatedBy,

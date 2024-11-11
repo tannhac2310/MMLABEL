@@ -41,6 +41,7 @@ func (m masterDataController) InsertMasterData(ctx *gin.Context) {
 		Name:        req.Name,
 		Description: req.Description,
 		Status:      req.Status,
+		Code:        req.Code,
 		UserFields:  uf,
 		CreatedBy:   userID,
 	}
@@ -71,6 +72,7 @@ func (m masterDataController) UpdateMasterData(ctx *gin.Context) {
 	masterData := &master_data.UpdateMasterDataOpts{
 		ID:          req.ID,
 		Name:        req.Name,
+		Code:        req.Code,
 		Description: req.Description,
 		UserFields:  uf,
 		Status:      req.Status,
@@ -133,6 +135,7 @@ func (m masterDataController) GetMasterData(ctx *gin.Context) {
 			ID:          d.ID,
 			Type:        d.Type,
 			Name:        d.Name,
+			Code:        d.Code,
 			Description: d.Description,
 			Status:      d.Status,
 			UserFields:  uf,

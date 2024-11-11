@@ -35,6 +35,7 @@ type CreateMasterDataUserField struct {
 type CreateMasterDataOpts struct {
 	Type        enum.MasterDataType
 	Name        string
+	Code        string
 	Description string
 	Status      enum.MasterDataStatus
 	UserFields  []CreateMasterDataUserField
@@ -44,6 +45,7 @@ type CreateMasterDataOpts struct {
 type UpdateMasterDataOpts struct {
 	ID          string
 	Name        string
+	Code        string
 	Description string
 	UserFields  []CreateMasterDataUserField
 	Status      enum.MasterDataStatus
@@ -66,6 +68,7 @@ type MasterData struct {
 	ID          string
 	Type        enum.MasterDataType
 	Name        string
+	Code        string
 	Description string
 	Status      enum.MasterDataStatus
 	UserFields  []*MasterDataUserField

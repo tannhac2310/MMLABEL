@@ -50,6 +50,7 @@ func (s customerController) CreateCustomer(c *gin.Context) {
 		ContactPersonPhone: req.ContactPersonPhone,
 		ContactPersonRole:  req.ContactPersonRole,
 		Note:               req.Note,
+		Data:               req.Data,
 		Status:             enum.CustomerStatusActivate,
 		CreatedBy:          userID,
 	})

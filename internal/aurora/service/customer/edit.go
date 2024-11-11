@@ -2,6 +2,7 @@ package customer
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -11,6 +12,9 @@ import (
 )
 
 func (c *customerService) EditCustomer(ctx context.Context, opt *EditCustomerOpts) error {
+	b, _ := json.Marshal(opt)
+	searchContent := fmt.Sprintf("%s %s %s", opt.Name, opt.CompanyEmail, string(b))
+
 	customer := model.Customer{
 		ID:                 opt.ID,
 		Name:               opt.Name,
@@ -27,6 +31,8 @@ func (c *customerService) EditCustomer(ctx context.Context, opt *EditCustomerOpt
 		ContactPersonEmail: opt.ContactPersonEmail,
 		ContactPersonPhone: opt.ContactPersonPhone,
 		ContactPersonRole:  opt.ContactPersonRole,
+		Data:               opt.Data,
+		SearchContent:      searchContent,
 		Note:               cockroach.String(opt.Note),
 		Status:             opt.Status,
 		UpdatedAt:          time.Now(),

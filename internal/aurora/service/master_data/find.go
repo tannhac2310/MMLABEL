@@ -67,6 +67,7 @@ func (s *masterDataService) FindMasterData(ctx context.Context, opt *FindMasterD
 			ID:          md.ID,
 			Type:        md.Type,
 			Name:        md.Name,
+			Code:        md.Code,
 			Status:      md.Status,
 			Description: md.Description,
 			CreatedAt:   md.CreatedAt,

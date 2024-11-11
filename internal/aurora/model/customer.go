@@ -25,11 +25,13 @@ const (
 	CustomerFieldContactPersonRole  = "contact_person_role"
 	CustomerFieldNote               = "note"
 	CustomerFieldStatus             = "status"
-	CustomerFieldData               = "data"
-	CustomerFieldCreatedBy          = "created_by"
-	CustomerFieldCreatedAt          = "created_at"
-	CustomerFieldUpdatedAt          = "updated_at"
-	CustomerFieldDeletedAt          = "deleted_at"
+	//search_content
+	CustomerFieldSearchContent = "search_content"
+	CustomerFieldData          = "data"
+	CustomerFieldCreatedBy     = "created_by"
+	CustomerFieldCreatedAt     = "created_at"
+	CustomerFieldUpdatedAt     = "updated_at"
+	CustomerFieldDeletedAt     = "deleted_at"
 )
 
 type Customer struct {
@@ -50,6 +52,7 @@ type Customer struct {
 	ContactPersonRole  string              `db:"contact_person_role"`
 	Note               sql.NullString      `db:"note"`
 	Status             enum.CustomerStatus `db:"status"`
+	SearchContent      string              `db:"search_content"`
 	Data               any                 `db:"data"`
 	CreatedBy          string              `db:"created_by"`
 	CreatedAt          time.Time           `db:"created_at"`
@@ -76,6 +79,7 @@ func (rcv *Customer) FieldMap() (fields []string, values []interface{}) {
 		CustomerFieldContactPersonRole,
 		CustomerFieldNote,
 		CustomerFieldStatus,
+		CustomerFieldSearchContent,
 		CustomerFieldData,
 		CustomerFieldCreatedBy,
 		CustomerFieldCreatedAt,
@@ -101,6 +105,7 @@ func (rcv *Customer) FieldMap() (fields []string, values []interface{}) {
 		&rcv.ContactPersonRole,
 		&rcv.Note,
 		&rcv.Status,
+		&rcv.SearchContent,
 		&rcv.Data,
 		&rcv.CreatedBy,
 		&rcv.CreatedAt,

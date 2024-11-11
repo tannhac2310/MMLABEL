@@ -18,6 +18,7 @@ type MasterData struct {
 	ID          string                 `json:"id"`
 	Type        enum.MasterDataType    `json:"type"`
 	Name        string                 `json:"name"`
+	Code        string                 `json:"code"`
 	UserFields  []*MasterDataUserField `json:"userFields"`
 	Description string                 `json:"description"`
 	Status      enum.MasterDataStatus  `json:"status"`
@@ -41,6 +42,7 @@ type CreateMasterDataRequest struct {
 	Description string                       `json:"description"`
 	UserFields  []*CreateMasterDataUserField `json:"userFields" binding:"required"`
 	Status      enum.MasterDataStatus        `json:"status" binding:"required"`
+	Code        string                       `json:"code"`
 }
 
 type CreateMasterDataResponse struct {
@@ -54,6 +56,7 @@ type UpdateMasterDataRequest struct {
 	Description string                       `json:"description"`
 	Status      enum.MasterDataStatus        `json:"status"`
 	UserFields  []*CreateMasterDataUserField `json:"userFields"`
+	Code        string                       `json:"code"`
 }
 
 type UpdateMasterDataResponse struct {

@@ -11,6 +11,7 @@ const (
 	MasterDataFieldID          = "id"
 	MasterDataFieldType        = "type"
 	MasterDataFieldName        = "name"
+	MasterDataFieldCode        = "code"
 	MasterDataFieldDescription = "description"
 	MasterDataFieldStatus      = "status"
 	MasterDataFieldCreatedAt   = "created_at"
@@ -24,6 +25,7 @@ type MasterData struct {
 	ID          string                `db:"id"`
 	Type        enum.MasterDataType   `db:"type"`
 	Name        string                `db:"name"`
+	Code        string                `db:"code"`
 	Description string                `db:"description"`
 	Status      enum.MasterDataStatus `db:"status"`
 	CreatedAt   time.Time             `db:"created_at"`
@@ -38,6 +40,7 @@ func (rcv *MasterData) FieldMap() (fields []string, values []interface{}) {
 		MasterDataFieldID,
 		MasterDataFieldType,
 		MasterDataFieldName,
+		MasterDataFieldCode,
 		MasterDataFieldDescription,
 		MasterDataFieldStatus,
 		MasterDataFieldCreatedAt,
@@ -51,6 +54,7 @@ func (rcv *MasterData) FieldMap() (fields []string, values []interface{}) {
 		&rcv.ID,
 		&rcv.Type,
 		&rcv.Name,
+		&rcv.Code,
 		&rcv.Description,
 		&rcv.Status,
 		&rcv.CreatedAt,
