@@ -32,34 +32,34 @@ type CustomField struct {
 
 func (c *productionPlanService) CreateProductionPlan(ctx context.Context, opt *CreateProductionPlanOpts) (string, error) {
 	now := time.Now()
-	id := idutil.ULIDNow()
 
-	// check if customer exists
-	//customer, err := c.customerRepo.FindByID(ctx, opt.CustomerID)
-	//if err != nil || customer == nil {
-	//	return "", fmt.Errorf("Thông tin khách hàng không hợp lệ: %s", opt.CustomerID)
-	//}
+	productionPlanID := fmt.Sprintf("in-%d", c.productionPlanRepo.CountRows(ctx)+1)
+	//structToArray
 
-	productionPlan := &model.ProductionPlan{
-		ID:           id,
-		ProductName:  opt.ProductName,
-		ProductCode:  opt.ProductCode,
-		QtyPaper:     opt.QtyPaper,
-		QtyFinished:  opt.QtyFinished,
-		QtyDelivered: opt.QtyDelivered,
-		Workflow:     opt.Workflow,
-		Thumbnail:    cockroach.String(opt.Thumbnail),
-		Status:       enum.ProductionPlanStatusSaleNew,
-		Note:         cockroach.String(opt.Note),
-		CreatedBy:    opt.CreatedBy,
-		CreatedAt:    now,
-		UpdatedBy:    opt.CreatedBy,
-		UpdatedAt:    now,
-		Name:         opt.Name,
-		CurrentStage: enum.ProductionPlanStageSale,
+	search := fmt.Sprintf("%s %s %s %s", opt.Name, opt.ProductName, opt.ProductCode, opt.Note)
+	for _, field := range opt.CustomField {
+		search += fmt.Sprintf(" %s", field.Value)
 	}
-
 	errTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
+		productionPlan := &model.ProductionPlan{
+			ID:            productionPlanID,
+			ProductName:   opt.ProductName,
+			ProductCode:   opt.ProductCode,
+			QtyPaper:      opt.QtyPaper,
+			QtyFinished:   opt.QtyFinished,
+			QtyDelivered:  opt.QtyDelivered,
+			Workflow:      opt.Workflow,
+			Thumbnail:     cockroach.String(opt.Thumbnail),
+			Status:        enum.ProductionPlanStatusSaleNew,
+			Note:          cockroach.String(opt.Note),
+			CreatedBy:     opt.CreatedBy,
+			CreatedAt:     now,
+			UpdatedBy:     opt.CreatedBy,
+			UpdatedAt:     now,
+			Name:          opt.Name,
+			SearchContent: search,
+			CurrentStage:  enum.ProductionPlanStageSale,
+		}
 		if err := c.productionPlanRepo.Insert(ctx2, productionPlan); err != nil {
 			return fmt.Errorf("c.productionPlanRepo.Insert: %w", err)
 		}
@@ -69,12 +69,12 @@ func (c *productionPlanService) CreateProductionPlan(ctx context.Context, opt *C
 			err := c.customFieldRepo.Insert(ctx2, &model.CustomField{
 				ID:         idutil.ULIDNow(),
 				EntityType: enum.CustomFieldTypeProductionPlan,
-				EntityID:   id,
+				EntityID:   productionPlanID,
 				Field:      val.Field,
 				Value:      val.Value,
 			})
 			if err != nil {
-				return fmt.Errorf("c.customFieldRepo.Insert: %w", err)
+				return fmt.Errorf("c.customFieldRepo.Insert:  %w %s %s %s ", err, productionPlanID, val.Field, val.Value)
 			}
 		}
 		return nil
@@ -83,5 +83,5 @@ func (c *productionPlanService) CreateProductionPlan(ctx context.Context, opt *C
 		return "", errTx
 	}
 
-	return productionPlan.ID, nil
+	return productionPlanID, nil
 }

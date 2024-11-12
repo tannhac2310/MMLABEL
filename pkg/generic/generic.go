@@ -1,5 +1,7 @@
 package generic
 
+import "reflect"
+
 func ToMap[K comparable, V any](list []V, f func(V) K) map[K]V {
 	res := make(map[K]V, len(list))
 	for _, item := range list {
@@ -16,4 +18,15 @@ func Map[S any, T any](list []S, f func(S) T) []T {
 	}
 
 	return res
+}
+
+func structToArray(s interface{}) []interface{} {
+	v := reflect.ValueOf(s)
+	values := make([]interface{}, v.NumField())
+
+	for i := 0; i < v.NumField(); i++ {
+		values[i] = v.Field(i).Interface()
+	}
+
+	return values
 }

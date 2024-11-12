@@ -248,6 +248,7 @@ func (s productionPlanController) FindProductionPlans(c *gin.Context) {
 	productionPlans, cnt, err := s.productionPlanService.FindProductionPlans(c, &production_plan.FindProductionPlansOpts{
 		IDs: req.Filter.IDs,
 		//CustomerID:  req.Filter.CustomerID,
+		Search:      req.Filter.Search,
 		Name:        req.Filter.Name,
 		ProductName: req.Filter.ProductName,
 		ProductCode: req.Filter.ProductCode,

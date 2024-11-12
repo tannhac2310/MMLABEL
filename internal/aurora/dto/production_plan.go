@@ -8,9 +8,9 @@ import (
 )
 
 type ProductionPlanFilter struct {
-	IDs  []string `json:"ids"`
-	Name string   `json:"name"`
-	//CustomerID  string                      `json:"customerID"`
+	IDs         []string                    `json:"ids"`
+	Name        string                      `json:"name"`
+	Search      string                      `json:"search"`
 	ProductName string                      `json:"productName"`
 	ProductCode string                      `json:"productCode"`
 	Statuses    []enum.ProductionPlanStatus `json:"statuses"`

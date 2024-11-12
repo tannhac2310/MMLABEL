@@ -29,6 +29,7 @@ const (
 	ProductionPlanFieldQtyDelivered      = "qty_delivered"
 	ProductionPlanFieldWorkflow          = "workflow"
 	ProductionPlanFieldProductionOrderID = "production_order_id"
+	ProductionPlanFieldSearchContent     = "search_content"
 )
 
 type ProductionPlan struct {
@@ -51,6 +52,7 @@ type ProductionPlan struct {
 	QtyDelivered      int64                     `db:"qty_delivered"`
 	Workflow          any                       `db:"workflow"`
 	ProductionOrderID sql.NullString            `db:"production_order_id"`
+	SearchContent     string                    `db:"search_content"`
 }
 
 func (rcv *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
@@ -74,6 +76,7 @@ func (rcv *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
 		ProductionPlanFieldQtyDelivered,
 		ProductionPlanFieldWorkflow,
 		ProductionPlanFieldProductionOrderID,
+		ProductionPlanFieldSearchContent,
 	}
 
 	values = []interface{}{
@@ -96,6 +99,7 @@ func (rcv *ProductionPlan) FieldMap() (fields []string, values []interface{}) {
 		&rcv.QtyDelivered,
 		&rcv.Workflow,
 		&rcv.ProductionOrderID,
+		&rcv.SearchContent,
 	}
 
 	return

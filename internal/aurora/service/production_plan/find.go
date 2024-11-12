@@ -16,6 +16,7 @@ type Analysis struct {
 type FindProductionPlansOpts struct {
 	IDs []string
 	//CustomerID  string
+	Search      string
 	Name        string
 	ProductName string
 	ProductCode string
@@ -28,6 +29,7 @@ func (c *productionPlanService) FindProductionPlans(ctx context.Context, opts *F
 	filter := &repository.SearchProductionPlanOpts{
 		IDs: opts.IDs,
 		//CustomerID:  opts.CustomerID,
+		Search:      opts.Search,
 		Name:        opts.Name,
 		ProductName: opts.ProductName,
 		ProductCode: opts.ProductCode,

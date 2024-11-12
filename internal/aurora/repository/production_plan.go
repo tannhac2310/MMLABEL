@@ -18,6 +18,7 @@ type ProductionPlanRepo interface {
 	FindByID(ctx context.Context, id string) (*ProductionPlanData, error)
 	Search(ctx context.Context, s *SearchProductionPlanOpts) ([]*ProductionPlanData, error)
 	Count(ctx context.Context, s *SearchProductionPlanOpts) (*CountResult, error)
+	CountRows(ctx context.Context) int64
 	Summary(ctx context.Context, s *SummaryProductionPlanOpts) ([]*SummaryProductionPlanData, error)
 }
 
@@ -27,7 +28,18 @@ type sProductionPlanRepo struct {
 func NewProductionPlanRepo() ProductionPlanRepo {
 	return &sProductionPlanRepo{}
 }
+func (r *sProductionPlanRepo) CountRows(ctx context.Context) int64 {
+	countResult := &CountResult{}
+	sql := "SELECT count(*) as cnt FROM production_plans AS b"
 
+	err := cockroach.Select(ctx, sql).ScanOne(countResult)
+	if err != nil {
+		return 0
+	}
+
+	return countResult.Count
+
+}
 func (r *sProductionPlanRepo) Insert(ctx context.Context, e *model.ProductionPlan) error {
 	err := cockroach.Create(ctx, e)
 	if err != nil {
@@ -113,6 +125,7 @@ type SearchProductionPlanOpts struct {
 	IDs []string
 	//CustomerID  string
 	Name        string
+	Search      string
 	ProductName string
 	ProductCode string
 	Statuses    []enum.ProductionPlanStatus
@@ -136,6 +149,12 @@ func (s *SearchProductionPlanOpts) buildQuery(isCount bool) (string, []interface
 		args = append(args, "%"+s.Name+"%")
 		conds += fmt.Sprintf(" AND b.%[2]s ILIKE $%[1]d", len(args), model.ProductionPlanFieldName)
 	}
+
+	if s.Search != "" {
+		args = append(args, "%"+s.Search+"%")
+		conds += fmt.Sprintf(" AND b.%[2]s ILIKE $%[1]d", len(args), model.ProductionPlanFieldSearchContent)
+	}
+
 	if s.ProductName != "" {
 		args = append(args, "%"+s.ProductName+"%")
 		conds += fmt.Sprintf(" AND b.%[2]s ILIKE $%[1]d", len(args), model.ProductionPlanFieldProductName)

@@ -50,7 +50,10 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 	if err != nil {
 		return err
 	}
-
+	search := fmt.Sprintf("%s %s %s %s", opt.Name, opt.ProductName, opt.ProductCode, opt.Note)
+	for _, field := range opt.CustomField {
+		search += fmt.Sprintf(" %s", field.Value)
+	}
 	customFieldMap := generic.ToMap(customFields, func(f *repository.CustomFieldData) string {
 		return f.Field
 	})
@@ -91,6 +94,7 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 		plan.Thumbnail = cockroach.String(opt.Thumbnail)
 		plan.Note = cockroach.String(opt.Note)
 		plan.Status = opt.Status
+		plan.SearchContent = search
 		//plan.CurrentStage = opt.CurrentStage // TODO: have to update this field
 
 		if err := c.productionPlanRepo.Update(ctx2, plan.ProductionPlan); err != nil {
