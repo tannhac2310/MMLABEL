@@ -1,6 +1,9 @@
 package controller
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
@@ -133,13 +136,9 @@ func (m masterDataController) GetMasterData(ctx *gin.Context) {
 	//	Limit: len(pIDs),
 	//})
 
-	productionPlanData, _, err := m.masterDataService.FindMasterData(ctx, &master_data.FindMasterDataOpts{
-		IDs:    req.Filter.IDs,
-		Type:   req.Filter.Type,
-		Search: req.Filter.Search,
-		Limit:  req.Paging.Limit,
-		Offset: req.Paging.Offset,
-	})
+	productionPlanData, _, err := m.productionPlanService.FindProductionPlans(ctx, &production_plan.FindProductionPlansOpts{
+		IDs: pIDs,
+	}, nil, int64(len(pIDs)), 0)
 
 	if err != nil {
 		transportutil.Error(ctx, apperror.ErrUnknown.WithDebugMessage(err.Error()+"find production plan"))
@@ -148,10 +147,14 @@ func (m masterDataController) GetMasterData(ctx *gin.Context) {
 	productionPlanDataMap := make(map[string][]*dto.ShortProductionPlan)
 	for _, d := range productionPlanData {
 		productionPlanDataMap[d.ID] = append(productionPlanDataMap[d.ID], &dto.ShortProductionPlan{
-			ID:   d.ID,
-			Name: d.Name,
+			ID:         d.ID,
+			Name:       d.Name,
+			CustomData: d.CustomData,
 		})
 	}
+	fmt.Println("====================================")
+	x, _ := json.Marshal(productionPlanDataMap)
+	fmt.Println("productionPlanDataMap", string(x))
 	res := make([]*dto.MasterData, 0, len(data))
 	for _, d := range data {
 		uf := make([]*dto.MasterDataUserField, 0, len(d.UserFields))
@@ -164,7 +167,10 @@ func (m masterDataController) GetMasterData(ctx *gin.Context) {
 			})
 		}
 
-		xData := productionPlanDataMap[d.ID]
+		xData := make([]*dto.ShortProductionPlan, 0)
+		for _, x := range d.ProductionPlanIDs {
+			xData = append(xData, productionPlanDataMap[x]...)
+		}
 
 		res = append(res, &dto.MasterData{
 			ID:              d.ID,

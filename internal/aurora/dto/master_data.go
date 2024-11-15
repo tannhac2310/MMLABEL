@@ -14,8 +14,9 @@ type MasterDataUserField struct {
 	FieldValue   string `json:"fieldValue"`
 }
 type ShortProductionPlan struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID         string            `json:"id"`
+	Name       string            `json:"name"`
+	CustomData map[string]string `json:"customData"`
 }
 type MasterData struct {
 	ID              string                 `json:"id"`
