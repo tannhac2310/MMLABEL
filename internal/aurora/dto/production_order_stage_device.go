@@ -66,6 +66,7 @@ type ProductionOrderStageDevice struct {
 	CompleteAt                              time.Time                             `json:"completeAt"`
 	DeviceID                                string                                `json:"deviceID"`
 	DeviceName                              string                                `json:"deviceName"`
+	Color                                   string                                `json:"color"`
 	Quantity                                int64                                 `json:"quantity"`
 	AssignedQuantity                        int64                                 `json:"assignedQuantity"`
 	ProcessStatus                           enum.ProductionOrderStageDeviceStatus `json:"processStatus"`

@@ -18,12 +18,16 @@ type Service interface {
 type masterDataService struct {
 	masterDataRep       repository.MasterDataRepo
 	masterDataUserField repository.MasterDataUserFieldRepo
+	customFieldRepo     repository.CustomFieldRepo
 }
 
-func NewService(masterDataRep repository.MasterDataRepo, masterDataUserField repository.MasterDataUserFieldRepo) Service {
+func NewService(masterDataRep repository.MasterDataRepo, masterDataUserField repository.MasterDataUserFieldRepo,
+	customFieldRepo repository.CustomFieldRepo,
+) Service {
 	return &masterDataService{
 		masterDataRep:       masterDataRep,
 		masterDataUserField: masterDataUserField,
+		customFieldRepo:     customFieldRepo,
 	}
 }
 
@@ -57,7 +61,7 @@ type DeleteMasterDataOpts struct {
 }
 
 type FindMasterDataOpts struct {
-	ID     string
+	IDs    []string
 	Type   enum.MasterDataType
 	Search string
 	Limit  int64
@@ -65,17 +69,18 @@ type FindMasterDataOpts struct {
 }
 
 type MasterData struct {
-	ID          string
-	Type        enum.MasterDataType
-	Name        string
-	Code        string
-	Description string
-	Status      enum.MasterDataStatus
-	UserFields  []*MasterDataUserField
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	CreatedBy   string
-	UpdatedBy   string
+	ID                string
+	Type              enum.MasterDataType
+	Name              string
+	Code              string
+	Description       string
+	Status            enum.MasterDataStatus
+	UserFields        []*MasterDataUserField
+	ProductionPlanIDs []string
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+	CreatedBy         string
+	UpdatedBy         string
 }
 
 type MasterDataUserField struct {

@@ -22,6 +22,7 @@ func (c *deviceConfigService) CreateDeviceConfig(ctx context.Context, opt *Creat
 		Description:       cockroach.String(opt.Description),
 		Search:            cockroach.String(opt.Search),
 		DeviceConfig:      opt.DeviceConfig,
+		DeviceType:        opt.DeviceType,
 		CreatedBy:         opt.CreatedBy,
 		CreatedAt:         now,
 		UpdatedBy:         opt.CreatedBy,
@@ -51,5 +52,6 @@ type CreateDeviceConfigOpts struct {
 	Color             string
 	Description       string
 	Search            string
+	DeviceType        string
 	CreatedBy         string
 }

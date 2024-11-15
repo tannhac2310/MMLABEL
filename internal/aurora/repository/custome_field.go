@@ -74,10 +74,12 @@ type SearchCustomFieldsOpts struct {
 	EntityId   string
 	EntityType enum.CustomFieldType
 	Field      string
-	Code       string
-	Limit      int64
-	Offset     int64
-	Sort       *Sort
+	Value      string
+	Values     []string
+	//Code       string
+	Limit  int64
+	Offset int64
+	Sort   *Sort
 }
 
 func (s *SearchCustomFieldsOpts) buildQuery(isCount bool) (string, []interface{}) {
@@ -99,6 +101,16 @@ func (s *SearchCustomFieldsOpts) buildQuery(isCount bool) (string, []interface{}
 		args = append(args, s.EntityType)
 		conds += fmt.Sprintf(" AND b.%[2]s = $%[1]d",
 			len(args), model.CustomFieldFieldEntityType)
+	}
+	if s.Value != "" {
+		args = append(args, s.Value)
+		conds += fmt.Sprintf(" AND b.%[2]s = $%[1]d",
+			len(args), model.CustomFieldFieldValue)
+	}
+	if len(s.Values) > 0 {
+		args = append(args, s.Values)
+		conds += fmt.Sprintf(" AND b.%[2]s = ANY($%[1]d)",
+			len(args), model.CustomFieldFieldValue)
 	}
 
 	b := &model.CustomField{}

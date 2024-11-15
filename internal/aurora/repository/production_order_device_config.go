@@ -60,6 +60,7 @@ type SearchProductionOrderDeviceConfigOpts struct {
 	Search            string
 	ProductionOrderID string
 	ProductionPlanID  string
+	DeviceType        string
 	Limit             int64
 	Offset            int64
 	Sort              *Sort
@@ -85,6 +86,10 @@ func (s *SearchProductionOrderDeviceConfigOpts) buildQuery(isCount bool) (string
 	if s.ProductionPlanID != "" {
 		args = append(args, s.ProductionPlanID)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderDeviceConfigFieldProductionPlanID, len(args))
+	}
+	if s.DeviceType != "" {
+		args = append(args, s.DeviceType)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderDeviceConfigFieldDeviceType, len(args))
 	}
 
 	if s.Search != "" {

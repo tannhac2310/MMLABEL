@@ -13,19 +13,23 @@ type MasterDataUserField struct {
 	FieldName    string `json:"fieldName"`
 	FieldValue   string `json:"fieldValue"`
 }
-
+type ShortProductionPlan struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
 type MasterData struct {
-	ID          string                 `json:"id"`
-	Type        enum.MasterDataType    `json:"type"`
-	Name        string                 `json:"name"`
-	Code        string                 `json:"code"`
-	UserFields  []*MasterDataUserField `json:"userFields"`
-	Description string                 `json:"description"`
-	Status      enum.MasterDataStatus  `json:"status"`
-	CreatedAt   time.Time              `json:"createdAt"`
-	UpdatedAt   time.Time              `json:"updatedAt"`
-	CreatedBy   string                 `json:"createdBy"`
-	UpdatedBy   string                 `json:"updatedBy"`
+	ID              string                 `json:"id"`
+	Type            enum.MasterDataType    `json:"type"`
+	Name            string                 `json:"name"`
+	Code            string                 `json:"code"`
+	UserFields      []*MasterDataUserField `json:"userFields"`
+	Description     string                 `json:"description"`
+	Status          enum.MasterDataStatus  `json:"status"`
+	ProductionPlans []*ShortProductionPlan `json:"productionPlans"`
+	CreatedAt       time.Time              `json:"createdAt"`
+	UpdatedAt       time.Time              `json:"updatedAt"`
+	CreatedBy       string                 `json:"createdBy"`
+	UpdatedBy       string                 `json:"updatedBy"`
 }
 
 type CreateMasterDataUserField struct {
@@ -72,7 +76,7 @@ type DeleteMasterDataResponse struct {
 
 // SearchMasterDataFilter get
 type SearchMasterDataFilter struct {
-	ID     string              `json:"id"`
+	IDs    []string            `json:"ids"`
 	Type   enum.MasterDataType `json:"type"`
 	Search string              `json:"search"`
 }

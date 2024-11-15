@@ -12,6 +12,7 @@ func (c *deviceConfigService) FindDeviceConfigs(ctx context.Context, opts *FindD
 		Search:            opts.Search,
 		ProductionOrderID: opts.ProductionOrderID,
 		ProductionPlanID:  opts.ProductionPlanID,
+		DeviceType:        opts.DeviceType,
 		Limit:             limit,
 		Offset:            offset,
 		Sort:              sort,
@@ -28,10 +29,6 @@ func (c *deviceConfigService) FindDeviceConfigs(ctx context.Context, opts *FindD
 
 	results := make([]*Data, 0, len(deviceConfigs))
 	for _, deviceConfig := range deviceConfigs {
-		if err != nil {
-			return nil, nil, err
-		}
-
 		results = append(results, &Data{
 			ProductionOrderDeviceConfigData: deviceConfig,
 		})
@@ -44,4 +41,5 @@ type FindDeviceConfigsOpts struct {
 	Search            string
 	ProductionOrderID string
 	ProductionPlanID  string
+	DeviceType        string
 }

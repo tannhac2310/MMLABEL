@@ -14,6 +14,7 @@ const (
 	ProductionOrderDeviceConfigFieldSearch            = "search"
 	ProductionOrderDeviceConfigFieldDeviceConfig      = "device_config"
 	ProductionOrderDeviceConfigFieldProductionPlanID  = "production_plan_id"
+	ProductionOrderDeviceConfigFieldDeviceType        = "device_type"
 	ProductionOrderDeviceConfigFieldCreatedBy         = "created_by"
 	ProductionOrderDeviceConfigFieldCreatedAt         = "created_at"
 	ProductionOrderDeviceConfigFieldUpdatedBy         = "updated_by"
@@ -30,6 +31,7 @@ type ProductionOrderDeviceConfig struct {
 	Search            sql.NullString         `db:"search"`
 	DeviceConfig      map[string]interface{} `db:"device_config"`
 	ProductionPlanID  sql.NullString         `db:"production_plan_id"`
+	DeviceType        string                 `db:"device_type"`
 	CreatedBy         string                 `db:"created_by"`
 	CreatedAt         time.Time              `db:"created_at"`
 	UpdatedBy         string                 `db:"updated_by"`
@@ -47,6 +49,7 @@ func (rcv *ProductionOrderDeviceConfig) FieldMap() (fields []string, values []in
 		ProductionOrderDeviceConfigFieldSearch,
 		ProductionOrderDeviceConfigFieldDeviceConfig,
 		ProductionOrderDeviceConfigFieldProductionPlanID,
+		ProductionOrderDeviceConfigFieldDeviceType,
 		ProductionOrderDeviceConfigFieldCreatedBy,
 		ProductionOrderDeviceConfigFieldCreatedAt,
 		ProductionOrderDeviceConfigFieldUpdatedBy,
@@ -63,6 +66,7 @@ func (rcv *ProductionOrderDeviceConfig) FieldMap() (fields []string, values []in
 		&rcv.Search,
 		&rcv.DeviceConfig,
 		&rcv.ProductionPlanID,
+		&rcv.DeviceType,
 		&rcv.CreatedBy,
 		&rcv.CreatedAt,
 		&rcv.UpdatedBy,

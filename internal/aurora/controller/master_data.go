@@ -5,6 +5,7 @@ import (
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/master_data"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_plan"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/apperror"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/interceptor"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/routeutil"
@@ -19,7 +20,8 @@ type MasterDataController interface {
 }
 
 type masterDataController struct {
-	masterDataService master_data.Service
+	masterDataService     master_data.Service
+	productionPlanService production_plan.Service
 }
 
 func (m masterDataController) InsertMasterData(ctx *gin.Context) {
@@ -109,7 +111,7 @@ func (m masterDataController) GetMasterData(ctx *gin.Context) {
 		return
 	}
 	data, total, err := m.masterDataService.FindMasterData(ctx, &master_data.FindMasterDataOpts{
-		ID:     req.Filter.ID,
+		IDs:    req.Filter.IDs,
 		Type:   req.Filter.Type,
 		Search: req.Filter.Search,
 		Limit:  req.Paging.Limit,
@@ -119,7 +121,37 @@ func (m masterDataController) GetMasterData(ctx *gin.Context) {
 		transportutil.Error(ctx, err)
 		return
 	}
+	// find production plan
+	pIDs := make([]string, 0)
+	for _, d := range data {
+		pIDs = append(pIDs, d.ProductionPlanIDs...)
+	}
 
+	// find production plan
+	//productionPlanData, err := m.masterDataService.FindMasterData(ctx, &master_data.FindMasterDataOpts{
+	//	IDs:   pIDs,
+	//	Limit: len(pIDs),
+	//})
+
+	productionPlanData, _, err := m.masterDataService.FindMasterData(ctx, &master_data.FindMasterDataOpts{
+		IDs:    req.Filter.IDs,
+		Type:   req.Filter.Type,
+		Search: req.Filter.Search,
+		Limit:  req.Paging.Limit,
+		Offset: req.Paging.Offset,
+	})
+
+	if err != nil {
+		transportutil.Error(ctx, apperror.ErrUnknown.WithDebugMessage(err.Error()+"find production plan"))
+		return
+	}
+	productionPlanDataMap := make(map[string][]*dto.ShortProductionPlan)
+	for _, d := range productionPlanData {
+		productionPlanDataMap[d.ID] = append(productionPlanDataMap[d.ID], &dto.ShortProductionPlan{
+			ID:   d.ID,
+			Name: d.Name,
+		})
+	}
 	res := make([]*dto.MasterData, 0, len(data))
 	for _, d := range data {
 		uf := make([]*dto.MasterDataUserField, 0, len(d.UserFields))
@@ -131,16 +163,22 @@ func (m masterDataController) GetMasterData(ctx *gin.Context) {
 				FieldValue:   f.FieldValue,
 			})
 		}
+
+		xData := productionPlanDataMap[d.ID]
+
 		res = append(res, &dto.MasterData{
-			ID:          d.ID,
-			Type:        d.Type,
-			Name:        d.Name,
-			Code:        d.Code,
-			Description: d.Description,
-			Status:      d.Status,
-			UserFields:  uf,
-			CreatedBy:   d.CreatedBy,
-			CreatedAt:   d.CreatedAt,
+			ID:              d.ID,
+			Type:            d.Type,
+			Name:            d.Name,
+			Code:            d.Code,
+			UserFields:      uf,
+			Description:     d.Description,
+			Status:          d.Status,
+			ProductionPlans: xData,
+			CreatedAt:       d.CreatedAt,
+			UpdatedAt:       d.UpdatedAt,
+			CreatedBy:       d.CreatedBy,
+			UpdatedBy:       d.UpdatedBy,
 		})
 	}
 
@@ -150,17 +188,18 @@ func (m masterDataController) GetMasterData(ctx *gin.Context) {
 	})
 }
 
-func NewMasterDataController(masterDataService master_data.Service) MasterDataController {
-	return &masterDataController{
-		masterDataService: masterDataService,
-	}
-}
+//func NewMasterDataController(masterDataService master_data.Service) MasterDataController {
+//	return &masterDataController{
+//		masterDataService: masterDataService,
+//	}
+//}
 
-func RegisterMasterDataController(r *gin.RouterGroup, masterDataService master_data.Service) {
+func RegisterMasterDataController(r *gin.RouterGroup, masterDataService master_data.Service, productionPlanService production_plan.Service) {
 	g := r.Group("master-data")
 
 	var c MasterDataController = &masterDataController{
-		masterDataService: masterDataService,
+		masterDataService:     masterDataService,
+		productionPlanService: productionPlanService,
 	}
 
 	routeutil.AddEndpoint(

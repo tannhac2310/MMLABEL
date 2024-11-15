@@ -11,6 +11,7 @@ type DeviceConfigFilter struct {
 	Search            string   `json:"search"`
 	ProductionOrderID string   `json:"productionOrderID"`
 	ProductionPlanID  string   `json:"productionPlanID"`
+	DeviceType        string   `json:"deviceType"`
 }
 
 type FindDeviceConfigsRequest struct {
@@ -34,6 +35,7 @@ type DeviceConfig struct {
 	DeviceConfig        map[string]interface{} `json:"deviceConfig"`
 	Color               string                 `json:"color"`
 	Description         string                 `json:"description"`
+	DeviceType          string                 `json:"deviceType"`
 	CreatedBy           string                 `json:"createdBy"`
 	CreatedAt           time.Time              `json:"createdAt"`
 	UpdatedAt           time.Time              `json:"updatedAt"`
@@ -44,6 +46,7 @@ type CreateDeviceConfigRequest struct {
 	ProductionPlanID  string                 `json:"productionPlanID"`
 	DeviceID          string                 `json:"deviceID"`
 	DeviceConfig      map[string]interface{} `json:"deviceConfig" binding:"required"`
+	DeviceType        string                 `json:"deviceType"` // todo add binding:"required"
 	Color             string                 `json:"color"`
 	Description       string                 `json:"description"`
 	Search            string                 `json:"search"`

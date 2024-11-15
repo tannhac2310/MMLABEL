@@ -40,6 +40,7 @@ func (s deviceConfigController) CreateDeviceConfig(c *gin.Context) {
 		DeviceConfig:      req.DeviceConfig,
 		Color:             req.Color,
 		Description:       req.Description,
+		DeviceType:        "printer", // req.DeviceType, TODO change to req.DeviceType
 		Search:            req.Search,
 		CreatedBy:         userId,
 	})
@@ -110,6 +111,7 @@ func (s deviceConfigController) FindDeviceConfigs(c *gin.Context) {
 		Search:            req.Filter.Search,
 		ProductionOrderID: req.Filter.ProductionOrderID,
 		ProductionPlanID:  req.Filter.ProductionPlanID,
+		DeviceType:        req.Filter.DeviceType,
 	}, &repository.Sort{
 		Order: repository.SortOrderDESC,
 		By:    "ID",
@@ -142,6 +144,7 @@ func toDeviceConfigResp(f *device_config.Data) *dto.DeviceConfig {
 		DeviceConfig:        f.DeviceConfig,
 		Color:               f.Color.String,
 		Description:         f.Description.String,
+		DeviceType:          f.DeviceType,
 		CreatedBy:           f.CreatedBy,
 		CreatedAt:           f.CreatedAt,
 		UpdatedAt:           f.UpdatedAt,
