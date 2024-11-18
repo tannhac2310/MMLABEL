@@ -200,3 +200,11 @@ type FindAvailabilityTimeResponse struct {
 	LossTime    int64 `json:"lossTime"`
 	WorkingTime int64 `json:"workingTime"`
 }
+
+type UpdateProcessStatusRequest struct {
+	ProductionOrderStageDeviceID string                                `json:"productionOrderStageDeviceID"`
+	ProcessStatus                enum.ProductionOrderStageDeviceStatus `json:"processStatus"`
+}
+
+type UpdateProcessStatusResponse struct {
+}

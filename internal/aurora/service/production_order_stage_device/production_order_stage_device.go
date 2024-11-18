@@ -71,6 +71,7 @@ type Service interface {
 	FindProcessDeviceHistory(ctx context.Context, opt *FindProcessDeviceHistoryOpts, sort *repository.Sort, limit, offset int64) ([]*repository.DeviceProgressStatusHistoryData, *repository.CountResult, error)
 	EditDeviceProcessHistoryIsSolved(ctx context.Context, opt *EditDeviceProcessHistoryIsSolvedOpts) error
 	FindAvailabilityTime(ctx context.Context, opt *FindLostTimeOpts) (*AvailabilityTime, error)
+	UpdateProcessStatus(ctx context.Context, opt *UpdateProcessStatusOpts) error
 }
 type productionOrderStageDeviceService struct {
 	productionOrderRepo              repository.ProductionOrderRepo
@@ -438,6 +439,25 @@ func (p productionOrderStageDeviceService) Find(ctx context.Context, opt *FindPr
 	}
 
 	return result, total, nil
+}
+
+type UpdateProcessStatusOpts struct {
+	ProductionOrderStageDeviceID string
+	ProcessStatus                enum.ProductionOrderStageDeviceStatus
+}
+
+func (p productionOrderStageDeviceService) UpdateProcessStatus(ctx context.Context, opt *UpdateProcessStatusOpts) error {
+	device := model.ProductionOrderStageDevice{}
+	updater := cockroach.NewUpdater(device.TableName(), model.ProductionOrderStageDeviceFieldID, opt.ProductionOrderStageDeviceID)
+	updater.Set(model.ProductionOrderStageDeviceFieldProcessStatus, opt.ProcessStatus)
+	updater.Set(model.ProductionOrderStageDeviceFieldUpdatedAt, time.Now())
+
+	err := cockroach.UpdateFields(ctx, updater)
+	if err != nil {
+		return fmt.Errorf("update process status: %w", err)
+	}
+
+	return nil
 }
 
 func NewService(

@@ -25,10 +25,29 @@ type ProductionOrderStageDeviceController interface {
 	UpdateProcessDeviceHistoryIsSolved(c *gin.Context)
 	FindAvailabilityTime(c *gin.Context)
 	FindWorkingDevice(c *gin.Context)
+	UpdateProcessStatus(c *gin.Context)
 }
 
 type productionOrderStageDeviceController struct {
 	productionOrderStageDeviceService production_order_stage_device.Service
+}
+
+func (s productionOrderStageDeviceController) UpdateProcessStatus(c *gin.Context) {
+	req := &dto.UpdateProcessStatusRequest{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+	err = s.productionOrderStageDeviceService.UpdateProcessStatus(c, &production_order_stage_device.UpdateProcessStatusOpts{
+		ProductionOrderStageDeviceID: req.ProductionOrderStageDeviceID,
+		ProcessStatus:                req.ProcessStatus,
+	})
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+	transportutil.SendJSONResponse(c, &dto.UpdateProcessStatusResponse{})
 }
 
 func (s productionOrderStageDeviceController) FindByID(c *gin.Context) {
@@ -548,5 +567,13 @@ func RegisterProductionOrderStageDeviceController(
 		&dto.FindWorkingDevice{},
 		&dto.FindProductionOrderStageDevicesResponse{},
 		"Lay danh sach thiet bi dang lam viec",
+	)
+	routeutil.AddEndpoint(
+		g,
+		"update-process-status",
+		c.UpdateProcessStatus,
+		&dto.UpdateProcessStatusRequest{},
+		&dto.UpdateProcessStatusResponse{},
+		"Update process status",
 	)
 }

@@ -91,7 +91,7 @@ func (s *SearchStagesOpts) buildQuery(isCount bool) (string, []interface{}) {
 		args = append(args, s.Codes)
 		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.StageFieldCode, len(args))
 	}
-
+	fmt.Println("============================================>>s.UserID", s.UserID)
 	if s.UserID != "" {
 		args = append(args, s.UserID)
 		// join user_role, role_permission
@@ -111,13 +111,8 @@ func (s *SearchStagesOpts) buildQuery(isCount bool) (string, []interface{}) {
 	if s.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", s.Sort.By, s.Sort.Order)
 	}
-	fmt.Println(fmt.Sprintf(`SELECT b.%s
-		FROM %s AS b %s
-		WHERE TRUE %s AND b.deleted_at IS NULL
-		%s
-		LIMIT %d
-		OFFSET %d`, strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset))
-	return fmt.Sprintf(`SELECT b.%s
+
+	return fmt.Sprintf(`SELECT DISTINCT b.%s
 		FROM %s AS b %s
 		WHERE TRUE %s AND b.deleted_at IS NULL
 		%s
