@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_order_stage_device"
+	"strconv"
 	"strings"
 	"time"
 
@@ -25,10 +27,11 @@ type EventMQTTSubscription struct {
 	config *configs.Config
 	db     cockroach.Ext
 	//busFactory nats.BusFactory
-	productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo
-	deviceWorkingHistoryRepo       repository.DeviceWorkingHistoryRepo
-	logger                         *zap.Logger
-	wsService                      ws.WebSocketService
+	productionOrderStageDeviceRepo    repository.ProductionOrderStageDeviceRepo
+	deviceWorkingHistoryRepo          repository.DeviceWorkingHistoryRepo
+	productionOrderStageDeviceService production_order_stage_device.Service
+	logger                            *zap.Logger
+	wsService                         ws.WebSocketService
 }
 
 func NewMQTTSubscription(
@@ -36,16 +39,18 @@ func NewMQTTSubscription(
 	db cockroach.Ext,
 	productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo,
 	deviceWorkingHistoryRepo repository.DeviceWorkingHistoryRepo,
+	productionOrderStageDeviceService production_order_stage_device.Service,
 	logger *zap.Logger,
 	wsService ws.WebSocketService,
 ) *EventMQTTSubscription {
 	return &EventMQTTSubscription{
-		config:                         config,
-		db:                             db,
-		productionOrderStageDeviceRepo: productionOrderStageDeviceRepo,
-		deviceWorkingHistoryRepo:       deviceWorkingHistoryRepo,
-		logger:                         logger,
-		wsService:                      wsService,
+		config:                            config,
+		db:                                db,
+		productionOrderStageDeviceRepo:    productionOrderStageDeviceRepo,
+		deviceWorkingHistoryRepo:          deviceWorkingHistoryRepo,
+		productionOrderStageDeviceService: productionOrderStageDeviceService,
+		logger:                            logger,
+		wsService:                         wsService,
 	}
 }
 
@@ -68,6 +73,99 @@ type IotParseData struct {
 	TG_in_Ngay int64
 	SL_in_LSX  int64
 	TG_in_LSX  int64
+}
+
+type IotData struct {
+	DeviceID        string
+	Quantity        int64
+	WorkOrderID     string
+	TestProduction  bool
+	StartProduction bool
+	StopPO          bool
+	Pause           bool
+	PauseReason     int
+	DefectQuantity  int64
+	PrintPerDay     int64
+}
+
+func parseIotData(jsonData []byte, prefixes []string) (IotData, error) {
+	var rawData map[string]interface{}
+	if err := json.Unmarshal(jsonData, &rawData); err != nil {
+		return IotData{}, err
+	}
+
+	var detectedPrefix string
+	for _, prefix := range prefixes {
+		for key := range rawData {
+			if strings.HasPrefix(key, prefix+"_") {
+				detectedPrefix = prefix
+				break
+			}
+		}
+		if detectedPrefix != "" {
+			break
+		}
+	}
+
+	if detectedPrefix == "" {
+		return IotData{}, fmt.Errorf("không tìm thấy tiền tố phù hợp trong JSON")
+	}
+
+	data := IotData{DeviceID: detectedPrefix}
+
+	for key, value := range rawData {
+		if strings.HasPrefix(key, detectedPrefix+"_") {
+			field := strings.TrimPrefix(key, detectedPrefix+"_")
+			switch field {
+			case "ON/OFF":
+				if v, ok := value.(float64); ok {
+					data.StartProduction = v == 1
+				}
+			case "SO_LUONG_SX":
+				if v, ok := value.(float64); ok {
+					data.Quantity = int64(v)
+				}
+			case "MA_LENH_LAM_VIEC":
+				switch v := value.(type) {
+				case float64:
+					data.WorkOrderID = strconv.FormatInt(int64(v), 10)
+				case string:
+					data.WorkOrderID = v
+				}
+			case "BUTTON_SX_THU":
+				if v, ok := value.(float64); ok {
+					data.TestProduction = v == 1
+				}
+			case "BUTTON_SX":
+				if v, ok := value.(float64); ok {
+					data.StartProduction = v == 1
+				}
+			case "BUTTON_NGUNG_PO":
+				if v, ok := value.(float64); ok {
+					data.StopPO = v == 1
+				}
+			case "BUTTON_TAM_DUNG":
+				if v, ok := value.(float64); ok {
+					data.Pause = v == 1
+				}
+			case "LY_DO_TAM_DUNG":
+				if v, ok := value.(float64); ok {
+					data.PauseReason = int(v)
+				}
+			case "SO_LUONG_LOI":
+				if v, ok := value.(float64); ok {
+					data.DefectQuantity = int64(v)
+				}
+			case "SO_LUONG_NGAY":
+				if v, ok := value.(float64); ok {
+					data.PrintPerDay = int64(v)
+				}
+			}
+
+		}
+	}
+
+	return data, nil
 }
 
 func (p *EventMQTTSubscription) Subscribe() error {
@@ -109,151 +207,270 @@ func (p *EventMQTTSubscription) Subscribe() error {
 		ctx = ctxzap.ToContext(ctx, p.logger)
 		ctx = cockroach.ContextWithDB(ctx, p.db)
 
-		// parse message.Payload() to data struct
-		var iotData MyStruct
-		err := json.Unmarshal(message.Payload(), &iotData)
-		if err != nil {
-			fmt.Println("Error parsing JSON:", err)
-			return
-		}
+		//// parse message.Payload() to data struct
+		//var IotParseData MyStruct
+		//err := json.Unmarshal(message.Payload(), &IotParseData)
+		//if err != nil {
+		//	fmt.Println("Error parsing JSON:", err)
+		//	return
+		//}
 
 		now := time.Now()
 		dateStr := now.Format("2006-01-02")
-		// iotData.D is {"d":[{"tag":"B_PR03:SL_in_LSX","value":259.00},{"tag":"B_PR03:ON_OFF","value":1},{"tag":"B_PR03:SL_in_Ngay","value":143.00},{"tag":"B_PR03:TG_in_Ngay","value":32.00},{"tag":"B_PR03:SL_in_LSX_1","value":0.00},{"tag":"B_PR03:TG_in_LSX_1","value":0.00},{"tag":"B_PR03:SL_in_LSX_2","value":0.00},{"tag":"B_PR03:TG_in_LSX_2","value":0.00},{"tag":"B_PR03:SL_in_LSX_3","value":0.00},{"tag":"B_PR03:TG_in_LSX_3","value":0.00},{"tag":"B_PR03:SL_in_LSX_4","value":0.00},{"tag":"B_PR03:TG_in_LSX_4","value":0.00},{"tag":"B_PR03:TG_in_LSX","value":32.00},{"tag":"B_PR04:SL_in_LSX","value":0.00},{"tag":"B_PR04:ON_OFF","value":1},{"tag":"B_PR04:SL_in_Ngay","value":0.00},{"tag":"B_PR04:TG_in_Ngay","value":0.00},{"tag":"B_PR04:TG_in_LSX","value":0.00},{"tag":"B_PR04:SL_in_LSX_1","value":0.00},{"tag":"B_PR04:TG_in_LSX_1","value":0.00},{"tag":"B_PR04:SL_in_LSX_2","value":0.00},{"tag":"B_PR04:TG_in_LSX_2","value":0.00},{"tag":"B_PR04:SL_in_LSX_3","value":0.00},{"tag":"B_PR04:TG_in_LSX_3","value":0.00},{"tag":"B_PR04:SL_in_LSX_4","value":0.00},{"tag":"B_PR04:TG_in_LSX_4","value":0.00}],"ts":"2023-12-27T01:19:15+0000"}
-		// group by by device id
-		//
-		mappingData := make(map[string]*IotParseData, 0)
-		for _, item := range iotData.D {
 
-			d := strings.Split(item.Tag, ":")
-			if len(d) != 2 {
-				continue
-			}
-			deviceID := d[0]
-			action := d[1]
-			if _, ok := mappingData[deviceID]; !ok {
-				mappingData[deviceID] = &IotParseData{
-					DeviceID:   deviceID,
-					SL_in_Ngay: 0,
-					TG_in_Ngay: 0,
-					SL_in_LSX:  0,
-					TG_in_LSX:  0,
-				}
-			}
-			if action == "SL_in_Ngay" {
-				mappingData[deviceID].SL_in_Ngay = int64(item.Value)
-			}
-			if action == "TG_in_Ngay" {
-				mappingData[deviceID].TG_in_Ngay = int64(item.Value)
-			}
-			if action == "SL_in_LSX" {
-				mappingData[deviceID].SL_in_LSX = int64(item.Value)
-			}
-			if action == "TG_in_LSX" {
-				mappingData[deviceID].TG_in_LSX = int64(item.Value)
-			}
+		//Minh
+		jsonStr := message.Payload() //`{"PR05_ON/OFF":1,"PR05_SO_LUONG_SX":1,"PR05_MA_LENH_LAM_VIEC":"20271","PR05_BUTTON_SX_THU":0,"PR05_BUTTON_SX":1,"PR05_BUTTON_NGUNG_PO":0,"PR05_BUTTON_TAM_DUNG":0,"PR05_LY_DO_TAM_DUNG":0,"PR05_SO_LUONG_LOI":1}`
+		prefixes := []string{"PR05", "PR06", "PR07"}
+		iotData, err := parseIotData([]byte(jsonStr), prefixes)
+		if err == nil {
+			fmt.Println("Lỗi:", err)
+			return
 		}
-		fmt.Println(iotData.D, iotData.Ts)
-		for deviceID, item := range mappingData {
-			// find device in production order stage device
-
-			p.logger.Info("IOT+PARSE+DATA",
-				zap.Any("deviceID", deviceID),
-				zap.Any("mappingData", item))
-
-			orderStageDevices, err := p.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
-				DeviceIDs:                    []string{deviceID},
-				ProductionOrderStageStatuses: []enum.ProductionOrderStageStatus{enum.ProductionOrderStageStatusProductionStart},
-				Limit:                        1,
-				Offset:                       0,
-			})
-
-			if err != nil {
-				// todo nothing
-				p.logger.Error(" p.productionOrderStageDeviceRepo.Search error", zap.Error(err))
-			}
-			activeStageID := ""
-			orderStageDeviceID := ""
-			if len(orderStageDevices) >= 1 && orderStageDevices[0].ProcessStatus == enum.ProductionOrderStageDeviceStatusStart {
-				device := orderStageDevices[0]
-				orderStageDeviceID = device.ID
-				activeStageID = device.ProductionOrderStageID
-				if item.SL_in_LSX > 0 && item.SL_in_LSX > device.Quantity {
-					// update first device
-					_ = p.productionOrderStageDeviceRepo.Update(ctx, &model.ProductionOrderStageDevice{
-						ID:                     device.ID,
-						ProductionOrderStageID: device.ProductionOrderStageID,
-						DeviceID:               device.DeviceID,
-						Quantity:               item.SL_in_LSX,
-						ProcessStatus:          device.ProcessStatus,
-						Status:                 device.Status,
-						Settings:               device.Settings,
-						Note:                   device.Note,
-						CreatedAt:              device.CreatedAt,
-						UpdatedAt:              device.UpdatedAt,
-						Responsible:            device.Responsible,
-						EstimatedCompleteAt:    device.EstimatedCompleteAt,
-						AssignedQuantity:       device.AssignedQuantity,
-					})
-				}
-			}
-			// upsert to device_working_history
+		upsertDeviceWorkingHistory := func(ctx context.Context, orderStageDevice *model.ProductionOrderStageDevice, item IotData, dateStr string, now time.Time) error {
 			deviceWorkingHistories, err := p.deviceWorkingHistoryRepo.Search(ctx, &repository.SearchDeviceWorkingHistoryOpts{
-				DeviceID: deviceID,
+				DeviceID: orderStageDevice.DeviceID,
 				Date:     dateStr,
 				Limit:    1,
 			})
 			if err != nil {
-				// todo nothing
-				p.logger.Error(" p.deviceWorkingHistoryRepo.Search error", zap.Error(err))
+				return err
 			}
+
 			if len(deviceWorkingHistories) == 0 {
-				p.deviceWorkingHistoryRepo.Insert(ctx, &model.DeviceWorkingHistory{
+				// Chèn mới
+				newHistory := &model.DeviceWorkingHistory{
 					ID:                           idutil.ULIDNow(),
-					ProductionOrderStageDeviceID: cockroach.String(orderStageDeviceID),
-					DeviceID:                     deviceID,
+					ProductionOrderStageDeviceID: cockroach.String(orderStageDevice.DeviceID),
+					DeviceID:                     orderStageDevice.DeviceID,
 					Date:                         dateStr,
-					Quantity:                     item.SL_in_Ngay, // todo remove this field in db
-					WorkingTime:                  item.TG_in_Ngay, // todo remove this field in db
-					NumberOfPrintsPerDay:         item.SL_in_Ngay,
-					PrintingTimePerDay:           item.TG_in_Ngay,
-					PoQuantity:                   item.SL_in_LSX,
-					PoWorkingTime:                item.TG_in_LSX,
+					NumberOfPrintsPerDay:         item.Quantity,
 					CreatedAt:                    now,
-				})
-			} else {
-				// update
-				deviceWorkingHistory := deviceWorkingHistories[0].DeviceWorkingHistory
-
-				deviceWorkingHistory.NumberOfPrintsPerDay = item.SL_in_Ngay
-				deviceWorkingHistory.PrintingTimePerDay = item.TG_in_Ngay
-				deviceWorkingHistory.Quantity = item.SL_in_Ngay    // todo remove this field in db
-				deviceWorkingHistory.WorkingTime = item.TG_in_Ngay // todo remove this field in db
-				deviceWorkingHistory.PoWorkingTime = item.TG_in_LSX
-				deviceWorkingHistory.PoQuantity = item.SL_in_LSX
-
-				deviceWorkingHistory.UpdatedAt = cockroach.Time(now)
-
-				err := p.deviceWorkingHistoryRepo.Update(ctx, deviceWorkingHistory)
-				if err != nil {
-					// todo nothing
-					p.logger.Error(" p.deviceWorkingHistoryRepo.Update error", zap.Error(err))
 				}
+				return p.deviceWorkingHistoryRepo.Insert(ctx, newHistory)
 			}
 
-			fmt.Println("activeStageID", activeStageID)
-			// insert event log
-			_ = p.productionOrderStageDeviceRepo.InsertEventLog(ctx, &model.EventLog{
+			// Cập nhật
+			existingHistory := deviceWorkingHistories[0].DeviceWorkingHistory
+			existingHistory.Quantity = item.Quantity
+			existingHistory.UpdatedAt = cockroach.Time(now)
+			return p.deviceWorkingHistoryRepo.Update(ctx, existingHistory)
+		}
+
+		insertEventLog := func(ctx context.Context, orderStageDevice *model.ProductionOrderStageDevice, item IotData, dateStr string, now time.Time, payload string) error {
+			eventLog := &model.EventLog{
 				ID:          time.Now().UnixNano(),
-				DeviceID:    deviceID,
-				StageID:     cockroach.String(activeStageID),
-				StageStatus: nil, // todo check stage status
-				Quantity:    float64(item.SL_in_Ngay),
-				Msg:         cockroach.String(string(message.Payload())),
+				DeviceID:    orderStageDevice.DeviceID,
+				StageID:     cockroach.String(orderStageDevice.ProductionOrderStageID),
+				StageStatus: nil, // todo: xác định trạng thái stage
+				Quantity:    float64(item.Quantity),
+				Msg:         cockroach.String(payload),
 				Date:        cockroach.String(dateStr),
 				CreatedAt:   now,
-			})
+			}
+			return p.productionOrderStageDeviceRepo.InsertEventLog(ctx, eventLog)
 		}
+		processIotData := func(ctx context.Context, item IotData, dateStr string, now time.Time, jsonStr string) error {
+			orderStageDevice, err := p.productionOrderStageDeviceRepo.FindByID(ctx, iotData.WorkOrderID)
+			if err != nil {
+				p.logger.Error("Error finding active order stage device", zap.Error(err))
+				return err
+			}
+			if orderStageDevice == nil {
+				return nil
+			}
+			deviceStateStatus := orderStageDevice.ProcessStatus
+			switch deviceStateStatus {
+			case enum.ProductionOrderStageDeviceStatusNone:
+				if item.StartProduction {
+					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusStart
+				} else if item.TestProduction {
+					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusTestProduce
+				} else {
+					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusCompleteTestProduce
+				}
+
+			case enum.ProductionOrderStageDeviceStatusStart:
+				if item.Pause {
+					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusFailed
+				} else if item.StopPO {
+					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusPause
+				}
+
+			case enum.ProductionOrderStageDeviceStatusFailed:
+				if item.StartProduction {
+					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusStart
+				}
+
+			default:
+				// Log unexpected state for debugging
+				p.logger.Warn("Unexpected device state status", zap.Any("deviceStateStatus", deviceStateStatus))
+			}
+
+			err = p.productionOrderStageDeviceService.Edit(ctx, &production_order_stage_device.EditProductionOrderStageDeviceOpts{
+				ID:            orderStageDevice.ID,
+				DeviceID:      orderStageDevice.DeviceID,
+				ProcessStatus: deviceStateStatus,
+				Status:        orderStageDevice.Status,
+				SanPhamLoi:    item.DefectQuantity,
+			})
+			if err != nil {
+				p.logger.Error("Error updating production order stage device", zap.Error(err))
+				return err
+			}
+
+			// Cập nhật hoặc chèn lịch sử làm việc của thiết bị
+			if err := upsertDeviceWorkingHistory(ctx, orderStageDevice, item, dateStr, now); err != nil {
+				p.logger.Error("Error upserting device working history", zap.Error(err))
+				return err
+			}
+			if err := insertEventLog(ctx, orderStageDevice, item, dateStr, now, jsonStr); err != nil {
+				p.logger.Error("Error upserting device working history", zap.Error(err))
+				return err
+			}
+
+			return nil
+		}
+
+		err = processIotData(ctx, iotData, dateStr, now, string(jsonStr))
+		if err != nil {
+			return
+		}
+		//End Minh
+
+		// iotData.D is {"d":[{"tag":"B_PR03:SL_in_LSX","value":259.00},{"tag":"B_PR03:ON_OFF","value":1},{"tag":"B_PR03:SL_in_Ngay","value":143.00},{"tag":"B_PR03:TG_in_Ngay","value":32.00},{"tag":"B_PR03:SL_in_LSX_1","value":0.00},{"tag":"B_PR03:TG_in_LSX_1","value":0.00},{"tag":"B_PR03:SL_in_LSX_2","value":0.00},{"tag":"B_PR03:TG_in_LSX_2","value":0.00},{"tag":"B_PR03:SL_in_LSX_3","value":0.00},{"tag":"B_PR03:TG_in_LSX_3","value":0.00},{"tag":"B_PR03:SL_in_LSX_4","value":0.00},{"tag":"B_PR03:TG_in_LSX_4","value":0.00},{"tag":"B_PR03:TG_in_LSX","value":32.00},{"tag":"B_PR04:SL_in_LSX","value":0.00},{"tag":"B_PR04:ON_OFF","value":1},{"tag":"B_PR04:SL_in_Ngay","value":0.00},{"tag":"B_PR04:TG_in_Ngay","value":0.00},{"tag":"B_PR04:TG_in_LSX","value":0.00},{"tag":"B_PR04:SL_in_LSX_1","value":0.00},{"tag":"B_PR04:TG_in_LSX_1","value":0.00},{"tag":"B_PR04:SL_in_LSX_2","value":0.00},{"tag":"B_PR04:TG_in_LSX_2","value":0.00},{"tag":"B_PR04:SL_in_LSX_3","value":0.00},{"tag":"B_PR04:TG_in_LSX_3","value":0.00},{"tag":"B_PR04:SL_in_LSX_4","value":0.00},{"tag":"B_PR04:TG_in_LSX_4","value":0.00}],"ts":"2023-12-27T01:19:15+0000"}
+		// group by by device id
+		//
+		//mappingData := make(map[string]*IotParseData, 0)
+		//for _, item := range iotData.D {
+		//
+		//	d := strings.Split(item.Tag, ":")
+		//	if len(d) != 2 {
+		//		continue
+		//	}
+		//	deviceID := d[0]
+		//	action := d[1]
+		//	if _, ok := mappingData[deviceID]; !ok {
+		//		mappingData[deviceID] = &IotParseData{
+		//			DeviceID:   deviceID,
+		//			SL_in_Ngay: 0,
+		//			TG_in_Ngay: 0,
+		//			SL_in_LSX:  0,
+		//			TG_in_LSX:  0,
+		//		}
+		//	}
+		//	if action == "SL_in_Ngay" {
+		//		mappingData[deviceID].SL_in_Ngay = int64(item.Value)
+		//	}
+		//	if action == "TG_in_Ngay" {
+		//		mappingData[deviceID].TG_in_Ngay = int64(item.Value)
+		//	}
+		//	if action == "SL_in_LSX" {
+		//		mappingData[deviceID].SL_in_LSX = int64(item.Value)
+		//	}
+		//	if action == "TG_in_LSX" {
+		//		mappingData[deviceID].TG_in_LSX = int64(item.Value)
+		//	}
+		//}
+		//fmt.Println(iotData.D, iotData.Ts)
+		//for deviceID, item := range mappingData {
+		//	// find device in production order stage device
+		//	p.logger.Info("IOT+PARSE+DATA",
+		//		zap.Any("deviceID", deviceID),
+		//		zap.Any("mappingData", item))
+		//
+		//	orderStageDevices, err := p.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
+		//		DeviceIDs:                    []string{deviceID},
+		//		ProductionOrderStageStatuses: []enum.ProductionOrderStageStatus{enum.ProductionOrderStageStatusProductionStart},
+		//		Limit:                        1,
+		//		Offset:                       0,
+		//	})
+		//
+		//	if err != nil {
+		//		// todo nothing
+		//		p.logger.Error(" p.productionOrderStageDeviceRepo.Search error", zap.Error(err))
+		//	}
+		//	activeStageID := ""
+		//	orderStageDeviceID := ""
+		//	if len(orderStageDevices) >= 1 && orderStageDevices[0].ProcessStatus == enum.ProductionOrderStageDeviceStatusStart {
+		//		device := orderStageDevices[0]
+		//		orderStageDeviceID = device.ID
+		//		activeStageID = device.ProductionOrderStageID
+		//		if item.SL_in_LSX > 0 && item.SL_in_LSX > device.Quantity {
+		//			// update first device
+		//			_ = p.productionOrderStageDeviceRepo.Update(ctx, &model.ProductionOrderStageDevice{
+		//				ID:                     device.ID,
+		//				ProductionOrderStageID: device.ProductionOrderStageID,
+		//				DeviceID:               device.DeviceID,
+		//				Quantity:               item.SL_in_LSX,
+		//				ProcessStatus:          device.ProcessStatus,
+		//				Status:                 device.Status,
+		//				Settings:               device.Settings,
+		//				Note:                   device.Note,
+		//				CreatedAt:              device.CreatedAt,
+		//				UpdatedAt:              device.UpdatedAt,
+		//				Responsible:            device.Responsible,
+		//				EstimatedCompleteAt:    device.EstimatedCompleteAt,
+		//				AssignedQuantity:       device.AssignedQuantity,
+		//			})
+		//		}
+		//	}
+		//	// upsert to device_working_history
+		//	deviceWorkingHistories, err := p.deviceWorkingHistoryRepo.Search(ctx, &repository.SearchDeviceWorkingHistoryOpts{
+		//		DeviceID: deviceID,
+		//		Date:     dateStr,
+		//		Limit:    1,
+		//	})
+		//	if err != nil {
+		//		// todo nothing
+		//		p.logger.Error(" p.deviceWorkingHistoryRepo.Search error", zap.Error(err))
+		//	}
+		//	if len(deviceWorkingHistories) == 0 {
+		//		p.deviceWorkingHistoryRepo.Insert(ctx, &model.DeviceWorkingHistory{
+		//			ID:                           idutil.ULIDNow(),
+		//			ProductionOrderStageDeviceID: cockroach.String(orderStageDeviceID),
+		//			DeviceID:                     deviceID,
+		//			Date:                         dateStr,
+		//			Quantity:                     item.SL_in_Ngay, // todo remove this field in db
+		//			WorkingTime:                  item.TG_in_Ngay, // todo remove this field in db
+		//			NumberOfPrintsPerDay:         item.SL_in_Ngay,
+		//			PrintingTimePerDay:           item.TG_in_Ngay,
+		//			PoQuantity:                   item.SL_in_LSX,
+		//			PoWorkingTime:                item.TG_in_LSX,
+		//			CreatedAt:                    now,
+		//		})
+		//	} else {
+		//		// update
+		//		deviceWorkingHistory := deviceWorkingHistories[0].DeviceWorkingHistory
+		//
+		//		deviceWorkingHistory.NumberOfPrintsPerDay = item.SL_in_Ngay
+		//		deviceWorkingHistory.PrintingTimePerDay = item.TG_in_Ngay
+		//		deviceWorkingHistory.Quantity = item.SL_in_Ngay    // todo remove this field in db
+		//		deviceWorkingHistory.WorkingTime = item.TG_in_Ngay // todo remove this field in db
+		//		deviceWorkingHistory.PoWorkingTime = item.TG_in_LSX
+		//		deviceWorkingHistory.PoQuantity = item.SL_in_LSX
+		//
+		//		deviceWorkingHistory.UpdatedAt = cockroach.Time(now)
+		//
+		//		err := p.deviceWorkingHistoryRepo.Update(ctx, deviceWorkingHistory)
+		//		if err != nil {
+		//			// todo nothing
+		//			p.logger.Error(" p.deviceWorkingHistoryRepo.Update error", zap.Error(err))
+		//		}
+		//	}
+		//
+		//	fmt.Println("activeStageID", activeStageID)
+		//	// insert event log
+		//	_ = p.productionOrderStageDeviceRepo.InsertEventLog(ctx, &model.EventLog{
+		//		ID:          time.Now().UnixNano(),
+		//		DeviceID:    deviceID,
+		//		StageID:     cockroach.String(activeStageID),
+		//		StageStatus: nil, // todo check stage status
+		//		Quantity:    float64(item.SL_in_Ngay),
+		//		Msg:         cockroach.String(string(message.Payload())),
+		//		Date:        cockroach.String(dateStr),
+		//		CreatedAt:   now,
+		//	})
+		//}
 
 		message.Ack()
 	})
