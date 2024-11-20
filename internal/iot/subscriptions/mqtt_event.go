@@ -312,6 +312,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				ProcessStatus: deviceStateStatus,
 				Status:        orderStageDevice.Status,
 				SanPhamLoi:    item.DefectQuantity,
+				Quantity:      item.Quantity,
 			})
 			if err != nil {
 				p.logger.Error("Error updating production order stage device", zap.Error(err))
