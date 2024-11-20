@@ -35,3 +35,8 @@ redis:
   host: "redis:6379"
   password: "MTIz"
 websockerDocsDir: "./resources/ws/"
+mqtt:
+  host: "103.252.72.219"
+  port: 31883
+  username: "user1"
+  password: "123"

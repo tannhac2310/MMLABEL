@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
+
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/device_config"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/iot/subscriptions"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/service/role"
-	"os"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/option"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/product_quality"
@@ -120,6 +121,7 @@ func Run(ctx context.Context, configPath string) {
 			repository.NewUserRoleRepo,
 			repository.NewRoleRepo,
 			repository.NewRolePermissionRepo,
+			repository2.NewProductionOrderStageResponsibleRepo,
 		),
 		// services
 		fx.Provide(
