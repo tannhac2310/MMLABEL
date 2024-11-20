@@ -22,19 +22,26 @@ const (
 	DeviceFieldDeletedAt = "deleted_at"
 )
 
+type SettingsData struct {
+	DefectiveError               string `json:"defective_error"`
+	DefectiveReason              string `json:"defective_reason"`
+	Description                  string `json:"description"`
+	ProductionOrderStageID       string `json:"production_order_stage_id"`
+	ProductionOrderStageDeviceID string `json:"production_order_stage_device_id"`
+}
 type Device struct {
-	ID        string                 `db:"id"`
-	Name      string                 `db:"name"`
-	Code      string                 `db:"code"`
-	Sort      int                    `db:"sort"`
-	Step      string                 `db:"step"`
-	OptionID  sql.NullString         `db:"option_id"`
-	Data      map[string]interface{} `db:"data"`
-	Status    enum.CommonStatus      `db:"status"`
-	CreatedBy string                 `db:"created_by"`
-	CreatedAt time.Time              `db:"created_at"`
-	UpdatedAt time.Time              `db:"updated_at"`
-	DeletedAt sql.NullTime           `db:"deleted_at"`
+	ID        string            `db:"id"`
+	Name      string            `db:"name"`
+	Code      string            `db:"code"`
+	Sort      int               `db:"sort"`
+	Step      string            `db:"step"`
+	OptionID  sql.NullString    `db:"option_id"`
+	Data      SettingsData      `db:"data"`
+	Status    enum.CommonStatus `db:"status"`
+	CreatedBy string            `db:"created_by"`
+	CreatedAt time.Time         `db:"created_at"`
+	UpdatedAt time.Time         `db:"updated_at"`
+	DeletedAt sql.NullTime      `db:"deleted_at"`
 }
 
 func (rcv *Device) FieldMap() (fields []string, values []interface{}) {

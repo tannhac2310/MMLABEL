@@ -42,6 +42,12 @@ func (s productionOrderStageDeviceController) UpdateProcessStatus(c *gin.Context
 	err = s.productionOrderStageDeviceService.UpdateProcessStatus(c, &production_order_stage_device.UpdateProcessStatusOpts{
 		ProductionOrderStageDeviceID: req.ProductionOrderStageDeviceID,
 		ProcessStatus:                req.ProcessStatus,
+		UserID:                       interceptor.UserIDFromCtx(c),
+		Settings: &production_order_stage_device.SettingsData{
+			DefectiveError:  req.Settings.DefectiveError,
+			DefectiveReason: req.Settings.DefectiveReason,
+			Description:     req.Settings.Description,
+		},
 	})
 	if err != nil {
 		transportutil.Error(c, err)

@@ -3,8 +3,9 @@ package device
 import (
 	"context"
 	"fmt"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
@@ -15,11 +16,11 @@ func (c *deviceService) CreateDevice(ctx context.Context, opt *CreateDeviceOpts)
 	now := time.Now()
 
 	device := &model.Device{
-		ID:        idutil.ULIDNow(),
-		Name:      opt.Name,
-		Code:      opt.Code,
-		OptionID:  cockroach.String(opt.OptionID),
-		Data:      opt.Data,
+		ID:       idutil.ULIDNow(),
+		Name:     opt.Name,
+		Code:     opt.Code,
+		OptionID: cockroach.String(opt.OptionID),
+		//Data:      opt.Data,
 		Status:    opt.Status,
 		CreatedBy: opt.CreatedBy,
 		CreatedAt: now,
@@ -41,10 +42,10 @@ func (c *deviceService) CreateDevice(ctx context.Context, opt *CreateDeviceOpts)
 }
 
 type CreateDeviceOpts struct {
-	Name      string
-	Code      string
-	OptionID  string
-	Data      map[string]interface{}
+	Name     string
+	Code     string
+	OptionID string
+	//Data      map[string]interface{}
 	Status    enum.CommonStatus
 	CreatedBy string
 }

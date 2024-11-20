@@ -143,6 +143,7 @@ func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditPr
 			modelData.ErrorReason = cockroach.String(opt.Settings.DefectiveError)
 			modelData.Description = cockroach.String(opt.Settings.Description)
 		}
+
 		err = p.sDeviceProgressStatusHistoryRepo.Insert(ctx, modelData)
 
 		if err != nil {
@@ -444,20 +445,110 @@ func (p productionOrderStageDeviceService) Find(ctx context.Context, opt *FindPr
 type UpdateProcessStatusOpts struct {
 	ProductionOrderStageDeviceID string
 	ProcessStatus                enum.ProductionOrderStageDeviceStatus
+	UserID                       string
+	Settings                     *SettingsData
 }
 
 func (p productionOrderStageDeviceService) UpdateProcessStatus(ctx context.Context, opt *UpdateProcessStatusOpts) error {
-	device := model.ProductionOrderStageDevice{}
-	updater := cockroach.NewUpdater(device.TableName(), model.ProductionOrderStageDeviceFieldID, opt.ProductionOrderStageDeviceID)
-	updater.Set(model.ProductionOrderStageDeviceFieldProcessStatus, opt.ProcessStatus)
-	updater.Set(model.ProductionOrderStageDeviceFieldUpdatedAt, time.Now())
+	userID := opt.UserID
+	//table := model.ProductionOrderStageDevice{}
+	tableProductProgress := model.DeviceProgressStatusHistory{}
+	tableDevice := model.Device{}
 
-	err := cockroach.UpdateFields(ctx, updater)
+	data, err := p.productionOrderStageDeviceRepo.FindByID(ctx, opt.ProductionOrderStageDeviceID)
 	if err != nil {
-		return fmt.Errorf("update process status: %w", err)
+		return fmt.Errorf("p.productionOrderStageDeviceRepo.FindByID: %w", err)
+	}
+
+	errTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
+		device := model.ProductionOrderStageDevice{}
+		updater := cockroach.NewUpdater(device.TableName(), model.ProductionOrderStageDeviceFieldID, opt.ProductionOrderStageDeviceID)
+		updater.Set(model.ProductionOrderStageDeviceFieldProcessStatus, opt.ProcessStatus)
+		updater.Set(model.ProductionOrderStageDeviceFieldUpdatedAt, time.Now())
+
+		err := cockroach.UpdateFields(ctx, updater)
+		if err != nil {
+			return fmt.Errorf("update process status: %w", err)
+		}
+
+		// write log
+		if data.ProcessStatus != opt.ProcessStatus {
+			// find lasted status of device
+			lasted, _ := p.sDeviceProgressStatusHistoryRepo.FindProductionOrderStageDeviceID(ctx, data.ID, data.DeviceID)
+			fmt.Println("userID===============>>>>lasted", err, lasted, data.ID, data.DeviceID)
+			if lasted != nil && lasted.IsResolved == 0 && opt.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart && (lasted.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed || lasted.ProcessStatus == enum.ProductionOrderStageDeviceStatusPause) {
+				updaterHistory := cockroach.NewUpdater(tableProductProgress.TableName(), model.DeviceProgressStatusHistoryFieldID, lasted.ID)
+				updaterHistory.Set(model.DeviceProgressStatusHistoryFieldUpdatedBy, userID)
+				updaterHistory.Set(model.DeviceProgressStatusHistoryFieldUpdatedAt, time.Now())
+				updaterHistory.Set(model.DeviceProgressStatusHistoryFieldIsResolved, 1)
+				err := cockroach.UpdateFields(ctx, updaterHistory)
+				if err != nil {
+					return fmt.Errorf("lỗi cập nhật xử lý máy: %w", err)
+				}
+			}
+			// MA1: Máy bị lỗi.
+			// Cập nhật trạng thái máy thành hỏng
+			// TODO fix hardcode
+			if opt.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed && opt.Settings.DefectiveError == "MA1" {
+				updaterDevice := cockroach.NewUpdater(tableDevice.TableName(), model.DeviceFieldID, data.DeviceID)
+				updaterDevice.Set(model.DeviceFieldStatus, enum.CommonStatusDamage)
+				updaterDevice.Set(model.DeviceFieldUpdatedAt, time.Now())
+				updaterDevice.Set(model.DeviceFieldOptionID, data.ID)
+				updaterDevice.Set(model.DeviceFieldData, model.SettingsData{
+					DefectiveError:               opt.Settings.DefectiveError,
+					DefectiveReason:              opt.Settings.DefectiveReason,
+					Description:                  opt.Settings.Description,
+					ProductionOrderStageID:       data.ProductionOrderStageID,
+					ProductionOrderStageDeviceID: data.ID,
+				})
+
+				err := cockroach.UpdateFields(ctx, updaterDevice)
+				if err != nil {
+					return fmt.Errorf("cập nhật trạng thái máy thành hỏng thất bại: %w", err)
+				}
+			}
+			//  insert DeviceProgressStatusHistory
+			modelData := &model.DeviceProgressStatusHistory{
+				ID:                           idutil.ULIDNow(),
+				ProductionOrderStageDeviceID: data.ID,
+				DeviceID:                     data.DeviceID,
+				ProcessStatus:                opt.ProcessStatus,
+				CreatedBy:                    cockroach.String(userID),
+				CreatedAt:                    time.Now(),
+			}
+
+			if opt.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed || opt.ProcessStatus == enum.ProductionOrderStageDeviceStatusPause {
+				modelData.IsResolved = 0
+				modelData.ErrorCode = cockroach.String(opt.Settings.DefectiveError)
+				modelData.ErrorReason = cockroach.String(opt.Settings.DefectiveReason)
+				modelData.Description = cockroach.String(opt.Settings.Description)
+			}
+
+			err = p.sDeviceProgressStatusHistoryRepo.Insert(ctx, modelData)
+
+			if err != nil {
+				return fmt.Errorf("p.sDeviceProgressStatusHistoryRepo.Insert: %w", err)
+			}
+		}
+
+		return nil
+	})
+
+	if errTx != nil {
+		return fmt.Errorf("cập nhật trạng thái lệnh làm việc thất bại: %w", errTx)
 	}
 
 	return nil
+}
+
+type SettingsData struct {
+	DefectiveError  string
+	DefectiveReason string
+	Description     string
+}
+type EditSettingsOpts struct {
+	ProductionOrderStageDeviceID string
+	Settings                     *SettingsData
 }
 
 func NewService(

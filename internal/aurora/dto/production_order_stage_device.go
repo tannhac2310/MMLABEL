@@ -112,6 +112,7 @@ type EditProductionOrderStageDeviceSettings struct {
 	DefectiveError string `json:"defectiveError"`
 	Description    string `json:"description"`
 }
+
 type EditProductionOrderStageDeviceResponse struct {
 }
 
@@ -204,6 +205,13 @@ type FindAvailabilityTimeResponse struct {
 type UpdateProcessStatusRequest struct {
 	ProductionOrderStageDeviceID string                                `json:"productionOrderStageDeviceID"`
 	ProcessStatus                enum.ProductionOrderStageDeviceStatus `json:"processStatus"`
+	Settings                     Settings                              `json:"settings"`
+}
+
+type Settings struct {
+	DefectiveError  string `json:"defectiveError"`
+	Description     string `json:"description"`
+	DefectiveReason string `json:"defectiveReason"`
 }
 
 type UpdateProcessStatusResponse struct {

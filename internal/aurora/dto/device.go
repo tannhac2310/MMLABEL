@@ -22,26 +22,26 @@ type FindDevicesResponse struct {
 	Total   int64     `json:"total"`
 }
 type Device struct {
-	ID        string                 `json:"id"`
-	Name      string                 `json:"name"`
-	Code      string                 `json:"code"`
-	Step      string                 `json:"Step"`
-	Sort      int                    `json:"sort"`
-	OptionID  string                 `json:"optionID"`
-	Data      map[string]interface{} `json:"data"`
-	Status    enum.CommonStatus      `json:"status"`
-	CreatedBy string                 `json:"createdBy"`
-	CreatedAt time.Time              `json:"createdAt"`
-	UpdatedAt time.Time              `json:"updatedAt"`
+	ID        string            `json:"id"`
+	Name      string            `json:"name"`
+	Code      string            `json:"code"`
+	Step      string            `json:"Step"`
+	Sort      int               `json:"sort"`
+	OptionID  string            `json:"optionID"`
+	Data      any               `json:"data"`
+	Status    enum.CommonStatus `json:"status"`
+	CreatedBy string            `json:"createdBy"`
+	CreatedAt time.Time         `json:"createdAt"`
+	UpdatedAt time.Time         `json:"updatedAt"`
 }
 
 type CreateDeviceRequest struct {
-	Name     string                 `json:"name"`
-	Code     string                 `json:"code"`
-	Step     string                 `json:"step"`
-	OptionID string                 `json:"optionID"`
-	Data     map[string]interface{} `json:"data"`
-	Status   enum.CommonStatus      `json:"status"`
+	Name     string `json:"name"`
+	Code     string `json:"code"`
+	Step     string `json:"step"`
+	OptionID string `json:"optionID"`
+	//Data     map[string]interface{} `json:"data"`
+	Status enum.CommonStatus `json:"status"`
 }
 
 type CreateDeviceResponse struct {

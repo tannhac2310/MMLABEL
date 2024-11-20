@@ -37,7 +37,6 @@ func (s deviceController) CreateDevice(c *gin.Context) {
 		Name:      req.Name,
 		Code:      req.Code,
 		OptionID:  req.OptionID,
-		Data:      req.Data,
 		Status:    req.Status,
 		CreatedBy: userID,
 	})
