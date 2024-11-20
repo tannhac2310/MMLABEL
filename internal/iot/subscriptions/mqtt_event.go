@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_order_stage_device"
 	"strconv"
-	"strings"
 	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/iot/configs"
@@ -76,92 +75,73 @@ type IotParseData struct {
 }
 
 type IotData struct {
-	DeviceID        string
 	Quantity        int64
 	WorkOrderID     string
 	TestProduction  bool
 	StartProduction bool
 	StopPO          bool
 	Pause           bool
+	Setup           bool
 	PauseReason     int
 	DefectQuantity  int64
 	PrintPerDay     int64
 }
 
-func parseIotData(jsonData []byte, prefixes []string) (IotData, error) {
+func parseIotData(jsonData []byte) (IotData, error) {
 	var rawData map[string]interface{}
 	if err := json.Unmarshal(jsonData, &rawData); err != nil {
 		return IotData{}, err
 	}
-
-	var detectedPrefix string
-	for _, prefix := range prefixes {
-		for key := range rawData {
-			if strings.HasPrefix(key, prefix+"_") {
-				detectedPrefix = prefix
-				break
-			}
-		}
-		if detectedPrefix != "" {
-			break
-		}
-	}
-
-	if detectedPrefix == "" {
-		return IotData{}, fmt.Errorf("không tìm thấy tiền tố phù hợp trong JSON")
-	}
-
-	data := IotData{DeviceID: detectedPrefix}
-
+	data := IotData{}
 	for key, value := range rawData {
-		if strings.HasPrefix(key, detectedPrefix+"_") {
-			field := strings.TrimPrefix(key, detectedPrefix+"_")
-			switch field {
-			case "ON/OFF":
-				if v, ok := value.(float64); ok {
-					data.StartProduction = v == 1
-				}
-			case "SO_LUONG_SX":
-				if v, ok := value.(float64); ok {
-					data.Quantity = int64(v)
-				}
-			case "MA_LENH_LAM_VIEC":
-				switch v := value.(type) {
-				case float64:
-					data.WorkOrderID = strconv.FormatInt(int64(v), 10)
-				case string:
-					data.WorkOrderID = v
-				}
-			case "BUTTON_SX_THU":
-				if v, ok := value.(float64); ok {
-					data.TestProduction = v == 1
-				}
-			case "BUTTON_SX":
-				if v, ok := value.(float64); ok {
-					data.StartProduction = v == 1
-				}
-			case "BUTTON_NGUNG_PO":
-				if v, ok := value.(float64); ok {
-					data.StopPO = v == 1
-				}
-			case "BUTTON_TAM_DUNG":
-				if v, ok := value.(float64); ok {
-					data.Pause = v == 1
-				}
-			case "LY_DO_TAM_DUNG":
-				if v, ok := value.(float64); ok {
-					data.PauseReason = int(v)
-				}
-			case "SO_LUONG_LOI":
-				if v, ok := value.(float64); ok {
-					data.DefectQuantity = int64(v)
-				}
-			case "SO_LUONG_NGAY":
-				if v, ok := value.(float64); ok {
-					data.PrintPerDay = int64(v)
-				}
+		switch key {
+		case "OnOff":
+			if v, ok := value.(float64); ok {
+				data.StartProduction = v == 1
 			}
-
+		case "SetUp":
+			if v, ok := value.(float64); ok {
+				data.Setup = v == 1
+			}
+		case "SoLuongSX":
+			if v, ok := value.(float64); ok {
+				data.Quantity = int64(v)
+			}
+		case "MaLenhLamViec":
+			switch v := value.(type) {
+			case float64:
+				data.WorkOrderID = strconv.FormatInt(int64(v), 10)
+			case string:
+				data.WorkOrderID = v
+			}
+		case "SXThu":
+			if v, ok := value.(float64); ok {
+				data.TestProduction = v == 1
+			}
+		case "SX":
+			if v, ok := value.(float64); ok {
+				data.StartProduction = v == 1
+			}
+		case "NgungPO":
+			if v, ok := value.(float64); ok {
+				data.StopPO = v == 1
+			}
+		case "TamDung":
+			if v, ok := value.(float64); ok {
+				data.Pause = v == 1
+			}
+		case "TamDungLyDo":
+			if v, ok := value.(float64); ok {
+				data.PauseReason = int(v)
+			}
+		case "SoLuongLoi":
+			if v, ok := value.(float64); ok {
+				data.DefectQuantity = int64(v)
+			}
+		case "SoLuongInNgay":
+			if v, ok := value.(float64); ok {
+				data.PrintPerDay = int64(v)
+			}
 		}
 	}
 
@@ -207,21 +187,12 @@ func (p *EventMQTTSubscription) Subscribe() error {
 		ctx = ctxzap.ToContext(ctx, p.logger)
 		ctx = cockroach.ContextWithDB(ctx, p.db)
 
-		//// parse message.Payload() to data struct
-		//var IotParseData MyStruct
-		//err := json.Unmarshal(message.Payload(), &IotParseData)
-		//if err != nil {
-		//	fmt.Println("Error parsing JSON:", err)
-		//	return
-		//}
-
 		now := time.Now()
 		dateStr := now.Format("2006-01-02")
 
 		//Minh
-		jsonStr := message.Payload() //`{"PR05_ON/OFF":1,"PR05_SO_LUONG_SX":1,"PR05_MA_LENH_LAM_VIEC":"20271","PR05_BUTTON_SX_THU":0,"PR05_BUTTON_SX":1,"PR05_BUTTON_NGUNG_PO":0,"PR05_BUTTON_TAM_DUNG":0,"PR05_LY_DO_TAM_DUNG":0,"PR05_SO_LUONG_LOI":1}`
-		prefixes := []string{"PR05", "PR06", "PR07"}
-		iotData, err := parseIotData([]byte(jsonStr), prefixes)
+		jsonStr := message.Payload()
+		iotData, err := parseIotData([]byte(jsonStr))
 		if err != nil {
 			fmt.Println("Lỗi:", err)
 			return
@@ -270,6 +241,9 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			return p.productionOrderStageDeviceRepo.InsertEventLog(ctx, eventLog)
 		}
 		processIotData := func(ctx context.Context, item IotData, dateStr string, now time.Time, jsonStr string) error {
+			//table := model.ProductionOrderStageDevice{}
+			//tableProductProgress := model.DeviceProgressStatusHistory{}
+			tableDevice := model.Device{}
 			orderStageDevice, err := p.productionOrderStageDeviceRepo.FindByID(ctx, iotData.WorkOrderID)
 			if err != nil {
 				p.logger.Error("Error finding active order stage device", zap.Error(err))
@@ -281,28 +255,40 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			deviceStateStatus := orderStageDevice.ProcessStatus
 			switch deviceStateStatus {
 			case enum.ProductionOrderStageDeviceStatusNone:
+			case enum.ProductionOrderStageDeviceStatusCompleteTestProduce:
 				if item.StartProduction {
 					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusStart
 				} else if item.TestProduction {
 					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusTestProduce
-				} else {
+				} else if item.Setup {
+					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusSetup
+				}
+			case enum.ProductionOrderStageDeviceStatusTestProduce:
+				if item.TestProduction == false {
 					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusCompleteTestProduce
 				}
-
+			case enum.ProductionOrderStageDeviceStatusSetup:
+				if item.StartProduction {
+					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusStart
+				}
+				if item.Setup == false {
+					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusNone
+				}
 			case enum.ProductionOrderStageDeviceStatusStart:
 				if item.Pause {
 					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusFailed
+					orderStageDevice.Note = cockroach.String(strconv.Itoa(item.PauseReason))
 				} else if item.StopPO {
 					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusPause
+				} else if item.StartProduction == false {
+					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusComplete
 				}
-
 			case enum.ProductionOrderStageDeviceStatusFailed:
 				if item.StartProduction {
 					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusStart
 				}
 
 			default:
-				// Log unexpected state for debugging
 				p.logger.Warn("Unexpected device state status", zap.Any("deviceStateStatus", deviceStateStatus))
 			}
 
@@ -319,7 +305,6 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				return err
 			}
 
-			// Cập nhật hoặc chèn lịch sử làm việc của thiết bị
 			if err := upsertDeviceWorkingHistory(ctx, orderStageDevice, item, dateStr, now); err != nil {
 				p.logger.Error("Error upserting device working history", zap.Error(err))
 				return err
@@ -327,6 +312,17 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			if err := insertEventLog(ctx, orderStageDevice, item, dateStr, now, jsonStr); err != nil {
 				p.logger.Error("Error upserting device working history", zap.Error(err))
 				return err
+			}
+
+			if item.Pause {
+				if item.PauseReason == 1 {
+					updaterDevice := cockroach.NewUpdater(tableDevice.TableName(), model.DeviceFieldID, orderStageDevice.DeviceID)
+					updaterDevice.Set(model.DeviceFieldStatus, enum.CommonStatusDamage)
+					if err := cockroach.UpdateFields(ctx, updaterDevice); err != nil {
+						p.logger.Error("Error upserting device working history", zap.Error(err))
+						return err
+					}
+				}
 			}
 
 			return nil
