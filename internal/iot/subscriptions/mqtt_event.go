@@ -222,7 +222,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 		jsonStr := message.Payload() //`{"PR05_ON/OFF":1,"PR05_SO_LUONG_SX":1,"PR05_MA_LENH_LAM_VIEC":"20271","PR05_BUTTON_SX_THU":0,"PR05_BUTTON_SX":1,"PR05_BUTTON_NGUNG_PO":0,"PR05_BUTTON_TAM_DUNG":0,"PR05_LY_DO_TAM_DUNG":0,"PR05_SO_LUONG_LOI":1}`
 		prefixes := []string{"PR05", "PR06", "PR07"}
 		iotData, err := parseIotData([]byte(jsonStr), prefixes)
-		if err == nil {
+		if err != nil {
 			fmt.Println("Lỗi:", err)
 			return
 		}
