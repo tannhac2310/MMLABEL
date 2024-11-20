@@ -15,6 +15,7 @@ const (
 	ProductionOrderStageDeviceStatusFailed
 	ProductionOrderStageDeviceStatusTestProduce
 	ProductionOrderStageDeviceStatusCompleteTestProduce
+	ProductionOrderStageDeviceStatusSetup
 )
 
 // Màn hình sẽ có 4 nút. 1. "Bắt đầu SX Thử"/"Kết thúc SX Thử", 2. "Bắt đầu SX"/"Hoàn thành SX", 3."Ngưng chuyển PO", 4."Tạm dừng"/"Sản xuất lại"
@@ -26,6 +27,7 @@ var ProductionOrderStageDeviceStatusName = map[ProductionOrderStageDeviceStatus]
 	ProductionOrderStageDeviceStatusFailed:              "failed",                // Tạm dừng"/"Sản xuất lại
 	ProductionOrderStageDeviceStatusTestProduce:         "test_produce",          // Bắt đầu SX Thử
 	ProductionOrderStageDeviceStatusCompleteTestProduce: "complete_test_produce", // Kết thúc SX Thử
+	ProductionOrderStageDeviceStatusSetup:               "setup",                 // Setup máy
 }
 
 var ProductionOrderStageDeviceStatusValue = func() map[string]ProductionOrderStageDeviceStatus {
