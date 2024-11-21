@@ -155,9 +155,10 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 			return fmt.Errorf("c.deviceConfigRepo.Search: %w", err)
 		}
 		for _, deviceConfig := range deviceConfigs {
+			// TODO use device_config_service.CreateDeviceConfig
 			err = c.deviceConfigRepo.Insert(ctx2, &model.ProductionOrderDeviceConfig{
-				ID:                idutil.ULIDNow(),
-				ProductionOrderID: newProductionOrderID,
+				ID: idutil.ULIDNow(),
+				//ProductionOrderID: newProductionOrderID,
 				//ProductionPlanID:  deviceConfig.ProductionPlanID,
 				DeviceID:     deviceConfig.DeviceID,
 				Color:        deviceConfig.Color,
