@@ -252,6 +252,9 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			}
 			settings := &production_order_stage_device.Settings{}
 			deviceStateStatus := orderStageDevice.ProcessStatus
+			fmt.Println("============>>>  Push IOT ITem: ", item)
+			fmt.Println("============>>>  orderStageDevice: ", orderStageDevice)
+			fmt.Println("============>>> deviceStateStatus Before: ", deviceStateStatus)
 			switch orderStageDevice.ProcessStatus {
 			case enum.ProductionOrderStageDeviceStatusNone:
 			case enum.ProductionOrderStageDeviceStatusCompleteTestProduce:
@@ -296,7 +299,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			default:
 				p.logger.Warn("Unexpected device state status", zap.Any("deviceStateStatus", deviceStateStatus))
 			}
-			p.logger.Warn("Status: ", zap.Any("deviceStateStatus", deviceStateStatus))
+			fmt.Println("============>>> deviceStateStatus After: ", deviceStateStatus)
 			err = p.productionOrderStageDeviceService.Edit(ctx, &production_order_stage_device.EditProductionOrderStageDeviceOpts{
 				ID:            orderStageDevice.ID,
 				DeviceID:      orderStageDevice.DeviceID,
