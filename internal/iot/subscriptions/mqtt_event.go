@@ -241,6 +241,22 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			return p.productionOrderStageDeviceRepo.InsertEventLog(ctx, eventLog)
 		}
 		processIotData := func(ctx context.Context, item IotData, dateStr string, now time.Time, jsonStr string) error {
+			mapping := map[int]string{
+				1:  "PP1",
+				2:  "CN3",
+				3:  "PP4",
+				4:  "CN2",
+				5:  "CN1",
+				6:  "VL1",
+				7:  "MA1",
+				8:  "NAT",
+				9:  "MAU",
+				10: "KH1",
+			}
+			if item.PauseReason > 10 || item.PauseReason < 1 {
+				item.PauseReason = 10
+			}
+
 			tableDevice := model.Device{}
 			orderStageDevice, err := p.productionOrderStageDeviceRepo.FindByID(ctx, iotData.WorkOrderID)
 			if err != nil {
@@ -256,6 +272,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			note := ""
 			settings := &production_order_stage_device.Settings{}
 			deviceStateStatus := orderStageDevice.ProcessStatus
+			fmt.Println("============>>> deviceStateStatus: ", deviceStateStatus)
 			if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusNone || orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusCompleteTestProduce {
 				if item.StartProduction {
 					deviceStateStatus = enum.ProductionOrderStageDeviceStatusStart
@@ -278,17 +295,17 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			} else if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart {
 				if item.Pause {
 					deviceStateStatus = enum.ProductionOrderStageDeviceStatusFailed
-					note = strconv.Itoa(item.PauseReason)
+					note = mapping[item.PauseReason]
 					settings = &production_order_stage_device.Settings{
-						DefectiveError: strconv.Itoa(item.PauseReason),
-						Description:    strconv.Itoa(item.PauseReason),
+						DefectiveError: note,
+						Description:    note,
 					}
 				} else if item.StopPO {
 					deviceStateStatus = enum.ProductionOrderStageDeviceStatusPause
-					note = strconv.Itoa(item.PauseReason)
+					note = "StopPO"
 					settings = &production_order_stage_device.Settings{
-						DefectiveError: "StopPO",
-						Description:    "StopPO",
+						DefectiveError: note,
+						Description:    note,
 					}
 				} else if item.StartProduction == false {
 					deviceStateStatus = enum.ProductionOrderStageDeviceStatusComplete
