@@ -211,7 +211,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				// Chèn mới
 				newHistory := &model.DeviceWorkingHistory{
 					ID:                           idutil.ULIDNow(),
-					ProductionOrderStageDeviceID: cockroach.String(orderStageDevice.DeviceID),
+					ProductionOrderStageDeviceID: cockroach.String(orderStageDevice.ID),
 					DeviceID:                     orderStageDevice.DeviceID,
 					Date:                         dateStr,
 					NumberOfPrintsPerDay:         item.Quantity,
@@ -253,39 +253,39 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				return nil
 			}
 			deviceStateStatus := orderStageDevice.ProcessStatus
-			switch deviceStateStatus {
+			switch orderStageDevice.ProcessStatus {
 			case enum.ProductionOrderStageDeviceStatusNone:
 			case enum.ProductionOrderStageDeviceStatusCompleteTestProduce:
 				if item.StartProduction {
-					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusStart
+					deviceStateStatus = enum.ProductionOrderStageDeviceStatusStart
 				} else if item.TestProduction {
-					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusTestProduce
+					deviceStateStatus = enum.ProductionOrderStageDeviceStatusTestProduce
 				} else if item.Setup {
-					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusSetup
+					deviceStateStatus = enum.ProductionOrderStageDeviceStatusSetup
 				}
 			case enum.ProductionOrderStageDeviceStatusTestProduce:
 				if item.TestProduction == false {
-					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusCompleteTestProduce
+					deviceStateStatus = enum.ProductionOrderStageDeviceStatusCompleteTestProduce
 				}
 			case enum.ProductionOrderStageDeviceStatusSetup:
 				if item.StartProduction {
-					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusStart
+					deviceStateStatus = enum.ProductionOrderStageDeviceStatusStart
 				}
 				if item.Setup == false {
-					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusNone
+					deviceStateStatus = enum.ProductionOrderStageDeviceStatusNone
 				}
 			case enum.ProductionOrderStageDeviceStatusStart:
 				if item.Pause {
-					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusFailed
+					deviceStateStatus = enum.ProductionOrderStageDeviceStatusFailed
 					orderStageDevice.Note = cockroach.String(strconv.Itoa(item.PauseReason))
 				} else if item.StopPO {
-					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusPause
+					deviceStateStatus = enum.ProductionOrderStageDeviceStatusPause
 				} else if item.StartProduction == false {
-					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusComplete
+					deviceStateStatus = enum.ProductionOrderStageDeviceStatusComplete
 				}
 			case enum.ProductionOrderStageDeviceStatusFailed:
 				if item.StartProduction {
-					orderStageDevice.ProcessStatus = enum.ProductionOrderStageDeviceStatusStart
+					deviceStateStatus = enum.ProductionOrderStageDeviceStatusStart
 				}
 
 			default:
@@ -295,7 +295,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			err = p.productionOrderStageDeviceService.Edit(ctx, &production_order_stage_device.EditProductionOrderStageDeviceOpts{
 				ID:            orderStageDevice.ID,
 				DeviceID:      orderStageDevice.DeviceID,
-				ProcessStatus: orderStageDevice.ProcessStatus,
+				ProcessStatus: deviceStateStatus,
 				Status:        orderStageDevice.Status,
 				SanPhamLoi:    item.DefectQuantity,
 				Quantity:      item.Quantity,
