@@ -241,6 +241,22 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			return p.productionOrderStageDeviceRepo.InsertEventLog(ctx, eventLog)
 		}
 		processIotData := func(ctx context.Context, item IotData, dateStr string, now time.Time, jsonStr string) error {
+			mapping := map[int]string{
+				1:  "PP1",
+				2:  "CN3",
+				3:  "PP4",
+				4:  "CN2",
+				5:  "CN1",
+				6:  "VL1",
+				7:  "MA1",
+				8:  "NAT",
+				9:  "MAU",
+				10: "KH1",
+			}
+			if item.PauseReason > 10 || item.PauseReason < 1 {
+				item.PauseReason = 10
+			}
+
 			tableDevice := model.Device{}
 			orderStageDevice, err := p.productionOrderStageDeviceRepo.FindByID(ctx, iotData.WorkOrderID)
 			if err != nil {
@@ -250,14 +266,14 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			if orderStageDevice == nil {
 				return nil
 			}
+			if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusComplete {
+				return nil
+			}
+			note := ""
 			settings := &production_order_stage_device.Settings{}
 			deviceStateStatus := orderStageDevice.ProcessStatus
-			fmt.Println("============>>>  Push IOT ITem: ", item)
-			fmt.Println("============>>>  orderStageDevice: ", orderStageDevice)
-			fmt.Println("============>>> deviceStateStatus Before: ", deviceStateStatus)
-			switch orderStageDevice.ProcessStatus {
-			case enum.ProductionOrderStageDeviceStatusNone:
-			case enum.ProductionOrderStageDeviceStatusCompleteTestProduce:
+			fmt.Println("============>>> deviceStateStatus: ", deviceStateStatus)
+			if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusNone || orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusCompleteTestProduce {
 				if item.StartProduction {
 					deviceStateStatus = enum.ProductionOrderStageDeviceStatusStart
 				} else if item.TestProduction {
@@ -265,41 +281,43 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				} else if item.Setup {
 					deviceStateStatus = enum.ProductionOrderStageDeviceStatusSetup
 				}
-			case enum.ProductionOrderStageDeviceStatusTestProduce:
+				item.Quantity = 0
+			} else if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusTestProduce {
 				if item.TestProduction == false {
 					deviceStateStatus = enum.ProductionOrderStageDeviceStatusCompleteTestProduce
 				}
-			case enum.ProductionOrderStageDeviceStatusSetup:
+				item.Quantity = 0
+			} else if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusSetup {
 				if item.Setup == false {
 					deviceStateStatus = enum.ProductionOrderStageDeviceStatusSetupComplete
 				}
-			case enum.ProductionOrderStageDeviceStatusStart:
+				item.Quantity = 0
+			} else if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart {
 				if item.Pause {
 					deviceStateStatus = enum.ProductionOrderStageDeviceStatusFailed
-					orderStageDevice.Note = cockroach.String(strconv.Itoa(item.PauseReason))
+					note = mapping[item.PauseReason]
 					settings = &production_order_stage_device.Settings{
-						DefectiveError: strconv.Itoa(item.PauseReason),
-						Description:    strconv.Itoa(item.PauseReason),
+						DefectiveError: note,
+						Description:    note,
 					}
 				} else if item.StopPO {
 					deviceStateStatus = enum.ProductionOrderStageDeviceStatusPause
-					orderStageDevice.Note = cockroach.String(strconv.Itoa(item.PauseReason))
+					note = "StopPO"
 					settings = &production_order_stage_device.Settings{
-						DefectiveError: "StopPO",
-						Description:    "StopPO",
+						DefectiveError: note,
+						Description:    note,
 					}
 				} else if item.StartProduction == false {
 					deviceStateStatus = enum.ProductionOrderStageDeviceStatusComplete
 				}
-			case enum.ProductionOrderStageDeviceStatusFailed:
+			} else if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed {
 				if item.StartProduction {
 					deviceStateStatus = enum.ProductionOrderStageDeviceStatusStart
 				}
-
-			default:
+			} else {
 				p.logger.Warn("Unexpected device state status", zap.Any("deviceStateStatus", deviceStateStatus))
 			}
-			fmt.Println("============>>> deviceStateStatus After: ", deviceStateStatus)
+			fmt.Println("============>>> deviceStateStatus After 2: ", deviceStateStatus)
 			err = p.productionOrderStageDeviceService.Edit(ctx, &production_order_stage_device.EditProductionOrderStageDeviceOpts{
 				ID:            orderStageDevice.ID,
 				DeviceID:      orderStageDevice.DeviceID,
@@ -309,6 +327,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				SanPhamLoi:    item.DefectQuantity,
 				Quantity:      item.Quantity,
 				Settings:      settings,
+				Note:          note,
 			})
 			if err != nil {
 				p.logger.Error("Error updating production order stage device", zap.Error(err))
