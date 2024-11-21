@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
@@ -34,15 +32,42 @@ func (s deviceConfigController) CreateDeviceConfig(c *gin.Context) {
 	}
 	userId := interceptor.UserIDFromCtx(c)
 	id, err := s.deviceConfigService.CreateDeviceConfig(c, &device_config.CreateDeviceConfigOpts{
-		ProductionOrderID: req.ProductionOrderID,
-		ProductionPlanID:  req.ProductionPlanID,
-		DeviceID:          req.DeviceID,
-		DeviceConfig:      req.DeviceConfig,
-		Color:             req.Color,
-		Description:       req.Description,
-		DeviceType:        "printer", // req.DeviceType, TODO change to req.DeviceType
-		Search:            req.Search,
-		CreatedBy:         userId,
+		ProductionOrderID:      req.ProductionOrderID,
+		ProductionPlanID:       req.ProductionPlanID,
+		DeviceID:               req.DeviceID,
+		Color:                  req.Color,
+		MaThongSoMay:           req.MaThongSoMay,
+		MaTaiLieuHuongDan:      req.MaTaiLieuHuongDan,
+		NgayHieuLuc:            req.NgayHieuLuc,
+		StageID:                req.StageID,
+		MaSanPham:              req.MaSanPham,
+		MaSanPhamNoiBo:         req.MaSanPhamNoiBo,
+		ChuKyIn:                req.ChuKyIn,
+		ThoiGianChuanBi:        req.ThoiGianChuanBi,
+		TenMauMuc:              req.TenMauMuc,
+		TenLoaiMuc:             req.TenLoaiMuc,
+		SoThuTuIn:              req.SoThuTuIn,
+		MaPhim:                 req.MaPhim,
+		MaMauMuc:               req.MaMauMuc,
+		TinhTrangMuc:           req.TinhTrangMuc,
+		DienTichPhuMuc:         req.DienTichPhuMuc,
+		DungMoi:                req.DungMoi,
+		NhietDoSay:             req.NhietDoSay,
+		ThoiGianSay:            req.ThoiGianSay,
+		GhiChu:                 req.GhiChu,
+		MaKhung:                req.MaKhung,
+		ThongSoLua:             req.ThongSoLua,
+		KhoangCachKhungInBanIn: req.KhoangCachKhungInBanIn,
+		CachIn:                 req.CachIn,
+		CungDao:                req.CungDao,
+		DoBenDao:               req.DoBenDao,
+		DoNghiengDao:           req.DoNghiengDao,
+		TocDoDao:               req.TocDoDao,
+		TocDo:                  req.TocDo,
+		Description:            req.Description,
+		DeviceType:             req.DeviceType,
+		DeviceConfig:           req.DeviceConfig,
+		CreatedBy:              userId,
 	})
 	if err != nil {
 		transportutil.Error(c, err)
@@ -70,7 +95,6 @@ func (s deviceConfigController) EditDeviceConfig(c *gin.Context) {
 		DeviceConfig:      req.DeviceConfig,
 		Color:             req.Color,
 		Description:       req.Description,
-		Search:            req.Search,
 		UpdatedBy:         interceptor.UserIDFromCtx(c),
 	})
 	if err != nil {
@@ -134,20 +158,47 @@ func (s deviceConfigController) FindDeviceConfigs(c *gin.Context) {
 
 func toDeviceConfigResp(f *device_config.Data) *dto.DeviceConfig {
 	return &dto.DeviceConfig{
-		ID:                  f.ID,
-		Name:                fmt.Sprintf("%s - %s", f.DeviceName.String, f.Color.String),
-		ProductionOrderID:   f.ProductionOrderID,
-		ProductionOrderName: f.ProductionOrderName.String,
-		DeviceID:            f.DeviceID.String,
-		DeviceCode:          f.DeviceCode.String,
-		DeviceName:          f.DeviceName.String,
-		DeviceConfig:        f.DeviceConfig,
-		Color:               f.Color.String,
-		Description:         f.Description.String,
-		DeviceType:          f.DeviceType,
-		CreatedBy:           f.CreatedBy,
-		CreatedAt:           f.CreatedAt,
-		UpdatedAt:           f.UpdatedAt,
+		ID:                     f.ID,
+		ProductionOrderID:      f.ProductionOrderID.String,
+		ProductionOrderName:    "",
+		ProductionPlanID:       f.ProductionPlanID.String,
+		DeviceID:               f.DeviceID.String,
+		DeviceName:             "",
+		DeviceType:             f.DeviceType,
+		DeviceCode:             "",
+		Color:                  f.Color.String,
+		MaThongSoMay:           f.MaThongSoMay,
+		MaTaiLieuHuongDan:      f.MaTaiLieuHuongDan.String,
+		NgayHieuLuc:            f.NgayHieuLuc,
+		StageID:                f.StageID.String,
+		MaSanPham:              f.MaSanPham.String,
+		MaSanPhamNoiBo:         f.MaSanPhamNoiBo.String,
+		ChuKyIn:                f.ChuKyIn.String,
+		ThoiGianChuanBi:        f.ThoiGianChuanBi.String,
+		TenMauMuc:              f.TenMauMuc.String,
+		TenLoaiMuc:             f.TenLoaiMuc.String,
+		SoThuTuIn:              f.SoThuTuIn.String,
+		MaPhim:                 f.MaPhim.String,
+		MaMauMuc:               f.MaMauMuc.String,
+		TinhTrangMuc:           f.TinhTrangMuc.String,
+		DienTichPhuMuc:         f.DienTichPhuMuc.String,
+		DungMoi:                f.DungMoi.String,
+		NhietDoSay:             f.NhietDoSay.String,
+		ThoiGianSay:            f.ThoiGianSay.String,
+		GhiChu:                 f.GhiChu.String,
+		MaKhung:                f.MaKhung.String,
+		ThongSoLua:             f.ThongSoLua.String,
+		KhoangCachKhungInBanIn: f.KhoangCachKhungInBanIn.String,
+		CachIn:                 f.CachIn.String,
+		CungDao:                f.CungDao.String,
+		DoBenDao:               f.DoBenDao.String,
+		DoNghiengDao:           f.DoNghiengDao.String,
+		TocDoDao:               f.TocDoDao.String,
+		TocDo:                  f.TocDo.String,
+		Description:            f.Description.String,
+		CreatedBy:              f.CreatedBy,
+		CreatedAt:              f.CreatedAt,
+		UpdatedAt:              f.UpdatedAt,
 	}
 }
 
