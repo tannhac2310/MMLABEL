@@ -296,7 +296,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			default:
 				p.logger.Warn("Unexpected device state status", zap.Any("deviceStateStatus", deviceStateStatus))
 			}
-
+			p.logger.Warn("Status: ", zap.Any("deviceStateStatus", deviceStateStatus))
 			err = p.productionOrderStageDeviceService.Edit(ctx, &production_order_stage_device.EditProductionOrderStageDeviceOpts{
 				ID:            orderStageDevice.ID,
 				DeviceID:      orderStageDevice.DeviceID,
