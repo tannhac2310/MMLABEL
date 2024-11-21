@@ -241,8 +241,6 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			return p.productionOrderStageDeviceRepo.InsertEventLog(ctx, eventLog)
 		}
 		processIotData := func(ctx context.Context, item IotData, dateStr string, now time.Time, jsonStr string) error {
-			//table := model.ProductionOrderStageDevice{}
-			//tableProductProgress := model.DeviceProgressStatusHistory{}
 			tableDevice := model.Device{}
 			orderStageDevice, err := p.productionOrderStageDeviceRepo.FindByID(ctx, iotData.WorkOrderID)
 			if err != nil {
@@ -269,11 +267,8 @@ func (p *EventMQTTSubscription) Subscribe() error {
 					deviceStateStatus = enum.ProductionOrderStageDeviceStatusCompleteTestProduce
 				}
 			case enum.ProductionOrderStageDeviceStatusSetup:
-				if item.StartProduction {
-					deviceStateStatus = enum.ProductionOrderStageDeviceStatusStart
-				}
 				if item.Setup == false {
-					deviceStateStatus = enum.ProductionOrderStageDeviceStatusNone
+					deviceStateStatus = enum.ProductionOrderStageDeviceStatusSetupComplete
 				}
 			case enum.ProductionOrderStageDeviceStatusStart:
 				if item.Pause {
