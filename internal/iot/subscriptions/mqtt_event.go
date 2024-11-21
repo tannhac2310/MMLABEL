@@ -252,6 +252,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			if orderStageDevice == nil {
 				return nil
 			}
+			settings := &production_order_stage_device.Settings{}
 			deviceStateStatus := orderStageDevice.ProcessStatus
 			switch orderStageDevice.ProcessStatus {
 			case enum.ProductionOrderStageDeviceStatusNone:
@@ -278,8 +279,17 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				if item.Pause {
 					deviceStateStatus = enum.ProductionOrderStageDeviceStatusFailed
 					orderStageDevice.Note = cockroach.String(strconv.Itoa(item.PauseReason))
+					settings = &production_order_stage_device.Settings{
+						DefectiveError: strconv.Itoa(item.PauseReason),
+						Description:    strconv.Itoa(item.PauseReason),
+					}
 				} else if item.StopPO {
 					deviceStateStatus = enum.ProductionOrderStageDeviceStatusPause
+					orderStageDevice.Note = cockroach.String(strconv.Itoa(item.PauseReason))
+					settings = &production_order_stage_device.Settings{
+						DefectiveError: "StopPO",
+						Description:    "StopPO",
+					}
 				} else if item.StartProduction == false {
 					deviceStateStatus = enum.ProductionOrderStageDeviceStatusComplete
 				}
@@ -300,6 +310,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				Status:        orderStageDevice.Status,
 				SanPhamLoi:    item.DefectQuantity,
 				Quantity:      item.Quantity,
+				Settings:      settings,
 			})
 			if err != nil {
 				p.logger.Error("Error updating production order stage device", zap.Error(err))
