@@ -129,11 +129,11 @@ type SearchProductionPlanOpts struct {
 	ProductName string
 	ProductCode string
 	Statuses    []enum.ProductionPlanStatus
-	UserID      string
-	Stage       enum.ProductionPlanStage
-	Limit       int64
-	Offset      int64
-	Sort        *Sort
+	//UserID      string // TODO add later
+	Stage  enum.ProductionPlanStage
+	Limit  int64
+	Offset int64
+	Sort   *Sort
 }
 
 func (s *SearchProductionPlanOpts) buildQuery(isCount bool) (string, []interface{}) {

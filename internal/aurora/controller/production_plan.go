@@ -190,8 +190,8 @@ func (s productionPlanController) FindProductionPlansWithNoPermission(c *gin.Con
 		ProductName: req.Filter.ProductName,
 		ProductCode: req.Filter.ProductCode,
 		Statuses:    req.Filter.Statuses,
-		UserID:      interceptor.UserIDFromCtx(c),
-		Stage:       req.Filter.Stage,
+		//UserID:      interceptor.UserIDFromCtx(c), // TODO add later
+		Stage: req.Filter.Stage,
 	}, sort, req.Paging.Limit, req.Paging.Offset)
 	if err != nil {
 		transportutil.Error(c, err)
@@ -253,8 +253,8 @@ func (s productionPlanController) FindProductionPlans(c *gin.Context) {
 		ProductName: req.Filter.ProductName,
 		ProductCode: req.Filter.ProductCode,
 		Statuses:    req.Filter.Statuses,
-		UserID:      interceptor.UserIDFromCtx(c),
-		Stage:       req.Filter.Stage,
+		//UserID:      interceptor.UserIDFromCtx(c),
+		Stage: req.Filter.Stage,
 	}, sort, req.Paging.Limit, req.Paging.Offset)
 	if err != nil {
 		transportutil.Error(c, err)

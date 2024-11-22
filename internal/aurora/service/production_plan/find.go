@@ -21,8 +21,8 @@ type FindProductionPlansOpts struct {
 	ProductName string
 	ProductCode string
 	Statuses    []enum.ProductionPlanStatus
-	UserID      string
-	Stage       enum.ProductionPlanStage
+	//UserID      string // todo add later
+	Stage enum.ProductionPlanStage
 }
 
 func (c *productionPlanService) FindProductionPlans(ctx context.Context, opts *FindProductionPlansOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error) {
@@ -34,11 +34,11 @@ func (c *productionPlanService) FindProductionPlans(ctx context.Context, opts *F
 		ProductName: opts.ProductName,
 		ProductCode: opts.ProductCode,
 		Statuses:    opts.Statuses,
-		UserID:      opts.UserID,
-		Stage:       opts.Stage,
-		Limit:       limit,
-		Offset:      offset,
-		Sort:        sort,
+		//UserID:      opts.UserID,
+		Stage:  opts.Stage,
+		Limit:  limit,
+		Offset: offset,
+		Sort:   sort,
 	}
 	productionPlans, err := c.productionPlanRepo.Search(ctx, filter)
 	if err != nil {
@@ -110,11 +110,11 @@ func (c *productionPlanService) FindProductionPlansWithNoPermission(ctx context.
 		ProductName: opts.ProductName,
 		ProductCode: opts.ProductCode,
 		Statuses:    opts.Statuses,
-		UserID:      opts.UserID,
-		Stage:       opts.Stage,
-		Limit:       limit,
-		Offset:      offset,
-		Sort:        sort,
+		//UserID:      opts.UserID,
+		Stage:  opts.Stage,
+		Limit:  limit,
+		Offset: offset,
+		Sort:   sort,
 	}
 	productionPlans, err := c.productionPlanRepo.Search(ctx, filter)
 	if err != nil {
