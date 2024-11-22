@@ -92,7 +92,8 @@ func (s *SearchMasterDataOpts) buildQuery(isCount bool) (string, []interface{}) 
 
 	if s.Search != "" {
 		args = append(args, "%"+s.Search+"%")
-		conds += fmt.Sprintf(" AND (b.name ILIKE $%d OR b.description ILIKE $%d OR b.code ILIKE $%d OR b.id ILIKE $%d)", len(args), len(args), len(args), len(args))
+		args = append(args, s.Search)
+		conds += fmt.Sprintf(" AND (b.name ILIKE $%d OR b.description ILIKE $%d OR b.code ILIKE $%d OR b.id = $%d)", len(args)-1, len(args)-1, len(args)-1, len(args))
 	}
 	if !s.IsIncludeDel {
 		conds += " AND b.deleted_at IS NULL "
