@@ -9,12 +9,12 @@ type DeviceConfigType string
 
 const (
 	DeviceConfigTypeMayIn   DeviceConfigType = "printer"
-	DeviceConfigTypeMayKhac DeviceConfigType = "may_khac"
+	DeviceConfigTypeMayKhac DeviceConfigType = "other"
 )
 
 var DeviceConfigTypeName = map[DeviceConfigType]string{
 	DeviceConfigTypeMayIn:   "printer",
-	DeviceConfigTypeMayKhac: "may_khac",
+	DeviceConfigTypeMayKhac: "other",
 }
 
 var DeviceConfigTypeValue = func() map[string]DeviceConfigType {
