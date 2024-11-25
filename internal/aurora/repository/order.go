@@ -17,6 +17,7 @@ type OrderRepo interface {
 	FindByID(ctx context.Context, id string) (*OrderData, error)
 	Search(ctx context.Context, s *SearchOrderOpts) ([]*OrderData, error)
 	Count(ctx context.Context, s *SearchOrderOpts) (*CountResult, error)
+	CntRows(ctx context.Context) (int64, error)
 }
 
 type sOrderRepo struct {
@@ -129,4 +130,15 @@ func (r *sOrderRepo) Count(ctx context.Context, s *SearchOrderOpts) (*CountResul
 	}
 
 	return countResult, nil
+}
+
+func (r *sOrderRepo) CntRows(ctx context.Context) (int64, error) {
+	sql := "SELECT count(*) FROM orders"
+	var count int64
+	err := cockroach.Select(ctx, sql).ScanOne(&count)
+	if err != nil {
+		return 0, fmt.Errorf("count rows: %w", err)
+	}
+
+	return count, nil
 }

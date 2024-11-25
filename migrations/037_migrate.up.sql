@@ -19,6 +19,7 @@ CREATE TABLE orders
 create table order_items
 (
     id                         VARCHAR(50) PRIMARY KEY,
+    order_id                   VARCHAR(50) NOT NULL,
     production_plan_product_id VARCHAR(50) NOT NULL,
     production_plan_id         VARCHAR(50) NOT NULL,
     production_quantity        INTEGER,                                                           -- Số lượng sản xuất -- Số đơn đặt hàng/Đơn hàng? = Số lượng sản xuất/Số lượng (1)

@@ -7,6 +7,7 @@ import (
 
 const (
 	OrderItemFieldID                      = "id"
+	OrderItemFieldOrderID                 = "order_id"
 	OrderItemFieldProductionPlanProductID = "production_plan_product_id"
 	OrderItemFieldProductionPlanID        = "production_plan_id"
 	OrderItemFieldProductionQuantity      = "production_quantity"
@@ -27,6 +28,7 @@ const (
 
 type OrderItem struct {
 	ID                      string            `db:"id"`
+	OrderID                 string            `db:"order_id"`
 	ProductionPlanProductID string            `db:"production_plan_product_id"`
 	ProductionPlanID        string            `db:"production_plan_id"`
 	ProductionQuantity      int64             `db:"production_quantity"`
@@ -48,6 +50,7 @@ type OrderItem struct {
 func (rcv *OrderItem) FieldMap() (fields []string, values []interface{}) {
 	fields = []string{
 		OrderItemFieldID,
+		OrderItemFieldOrderID,
 		OrderItemFieldProductionPlanProductID,
 		OrderItemFieldProductionPlanID,
 		OrderItemFieldProductionQuantity,
@@ -68,6 +71,7 @@ func (rcv *OrderItem) FieldMap() (fields []string, values []interface{}) {
 
 	values = []interface{}{
 		&rcv.ID,
+		&rcv.OrderID,
 		&rcv.ProductionPlanProductID,
 		&rcv.ProductionPlanID,
 		&rcv.ProductionQuantity,

@@ -16,18 +16,21 @@ type Service interface {
 }
 
 type masterDataService struct {
-	masterDataRep       repository.MasterDataRepo
-	masterDataUserField repository.MasterDataUserFieldRepo
-	customFieldRepo     repository.CustomFieldRepo
+	masterDataRep                   repository.MasterDataRepo
+	masterDataUserField             repository.MasterDataUserFieldRepo
+	customFieldRepo                 repository.CustomFieldRepo
+	productionOrderDeviceConfigRepo repository.ProductionOrderDeviceConfigRepo
 }
 
 func NewService(masterDataRep repository.MasterDataRepo, masterDataUserField repository.MasterDataUserFieldRepo,
 	customFieldRepo repository.CustomFieldRepo,
+	productionOrderDeviceConfigRepo repository.ProductionOrderDeviceConfigRepo,
 ) Service {
 	return &masterDataService{
-		masterDataRep:       masterDataRep,
-		masterDataUserField: masterDataUserField,
-		customFieldRepo:     customFieldRepo,
+		masterDataRep:                   masterDataRep,
+		masterDataUserField:             masterDataUserField,
+		customFieldRepo:                 customFieldRepo,
+		productionOrderDeviceConfigRepo: productionOrderDeviceConfigRepo,
 	}
 }
 

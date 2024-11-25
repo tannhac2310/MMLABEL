@@ -13,7 +13,8 @@ import (
 type OrderItemRepo interface {
 	Insert(ctx context.Context, e *model.OrderItem) error
 	Update(ctx context.Context, e *model.OrderItem) error
-	SoftDelete(ctx context.Context, id string) error
+	DeleteByOrderID(ctx context.Context, orderID string) error
+	SortDeleteByOrderID(ctx context.Context, orderID string) error
 	FindByID(ctx context.Context, id string) (*OrderItemData, error)
 	Search(ctx context.Context, s *SearchOrderItemOpts) ([]*OrderItemData, error)
 	Count(ctx context.Context, s *SearchOrderItemOpts) (*CountResult, error)
@@ -49,8 +50,28 @@ func (r *sOrderItemRepo) Update(ctx context.Context, e *model.OrderItem) error {
 	return cockroach.Update(ctx, e)
 }
 
-func (r *sOrderItemRepo) SoftDelete(ctx context.Context, id string) error {
-	sql := "UPDATE order_items SET deleted_at = NOW() WHERE id = $1;"
+func (r *sOrderItemRepo) DeleteByOrderID(ctx context.Context, id string) error {
+	if id == "" {
+		return fmt.Errorf("sOrderItemRepo.DeleteByOrderID: id is required")
+	}
+	sql := "DELETE FROM order_items WHERE order_id = $1;"
+
+	cmd, err := cockroach.Exec(ctx, sql, id)
+	if err != nil {
+		return fmt.Errorf("order_items cockroach.Exec: %w", err)
+	}
+	if cmd.RowsAffected() == 0 {
+		return fmt.Errorf("*sOrderItemRepo not found any records to delete")
+	}
+
+	return nil
+}
+
+func (r *sOrderItemRepo) SortDeleteByOrderID(ctx context.Context, id string) error {
+	if id == "" {
+		return fmt.Errorf("sOrderItemRepo.SortDeleteByOrderID: id is required")
+	}
+	sql := "UPDATE order_items SET deleted_at = NOW() WHERE order_id = $1;"
 
 	cmd, err := cockroach.Exec(ctx, sql, id)
 	if err != nil {
@@ -65,7 +86,8 @@ func (r *sOrderItemRepo) SoftDelete(ctx context.Context, id string) error {
 
 // SearchOrderItemOpts all params is options
 type SearchOrderItemOpts struct {
-	IDs []string
+	IDs     []string
+	OrderID string
 	// todo add more search options
 	Limit  int64
 	Offset int64
@@ -91,6 +113,10 @@ func (s *SearchOrderItemOpts) buildQuery(isCount bool) (string, []interface{}) {
 	//	args = append(args, s.Code)
 	//	conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.OrderItemFieldCode, len(args))
 	//}
+	if s.OrderID != "" {
+		args = append(args, s.OrderID)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.OrderItemFieldOrderID, len(args))
+	}
 
 	b := &model.OrderItem{}
 	fields, _ := b.FieldMap()

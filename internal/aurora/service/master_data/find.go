@@ -52,6 +52,34 @@ func (s *masterDataService) FindMasterData(ctx context.Context, opt *FindMasterD
 		}
 		baninnguonIDMapper[uf.Value] = append(baninnguonIDMapper[uf.Value], uf.EntityID)
 	}
+	// find baninnguonIDs from production_order_device_config.go
+	deviceConfigItems, err := s.productionOrderDeviceConfigRepo.Search(ctx, &repository.SearchProductionOrderDeviceConfigOpts{
+		MasterDataIDS: masterDataIDs,
+		Limit:         10000,
+		Offset:        0,
+	})
+	if err != nil {
+		return nil, 0, fmt.Errorf("tìm bản in nguồn từ cấu hình thiết bị %w", err)
+	}
+
+	for _, item := range deviceConfigItems {
+		if !item.ProductionPlanID.Valid { // TODO add && production order id
+			continue
+		}
+		if item.MaKhung.Valid {
+			if _, ok := baninnguonIDMapper[item.MaKhung.String]; !ok {
+				baninnguonIDMapper[item.MaKhung.String] = make([]string, 0)
+			}
+			baninnguonIDMapper[item.MaKhung.String] = append(baninnguonIDMapper[item.MaKhung.String], item.ProductionPlanID.String)
+		}
+
+		if item.MaPhim.Valid {
+			if _, ok := baninnguonIDMapper[item.MaPhim.String]; !ok {
+				baninnguonIDMapper[item.MaPhim.String] = make([]string, 0)
+			}
+			baninnguonIDMapper[item.MaPhim.String] = append(baninnguonIDMapper[item.MaPhim.String], item.ProductionPlanID.String)
+		}
+	}
 
 	userFields, err := s.masterDataUserField.Search(ctx, &repository.SearchMasterDataUserFieldOpts{
 		MasterDataIDs: masterDataIDs,
@@ -69,6 +97,7 @@ func (s *masterDataService) FindMasterData(ctx context.Context, opt *FindMasterD
 		}
 		userFieldsMap[uf.MasterDataID] = append(userFieldsMap[uf.MasterDataID], uf)
 	}
+
 	result := make([]*MasterData, 0)
 	// 5. map user fields to master data
 	for _, md := range masterData {
