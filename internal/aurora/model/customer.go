@@ -46,13 +46,13 @@ type Customer struct {
 	CompanyWebsite     sql.NullString      `db:"company_website"`
 	CompanyPhone       sql.NullString      `db:"company_phone"`
 	CompanyEmail       sql.NullString      `db:"company_email"`
-	ContactPersonName  string              `db:"contact_person_name"`
-	ContactPersonEmail string              `db:"contact_person_email"`
-	ContactPersonPhone string              `db:"contact_person_phone"`
-	ContactPersonRole  string              `db:"contact_person_role"`
+	ContactPersonName  sql.NullString      `db:"contact_person_name"`
+	ContactPersonEmail sql.NullString      `db:"contact_person_email"`
+	ContactPersonPhone sql.NullString      `db:"contact_person_phone"`
+	ContactPersonRole  sql.NullString      `db:"contact_person_role"`
 	Note               sql.NullString      `db:"note"`
 	Status             enum.CustomerStatus `db:"status"`
-	SearchContent      string              `db:"search_content"`
+	SearchContent      sql.NullString      `db:"search_content"`
 	Data               any                 `db:"data"`
 	CreatedBy          string              `db:"created_by"`
 	CreatedAt          time.Time           `db:"created_at"`
