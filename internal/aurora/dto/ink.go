@@ -9,25 +9,27 @@ import (
 )
 
 type Ink struct {
-	ID             string                 `json:"id"`
-	ImportID       string                 `json:"importID"`
-	Name           string                 `json:"name"`
-	Code           string                 `json:"code"`
-	MixInk         *MixInk                `json:"mixInk"`
-	ProductCodes   []string               `json:"productCodes"`
-	Position       string                 `json:"position"`
-	Location       string                 `json:"location"`
-	Manufacturer   string                 `json:"manufacturer"`
-	ColorDetail    map[string]interface{} `json:"colorDetail"`
-	Quantity       float64                `json:"quantity"`
-	ExpirationDate string                 `json:"expirationDate"`
-	Description    string                 `json:"description"`
-	Data           map[string]interface{} `json:"data"`
-	Status         enum.CommonStatus      `json:"status"`
-	CreatedBy      string                 `json:"createdBy"`
-	UpdatedBy      string                 `json:"updatedBy"`
-	CreatedAt      time.Time              `json:"createdAt"`
-	UpdatedAt      time.Time              `json:"updatedAt"`
+	ID                 string                 `json:"id"`
+	ImportID           string                 `json:"importID"`
+	Name               string                 `json:"name"`
+	Code               string                 `json:"code"`
+	MixInk             *MixInk                `json:"mixInk"`
+	ProductCodes       []string               `json:"productCodes"`
+	Position           string                 `json:"position"`
+	Location           string                 `json:"location"`
+	Manufacturer       string                 `json:"manufacturer"`
+	ColorDetail        map[string]interface{} `json:"colorDetail"`
+	Quantity           float64                `json:"quantity"`
+	ExpirationDate     string                 `json:"expirationDate"`
+	Description        string                 `json:"description"`
+	Data               map[string]interface{} `json:"data"`
+	Status             enum.CommonStatus      `json:"status"`
+	ProductionPlanIDs  []string               `json:"productionPlanIDs"`
+	ProductionOrderIDs []string               `json:"productionOrderIDs"`
+	CreatedBy          string                 `json:"createdBy"`
+	UpdatedBy          string                 `json:"updatedBy"`
+	CreatedAt          time.Time              `json:"createdAt"`
+	UpdatedAt          time.Time              `json:"updatedAt"`
 }
 
 type InkFilter struct {

@@ -67,6 +67,7 @@ func (s deviceConfigController) CreateDeviceConfig(c *gin.Context) {
 		Description:            req.Description,
 		DeviceType:             req.DeviceType,
 		DeviceConfig:           req.DeviceConfig,
+		InkID:                  req.InkID,
 		CreatedBy:              userId,
 	})
 	if err != nil {

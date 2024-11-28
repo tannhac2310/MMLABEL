@@ -52,6 +52,7 @@ const (
 	ProductionOrderDeviceConfigFieldTocDo                  = "toc_do"
 	ProductionOrderDeviceConfigFieldSanPhamNguon           = "san_pham_nguon"
 	ProductionOrderDeviceConfigFieldBanInNguon             = "ban_in_nguon"
+	ProductionOrderDeviceConfigFieldInkID                  = "ink_id"
 )
 
 type ProductionOrderDeviceConfig struct {
@@ -99,6 +100,7 @@ type ProductionOrderDeviceConfig struct {
 	TocDo                  sql.NullString         `db:"toc_do"`
 	SanPhamNguon           sql.NullString         `db:"san_pham_nguon"`
 	BanInNguon             sql.NullString         `db:"ban_in_nguon"`
+	InkID                  sql.NullString         `db:"ink_id"`
 }
 
 func (rcv *ProductionOrderDeviceConfig) FieldMap() (fields []string, values []interface{}) {
@@ -147,6 +149,7 @@ func (rcv *ProductionOrderDeviceConfig) FieldMap() (fields []string, values []in
 		ProductionOrderDeviceConfigFieldTocDo,
 		ProductionOrderDeviceConfigFieldSanPhamNguon,
 		ProductionOrderDeviceConfigFieldBanInNguon,
+		ProductionOrderDeviceConfigFieldInkID,
 	}
 
 	values = []interface{}{
@@ -194,6 +197,7 @@ func (rcv *ProductionOrderDeviceConfig) FieldMap() (fields []string, values []in
 		&rcv.TocDo,
 		&rcv.SanPhamNguon,
 		&rcv.BanInNguon,
+		&rcv.InkID,
 	}
 
 	return

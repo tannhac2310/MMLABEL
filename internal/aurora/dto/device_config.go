@@ -139,6 +139,7 @@ type CreateDeviceConfigRequest struct {
 	Description            string                 `json:"description"`
 	DeviceType             enum.DeviceConfigType  `json:"deviceType" binding:"required"`
 	DeviceConfig           map[string]interface{} `json:"deviceConfig"`
+	InkID                  string                 `json:"inkID"`
 }
 
 type CreateDeviceConfigResponse struct {
@@ -181,6 +182,7 @@ type EditDeviceConfigRequest struct {
 	TocDo                  string                 `json:"tocDo"`
 	Description            string                 `json:"description"`
 	DeviceConfig           map[string]interface{} `json:"deviceConfig"` // todo do we need this?
+	InkID                  string                 `json:"inkID"`
 }
 
 type EditDeviceConfigResponse struct {

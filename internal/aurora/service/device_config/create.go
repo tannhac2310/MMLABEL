@@ -56,6 +56,7 @@ func (c *deviceConfigService) CreateDeviceConfig(ctx context.Context, opt *Creat
 		DoNghiengDao:           cockroach.String(opt.DoNghiengDao),
 		TocDoDao:               cockroach.String(opt.TocDoDao),
 		TocDo:                  cockroach.String(opt.TocDo),
+		InkID:                  cockroach.String(opt.InkID),
 		//SanPhamNguon:           sql.NullString{},
 		//BanInNguon:             sql.NullString{},
 	}
@@ -111,5 +112,6 @@ type CreateDeviceConfigOpts struct {
 	Description            string
 	DeviceType             enum.DeviceConfigType
 	DeviceConfig           map[string]interface{}
+	InkID                  string
 	CreatedBy              string
 }

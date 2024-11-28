@@ -66,14 +66,15 @@ type Service interface {
 }
 
 type inkService struct {
-	inkRepo             repository.InkRepo
-	inkReturnRepo       repository.InkReturnRepo
-	inkReturnDetailRepo repository.InkReturnDetailRepo
-	inkExportDetailRepo repository.InkExportDetailRepo
-	inkImportDetailRepo repository.InkImportDetailRepo
-	historyRepo         repository.HistoryRepo
-	inkMixingRepo       repository.InkMixingRepo
-	inkMixingDetailRepo repository.InkMixingDetailRepo
+	inkRepo                         repository.InkRepo
+	inkReturnRepo                   repository.InkReturnRepo
+	inkReturnDetailRepo             repository.InkReturnDetailRepo
+	inkExportDetailRepo             repository.InkExportDetailRepo
+	inkImportDetailRepo             repository.InkImportDetailRepo
+	historyRepo                     repository.HistoryRepo
+	inkMixingRepo                   repository.InkMixingRepo
+	inkMixingDetailRepo             repository.InkMixingDetailRepo
+	productionOrderDeviceConfigRepo repository.ProductionOrderDeviceConfigRepo
 }
 
 func (p inkService) CalculateInkQuantity(ctx context.Context, inkID string) (float64, float64, float64, error) {
@@ -189,7 +190,8 @@ func (p inkService) Delete(ctx context.Context, id string) error {
 
 type InkData struct {
 	*repository.InkData
-	MixingData *InkMixingData
+	MixingData                      *InkMixingData
+	ProductionOrderDeviceConfigData []*repository.ProductionOrderDeviceConfigData
 }
 
 func (p inkService) Find(ctx context.Context, opt *FindInkOpts, sort *repository.Sort, limit, offset int64) ([]*InkData, *repository.CountResult, error) {
@@ -218,8 +220,20 @@ func (p inkService) Find(ctx context.Context, opt *FindInkOpts, sort *repository
 		inkIds = append(inkIds, ink.ID)
 	}
 
-	// find in production_order_device_config by
+	// find in production_order_device_config by color
+	productionOrderDeviceConfigs, err := p.productionOrderDeviceConfigRepo.Search(ctx, &repository.SearchProductionOrderDeviceConfigOpts{
+		InkIDs: inkIds,
+		Limit:  10000,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
 
+	// map production_order_device_config by ink_id
+	productionOrderDeviceConfigMap := make(map[string][]*repository.ProductionOrderDeviceConfigData)
+	for _, f := range productionOrderDeviceConfigs {
+		productionOrderDeviceConfigMap[f.InkID.String] = append(productionOrderDeviceConfigMap[f.InkID.String], f)
+	}
 	// get ink mixing detail
 	inkMixing, _, err := p.FindInkMixing(ctx, &FindInkMixingOpts{
 		IDs:    mixingIDs,
@@ -239,8 +253,9 @@ func (p inkService) Find(ctx context.Context, opt *FindInkOpts, sort *repository
 	results := make([]*InkData, 0)
 	for _, ink := range inks {
 		results = append(results, &InkData{
-			InkData:    ink,
-			MixingData: inkMixingMap[ink.MixingID.String],
+			InkData:                         ink,
+			MixingData:                      inkMixingMap[ink.MixingID.String],
+			ProductionOrderDeviceConfigData: productionOrderDeviceConfigMap[ink.ID],
 		})
 	}
 
@@ -317,16 +332,18 @@ func NewService(
 	historyRepo repository.HistoryRepo,
 	inkMixingRepo repository.InkMixingRepo,
 	inkMixingDetailRepo repository.InkMixingDetailRepo,
+	productionOrderDeviceConfigRepo repository.ProductionOrderDeviceConfigRepo,
 ) Service {
 	return &inkService{
-		inkReturnRepo:       inkReturnRepo,
-		inkReturnDetailRepo: inkReturnDetailRepo,
-		inkExportDetailRepo: inkExportDetailRepo,
-		inkImportDetailRepo: inkImportDetailRepo,
-		inkRepo:             inkRepo,
-		historyRepo:         historyRepo,
-		inkMixingRepo:       inkMixingRepo,
-		inkMixingDetailRepo: inkMixingDetailRepo,
+		inkReturnRepo:                   inkReturnRepo,
+		inkReturnDetailRepo:             inkReturnDetailRepo,
+		inkExportDetailRepo:             inkExportDetailRepo,
+		inkImportDetailRepo:             inkImportDetailRepo,
+		inkRepo:                         inkRepo,
+		historyRepo:                     historyRepo,
+		inkMixingRepo:                   inkMixingRepo,
+		inkMixingDetailRepo:             inkMixingDetailRepo,
+		productionOrderDeviceConfigRepo: productionOrderDeviceConfigRepo,
 	}
 
 }
