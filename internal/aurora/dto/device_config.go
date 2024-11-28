@@ -64,6 +64,7 @@ type DeviceConfig struct {
 	TocDoDao               string                `json:"tocDoDao"`
 	TocDo                  string                `json:"tocDo"`
 	Description            string                `json:"description"`
+	InkID                  string                `json:"inkID"`
 	CreatedBy              string                `json:"createdBy"`
 	CreatedAt              time.Time             `json:"createdAt"`
 	UpdatedAt              time.Time             `json:"updatedAt"`

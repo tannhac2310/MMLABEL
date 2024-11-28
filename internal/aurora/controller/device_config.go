@@ -197,6 +197,7 @@ func toDeviceConfigResp(f *device_config.Data) *dto.DeviceConfig {
 		TocDoDao:               f.TocDoDao.String,
 		TocDo:                  f.TocDo.String,
 		Description:            f.Description.String,
+		InkID:                  f.InkID.String,
 		CreatedBy:              f.CreatedBy,
 		CreatedAt:              f.CreatedAt,
 		UpdatedAt:              f.UpdatedAt,
