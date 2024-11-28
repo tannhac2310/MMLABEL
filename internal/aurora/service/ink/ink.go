@@ -210,12 +210,15 @@ func (p inkService) Find(ctx context.Context, opt *FindInkOpts, sort *repository
 	}
 
 	mixingIDs := make([]string, 0)
-
+	inkIds := make([]string, 0)
 	for _, ink := range inks {
 		if ink.MixingID.String != "" {
 			mixingIDs = append(mixingIDs, ink.MixingID.String)
 		}
+		inkIds = append(inkIds, ink.ID)
 	}
+
+	// find in production_order_device_config by
 
 	// get ink mixing detail
 	inkMixing, _, err := p.FindInkMixing(ctx, &FindInkMixingOpts{
