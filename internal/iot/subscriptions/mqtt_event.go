@@ -28,6 +28,7 @@ type EventMQTTSubscription struct {
 	//busFactory nats.BusFactory
 	productionOrderStageDeviceRepo    repository.ProductionOrderStageDeviceRepo
 	deviceWorkingHistoryRepo          repository.DeviceWorkingHistoryRepo
+	device                            model.Device
 	productionOrderStageDeviceService production_order_stage_device.Service
 	logger                            *zap.Logger
 	wsService                         ws.WebSocketService
@@ -64,6 +65,7 @@ var connectHandler mqtt.OnConnectHandler = func(client mqtt.Client) {
 var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err error) {
 	fmt.Printf("Connect lost: %v", err)
 	panic("Connect lost at " + time.Now().String())
+
 }
 
 type IotParseData struct {
@@ -85,6 +87,8 @@ type IotData struct {
 	PauseReason     int
 	DefectQuantity  int64
 	PrintPerDay     int64
+	DeviceBroken    bool
+	DeviceId        string
 }
 
 func parseIotData(jsonData []byte) (IotData, error) {
@@ -95,17 +99,21 @@ func parseIotData(jsonData []byte) (IotData, error) {
 	data := IotData{}
 	for key, value := range rawData {
 		switch key {
-		case "OnOff":
-			if v, ok := value.(float64); ok {
-				data.StartProduction = v == 1
-			}
-		case "SetUp":
-			if v, ok := value.(float64); ok {
-				data.Setup = v == 1
+		//case "OnOff":
+		//	if v, ok := value.(float64); ok {
+		//		data. = v == 1
+		//	}
+		case "MaMay":
+			if v, ok := value.(string); ok {
+				data.DeviceId = v
 			}
 		case "SoLuongSX":
 			if v, ok := value.(float64); ok {
 				data.Quantity = int64(v)
+			}
+		case "MayHu":
+			if v, ok := value.(float64); ok {
+				data.DeviceBroken = v == 1
 			}
 		case "MaLenhLamViec":
 			switch v := value.(type) {
@@ -114,17 +122,9 @@ func parseIotData(jsonData []byte) (IotData, error) {
 			case string:
 				data.WorkOrderID = v
 			}
-		case "SXThu":
-			if v, ok := value.(float64); ok {
-				data.TestProduction = v == 1
-			}
-		case "SX":
+		case "SanXuat":
 			if v, ok := value.(float64); ok {
 				data.StartProduction = v == 1
-			}
-		case "NgungPO":
-			if v, ok := value.(float64); ok {
-				data.StopPO = v == 1
 			}
 		case "TamDung":
 			if v, ok := value.(float64); ok {
@@ -197,6 +197,22 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			fmt.Println("Lỗi:", err)
 			return
 		}
+		if iotData.DeviceBroken == true {
+			e := &model.Device{}
+			err := cockroach.FindOne(ctx, e, "id = $1", iotData.DeviceId)
+			if err != nil {
+				fmt.Println("Lỗi không tìm thấy device: ", iotData.DeviceId, " ---> ", err)
+				return
+			}
+			if e.Status == enum.CommonStatusDamage {
+				return
+			}
+			updaterDevice := cockroach.NewUpdater(e.TableName(), model.DeviceFieldID, iotData.DeviceId)
+			updaterDevice.Set(model.DeviceFieldStatus, enum.CommonStatusDamage)
+			if err := cockroach.UpdateFields(ctx, updaterDevice); err != nil {
+				fmt.Println("Lỗi update device: ", iotData.DeviceId, " ---> ", err)
+			}
+		}
 		upsertDeviceWorkingHistory := func(ctx context.Context, orderStageDevice *model.ProductionOrderStageDevice, item IotData, dateStr string, now time.Time) error {
 			deviceWorkingHistories, err := p.deviceWorkingHistoryRepo.Search(ctx, &repository.SearchDeviceWorkingHistoryOpts{
 				DeviceID: orderStageDevice.DeviceID,
@@ -259,63 +275,60 @@ func (p *EventMQTTSubscription) Subscribe() error {
 
 			tableDevice := model.Device{}
 			orderStageDevice, err := p.productionOrderStageDeviceRepo.FindByID(ctx, iotData.WorkOrderID)
+			fmt.Println("============>>> orderStageDevice: ", orderStageDevice)
 			if err != nil {
 				p.logger.Error("Error finding active order stage device", zap.Error(err))
 				return err
 			}
 			if orderStageDevice == nil {
+				fmt.Println("============>>> D: ", orderStageDevice)
 				return nil
 			}
 			if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusComplete {
+				fmt.Println("============>>> E: ", orderStageDevice)
 				return nil
 			}
 			note := ""
 			settings := &production_order_stage_device.Settings{}
 			deviceStateStatus := orderStageDevice.ProcessStatus
 			fmt.Println("============>>> deviceStateStatus: ", deviceStateStatus)
-			if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusNone || orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusCompleteTestProduce {
-				if item.StartProduction {
+			if deviceStateStatus == enum.ProductionOrderStageDeviceStatusFailed {
+				if item.Pause == false {
 					deviceStateStatus = enum.ProductionOrderStageDeviceStatusStart
-				} else if item.TestProduction {
-					deviceStateStatus = enum.ProductionOrderStageDeviceStatusTestProduce
-				} else if item.Setup {
-					deviceStateStatus = enum.ProductionOrderStageDeviceStatusSetup
-				}
-				item.Quantity = 0
-			} else if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusTestProduce {
-				if item.TestProduction == false {
-					deviceStateStatus = enum.ProductionOrderStageDeviceStatusCompleteTestProduce
-				}
-				item.Quantity = 0
-			} else if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusSetup {
-				if item.Setup == false {
-					deviceStateStatus = enum.ProductionOrderStageDeviceStatusSetupComplete
-				}
-				item.Quantity = 0
-			} else if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart {
-				if item.Pause {
-					deviceStateStatus = enum.ProductionOrderStageDeviceStatusFailed
-					note = mapping[item.PauseReason]
-					settings = &production_order_stage_device.Settings{
-						DefectiveError: note,
-						Description:    note,
-					}
-				} else if item.StopPO {
-					deviceStateStatus = enum.ProductionOrderStageDeviceStatusPause
-					note = "StopPO"
-					settings = &production_order_stage_device.Settings{
-						DefectiveError: note,
-						Description:    note,
-					}
-				} else if item.StartProduction == false {
-					deviceStateStatus = enum.ProductionOrderStageDeviceStatusComplete
-				}
-			} else if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed {
-				if item.StartProduction {
-					deviceStateStatus = enum.ProductionOrderStageDeviceStatusStart
+				} else {
+					return nil
 				}
 			} else {
-				p.logger.Warn("Unexpected device state status", zap.Any("deviceStateStatus", deviceStateStatus))
+				if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusNone {
+					if item.StartProduction {
+						deviceStateStatus = enum.ProductionOrderStageDeviceStatusStart
+						fmt.Println("============>>> deviceStateStatus After 279: ", deviceStateStatus)
+					}
+					if item.Pause {
+						return nil
+					}
+					item.Quantity = 0
+				} else if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart {
+					if item.Pause {
+						deviceStateStatus = enum.ProductionOrderStageDeviceStatusFailed
+						note = mapping[item.PauseReason]
+						settings = &production_order_stage_device.Settings{
+							DefectiveError: note,
+							Description:    note,
+						}
+						fmt.Println("============>>> deviceStateStatus After 306: ", deviceStateStatus)
+					} else if item.StartProduction == false {
+						deviceStateStatus = enum.ProductionOrderStageDeviceStatusComplete
+						fmt.Println("============>>> deviceStateStatus After 317: ", deviceStateStatus)
+					}
+				} else if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed {
+					if item.StartProduction {
+						deviceStateStatus = enum.ProductionOrderStageDeviceStatusStart
+						fmt.Println("============>>> deviceStateStatus After 322: ", deviceStateStatus)
+					}
+				} else {
+					p.logger.Warn("Unexpected device state status", zap.Any("deviceStateStatus", deviceStateStatus))
+				}
 			}
 			fmt.Println("============>>> deviceStateStatus After 2: ", deviceStateStatus)
 			err = p.productionOrderStageDeviceService.Edit(ctx, &production_order_stage_device.EditProductionOrderStageDeviceOpts{
@@ -361,142 +374,6 @@ func (p *EventMQTTSubscription) Subscribe() error {
 		if err != nil {
 			return
 		}
-		//End Minh
-
-		// iotData.D is {"d":[{"tag":"B_PR03:SL_in_LSX","value":259.00},{"tag":"B_PR03:ON_OFF","value":1},{"tag":"B_PR03:SL_in_Ngay","value":143.00},{"tag":"B_PR03:TG_in_Ngay","value":32.00},{"tag":"B_PR03:SL_in_LSX_1","value":0.00},{"tag":"B_PR03:TG_in_LSX_1","value":0.00},{"tag":"B_PR03:SL_in_LSX_2","value":0.00},{"tag":"B_PR03:TG_in_LSX_2","value":0.00},{"tag":"B_PR03:SL_in_LSX_3","value":0.00},{"tag":"B_PR03:TG_in_LSX_3","value":0.00},{"tag":"B_PR03:SL_in_LSX_4","value":0.00},{"tag":"B_PR03:TG_in_LSX_4","value":0.00},{"tag":"B_PR03:TG_in_LSX","value":32.00},{"tag":"B_PR04:SL_in_LSX","value":0.00},{"tag":"B_PR04:ON_OFF","value":1},{"tag":"B_PR04:SL_in_Ngay","value":0.00},{"tag":"B_PR04:TG_in_Ngay","value":0.00},{"tag":"B_PR04:TG_in_LSX","value":0.00},{"tag":"B_PR04:SL_in_LSX_1","value":0.00},{"tag":"B_PR04:TG_in_LSX_1","value":0.00},{"tag":"B_PR04:SL_in_LSX_2","value":0.00},{"tag":"B_PR04:TG_in_LSX_2","value":0.00},{"tag":"B_PR04:SL_in_LSX_3","value":0.00},{"tag":"B_PR04:TG_in_LSX_3","value":0.00},{"tag":"B_PR04:SL_in_LSX_4","value":0.00},{"tag":"B_PR04:TG_in_LSX_4","value":0.00}],"ts":"2023-12-27T01:19:15+0000"}
-		// group by by device id
-		//
-		//mappingData := make(map[string]*IotParseData, 0)
-		//for _, item := range iotData.D {
-		//
-		//	d := strings.Split(item.Tag, ":")
-		//	if len(d) != 2 {
-		//		continue
-		//	}
-		//	deviceID := d[0]
-		//	action := d[1]
-		//	if _, ok := mappingData[deviceID]; !ok {
-		//		mappingData[deviceID] = &IotParseData{
-		//			DeviceID:   deviceID,
-		//			SL_in_Ngay: 0,
-		//			TG_in_Ngay: 0,
-		//			SL_in_LSX:  0,
-		//			TG_in_LSX:  0,
-		//		}
-		//	}
-		//	if action == "SL_in_Ngay" {
-		//		mappingData[deviceID].SL_in_Ngay = int64(item.Value)
-		//	}
-		//	if action == "TG_in_Ngay" {
-		//		mappingData[deviceID].TG_in_Ngay = int64(item.Value)
-		//	}
-		//	if action == "SL_in_LSX" {
-		//		mappingData[deviceID].SL_in_LSX = int64(item.Value)
-		//	}
-		//	if action == "TG_in_LSX" {
-		//		mappingData[deviceID].TG_in_LSX = int64(item.Value)
-		//	}
-		//}
-		//fmt.Println(iotData.D, iotData.Ts)
-		//for deviceID, item := range mappingData {
-		//	// find device in production order stage device
-		//	p.logger.Info("IOT+PARSE+DATA",
-		//		zap.Any("deviceID", deviceID),
-		//		zap.Any("mappingData", item))
-		//
-		//	orderStageDevices, err := p.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
-		//		DeviceIDs:                    []string{deviceID},
-		//		ProductionOrderStageStatuses: []enum.ProductionOrderStageStatus{enum.ProductionOrderStageStatusProductionStart},
-		//		Limit:                        1,
-		//		Offset:                       0,
-		//	})
-		//
-		//	if err != nil {
-		//		// todo nothing
-		//		p.logger.Error(" p.productionOrderStageDeviceRepo.Search error", zap.Error(err))
-		//	}
-		//	activeStageID := ""
-		//	orderStageDeviceID := ""
-		//	if len(orderStageDevices) >= 1 && orderStageDevices[0].ProcessStatus == enum.ProductionOrderStageDeviceStatusStart {
-		//		device := orderStageDevices[0]
-		//		orderStageDeviceID = device.ID
-		//		activeStageID = device.ProductionOrderStageID
-		//		if item.SL_in_LSX > 0 && item.SL_in_LSX > device.Quantity {
-		//			// update first device
-		//			_ = p.productionOrderStageDeviceRepo.Update(ctx, &model.ProductionOrderStageDevice{
-		//				ID:                     device.ID,
-		//				ProductionOrderStageID: device.ProductionOrderStageID,
-		//				DeviceID:               device.DeviceID,
-		//				Quantity:               item.SL_in_LSX,
-		//				ProcessStatus:          device.ProcessStatus,
-		//				Status:                 device.Status,
-		//				Settings:               device.Settings,
-		//				Note:                   device.Note,
-		//				CreatedAt:              device.CreatedAt,
-		//				UpdatedAt:              device.UpdatedAt,
-		//				Responsible:            device.Responsible,
-		//				EstimatedCompleteAt:    device.EstimatedCompleteAt,
-		//				AssignedQuantity:       device.AssignedQuantity,
-		//			})
-		//		}
-		//	}
-		//	// upsert to device_working_history
-		//	deviceWorkingHistories, err := p.deviceWorkingHistoryRepo.Search(ctx, &repository.SearchDeviceWorkingHistoryOpts{
-		//		DeviceID: deviceID,
-		//		Date:     dateStr,
-		//		Limit:    1,
-		//	})
-		//	if err != nil {
-		//		// todo nothing
-		//		p.logger.Error(" p.deviceWorkingHistoryRepo.Search error", zap.Error(err))
-		//	}
-		//	if len(deviceWorkingHistories) == 0 {
-		//		p.deviceWorkingHistoryRepo.Insert(ctx, &model.DeviceWorkingHistory{
-		//			ID:                           idutil.ULIDNow(),
-		//			ProductionOrderStageDeviceID: cockroach.String(orderStageDeviceID),
-		//			DeviceID:                     deviceID,
-		//			Date:                         dateStr,
-		//			Quantity:                     item.SL_in_Ngay, // todo remove this field in db
-		//			WorkingTime:                  item.TG_in_Ngay, // todo remove this field in db
-		//			NumberOfPrintsPerDay:         item.SL_in_Ngay,
-		//			PrintingTimePerDay:           item.TG_in_Ngay,
-		//			PoQuantity:                   item.SL_in_LSX,
-		//			PoWorkingTime:                item.TG_in_LSX,
-		//			CreatedAt:                    now,
-		//		})
-		//	} else {
-		//		// update
-		//		deviceWorkingHistory := deviceWorkingHistories[0].DeviceWorkingHistory
-		//
-		//		deviceWorkingHistory.NumberOfPrintsPerDay = item.SL_in_Ngay
-		//		deviceWorkingHistory.PrintingTimePerDay = item.TG_in_Ngay
-		//		deviceWorkingHistory.Quantity = item.SL_in_Ngay    // todo remove this field in db
-		//		deviceWorkingHistory.WorkingTime = item.TG_in_Ngay // todo remove this field in db
-		//		deviceWorkingHistory.PoWorkingTime = item.TG_in_LSX
-		//		deviceWorkingHistory.PoQuantity = item.SL_in_LSX
-		//
-		//		deviceWorkingHistory.UpdatedAt = cockroach.Time(now)
-		//
-		//		err := p.deviceWorkingHistoryRepo.Update(ctx, deviceWorkingHistory)
-		//		if err != nil {
-		//			// todo nothing
-		//			p.logger.Error(" p.deviceWorkingHistoryRepo.Update error", zap.Error(err))
-		//		}
-		//	}
-		//
-		//	fmt.Println("activeStageID", activeStageID)
-		//	// insert event log
-		//	_ = p.productionOrderStageDeviceRepo.InsertEventLog(ctx, &model.EventLog{
-		//		ID:          time.Now().UnixNano(),
-		//		DeviceID:    deviceID,
-		//		StageID:     cockroach.String(activeStageID),
-		//		StageStatus: nil, // todo check stage status
-		//		Quantity:    float64(item.SL_in_Ngay),
-		//		Msg:         cockroach.String(string(message.Payload())),
-		//		Date:        cockroach.String(dateStr),
-		//		CreatedAt:   now,
-		//	})
-		//}
 
 		message.Ack()
 	})
