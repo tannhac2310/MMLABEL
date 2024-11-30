@@ -24,11 +24,11 @@ func (s *masterDataService) CreateMasterData(ctx context.Context, opt *CreateMas
 			Type:         opt.Type,
 			IsIncludeDel: true,
 		})
-		fmt.Println("count", count)
+		fmt.Println("count", count) // TODO remove this line
 		if err != nil {
 			return fmt.Errorf("s.masterDataRep.Count: %w", err)
 		}
-		masterDataID = fmt.Sprintf("%s-%d", opt.Type, count.Count+1)
+		masterDataID = fmt.Sprintf("%s-%s", opt.Type, opt.Code)
 		// 1. Insert master data
 		masterData := &model.MasterData{
 			ID:          masterDataID,
