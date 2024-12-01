@@ -238,6 +238,7 @@ func Run(ctx context.Context, configPath string) {
 			controller.RegisterCommentController,
 			controller.RegisterMasterDataController,
 			controller.RegisterProductController,
+			controller.RegisterOrderController,
 		),
 	}
 

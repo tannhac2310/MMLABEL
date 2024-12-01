@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/commondto"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
 type CreateOrderRequest struct {
@@ -17,17 +18,10 @@ type UpdateOrderRequest struct {
 }
 
 type OrderData struct {
-	ID                  string `json:"id"`
-	Title               string `json:"title"`
-	Code                string `json:"code"`
-	SaleName            string `json:"saleName"`
-	SaleAdminName       string `json:"saleAdminName"`
-	ProductCode         string `json:"productCode"`
-	ProductName         string `json:"productName"`
-	CustomerID          string `json:"customerID"`
-	CustomerProductCode string `json:"customerProductCode"`
-	CustomerProductName string `json:"customerProductName"`
-	Status              string `json:"status"`
+	ID     string           `json:"id"`
+	Title  string           `json:"title"`
+	Code   string           `json:"code"`
+	Status enum.OrderStatus `json:"status"`
 }
 
 type OrderItemData struct {

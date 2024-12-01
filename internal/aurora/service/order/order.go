@@ -8,6 +8,7 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/idutil"
 )
 
@@ -17,17 +18,10 @@ type OrderWithItems struct {
 }
 
 type OrderData struct {
-	ID                  string
-	Title               string
-	Code                string
-	SaleName            string
-	SaleAdminName       string
-	ProductCode         string
-	ProductName         string
-	CustomerID          string
-	CustomerProductCode string
-	CustomerProductName string
-	Status              string
+	ID     string
+	Title  string
+	Code   string
+	Status enum.OrderStatus
 }
 
 type OrderItemData struct {
@@ -71,17 +65,10 @@ type orderService struct {
 func (s *orderService) UpdateOrder(ctx context.Context, orderWithItems *UpdateOrder) error {
 	errTx := cockroach.ExecInTx(ctx, func(tx context.Context) error {
 		order := &model.Order{
-			ID:                  orderWithItems.Order.ID,
-			Title:               orderWithItems.Order.Title,
-			Code:                orderWithItems.Order.Code,
-			SaleName:            orderWithItems.Order.SaleName,
-			SaleAdminName:       orderWithItems.Order.SaleAdminName,
-			ProductCode:         orderWithItems.Order.ProductCode,
-			ProductName:         orderWithItems.Order.ProductName,
-			CustomerID:          orderWithItems.Order.CustomerID,
-			CustomerProductCode: orderWithItems.Order.CustomerProductCode,
-			CustomerProductName: orderWithItems.Order.CustomerProductName,
-			Status:              orderWithItems.Order.Status,
+			ID:     orderWithItems.Order.ID,
+			Title:  orderWithItems.Order.Title,
+			Code:   orderWithItems.Order.Code,
+			Status: orderWithItems.Order.Status,
 		}
 
 		err := s.orderRepo.Update(tx, order)
@@ -183,17 +170,10 @@ func (s *orderService) SearchOrders(ctx context.Context, opts *repository.Search
 			}
 			orderWithItems = append(orderWithItems, &OrderWithItems{
 				Order: OrderData{
-					ID:                  order.ID,
-					Title:               order.Title,
-					Code:                order.Code,
-					SaleName:            order.SaleName,
-					SaleAdminName:       order.SaleAdminName,
-					ProductCode:         order.ProductCode,
-					ProductName:         order.ProductName,
-					CustomerID:          order.CustomerID,
-					CustomerProductCode: order.CustomerProductCode,
-					CustomerProductName: order.CustomerProductName,
-					Status:              order.Status,
+					ID:     order.ID,
+					Title:  order.Title,
+					Code:   order.Code,
+					Status: order.Status,
 				},
 				Items: orderItemData,
 			})
@@ -222,17 +202,10 @@ func (s *orderService) CreateOrder(ctx context.Context, orderWithItems *CreateOr
 		orderId = fmt.Sprintf("order-%d", cntRow+1)
 
 		order := &model.Order{
-			ID:                  orderId,
-			Title:               orderWithItems.Order.Title,
-			Code:                orderWithItems.Order.Code,
-			SaleName:            orderWithItems.Order.SaleName,
-			SaleAdminName:       orderWithItems.Order.SaleAdminName,
-			ProductCode:         orderWithItems.Order.ProductCode,
-			ProductName:         orderWithItems.Order.ProductName,
-			CustomerID:          orderWithItems.Order.CustomerID,
-			CustomerProductCode: orderWithItems.Order.CustomerProductCode,
-			CustomerProductName: orderWithItems.Order.CustomerProductName,
-			Status:              orderWithItems.Order.Status,
+			ID:     orderId,
+			Title:  orderWithItems.Order.Title,
+			Code:   orderWithItems.Order.Code,
+			Status: orderWithItems.Order.Status,
 		}
 
 		err = s.orderRepo.Insert(tx, order)
