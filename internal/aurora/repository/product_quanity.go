@@ -80,6 +80,8 @@ func (s *SearchProductQualitysOpts) buildQuery(isCount bool, isAnalysis bool) (s
 	}
 	if len(s.DeviceIDs) > 0 {
 		args = append(args, s.DeviceIDs)
+		// ProductQualityFieldDeviceIDs
+		conds += fmt.Sprintf(" AND b.%s && $%d", model.ProductQualityFieldDeviceIDs, len(args))
 	}
 	if s.DefectType != "" && !isAnalysis {
 		args = append(args, s.DefectType)

@@ -30,7 +30,7 @@ type DeviceConfig struct {
 	ProductionOrderID      string                `json:"productionOrderID" binding:"required"`
 	ProductionOrderName    string                `json:"productionOrderName"`
 	ProductionPlanID       string                `json:"productionPlanID"`
-	DeviceID               string                `json:"deviceID" binding:"required"`
+	DeviceID               string                `json:"deviceID"`
 	DeviceName             string                `json:"deviceName"`
 	DeviceType             enum.DeviceConfigType `json:"deviceType"`
 	DeviceCode             string                `json:"deviceCode"`
@@ -70,40 +70,6 @@ type DeviceConfig struct {
 	UpdatedAt              time.Time             `json:"updatedAt"`
 }
 
-// ProductionOrderID      string
-//
-//	ProductionPlanID       string
-//	DeviceID               string
-//	Color                  string
-//	MaThongSoMay           string
-//	MaTaiLieuHuongDan      string
-//	NgayHieuLuc            string
-//	StageID                string
-//	MaSanPham              string
-//	MaSanPhamNoiBo         string
-//	ChuKyIn                string
-//	ThoiGianChuanBi        string
-//	TenMauMuc              string
-//	TenLoaiMuc             string
-//	SoThuTuIn              string
-//	MaPhim                 string
-//	MaMauMuc               string
-//	TinhTrangMuc           string
-//	DienTichPhuMuc         string
-//	DungMoi                string
-//	NhietDoSay             string
-//	ThoiGianSay            string
-//	GhiChu                 string
-//	MaKhung                string
-//	ThongSoLua             string
-//	KhoangCachKhungInBanIn string
-//	CachIn                 string
-//	CungDao                string
-//	DoBenDao               string
-//	DoNghiengDao           string
-//	TocDoDao               string
-//	TocDo                  string
-//	Description            string
 type CreateDeviceConfigRequest struct {
 	ProductionOrderID      string                 `json:"productionOrderID"`
 	ProductionPlanID       string                 `json:"productionPlanID"`
@@ -149,13 +115,13 @@ type CreateDeviceConfigResponse struct {
 
 type EditDeviceConfigRequest struct {
 	ID                     string                 `json:"id" binding:"required"`
-	ProductionOrderID      string                 `json:"productionOrderID" binding:"required"`
+	ProductionOrderID      string                 `json:"productionOrderID"`
 	ProductionPlanID       string                 `json:"productionPlanID"`
-	DeviceID               string                 `json:"deviceID" binding:"required"`
+	DeviceID               string                 `json:"deviceID"`
 	Color                  string                 `json:"color"`
 	MaThongSoMay           string                 `json:"maThongSoMay"`
 	MaTaiLieuHuongDan      string                 `json:"maTaiLieuHuongDan"`
-	NgayHieuLuc            string                 `json:"ngayHieuLuc"`
+	NgayHieuLuc            time.Time              `json:"ngayHieuLuc"`
 	StageID                string                 `json:"stageID"`
 	MaSanPham              string                 `json:"maSanPham"`
 	MaSanPhamNoiBo         string                 `json:"maSanPhamNoiBo"`
