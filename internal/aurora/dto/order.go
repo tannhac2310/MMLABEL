@@ -18,10 +18,17 @@ type UpdateOrderRequest struct {
 }
 
 type OrderData struct {
-	ID     string           `json:"id"`
-	Title  string           `json:"title"`
-	Code   string           `json:"code"`
-	Status enum.OrderStatus `json:"status"`
+	ID                  string           `json:"id"`
+	Title               string           `json:"title"`
+	Code                string           `json:"code"`
+	SaleName            string           `json:"saleName"`
+	SaleAdminName       string           `json:"saleAdminName"`
+	ProductCode         string           `json:"productCode"`
+	ProductName         string           `json:"productName"`
+	CustomerID          string           `json:"customerID"`
+	CustomerProductCode string           `json:"customerProductCode"`
+	CustomerProductName string           `json:"customerProductName"`
+	Status              enum.OrderStatus `json:"status"`
 }
 
 type OrderItemData struct {
@@ -31,7 +38,6 @@ type OrderItemData struct {
 	ProductionQuantity      int64             `json:"productionQuantity"`
 	Quantity                int64             `json:"quantity"`
 	UnitPrice               float64           `json:"unitPrice"`
-	TotalAmount             float64           `json:"totalAmount"`
 	DeliveredQuantity       int64             `json:"deliveredQuantity"`
 	EstimatedDeliveryDate   time.Time         `json:"estimatedDeliveryDate"`
 	DeliveredDate           time.Time         `json:"deliveredDate"`

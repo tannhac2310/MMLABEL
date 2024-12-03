@@ -18,10 +18,17 @@ type OrderWithItems struct {
 }
 
 type OrderData struct {
-	ID     string
-	Title  string
-	Code   string
-	Status enum.OrderStatus
+	ID                  string
+	Title               string
+	Code                string
+	Status              enum.OrderStatus
+	SaleName            string
+	SaleAdminName       string
+	ProductCode         string
+	ProductName         string
+	CustomerID          string
+	CustomerProductCode string
+	CustomerProductName string
 }
 
 type OrderItemData struct {
@@ -31,7 +38,6 @@ type OrderItemData struct {
 	ProductionQuantity      int64
 	Quantity                int64
 	UnitPrice               float64
-	TotalAmount             float64
 	DeliveredQuantity       int64
 	EstimatedDeliveryDate   time.Time
 	DeliveredDate           time.Time
@@ -65,10 +71,17 @@ type orderService struct {
 func (s *orderService) UpdateOrder(ctx context.Context, orderWithItems *UpdateOrder) error {
 	errTx := cockroach.ExecInTx(ctx, func(tx context.Context) error {
 		order := &model.Order{
-			ID:     orderWithItems.Order.ID,
-			Title:  orderWithItems.Order.Title,
-			Code:   orderWithItems.Order.Code,
-			Status: orderWithItems.Order.Status,
+			ID:                  orderWithItems.Order.ID,
+			Title:               orderWithItems.Order.Title,
+			Code:                orderWithItems.Order.Code,
+			Status:              orderWithItems.Order.Status,
+			SaleName:            orderWithItems.Order.SaleName,
+			SaleAdminName:       orderWithItems.Order.SaleAdminName,
+			ProductCode:         orderWithItems.Order.ProductCode,
+			ProductName:         orderWithItems.Order.ProductName,
+			CustomerID:          orderWithItems.Order.CustomerID,
+			CustomerProductCode: orderWithItems.Order.CustomerProductCode,
+			CustomerProductName: orderWithItems.Order.CustomerProductName,
 		}
 
 		err := s.orderRepo.Update(tx, order)
@@ -89,7 +102,6 @@ func (s *orderService) UpdateOrder(ctx context.Context, orderWithItems *UpdateOr
 				ProductionQuantity:      item.ProductionQuantity,
 				Quantity:                item.Quantity,
 				UnitPrice:               item.UnitPrice,
-				TotalAmount:             item.TotalAmount,
 				DeliveredQuantity:       item.DeliveredQuantity,
 				EstimatedDeliveryDate:   cockroach.Time(item.EstimatedDeliveryDate),
 				DeliveredDate:           cockroach.Time(item.DeliveredDate),
@@ -159,7 +171,6 @@ func (s *orderService) SearchOrders(ctx context.Context, opts *repository.Search
 					ProductionQuantity:      item.ProductionQuantity,
 					Quantity:                item.Quantity,
 					UnitPrice:               item.UnitPrice,
-					TotalAmount:             item.TotalAmount,
 					DeliveredQuantity:       item.DeliveredQuantity,
 					EstimatedDeliveryDate:   item.EstimatedDeliveryDate.Time,
 					DeliveredDate:           item.DeliveredDate.Time,
@@ -202,10 +213,17 @@ func (s *orderService) CreateOrder(ctx context.Context, orderWithItems *CreateOr
 		orderId = fmt.Sprintf("order-%d", cntRow+1)
 
 		order := &model.Order{
-			ID:     orderId,
-			Title:  orderWithItems.Order.Title,
-			Code:   orderWithItems.Order.Code,
-			Status: orderWithItems.Order.Status,
+			ID:                  orderId,
+			Title:               orderWithItems.Order.Title,
+			Code:                orderWithItems.Order.Code,
+			Status:              orderWithItems.Order.Status,
+			SaleName:            orderWithItems.Order.SaleName,
+			SaleAdminName:       orderWithItems.Order.SaleAdminName,
+			ProductCode:         orderWithItems.Order.ProductCode,
+			ProductName:         orderWithItems.Order.ProductName,
+			CustomerID:          orderWithItems.Order.CustomerID,
+			CustomerProductCode: orderWithItems.Order.CustomerProductCode,
+			CustomerProductName: orderWithItems.Order.CustomerProductName,
 		}
 
 		err = s.orderRepo.Insert(tx, order)
@@ -222,13 +240,13 @@ func (s *orderService) CreateOrder(ctx context.Context, orderWithItems *CreateOr
 				ProductionQuantity:      item.ProductionQuantity,
 				Quantity:                item.Quantity,
 				UnitPrice:               item.UnitPrice,
-				TotalAmount:             item.TotalAmount,
-				DeliveredQuantity:       item.DeliveredQuantity,
-				EstimatedDeliveryDate:   cockroach.Time(item.EstimatedDeliveryDate),
-				DeliveredDate:           cockroach.Time(item.DeliveredDate),
-				Status:                  item.Status,
-				Attachment:              item.Attachment,
-				Note:                    item.Note,
+				//TotalAmount:             item.TotalAmount,
+				DeliveredQuantity:     item.DeliveredQuantity,
+				EstimatedDeliveryDate: cockroach.Time(item.EstimatedDeliveryDate),
+				DeliveredDate:         cockroach.Time(item.DeliveredDate),
+				Status:                item.Status,
+				Attachment:            item.Attachment,
+				Note:                  item.Note,
 			}
 			err := s.orderItemRepo.Insert(tx, orderItem)
 			if err != nil {

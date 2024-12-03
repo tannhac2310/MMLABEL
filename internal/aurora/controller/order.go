@@ -29,9 +29,10 @@ func (o orderController) CreateOrder(ctx *gin.Context) {
 		return
 	}
 	orderParams := order.OrderData{
-		Title:  req.Order.Title,
-		Code:   req.Order.Code,
-		Status: req.Order.Status,
+		Title:    req.Order.Title,
+		Code:     req.Order.Code,
+		Status:   req.Order.Status,
+		SaleName: req.Order.SaleName,
 	}
 
 	orderItems := make([]*order.OrderItemData, 0, len(req.Items))
@@ -42,7 +43,6 @@ func (o orderController) CreateOrder(ctx *gin.Context) {
 			ProductionQuantity:      item.ProductionQuantity,
 			Quantity:                item.Quantity,
 			UnitPrice:               item.UnitPrice,
-			TotalAmount:             item.TotalAmount,
 			DeliveredQuantity:       item.DeliveredQuantity,
 			EstimatedDeliveryDate:   item.EstimatedDeliveryDate,
 			DeliveredDate:           item.DeliveredDate,
@@ -86,7 +86,6 @@ func (o orderController) UpdateOrder(ctx *gin.Context) {
 			ProductionQuantity:      item.ProductionQuantity,
 			Quantity:                item.Quantity,
 			UnitPrice:               item.UnitPrice,
-			TotalAmount:             item.TotalAmount,
 			DeliveredQuantity:       item.DeliveredQuantity,
 			EstimatedDeliveryDate:   item.EstimatedDeliveryDate,
 			DeliveredDate:           item.DeliveredDate,
@@ -153,7 +152,6 @@ func (o orderController) FindOrder(ctx *gin.Context) {
 				ProductionQuantity:      item.ProductionQuantity,
 				Quantity:                item.Quantity,
 				UnitPrice:               item.UnitPrice,
-				TotalAmount:             item.TotalAmount,
 				DeliveredQuantity:       item.DeliveredQuantity,
 				EstimatedDeliveryDate:   item.EstimatedDeliveryDate,
 				DeliveredDate:           item.DeliveredDate,

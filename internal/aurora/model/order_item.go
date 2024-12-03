@@ -13,7 +13,6 @@ const (
 	OrderItemFieldProductionQuantity      = "production_quantity"
 	OrderItemFieldQuantity                = "quantity"
 	OrderItemFieldUnitPrice               = "unit_price"
-	OrderItemFieldTotalAmount             = "total_amount"
 	OrderItemFieldDeliveredQuantity       = "delivered_quantity"
 	OrderItemFieldEstimatedDeliveryDate   = "estimated_delivery_date"
 	OrderItemFieldDeliveredDate           = "delivered_date"
@@ -34,7 +33,6 @@ type OrderItem struct {
 	ProductionQuantity      int64             `db:"production_quantity"`
 	Quantity                int64             `db:"quantity"`
 	UnitPrice               float64           `db:"unit_price"`
-	TotalAmount             float64           `db:"total_amount"`
 	DeliveredQuantity       int64             `db:"delivered_quantity"`
 	EstimatedDeliveryDate   sql.NullTime      `db:"estimated_delivery_date"`
 	DeliveredDate           sql.NullTime      `db:"delivered_date"`
@@ -56,7 +54,6 @@ func (rcv *OrderItem) FieldMap() (fields []string, values []interface{}) {
 		OrderItemFieldProductionQuantity,
 		OrderItemFieldQuantity,
 		OrderItemFieldUnitPrice,
-		OrderItemFieldTotalAmount,
 		OrderItemFieldDeliveredQuantity,
 		OrderItemFieldEstimatedDeliveryDate,
 		OrderItemFieldDeliveredDate,
@@ -77,7 +74,6 @@ func (rcv *OrderItem) FieldMap() (fields []string, values []interface{}) {
 		&rcv.ProductionQuantity,
 		&rcv.Quantity,
 		&rcv.UnitPrice,
-		&rcv.TotalAmount,
 		&rcv.DeliveredQuantity,
 		&rcv.EstimatedDeliveryDate,
 		&rcv.DeliveredDate,
