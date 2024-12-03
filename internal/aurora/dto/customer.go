@@ -6,9 +6,11 @@ import (
 )
 
 type CustomerFilter struct {
-	Name  string `json:"name"`
-	Code  string `json:"code"`
-	Phone string `json:"phone"`
+	ID    string   `json:"id"`
+	IDs   []string `json:"ids"`
+	Name  string   `json:"name"`
+	Code  string   `json:"code"`
+	Phone string   `json:"phone"`
 }
 
 type FindCustomersRequest struct {

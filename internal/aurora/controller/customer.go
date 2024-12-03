@@ -129,6 +129,9 @@ func (s customerController) FindCustomers(c *gin.Context) {
 
 	customers, cnt, err := s.customerService.FindCustomers(c, &customer.FindCustomersOpts{
 		Name: req.Filter.Name,
+		Code: req.Filter.Code,
+		ID:   req.Filter.ID,
+		IDs:  req.Filter.IDs,
 	}, &repository.Sort{
 		Order: repository.SortOrderDESC,
 		By:    "ID",

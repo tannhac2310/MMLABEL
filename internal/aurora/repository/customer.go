@@ -66,6 +66,7 @@ func (r *sCustomerRepo) SoftDelete(ctx context.Context, id string) error {
 // SearchCustomerOpts all params is options
 type SearchCustomerOpts struct {
 	IDs    []string
+	ID     string
 	Name   string
 	Code   string
 	Phone  string
@@ -82,6 +83,11 @@ func (s *SearchCustomerOpts) buildQuery(isCount bool) (string, []interface{}) {
 	if len(s.IDs) > 0 {
 		args = append(args, s.IDs)
 		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.CustomerFieldID)
+	}
+
+	if s.ID != "" {
+		args = append(args, s.ID)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.CustomerFieldID, len(args))
 	}
 	// todo add more search options example:
 	if s.Name != "" {

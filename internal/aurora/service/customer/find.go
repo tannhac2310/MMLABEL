@@ -9,6 +9,7 @@ import (
 func (c *customerService) FindCustomers(ctx context.Context, opts *FindCustomersOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error) {
 	filter := &repository.SearchCustomerOpts{
 		IDs:    opts.IDs,
+		ID:     opts.ID,
 		Name:   opts.Name,
 		Phone:  opts.Phone,
 		Code:   opts.Code,
@@ -37,6 +38,7 @@ func (c *customerService) FindCustomers(ctx context.Context, opts *FindCustomers
 
 type FindCustomersOpts struct {
 	IDs   []string
+	ID    string
 	Name  string
 	Phone string
 	Code  string
