@@ -30,7 +30,7 @@ func NewOrderItemRepo() OrderItemRepo {
 func (r *sOrderItemRepo) Insert(ctx context.Context, e *model.OrderItem) error {
 	err := cockroach.Create(ctx, e)
 	if err != nil {
-		return fmt.Errorf("r.baseRepo.Create: %w", err)
+		return fmt.Errorf("sOrderItemRepo.Insert: %w", err)
 	}
 
 	return nil

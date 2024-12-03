@@ -26,6 +26,10 @@ type Ink struct {
 	Status             enum.CommonStatus      `json:"status"`
 	ProductionPlanIDs  []string               `json:"productionPlanIDs"`
 	ProductionOrderIDs []string               `json:"productionOrderIDs"`
+	Kho                string                 `json:"kho"`
+	LoaiMuc            string                 `json:"loaiMuc"`
+	NhaCungCap         string                 `json:"nhaCungCap"`
+	TinhTrang          string                 `json:"tinhTrang"`
 	CreatedBy          string                 `json:"createdBy"`
 	UpdatedBy          string                 `json:"updatedBy"`
 	CreatedAt          time.Time              `json:"createdAt"`
@@ -64,6 +68,10 @@ type EditInkRequest struct {
 	Data           map[string]interface{} `json:"data"`
 	Status         enum.CommonStatus      `json:"status"`
 	Quantity       float64                `json:"quantity"`
+	Kho            string                 `json:"kho"`
+	LoaiMuc        string                 `json:"loaiMuc"`
+	NhaCungCap     string                 `json:"nhaCungCap"`
+	TinhTrang      string                 `json:"tinhTrang"`
 }
 
 type EditInkResponse struct{}
@@ -89,6 +97,10 @@ type CreateInkImportDetail struct {
 	ExpirationDate string                 `json:"expirationDate"` // DD-MM-YYYY
 	Description    string                 `json:"description"`
 	Data           map[string]interface{} `json:"data"`
+	Kho            string                 `json:"kho"`
+	LoaiMuc        string                 `json:"loaiMuc"`
+	NhaCungCap     string                 `json:"nhaCungCap"`
+	TinhTrang      string                 `json:"tinhTrang"`
 }
 
 type InkImportDetail struct {
@@ -105,6 +117,10 @@ type InkImportDetail struct {
 	ExpirationDate string                 `json:"expirationDate"` // DD-MM-YYYY
 	Description    string                 `json:"description"`
 	Data           map[string]interface{} `json:"data"`
+	Kho            string                 `json:"kho"`
+	LoaiMuc        string                 `json:"loaiMuc"`
+	NhaCungCap     string                 `json:"nhaCungCap"`
+	TinhTrang      string                 `json:"tinhTrang"`
 }
 
 type CreateInkImportResponse struct {

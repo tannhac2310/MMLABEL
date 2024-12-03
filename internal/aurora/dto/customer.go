@@ -39,6 +39,7 @@ type Customer struct {
 	ContactPersonRole  string              `json:"contactPersonRole,omitempty"`
 	Note               string              `json:"note,omitempty"`
 	Status             enum.CustomerStatus `json:"status,omitempty"`
+	UserField          any                 `json:"userField,omitempty"`
 }
 
 type CreateCustomerRequest struct {
@@ -57,7 +58,7 @@ type CreateCustomerRequest struct {
 	ContactPersonPhone string `json:"contactPersonPhone,omitempty" `
 	ContactPersonRole  string `json:"contactPersonRole,omitempty"`
 	Note               string `json:"note,omitempty"`
-	Data               any    `json:"userField"`
+	UserField          any    `json:"userField"`
 }
 
 type CreateCustomerResponse struct {
@@ -81,7 +82,7 @@ type EditCustomerRequest struct {
 	ContactPersonPhone string `json:"contactPersonPhone,omitempty" `
 	ContactPersonRole  string `json:"contactPersonRole,omitempty"`
 	Note               string `json:"note,omitempty"`
-	UserField          []*UserField
+	UserField          any    `json:"userField,omitempty"`
 }
 
 type EditCustomerResponse struct {

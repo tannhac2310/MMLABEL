@@ -8,7 +8,6 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/idutil"
 )
 
@@ -18,17 +17,14 @@ type OrderWithItems struct {
 }
 
 type OrderData struct {
-	ID                  string
-	Title               string
-	Code                string
-	Status              enum.OrderStatus
-	SaleName            string
-	SaleAdminName       string
-	ProductCode         string
-	ProductName         string
-	CustomerID          string
-	CustomerProductCode string
-	CustomerProductName string
+	ID                 string
+	Title              string
+	MaDatHangMm        string
+	MaHopDongKhachHang string
+	MaHopDong          string
+	SaleName           string
+	SaleAdminName      string
+	Status             string
 }
 
 type OrderItemData struct {
@@ -47,13 +43,15 @@ type OrderItemData struct {
 }
 
 type CreateOrder struct {
-	Order OrderData
-	Items []*OrderItemData
+	Order    OrderData
+	Items    []*OrderItemData
+	CreateBy string
 }
 
 type UpdateOrder struct {
-	Order OrderData
-	Items []*OrderItemData
+	Order    OrderData
+	Items    []*OrderItemData
+	UpdateBy string
 }
 
 type OrderService interface {
@@ -71,17 +69,12 @@ type orderService struct {
 func (s *orderService) UpdateOrder(ctx context.Context, orderWithItems *UpdateOrder) error {
 	errTx := cockroach.ExecInTx(ctx, func(tx context.Context) error {
 		order := &model.Order{
-			ID:                  orderWithItems.Order.ID,
-			Title:               orderWithItems.Order.Title,
-			Code:                orderWithItems.Order.Code,
-			Status:              orderWithItems.Order.Status,
-			SaleName:            orderWithItems.Order.SaleName,
-			SaleAdminName:       orderWithItems.Order.SaleAdminName,
-			ProductCode:         orderWithItems.Order.ProductCode,
-			ProductName:         orderWithItems.Order.ProductName,
-			CustomerID:          orderWithItems.Order.CustomerID,
-			CustomerProductCode: orderWithItems.Order.CustomerProductCode,
-			CustomerProductName: orderWithItems.Order.CustomerProductName,
+			ID:            orderWithItems.Order.ID,
+			Title:         orderWithItems.Order.Title,
+			Status:        orderWithItems.Order.Status,
+			SaleName:      cockroach.String(orderWithItems.Order.SaleName),
+			SaleAdminName: cockroach.String(orderWithItems.Order.SaleAdminName),
+			UpdatedBy:     orderWithItems.UpdateBy,
 		}
 
 		err := s.orderRepo.Update(tx, order)
@@ -95,7 +88,7 @@ func (s *orderService) UpdateOrder(ctx context.Context, orderWithItems *UpdateOr
 		// insert new order items
 		for _, item := range orderWithItems.Items {
 			orderItem := &model.OrderItem{
-				ID:                      item.ID,
+				ID:                      idutil.ULIDNow(),
 				OrderID:                 orderWithItems.Order.ID,
 				ProductionPlanProductID: item.ProductionPlanProductID,
 				ProductionPlanID:        item.ProductionPlanID,
@@ -181,10 +174,14 @@ func (s *orderService) SearchOrders(ctx context.Context, opts *repository.Search
 			}
 			orderWithItems = append(orderWithItems, &OrderWithItems{
 				Order: OrderData{
-					ID:     order.ID,
-					Title:  order.Title,
-					Code:   order.Code,
-					Status: order.Status,
+					ID:                 order.ID,
+					Title:              order.Title,
+					MaDatHangMm:        order.MaDatHangMm,
+					MaHopDongKhachHang: order.MaHopDongKhachHang,
+					MaHopDong:          order.MaHopDong,
+					SaleName:           order.SaleName.String,
+					SaleAdminName:      order.SaleAdminName.String,
+					Status:             order.Status,
 				},
 				Items: orderItemData,
 			})
@@ -211,19 +208,20 @@ func (s *orderService) CreateOrder(ctx context.Context, orderWithItems *CreateOr
 			return err
 		}
 		orderId = fmt.Sprintf("order-%d", cntRow+1)
-
+		now := time.Now()
 		order := &model.Order{
-			ID:                  orderId,
-			Title:               orderWithItems.Order.Title,
-			Code:                orderWithItems.Order.Code,
-			Status:              orderWithItems.Order.Status,
-			SaleName:            orderWithItems.Order.SaleName,
-			SaleAdminName:       orderWithItems.Order.SaleAdminName,
-			ProductCode:         orderWithItems.Order.ProductCode,
-			ProductName:         orderWithItems.Order.ProductName,
-			CustomerID:          orderWithItems.Order.CustomerID,
-			CustomerProductCode: orderWithItems.Order.CustomerProductCode,
-			CustomerProductName: orderWithItems.Order.CustomerProductName,
+			ID:                 orderId,
+			Title:              orderWithItems.Order.Title,
+			MaDatHangMm:        orderWithItems.Order.MaDatHangMm,
+			MaHopDongKhachHang: orderWithItems.Order.MaHopDongKhachHang,
+			MaHopDong:          orderWithItems.Order.MaHopDong,
+			SaleName:           cockroach.String(orderWithItems.Order.SaleName),
+			SaleAdminName:      cockroach.String(orderWithItems.Order.SaleAdminName),
+			Status:             orderWithItems.Order.Status,
+			CreatedBy:          orderWithItems.CreateBy,
+			UpdatedBy:          orderWithItems.CreateBy,
+			CreatedAt:          now,
+			UpdatedAt:          now,
 		}
 
 		err = s.orderRepo.Insert(tx, order)
@@ -240,13 +238,12 @@ func (s *orderService) CreateOrder(ctx context.Context, orderWithItems *CreateOr
 				ProductionQuantity:      item.ProductionQuantity,
 				Quantity:                item.Quantity,
 				UnitPrice:               item.UnitPrice,
-				//TotalAmount:             item.TotalAmount,
-				DeliveredQuantity:     item.DeliveredQuantity,
-				EstimatedDeliveryDate: cockroach.Time(item.EstimatedDeliveryDate),
-				DeliveredDate:         cockroach.Time(item.DeliveredDate),
-				Status:                item.Status,
-				Attachment:            item.Attachment,
-				Note:                  item.Note,
+				DeliveredQuantity:       item.DeliveredQuantity,
+				EstimatedDeliveryDate:   cockroach.Time(item.EstimatedDeliveryDate),
+				DeliveredDate:           cockroach.Time(item.DeliveredDate),
+				Status:                  item.Status,
+				Attachment:              item.Attachment,
+				Note:                    item.Note,
 			}
 			err := s.orderItemRepo.Insert(tx, orderItem)
 			if err != nil {

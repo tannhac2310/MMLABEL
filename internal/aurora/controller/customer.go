@@ -50,7 +50,7 @@ func (s customerController) CreateCustomer(c *gin.Context) {
 		ContactPersonPhone: req.ContactPersonPhone,
 		ContactPersonRole:  req.ContactPersonRole,
 		Note:               req.Note,
-		Data:               req.Data,
+		Data:               req.UserField,
 		Status:             enum.CustomerStatusActivate,
 		CreatedBy:          userID,
 	})
@@ -75,17 +75,17 @@ func (s customerController) EditCustomer(c *gin.Context) {
 	userID := interceptor.UserIDFromCtx(c)
 
 	err = s.customerService.EditCustomer(c, &customer.EditCustomerOpts{
-		ID:             req.ID,
-		Name:           req.Name,
-		Tax:            req.Tax,
-		Code:           req.Code,
-		Country:        req.Country,
-		Province:       req.Province,
-		Address:        req.Address,
-		Fax:            req.Fax,
-		CompanyWebsite: req.CompanyWebsite,
-		CompanyPhone:   req.CompanyPhone,
-
+		ID:                 req.ID,
+		Name:               req.Name,
+		Tax:                req.Tax,
+		Code:               req.Code,
+		Country:            req.Country,
+		Province:           req.Province,
+		Address:            req.Address,
+		Fax:                req.Fax,
+		CompanyWebsite:     req.CompanyWebsite,
+		CompanyPhone:       req.CompanyPhone,
+		Data:               req.UserField,
 		ContactPersonName:  req.ContactPersonName,
 		ContactPersonEmail: req.ContactPersonEmail,
 		ContactPersonPhone: req.ContactPersonPhone,
@@ -169,6 +169,7 @@ func toCustomerResp(f *customer.Data) *dto.Customer {
 		ContactPersonEmail: f.ContactPersonEmail.String,
 		ContactPersonRole:  f.ContactPersonRole.String,
 		Note:               f.Note.String,
+		UserField:          f.Data,
 		Status:             f.Status,
 	}
 }

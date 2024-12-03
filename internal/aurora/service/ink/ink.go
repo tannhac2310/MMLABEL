@@ -27,6 +27,10 @@ type EditInkOpts struct {
 	Description    string
 	Data           map[string]interface{}
 	Status         enum.CommonStatus
+	Kho            string
+	LoaiMuc        string
+	NhaCungCap     string
+	TinhTrang      string
 	UpdatedBy      string
 }
 
@@ -43,6 +47,10 @@ type CreateInkOpts struct {
 	Description    string
 	Data           map[string]interface{}
 	Status         enum.CommonStatus
+	Kho            string
+	LoaiMuc        string
+	NhaCungCap     string
+	TinhTrang      string
 	CreatedBy      string
 }
 
@@ -147,6 +155,14 @@ func (p inkService) Edit(ctx context.Context, opt *EditInkOpts) error {
 	updater.Set(model.InkFieldDescription, opt.Description)
 	updater.Set(model.InkFieldData, opt.Data)
 	updater.Set(model.InkFieldUpdatedBy, opt.UpdatedBy)
+	//kho
+	//loai_muc
+	//nha_cung_cap
+	//tinh_trang
+	updater.Set(model.InkFieldKho, opt.Kho)
+	updater.Set(model.InkFieldLoaiMuc, opt.LoaiMuc)
+	updater.Set(model.InkFieldNhaCungCap, opt.NhaCungCap)
+	updater.Set(model.InkFieldTinhTrang, opt.TinhTrang)
 
 	updater.Set(model.InkFieldUpdatedAt, time.Now())
 
@@ -171,6 +187,10 @@ func (p inkService) Create(ctx context.Context, opt *CreateInkOpts) (string, err
 		Quantity:       opt.Quantity,
 		ExpirationDate: opt.ExpirationDate,
 		Description:    cockroach.String(opt.Description),
+		Kho:            opt.Kho,
+		LoaiMuc:        opt.LoaiMuc,
+		NhaCungCap:     opt.NhaCungCap,
+		TinhTrang:      opt.TinhTrang,
 		Data:           opt.Data,
 		Status:         opt.Status,
 		CreatedBy:      opt.CreatedBy,

@@ -472,6 +472,10 @@ func (s inkController) ImportInk(c *gin.Context) {
 			ExpirationDate: f.ExpirationDate,
 			Description:    f.Description,
 			Data:           f.Data,
+			Kho:            f.Kho,
+			LoaiMuc:        f.LoaiMuc,
+			NhaCungCap:     f.NhaCungCap,
+			TinhTrang:      f.TinhTrang,
 		})
 	}
 	id, err := s.inkImportService.Create(c, &ink_import.CreateInkImportOpts{
@@ -547,6 +551,10 @@ func (s inkController) EditInk(c *gin.Context) {
 		ColorDetail:    req.ColorDetail,
 		ExpirationDate: req.ExpirationDate,
 		Description:    req.Description,
+		Kho:            req.Kho,
+		LoaiMuc:        req.LoaiMuc,
+		NhaCungCap:     req.NhaCungCap,
+		TinhTrang:      req.TinhTrang,
 		Data:           req.Data,
 		Status:         req.Status,
 		Quantity:       req.Quantity,

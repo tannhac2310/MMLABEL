@@ -23,6 +23,10 @@ const (
 	InkFieldDescription    = "description"
 	InkFieldData           = "data"
 	InkFieldStatus         = "status"
+	InkFieldKho            = "kho"
+	InkFieldLoaiMuc        = "loai_muc"
+	InkFieldNhaCungCap     = "nha_cung_cap"
+	InkFieldTinhTrang      = "tinh_trang"
 	InkFieldCreatedBy      = "created_by"
 	InkFieldUpdatedBy      = "updated_by"
 	InkFieldCreatedAt      = "created_at"
@@ -46,6 +50,10 @@ type Ink struct {
 	Description    sql.NullString         `db:"description"`
 	Data           map[string]interface{} `db:"data"`
 	Status         enum.CommonStatus      `db:"status"`
+	Kho            string                 `db:"kho"`
+	LoaiMuc        string                 `db:"loai_muc"`
+	NhaCungCap     string                 `db:"nha_cung_cap"`
+	TinhTrang      string                 `db:"tinh_trang"`
 	CreatedBy      string                 `db:"created_by"`
 	UpdatedBy      string                 `db:"updated_by"`
 	CreatedAt      time.Time              `db:"created_at"`
@@ -70,6 +78,10 @@ func (rcv *Ink) FieldMap() (fields []string, values []interface{}) {
 		InkFieldDescription,
 		InkFieldData,
 		InkFieldStatus,
+		InkFieldKho,
+		InkFieldLoaiMuc,
+		InkFieldNhaCungCap,
+		InkFieldTinhTrang,
 		InkFieldCreatedBy,
 		InkFieldUpdatedBy,
 		InkFieldCreatedAt,
@@ -93,6 +105,10 @@ func (rcv *Ink) FieldMap() (fields []string, values []interface{}) {
 		&rcv.Description,
 		&rcv.Data,
 		&rcv.Status,
+		&rcv.Kho,
+		&rcv.LoaiMuc,
+		&rcv.NhaCungCap,
+		&rcv.TinhTrang,
 		&rcv.CreatedBy,
 		&rcv.UpdatedBy,
 		&rcv.CreatedAt,

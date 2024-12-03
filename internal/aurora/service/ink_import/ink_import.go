@@ -53,6 +53,10 @@ type CreateInkImportDetailOpts struct {
 	ExpirationDate string // DD-MM-YYYY
 	Description    string
 	Data           map[string]interface{}
+	Kho            string
+	LoaiMuc        string
+	NhaCungCap     string
+	TinhTrang      string
 }
 type CreateInkImportOpts struct {
 	Name            string
@@ -147,6 +151,10 @@ func (p inkImportService) Create(ctx context.Context, opt *CreateInkImportOpts) 
 					Description:    cockroach.String(inkImportDetail.Description),
 					Data:           inkImportDetail.Data,
 					Status:         enum.CommonStatusActive,
+					Kho:            inkImportDetail.Kho,
+					LoaiMuc:        inkImportDetail.LoaiMuc,
+					NhaCungCap:     inkImportDetail.NhaCungCap,
+					TinhTrang:      inkImportDetail.TinhTrang,
 					CreatedBy:      opt.CreatedBy,
 					UpdatedBy:      opt.CreatedBy,
 					CreatedAt:      now,

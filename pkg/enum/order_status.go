@@ -7,16 +7,19 @@ import (
 
 type OrderStatus string
 
+// chờ sản xuất/ sản xuất/ hoàn thành sx/ giao hàng
 const (
-	OrderStatusActive     OrderStatus = "new"
-	OrderStatusInProgress OrderStatus = "in_progress"
-	OrderStatusCompleted  OrderStatus = "completed"
+	OrderStatusChoSX     OrderStatus = "cho_san_xuat"
+	OrderStatusSanXuat   OrderStatus = "san_xuat"
+	OrderStatusHoanThanh OrderStatus = "hoan_thanh"
+	OrderStatusGiaoHang  OrderStatus = "giao_hang"
 )
 
 var OrderStatusName = map[OrderStatus]string{
-	OrderStatusActive:     "new",
-	OrderStatusInProgress: "in_progress",
-	OrderStatusCompleted:  "completed",
+	OrderStatusChoSX:     "cho_san_xuat",
+	OrderStatusSanXuat:   "san_xuat",
+	OrderStatusHoanThanh: "hoan_thanh",
+	OrderStatusGiaoHang:  "giao_hang",
 }
 
 var OrderStatusValue = func() map[string]OrderStatus {

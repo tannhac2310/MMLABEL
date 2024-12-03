@@ -29,10 +29,13 @@ func (o orderController) CreateOrder(ctx *gin.Context) {
 		return
 	}
 	orderParams := order.OrderData{
-		Title:    req.Order.Title,
-		Code:     req.Order.Code,
-		Status:   req.Order.Status,
-		SaleName: req.Order.SaleName,
+		Title:              req.Order.Title,
+		MaDatHangMm:        req.Order.MaDatHangMm,
+		MaHopDongKhachHang: req.Order.MaHopDongKhachHang,
+		MaHopDong:          req.Order.MaHopDong,
+		SaleName:           req.Order.SaleName,
+		SaleAdminName:      req.Order.SaleAdminName,
+		Status:             req.Order.Status,
 	}
 
 	orderItems := make([]*order.OrderItemData, 0, len(req.Items))
@@ -71,10 +74,14 @@ func (o orderController) UpdateOrder(ctx *gin.Context) {
 	}
 
 	oderData := order.OrderData{
-		ID:     req.Order.ID,
-		Title:  req.Order.Title,
-		Code:   req.Order.Code,
-		Status: req.Order.Status,
+		ID:                 req.Order.ID,
+		Title:              req.Order.Title,
+		MaDatHangMm:        req.Order.MaDatHangMm,
+		MaHopDongKhachHang: req.Order.MaHopDongKhachHang,
+		MaHopDong:          req.Order.MaHopDong,
+		SaleName:           req.Order.SaleName,
+		SaleAdminName:      req.Order.SaleAdminName,
+		Status:             req.Order.Status,
 	}
 
 	orderItems := make([]*order.OrderItemData, 0, len(req.Items))
@@ -162,10 +169,14 @@ func (o orderController) FindOrder(ctx *gin.Context) {
 		}
 		orderData = append(orderData, &dto.OrderWithItems{
 			Order: dto.OrderData{
-				ID:     orderWithItems.Order.ID,
-				Title:  orderWithItems.Order.Title,
-				Code:   orderWithItems.Order.Code,
-				Status: orderWithItems.Order.Status,
+				ID:                 orderWithItems.Order.ID,
+				Title:              orderWithItems.Order.Title,
+				MaDatHangMm:        orderWithItems.Order.MaDatHangMm,
+				MaHopDongKhachHang: orderWithItems.Order.MaHopDongKhachHang,
+				MaHopDong:          orderWithItems.Order.MaHopDong,
+				SaleName:           orderWithItems.Order.SaleName,
+				SaleAdminName:      orderWithItems.Order.SaleAdminName,
+				Status:             orderWithItems.Order.Status,
 			},
 			Items: items,
 		})
