@@ -90,8 +90,10 @@ func (s *SearchProductOpts) buildQuery(isCount bool) (string, []interface{}) {
 	}
 	if s.Name != "" {
 		args = append(args, "%"+s.Name+"%")
+		args = append(args, s.Name)
+
 		// search by name, code, description
-		conds += fmt.Sprintf(" AND (b.%s ILIKE $%d OR b.%s ILIKE $%d OR b.%s ILIKE $%d)", model.ProductFieldName, len(args), model.ProductFieldCode, len(args), model.ProductFieldDescription, len(args))
+		conds += fmt.Sprintf(" AND (b.%s ILIKE $%d OR b.%s ILIKE $%d OR b.%s = $%d)", model.ProductFieldName, len(args)-1, model.ProductFieldDescription, len(args)-1, model.ProductFieldCode, len(args))
 	}
 
 	if s.Code != "" {
