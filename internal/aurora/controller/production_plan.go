@@ -237,7 +237,7 @@ func (s productionPlanController) FindProductionPlans(c *gin.Context) {
 
 	sort := &repository.Sort{
 		Order: repository.SortOrderDESC,
-		By:    "ID",
+		By:    "created_at",
 	}
 	if req.Sort != nil {
 		sort = &repository.Sort{
