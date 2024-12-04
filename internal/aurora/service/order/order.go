@@ -231,7 +231,7 @@ func (s *orderService) CreateOrder(ctx context.Context, orderWithItems *CreateOr
 
 		for _, item := range orderWithItems.Items {
 			orderItem := &model.OrderItem{
-				ID:                      item.ID,
+				ID:                      idutil.ULIDNow(),
 				OrderID:                 orderId,
 				ProductionPlanProductID: item.ProductionPlanProductID,
 				ProductionPlanID:        item.ProductionPlanID,
