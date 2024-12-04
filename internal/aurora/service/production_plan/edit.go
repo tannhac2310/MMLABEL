@@ -109,17 +109,17 @@ func (c *productionPlanService) EditProductionPlan(ctx context.Context, opt *Edi
 			return fmt.Errorf("delete custom field for production plan failed: %w", err)
 		}
 
-		for _, uf := range opt.CustomField {
-
-			err := c.customFieldRepo.Insert(ctx, &model.CustomField{
+		for _, val := range opt.CustomField {
+			// add custom field table
+			err := c.customFieldRepo.Insert(ctx2, &model.CustomField{
 				ID:         idutil.ULIDNow(),
-				EntityID:   opt.ID,
-				EntityType: enum.CustomFieldTypeProduct,
-				Field:      uf.Field,
-				Value:      uf.Value,
+				EntityType: enum.CustomFieldTypeProductionPlan,
+				EntityID:   plan.ID,
+				Field:      val.Field,
+				Value:      val.Value,
 			})
 			if err != nil {
-				return fmt.Errorf("create custom field for production plan failed: %w", err)
+				return fmt.Errorf("c.customFieldRepo.Insert:  %w %s %s %s ", err, plan.ID, val.Field, val.Value)
 			}
 		}
 		//for _, field := range deletedCustomFields {
