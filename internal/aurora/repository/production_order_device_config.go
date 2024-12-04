@@ -138,8 +138,10 @@ func (r *sProductionOrderDeviceConfigRepo) Search(ctx context.Context, s *Search
 	ProductionOrderDeviceConfig := make([]*ProductionOrderDeviceConfigData, 0)
 	sql, args := s.buildQuery(false)
 	err := cockroach.Select(ctx, sql, args...).ScanAll(&ProductionOrderDeviceConfig)
+	fmt.Println("sql+++++++++++++++++++++"+
+		"", sql)
 	if err != nil {
-		return nil, fmt.Errorf("cockroach.Select: %w", err)
+		return nil, fmt.Errorf("sProductionOrderDeviceConfigRepo.Select: %w", err)
 	}
 
 	return ProductionOrderDeviceConfig, nil

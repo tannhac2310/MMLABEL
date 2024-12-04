@@ -37,6 +37,7 @@ type Customer struct {
 	ContactPersonEmail string              `json:"contactPersonEmail,omitempty"`
 	ContactPersonPhone string              `json:"contactPersonPhone,omitempty"`
 	ContactPersonRole  string              `json:"contactPersonRole,omitempty"`
+	CompanyEmail       string              `json:"companyEmail,omitempty"`
 	Note               string              `json:"note,omitempty"`
 	Status             enum.CustomerStatus `json:"status,omitempty"`
 	UserField          any                 `json:"userField,omitempty"`

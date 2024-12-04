@@ -168,6 +168,7 @@ func toCustomerResp(f *customer.Data) *dto.Customer {
 		ContactPersonPhone: f.ContactPersonPhone.String,
 		ContactPersonEmail: f.ContactPersonEmail.String,
 		ContactPersonRole:  f.ContactPersonRole.String,
+		CompanyEmail:       f.CompanyEmail.String,
 		Note:               f.Note.String,
 		UserField:          f.Data,
 		Status:             f.Status,
