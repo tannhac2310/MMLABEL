@@ -13,6 +13,7 @@ func (p productService) FindProduct(ctx context.Context, opts *FindProductOpts, 
 	filter := repository.SearchProductOpts{
 		IDs:           opts.IDs,
 		Name:          opts.Name,
+		Code:          opts.Code,
 		CustomerID:    opts.CustomerID,
 		SaleID:        opts.SaleID,
 		ProductPlanID: opts.ProductPlanID,

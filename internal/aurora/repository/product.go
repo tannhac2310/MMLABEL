@@ -68,6 +68,7 @@ func (r *sProductRepo) SoftDelete(ctx context.Context, id string) error {
 type SearchProductOpts struct {
 	IDs           []string
 	Name          string
+	Code          string
 	CustomerID    string
 	SaleID        string
 	ProductPlanID string
@@ -92,6 +93,12 @@ func (s *SearchProductOpts) buildQuery(isCount bool) (string, []interface{}) {
 		// search by name, code, description
 		conds += fmt.Sprintf(" AND (b.%s ILIKE $%d OR b.%s ILIKE $%d OR b.%s ILIKE $%d)", model.ProductFieldName, len(args), model.ProductFieldCode, len(args), model.ProductFieldDescription, len(args))
 	}
+
+	if s.Code != "" {
+		args = append(args, s.Code)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductFieldCode, len(args))
+	}
+
 	if s.CustomerID != "" {
 		args = append(args, s.CustomerID)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductFieldCustomerID, len(args))
