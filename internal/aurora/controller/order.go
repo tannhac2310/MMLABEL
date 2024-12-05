@@ -140,6 +140,7 @@ func (o orderController) FindOrder(ctx *gin.Context) {
 
 	orders, total, err := o.orderSvc.SearchOrders(ctx, &repository.SearchOrderOpts{
 		IDs:    req.Filter.IDs,
+		Search: req.Filter.Search,
 		Limit:  req.Paging.Limit,
 		Offset: req.Paging.Offset,
 		Sort:   nil,
