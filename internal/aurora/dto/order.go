@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/commondto"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
 type CreateOrderRequest struct {
@@ -17,29 +18,29 @@ type UpdateOrderRequest struct {
 }
 
 type OrderData struct {
-	ID                 string `json:"id"`
-	Title              string `json:"title"`
-	MaDatHangMm        string `json:"maDatHangMm"`
-	MaHopDongKhachHang string `json:"maHopDongKhachHang"`
-	MaHopDong          string `json:"maHopDong"`
-	SaleName           string `json:"saleName"`
-	SaleAdminName      string `json:"saleAdminName"`
-	Status             string `json:"status"`
+	ID                 string           `json:"id"`
+	Title              string           `json:"title"`
+	MaDatHangMm        string           `json:"maDatHangMm"`
+	MaHopDongKhachHang string           `json:"maHopDongKhachHang"`
+	MaHopDong          string           `json:"maHopDong"`
+	SaleName           string           `json:"saleName"`
+	SaleAdminName      string           `json:"saleAdminName"`
+	Status             enum.OrderStatus `json:"status"`
 }
 
 type OrderItemData struct {
-	ID                      string         `json:"id"`
-	ProductionPlanProductID string         `json:"productionPlanProductID"`
-	ProductionPlanID        string         `json:"productionPlanID"`
-	ProductionQuantity      int64          `json:"productionQuantity"`
-	Quantity                int64          `json:"quantity"`
-	UnitPrice               float64        `json:"unitPrice"`
-	DeliveredQuantity       int64          `json:"deliveredQuantity"`
-	EstimatedDeliveryDate   time.Time      `json:"estimatedDeliveryDate"`
-	DeliveredDate           time.Time      `json:"deliveredDate"`
-	Status                  string         `json:"status"`
-	Attachment              map[string]any `json:"attachment"`
-	Note                    string         `json:"note"`
+	ID                      string           `json:"id"`
+	ProductionPlanProductID string           `json:"productionPlanProductID"`
+	ProductionPlanID        string           `json:"productionPlanID"`
+	ProductionQuantity      int64            `json:"productionQuantity"`
+	Quantity                int64            `json:"quantity"`
+	UnitPrice               float64          `json:"unitPrice"`
+	DeliveredQuantity       int64            `json:"deliveredQuantity"`
+	EstimatedDeliveryDate   time.Time        `json:"estimatedDeliveryDate"`
+	DeliveredDate           time.Time        `json:"deliveredDate"`
+	Status                  enum.OrderStatus `json:"status"`
+	Attachment              map[string]any   `json:"attachment"`
+	Note                    string           `json:"note"`
 }
 
 type CreateOrderResponse struct {
@@ -59,8 +60,9 @@ type DeleteOrderResponse struct {
 }
 
 type SearchOrderFilter struct {
-	IDs    []string `json:"ids"`
-	Search string   `json:"search"`
+	IDs    []string         `json:"ids"`
+	Search string           `json:"search"`
+	Status enum.OrderStatus `json:"status"`
 }
 
 type SearchOrderRequest struct {

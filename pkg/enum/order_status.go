@@ -7,8 +7,9 @@ import (
 
 type OrderStatus string
 
-// chờ sản xuất/ sản xuất/ hoàn thành sx/ giao hàng
+// Chưa có lsx/ Chờ sản xuất/Sản xuất/Hoàn thành/Giao hàng
 const (
+	OrderStatusChuaCoLSX OrderStatus = "chua_co_lsx"
 	OrderStatusChoSX     OrderStatus = "cho_san_xuat"
 	OrderStatusSanXuat   OrderStatus = "san_xuat"
 	OrderStatusHoanThanh OrderStatus = "hoan_thanh"
@@ -16,6 +17,7 @@ const (
 )
 
 var OrderStatusName = map[OrderStatus]string{
+	OrderStatusChuaCoLSX: "chua_co_lsx",
 	OrderStatusChoSX:     "cho_san_xuat",
 	OrderStatusSanXuat:   "san_xuat",
 	OrderStatusHoanThanh: "hoan_thanh",

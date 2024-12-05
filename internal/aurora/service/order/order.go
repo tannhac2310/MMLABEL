@@ -8,6 +8,7 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/idutil"
 )
 
@@ -24,7 +25,7 @@ type OrderData struct {
 	MaHopDong          string
 	SaleName           string
 	SaleAdminName      string
-	Status             string
+	Status             enum.OrderStatus
 }
 
 type OrderItemData struct {
@@ -37,7 +38,7 @@ type OrderItemData struct {
 	DeliveredQuantity       int64
 	EstimatedDeliveryDate   time.Time
 	DeliveredDate           time.Time
-	Status                  string
+	Status                  enum.OrderStatus
 	Attachment              map[string]any
 	Note                    string
 }
