@@ -29,18 +29,18 @@ type OrderData struct {
 }
 
 type OrderItemData struct {
-	ID                      string           `json:"id"`
-	ProductionPlanProductID string           `json:"productionPlanProductID"`
-	ProductionPlanID        string           `json:"productionPlanID"`
-	ProductionQuantity      int64            `json:"productionQuantity"`
-	Quantity                int64            `json:"quantity"`
-	UnitPrice               float64          `json:"unitPrice"`
-	DeliveredQuantity       int64            `json:"deliveredQuantity"`
-	EstimatedDeliveryDate   time.Time        `json:"estimatedDeliveryDate"`
-	DeliveredDate           time.Time        `json:"deliveredDate"`
-	Status                  enum.OrderStatus `json:"status"`
-	Attachment              map[string]any   `json:"attachment"`
-	Note                    string           `json:"note"`
+	ID                      string         `json:"id"`
+	ProductionPlanProductID string         `json:"productionPlanProductID"`
+	ProductionPlanID        string         `json:"productionPlanID"`
+	ProductionQuantity      int64          `json:"productionQuantity"`
+	Quantity                int64          `json:"quantity"`
+	UnitPrice               float64        `json:"unitPrice"`
+	DeliveredQuantity       int64          `json:"deliveredQuantity"`
+	EstimatedDeliveryDate   time.Time      `json:"estimatedDeliveryDate"`
+	DeliveredDate           time.Time      `json:"deliveredDate"`
+	Status                  string         `json:"status"`
+	Attachment              map[string]any `json:"attachment"`
+	Note                    string         `json:"note"`
 }
 
 type CreateOrderResponse struct {

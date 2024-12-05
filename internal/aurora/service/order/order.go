@@ -38,7 +38,7 @@ type OrderItemData struct {
 	DeliveredQuantity       int64
 	EstimatedDeliveryDate   time.Time
 	DeliveredDate           time.Time
-	Status                  enum.OrderStatus
+	Status                  string
 	Attachment              map[string]any
 	Note                    string
 }

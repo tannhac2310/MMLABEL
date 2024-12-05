@@ -3,8 +3,6 @@ package model
 import (
 	"database/sql"
 	"time"
-
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
 const (
@@ -28,23 +26,23 @@ const (
 )
 
 type OrderItem struct {
-	ID                      string           `db:"id"`
-	OrderID                 string           `db:"order_id"`
-	ProductionPlanProductID string           `db:"production_plan_product_id"`
-	ProductionPlanID        string           `db:"production_plan_id"`
-	ProductionQuantity      int64            `db:"production_quantity"`
-	Quantity                int64            `db:"quantity"`
-	UnitPrice               float64          `db:"unit_price"`
-	DeliveredQuantity       int64            `db:"delivered_quantity"`
-	EstimatedDeliveryDate   sql.NullTime     `db:"estimated_delivery_date"`
-	DeliveredDate           sql.NullTime     `db:"delivered_date"`
-	Status                  enum.OrderStatus `db:"status"`
-	Attachment              map[string]any   `db:"attachment"`
-	Note                    string           `db:"note"`
-	CreatedBy               string           `db:"created_by"`
-	UpdatedBy               string           `db:"updated_by"`
-	CreatedAt               time.Time        `db:"created_at"`
-	UpdatedAt               time.Time        `db:"updated_at"`
+	ID                      string         `db:"id"`
+	OrderID                 string         `db:"order_id"`
+	ProductionPlanProductID string         `db:"production_plan_product_id"`
+	ProductionPlanID        string         `db:"production_plan_id"`
+	ProductionQuantity      int64          `db:"production_quantity"`
+	Quantity                int64          `db:"quantity"`
+	UnitPrice               float64        `db:"unit_price"`
+	DeliveredQuantity       int64          `db:"delivered_quantity"`
+	EstimatedDeliveryDate   sql.NullTime   `db:"estimated_delivery_date"`
+	DeliveredDate           sql.NullTime   `db:"delivered_date"`
+	Status                  string         `db:"status"`
+	Attachment              map[string]any `db:"attachment"`
+	Note                    string         `db:"note"`
+	CreatedBy               string         `db:"created_by"`
+	UpdatedBy               string         `db:"updated_by"`
+	CreatedAt               time.Time      `db:"created_at"`
+	UpdatedAt               time.Time      `db:"updated_at"`
 }
 
 func (rcv *OrderItem) FieldMap() (fields []string, values []interface{}) {
