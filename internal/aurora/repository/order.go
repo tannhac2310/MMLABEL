@@ -66,8 +66,8 @@ func (r *sOrderRepo) SoftDelete(ctx context.Context, id string) error {
 
 // SearchOrderOpts all params is options
 type SearchOrderOpts struct {
-	IDs []string
-	// todo add more search options
+	IDs    []string
+	Search string
 	Limit  int64
 	Offset int64
 	Sort   *Sort
@@ -82,16 +82,12 @@ func (s *SearchOrderOpts) buildQuery(isCount bool) (string, []interface{}) {
 		args = append(args, s.IDs)
 		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.OrderFieldID)
 	}
-	// todo add more search options example:
-	//if s.Name != "" {
-	//	args = append(args, "%"+s.Name+"%")
-	//	conds += fmt.Sprintf(" AND (b.%[2]s ILIKE $%[1]d OR b.%[3]s ILIKE $%[1]d)",
-	//		len(args), model.OrderFieldName, model.OrderFieldCode)
-	//}
-	//if s.Code != "" {
-	//	args = append(args, s.Code)
-	//	conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.OrderFieldCode, len(args))
-	//}
+
+	if s.Search != "" {
+		args = append(args, "%"+s.Search+"%")
+		// ma_dat_hang_mm ma_hop_dong_khach_hang ma_hop_dong sale_name sale_admin_name
+		conds += fmt.Sprintf(" AND (b.title LIKE $%d or b.ma_dat_hang_mm LIKE $%d or b.ma_hop_dong_khach_hang LIKE $%d or b.ma_hop_dong LIKE $%d or b.sale_name LIKE $%d or b.sale_admin_name LIKE $%d)", len(args), len(args), len(args), len(args), len(args), len(args))
+	}
 
 	b := &model.Order{}
 	fields, _ := b.FieldMap()

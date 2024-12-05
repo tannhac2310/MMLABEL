@@ -38,7 +38,7 @@ type OrderItemData struct {
 	EstimatedDeliveryDate   time.Time
 	DeliveredDate           time.Time
 	Status                  string
-	Attachment              map[string]string
+	Attachment              map[string]any
 	Note                    string
 }
 
@@ -145,51 +145,55 @@ func (s *orderService) SearchOrders(ctx context.Context, opts *repository.Search
 	if err != nil {
 		return nil, nil, fmt.Errorf("lấy danh sách đơn hàng thất bại: %w", err)
 	}
+	// 2. count order
+	count, err := s.orderRepo.Count(ctx, opts)
 
-	if len(orders) > 0 {
-		orderWithItems := make([]*OrderWithItems, 0, len(orders))
-		for _, order := range orders {
-			items, err := s.orderItemRepo.Search(ctx, &repository.SearchOrderItemOpts{
-				OrderID: order.ID,
-			})
-			if err != nil {
-				return nil, nil, fmt.Errorf("lấy danh sách sản phẩm trong đơn hàng thất bại: %w", err)
-			}
-			orderItemData := make([]*OrderItemData, 0, len(items))
-			for _, item := range items {
-				orderItemData = append(orderItemData, &OrderItemData{
-					ID:                      item.ID,
-					ProductionPlanProductID: item.ProductionPlanProductID,
-					ProductionPlanID:        item.ProductionPlanID,
-					ProductionQuantity:      item.ProductionQuantity,
-					Quantity:                item.Quantity,
-					UnitPrice:               item.UnitPrice,
-					DeliveredQuantity:       item.DeliveredQuantity,
-					EstimatedDeliveryDate:   item.EstimatedDeliveryDate.Time,
-					DeliveredDate:           item.DeliveredDate.Time,
-					Status:                  item.Status,
-					Attachment:              item.Attachment,
-					Note:                    item.Note,
-				})
-			}
-			orderWithItems = append(orderWithItems, &OrderWithItems{
-				Order: OrderData{
-					ID:                 order.ID,
-					Title:              order.Title,
-					MaDatHangMm:        order.MaDatHangMm,
-					MaHopDongKhachHang: order.MaHopDongKhachHang,
-					MaHopDong:          order.MaHopDong,
-					SaleName:           order.SaleName.String,
-					SaleAdminName:      order.SaleAdminName.String,
-					Status:             order.Status,
-				},
-				Items: orderItemData,
-			})
-		}
-		return orderWithItems, nil, nil
+	if err != nil {
+		return nil, nil, fmt.Errorf("lấy số lượng đơn hàng thất bại: %w", err)
 	}
 
-	return nil, nil, nil
+	orderWithItems := make([]*OrderWithItems, 0, len(orders))
+	for _, order := range orders {
+		items, err := s.orderItemRepo.Search(ctx, &repository.SearchOrderItemOpts{
+			OrderID: order.ID,
+			Limit:   1000,
+			Offset:  0,
+		})
+		if err != nil {
+			return nil, nil, fmt.Errorf("lấy danh sách sản phẩm trong đơn hàng thất bại: %w", err)
+		}
+		orderItemData := make([]*OrderItemData, 0, len(items))
+		for _, item := range items {
+			orderItemData = append(orderItemData, &OrderItemData{
+				ID:                      item.ID,
+				ProductionPlanProductID: item.ProductionPlanProductID,
+				ProductionPlanID:        item.ProductionPlanID,
+				ProductionQuantity:      item.ProductionQuantity,
+				Quantity:                item.Quantity,
+				UnitPrice:               item.UnitPrice,
+				DeliveredQuantity:       item.DeliveredQuantity,
+				EstimatedDeliveryDate:   item.EstimatedDeliveryDate.Time,
+				DeliveredDate:           item.DeliveredDate.Time,
+				Status:                  item.Status,
+				Attachment:              item.Attachment,
+				Note:                    item.Note,
+			})
+		}
+		orderWithItems = append(orderWithItems, &OrderWithItems{
+			Order: OrderData{
+				ID:                 order.ID,
+				Title:              order.Title,
+				MaDatHangMm:        order.MaDatHangMm,
+				MaHopDongKhachHang: order.MaHopDongKhachHang,
+				MaHopDong:          order.MaHopDong,
+				SaleName:           order.SaleName.String,
+				SaleAdminName:      order.SaleAdminName.String,
+				Status:             order.Status,
+			},
+			Items: orderItemData,
+		})
+	}
+	return orderWithItems, count, nil
 
 }
 

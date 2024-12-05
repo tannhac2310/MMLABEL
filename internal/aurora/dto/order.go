@@ -28,18 +28,18 @@ type OrderData struct {
 }
 
 type OrderItemData struct {
-	ID                      string            `json:"id"`
-	ProductionPlanProductID string            `json:"productionPlanProductID"`
-	ProductionPlanID        string            `json:"productionPlanID"`
-	ProductionQuantity      int64             `json:"productionQuantity"`
-	Quantity                int64             `json:"quantity"`
-	UnitPrice               float64           `json:"unitPrice"`
-	DeliveredQuantity       int64             `json:"deliveredQuantity"`
-	EstimatedDeliveryDate   time.Time         `json:"estimatedDeliveryDate"`
-	DeliveredDate           time.Time         `json:"deliveredDate"`
-	Status                  string            `json:"status"`
-	Attachment              map[string]string `json:"attachment"`
-	Note                    string            `json:"note"`
+	ID                      string         `json:"id"`
+	ProductionPlanProductID string         `json:"productionPlanProductID"`
+	ProductionPlanID        string         `json:"productionPlanID"`
+	ProductionQuantity      int64          `json:"productionQuantity"`
+	Quantity                int64          `json:"quantity"`
+	UnitPrice               float64        `json:"unitPrice"`
+	DeliveredQuantity       int64          `json:"deliveredQuantity"`
+	EstimatedDeliveryDate   time.Time      `json:"estimatedDeliveryDate"`
+	DeliveredDate           time.Time      `json:"deliveredDate"`
+	Status                  string         `json:"status"`
+	Attachment              map[string]any `json:"attachment"`
+	Note                    string         `json:"note"`
 }
 
 type CreateOrderResponse struct {
@@ -59,10 +59,8 @@ type DeleteOrderResponse struct {
 }
 
 type SearchOrderFilter struct {
-	IDs      []string `json:"ids"`
-	Title    string   `json:"title"`
-	Code     string   `json:"code"`
-	SaleName string   `json:"saleName"`
+	IDs    []string `json:"ids"`
+	Search string   `json:"search"`
 }
 
 type SearchOrderRequest struct {
@@ -76,6 +74,6 @@ type SearchOrderResponse struct {
 }
 
 type OrderWithItems struct {
-	Order OrderData
-	Items []*OrderItemData
+	Order OrderData        `json:"order"`
+	Items []*OrderItemData `json:"items"`
 }
