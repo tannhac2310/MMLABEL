@@ -69,22 +69,26 @@ type orderService struct {
 
 func (s *orderService) UpdateOrder(ctx context.Context, orderWithItems *UpdateOrder) error {
 	errTx := cockroach.ExecInTx(ctx, func(tx context.Context) error {
-		order := &model.Order{
-			ID:            orderWithItems.Order.ID,
-			Title:         orderWithItems.Order.Title,
-			Status:        orderWithItems.Order.Status,
-			SaleName:      cockroach.String(orderWithItems.Order.SaleName),
-			SaleAdminName: cockroach.String(orderWithItems.Order.SaleAdminName),
-			UpdatedBy:     orderWithItems.UpdateBy,
-		}
+		orderTable := model.Order{}
+		oderUpdater := cockroach.NewUpdater(orderTable.TableName(), model.DepartmentFieldID, orderWithItems.Order.ID)
 
-		err := s.orderRepo.Update(tx, order)
+		oderUpdater.Set(model.OrderFieldTitle, orderWithItems.Order.Title)
+		oderUpdater.Set(model.OrderFieldMaDatHangMm, orderWithItems.Order.MaDatHangMm)
+		oderUpdater.Set(model.OrderFieldMaHopDongKhachHang, orderWithItems.Order.MaHopDongKhachHang)
+		oderUpdater.Set(model.OrderFieldMaHopDong, orderWithItems.Order.MaHopDong)
+		oderUpdater.Set(model.OrderFieldSaleName, orderWithItems.Order.SaleName)
+		oderUpdater.Set(model.OrderFieldSaleAdminName, orderWithItems.Order.SaleAdminName)
+		oderUpdater.Set(model.OrderFieldStatus, orderWithItems.Order.Status)
+		oderUpdater.Set(model.OrderFieldUpdatedBy, orderWithItems.UpdateBy)
+		oderUpdater.Set(model.OrderFieldUpdatedAt, time.Now())
+
+		err := cockroach.UpdateFields(ctx, oderUpdater)
 		if err != nil {
-			return err
+			return fmt.Errorf("cập nhật đơn hàng thất bại: %w", err)
 		}
 
 		// delete all order items
-		err = s.orderItemRepo.DeleteByOrderID(tx, order.ID)
+		err = s.orderItemRepo.DeleteByOrderID(tx, orderWithItems.Order.ID)
 
 		// insert new order items
 		for _, item := range orderWithItems.Items {
