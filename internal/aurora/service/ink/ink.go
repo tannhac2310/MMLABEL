@@ -27,6 +27,10 @@ type EditInkOpts struct {
 	Description    string
 	Data           map[string]interface{}
 	Status         enum.CommonStatus
+	Kho            string
+	LoaiMuc        string
+	NhaCungCap     string
+	TinhTrang      string
 	UpdatedBy      string
 }
 
@@ -43,6 +47,10 @@ type CreateInkOpts struct {
 	Description    string
 	Data           map[string]interface{}
 	Status         enum.CommonStatus
+	Kho            string
+	LoaiMuc        string
+	NhaCungCap     string
+	TinhTrang      string
 	CreatedBy      string
 }
 
@@ -66,14 +74,15 @@ type Service interface {
 }
 
 type inkService struct {
-	inkRepo             repository.InkRepo
-	inkReturnRepo       repository.InkReturnRepo
-	inkReturnDetailRepo repository.InkReturnDetailRepo
-	inkExportDetailRepo repository.InkExportDetailRepo
-	inkImportDetailRepo repository.InkImportDetailRepo
-	historyRepo         repository.HistoryRepo
-	inkMixingRepo       repository.InkMixingRepo
-	inkMixingDetailRepo repository.InkMixingDetailRepo
+	inkRepo                         repository.InkRepo
+	inkReturnRepo                   repository.InkReturnRepo
+	inkReturnDetailRepo             repository.InkReturnDetailRepo
+	inkExportDetailRepo             repository.InkExportDetailRepo
+	inkImportDetailRepo             repository.InkImportDetailRepo
+	historyRepo                     repository.HistoryRepo
+	inkMixingRepo                   repository.InkMixingRepo
+	inkMixingDetailRepo             repository.InkMixingDetailRepo
+	productionOrderDeviceConfigRepo repository.ProductionOrderDeviceConfigRepo
 }
 
 func (p inkService) CalculateInkQuantity(ctx context.Context, inkID string) (float64, float64, float64, error) {
@@ -146,6 +155,14 @@ func (p inkService) Edit(ctx context.Context, opt *EditInkOpts) error {
 	updater.Set(model.InkFieldDescription, opt.Description)
 	updater.Set(model.InkFieldData, opt.Data)
 	updater.Set(model.InkFieldUpdatedBy, opt.UpdatedBy)
+	//kho
+	//loai_muc
+	//nha_cung_cap
+	//tinh_trang
+	updater.Set(model.InkFieldKho, opt.Kho)
+	updater.Set(model.InkFieldLoaiMuc, opt.LoaiMuc)
+	updater.Set(model.InkFieldNhaCungCap, opt.NhaCungCap)
+	updater.Set(model.InkFieldTinhTrang, opt.TinhTrang)
 
 	updater.Set(model.InkFieldUpdatedAt, time.Now())
 
@@ -170,6 +187,10 @@ func (p inkService) Create(ctx context.Context, opt *CreateInkOpts) (string, err
 		Quantity:       opt.Quantity,
 		ExpirationDate: opt.ExpirationDate,
 		Description:    cockroach.String(opt.Description),
+		Kho:            opt.Kho,
+		LoaiMuc:        opt.LoaiMuc,
+		NhaCungCap:     opt.NhaCungCap,
+		TinhTrang:      opt.TinhTrang,
 		Data:           opt.Data,
 		Status:         opt.Status,
 		CreatedBy:      opt.CreatedBy,
@@ -189,7 +210,8 @@ func (p inkService) Delete(ctx context.Context, id string) error {
 
 type InkData struct {
 	*repository.InkData
-	MixingData *InkMixingData
+	MixingData                      *InkMixingData
+	ProductionOrderDeviceConfigData []*repository.ProductionOrderDeviceConfigData
 }
 
 func (p inkService) Find(ctx context.Context, opt *FindInkOpts, sort *repository.Sort, limit, offset int64) ([]*InkData, *repository.CountResult, error) {
@@ -210,13 +232,28 @@ func (p inkService) Find(ctx context.Context, opt *FindInkOpts, sort *repository
 	}
 
 	mixingIDs := make([]string, 0)
-
+	inkIds := make([]string, 0)
 	for _, ink := range inks {
 		if ink.MixingID.String != "" {
 			mixingIDs = append(mixingIDs, ink.MixingID.String)
 		}
+		inkIds = append(inkIds, ink.ID)
 	}
 
+	// find in production_order_device_config by color
+	productionOrderDeviceConfigs, err := p.productionOrderDeviceConfigRepo.Search(ctx, &repository.SearchProductionOrderDeviceConfigOpts{
+		InkIDs: inkIds,
+		Limit:  10000,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// map production_order_device_config by ink_id
+	productionOrderDeviceConfigMap := make(map[string][]*repository.ProductionOrderDeviceConfigData)
+	for _, f := range productionOrderDeviceConfigs {
+		productionOrderDeviceConfigMap[f.InkID.String] = append(productionOrderDeviceConfigMap[f.InkID.String], f)
+	}
 	// get ink mixing detail
 	inkMixing, _, err := p.FindInkMixing(ctx, &FindInkMixingOpts{
 		IDs:    mixingIDs,
@@ -236,8 +273,9 @@ func (p inkService) Find(ctx context.Context, opt *FindInkOpts, sort *repository
 	results := make([]*InkData, 0)
 	for _, ink := range inks {
 		results = append(results, &InkData{
-			InkData:    ink,
-			MixingData: inkMixingMap[ink.MixingID.String],
+			InkData:                         ink,
+			MixingData:                      inkMixingMap[ink.MixingID.String],
+			ProductionOrderDeviceConfigData: productionOrderDeviceConfigMap[ink.ID],
 		})
 	}
 
@@ -314,16 +352,18 @@ func NewService(
 	historyRepo repository.HistoryRepo,
 	inkMixingRepo repository.InkMixingRepo,
 	inkMixingDetailRepo repository.InkMixingDetailRepo,
+	productionOrderDeviceConfigRepo repository.ProductionOrderDeviceConfigRepo,
 ) Service {
 	return &inkService{
-		inkReturnRepo:       inkReturnRepo,
-		inkReturnDetailRepo: inkReturnDetailRepo,
-		inkExportDetailRepo: inkExportDetailRepo,
-		inkImportDetailRepo: inkImportDetailRepo,
-		inkRepo:             inkRepo,
-		historyRepo:         historyRepo,
-		inkMixingRepo:       inkMixingRepo,
-		inkMixingDetailRepo: inkMixingDetailRepo,
+		inkReturnRepo:                   inkReturnRepo,
+		inkReturnDetailRepo:             inkReturnDetailRepo,
+		inkExportDetailRepo:             inkExportDetailRepo,
+		inkImportDetailRepo:             inkImportDetailRepo,
+		inkRepo:                         inkRepo,
+		historyRepo:                     historyRepo,
+		inkMixingRepo:                   inkMixingRepo,
+		inkMixingDetailRepo:             inkMixingDetailRepo,
+		productionOrderDeviceConfigRepo: productionOrderDeviceConfigRepo,
 	}
 
 }

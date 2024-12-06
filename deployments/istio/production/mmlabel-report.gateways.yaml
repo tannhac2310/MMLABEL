@@ -1,0 +1,63 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: report-nexpeak
+  namespace: redash
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "report.nexpeak.net"
+      tls:
+        httpsRedirect: false
+    - port:
+        number: 443
+        name: https-secondary
+        protocol: HTTPS
+      hosts:
+        - "report.nexpeak.net"
+      tls:
+        credentialName: cert-report.nexpeak.net
+        mode: SIMPLE
+        privateKey: sds
+        serverCertificate: sds
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: report-ingress
+  namespace: redash
+spec:
+  hosts:
+    - "report.nexpeak.net"
+  gateways:
+    - report-nexpeak
+  http:
+    - match:
+        - uri:
+            prefix: "/"
+      route:
+        - destination:
+            host: redash
+            port:
+              number: 80
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: report.nexpeak.net
+  namespace: istio-system
+spec:
+  commonName: report.nexpeak.net
+  dnsNames:
+    - report.nexpeak.net
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt
+  secretName: cert-report.nexpeak.net
+#pass: x8b7z99w

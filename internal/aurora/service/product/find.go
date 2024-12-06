@@ -13,6 +13,7 @@ func (p productService) FindProduct(ctx context.Context, opts *FindProductOpts, 
 	filter := repository.SearchProductOpts{
 		IDs:           opts.IDs,
 		Name:          opts.Name,
+		Code:          opts.Code,
 		CustomerID:    opts.CustomerID,
 		SaleID:        opts.SaleID,
 		ProductPlanID: opts.ProductPlanID,
@@ -85,9 +86,9 @@ func (p productService) FindProduct(ctx context.Context, opts *FindProductOpts, 
 	}
 
 	// 8. Map user data
-	userDataMap := make(map[string]*repository2.UserData)
+	userDataMap := make(map[string]string)
 	for _, user := range userData {
-		userDataMap[user.ID] = user
+		userDataMap[user.ID] = user.Name
 	}
 
 	// 9. Map production plan data
@@ -128,9 +129,9 @@ func (p productService) FindProduct(ctx context.Context, opts *FindProductOpts, 
 			CreatedAt:          product.CreatedAt,
 			UpdatedAt:          product.UpdatedAt,
 			CreatedBy:          product.CreatedBy,
-			CreatedByName:      userDataMap[product.CreatedBy].Name,
+			CreatedByName:      userDataMap[product.CreatedBy],
 			UpdatedBy:          product.UpdatedBy,
-			UpdatedByName:      userDataMap[product.UpdatedBy].Name,
+			UpdatedByName:      userDataMap[product.UpdatedBy],
 			ProductionPlanID:   product.ProductionPlanID.String,
 			ProductionPlanData: productionPlanDataMap[product.ProductionPlanID.String],
 		})

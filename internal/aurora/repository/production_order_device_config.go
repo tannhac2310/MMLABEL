@@ -61,6 +61,8 @@ type SearchProductionOrderDeviceConfigOpts struct {
 	ProductionOrderID string
 	ProductionPlanID  string
 	DeviceType        string
+	MasterDataIDS     []string
+	InkIDs            []string
 	Limit             int64
 	Offset            int64
 	Sort              *Sort
@@ -92,9 +94,20 @@ func (s *SearchProductionOrderDeviceConfigOpts) buildQuery(isCount bool) (string
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderDeviceConfigFieldDeviceType, len(args))
 	}
 
+	if len(s.MasterDataIDS) > 0 {
+		args = append(args, s.MasterDataIDS)
+		// = array ma_phim or ma_khung or ma_mau_muc
+		conds += fmt.Sprintf(" AND (b.ma_phim = ANY($%d) OR b.ma_khung = ANY($%d) OR b.ma_mau_muc = ANY($%d))", len(args), len(args), len(args))
+	}
+
+	if len(s.InkIDs) > 0 {
+		args = append(args, s.InkIDs)
+		conds += fmt.Sprintf(" AND b.ink_id = ANY($%d)", len(args))
+	}
+
 	if s.Search != "" {
 		args = append(args, "%"+s.Search+"%")
-		conds += fmt.Sprintf(" AND (b.color ILIKE $%[1]d OR d.name ILIKE $%[1]d OR d.code ILIKE $%[1]d OR po.name ILIKE $%[1]d) or pp.name ILIKE $%[1]d", len(args))
+		conds += fmt.Sprintf(" AND (b.id like $%[1]d  or b.color ILIKE $%[1]d OR d.name ILIKE $%[1]d OR d.code ILIKE $%[1]d OR po.name ILIKE $%[1]d) or pp.name ILIKE $%[1]d", len(args))
 	}
 
 	b := &model.ProductionOrderDeviceConfig{}
@@ -125,8 +138,10 @@ func (r *sProductionOrderDeviceConfigRepo) Search(ctx context.Context, s *Search
 	ProductionOrderDeviceConfig := make([]*ProductionOrderDeviceConfigData, 0)
 	sql, args := s.buildQuery(false)
 	err := cockroach.Select(ctx, sql, args...).ScanAll(&ProductionOrderDeviceConfig)
+	fmt.Println("sql+++++++++++++++++++++"+
+		"", sql)
 	if err != nil {
-		return nil, fmt.Errorf("cockroach.Select: %w", err)
+		return nil, fmt.Errorf("sProductionOrderDeviceConfigRepo.Select: %w", err)
 	}
 
 	return ProductionOrderDeviceConfig, nil

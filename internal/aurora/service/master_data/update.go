@@ -29,7 +29,7 @@ func (s *masterDataService) UpdateMasterData(ctx context.Context, opt *UpdateMas
 		}
 
 		// 2. Update user fields
-		if err := s.masterDataUserField.DeleteByMasterDataIDs(ctx, []string{opt.ID}); err != nil {
+		if err := s.masterDataUserField.DeleteByMasterDataIDs(ctx, []string{opt.ID}); err != nil && cockroach.IsErrNoRows(err) {
 			return fmt.Errorf(" delete old user field value : %w", err)
 		}
 

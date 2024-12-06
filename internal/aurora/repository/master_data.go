@@ -68,6 +68,7 @@ func (r *sMasterDataRepo) SoftDelete(ctx context.Context, id string) error {
 type SearchMasterDataOpts struct {
 	IDs          []string
 	Type         enum.MasterDataType
+	Code         string
 	IsIncludeDel bool
 	Search       string
 	Limit        int64
@@ -95,6 +96,12 @@ func (s *SearchMasterDataOpts) buildQuery(isCount bool) (string, []interface{}) 
 		args = append(args, s.Search)
 		conds += fmt.Sprintf(" AND (b.name ILIKE $%d OR b.description ILIKE $%d OR b.code ILIKE $%d OR b.id = $%d)", len(args)-1, len(args)-1, len(args)-1, len(args))
 	}
+
+	if s.Code != "" {
+		args = append(args, s.Code)
+		conds += fmt.Sprintf(" AND b.code = $%d", len(args))
+	}
+
 	if !s.IsIncludeDel {
 		conds += " AND b.deleted_at IS NULL "
 	}

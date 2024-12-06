@@ -47,7 +47,7 @@ type CreateMasterDataRequest struct {
 	Description string                       `json:"description"`
 	UserFields  []*CreateMasterDataUserField `json:"userFields" binding:"required"`
 	Status      enum.MasterDataStatus        `json:"status" binding:"required"`
-	Code        string                       `json:"code"`
+	Code        string                       `json:"code" binding:"required"`
 }
 
 type CreateMasterDataResponse struct {

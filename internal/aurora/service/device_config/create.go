@@ -28,9 +28,9 @@ func (c *deviceConfigService) CreateDeviceConfig(ctx context.Context, opt *Creat
 		UpdatedAt:              now,
 		ProductionPlanID:       cockroach.String(opt.ProductionPlanID),
 		DeviceType:             opt.DeviceType,
-		MaThongSoMay:           opt.MaThongSoMay,
+		MaThongSoMay:           cockroach.String(opt.MaThongSoMay),
 		MaTaiLieuHuongDan:      cockroach.String(opt.MaTaiLieuHuongDan),
-		NgayHieuLuc:            opt.NgayHieuLuc,
+		NgayHieuLuc:            cockroach.Time(opt.NgayHieuLuc),
 		StageID:                cockroach.String(opt.StageID),
 		MaSanPham:              cockroach.String(opt.MaSanPham),
 		MaSanPhamNoiBo:         cockroach.String(opt.MaSanPhamNoiBo),
@@ -56,6 +56,7 @@ func (c *deviceConfigService) CreateDeviceConfig(ctx context.Context, opt *Creat
 		DoNghiengDao:           cockroach.String(opt.DoNghiengDao),
 		TocDoDao:               cockroach.String(opt.TocDoDao),
 		TocDo:                  cockroach.String(opt.TocDo),
+		InkID:                  cockroach.String(opt.InkID),
 		//SanPhamNguon:           sql.NullString{},
 		//BanInNguon:             sql.NullString{},
 	}
@@ -111,5 +112,6 @@ type CreateDeviceConfigOpts struct {
 	Description            string
 	DeviceType             enum.DeviceConfigType
 	DeviceConfig           map[string]interface{}
+	InkID                  string
 	CreatedBy              string
 }

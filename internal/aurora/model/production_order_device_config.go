@@ -52,6 +52,7 @@ const (
 	ProductionOrderDeviceConfigFieldTocDo                  = "toc_do"
 	ProductionOrderDeviceConfigFieldSanPhamNguon           = "san_pham_nguon"
 	ProductionOrderDeviceConfigFieldBanInNguon             = "ban_in_nguon"
+	ProductionOrderDeviceConfigFieldInkID                  = "ink_id"
 )
 
 type ProductionOrderDeviceConfig struct {
@@ -69,9 +70,9 @@ type ProductionOrderDeviceConfig struct {
 	DeletedAt              sql.NullTime           `db:"deleted_at"`
 	ProductionPlanID       sql.NullString         `db:"production_plan_id"`
 	DeviceType             enum.DeviceConfigType  `db:"device_type"`
-	MaThongSoMay           string                 `db:"ma_thong_so_may"`
+	MaThongSoMay           sql.NullString         `db:"ma_thong_so_may"`
 	MaTaiLieuHuongDan      sql.NullString         `db:"ma_tai_lieu_huong_dan"`
-	NgayHieuLuc            time.Time              `db:"ngay_hieu_luc"`
+	NgayHieuLuc            sql.NullTime           `db:"ngay_hieu_luc"`
 	StageID                sql.NullString         `db:"stage_id"`
 	MaSanPham              sql.NullString         `db:"ma_san_pham"`
 	MaSanPhamNoiBo         sql.NullString         `db:"ma_san_pham_noi_bo"`
@@ -99,6 +100,7 @@ type ProductionOrderDeviceConfig struct {
 	TocDo                  sql.NullString         `db:"toc_do"`
 	SanPhamNguon           sql.NullString         `db:"san_pham_nguon"`
 	BanInNguon             sql.NullString         `db:"ban_in_nguon"`
+	InkID                  sql.NullString         `db:"ink_id"`
 }
 
 func (rcv *ProductionOrderDeviceConfig) FieldMap() (fields []string, values []interface{}) {
@@ -147,6 +149,7 @@ func (rcv *ProductionOrderDeviceConfig) FieldMap() (fields []string, values []in
 		ProductionOrderDeviceConfigFieldTocDo,
 		ProductionOrderDeviceConfigFieldSanPhamNguon,
 		ProductionOrderDeviceConfigFieldBanInNguon,
+		ProductionOrderDeviceConfigFieldInkID,
 	}
 
 	values = []interface{}{
@@ -194,6 +197,7 @@ func (rcv *ProductionOrderDeviceConfig) FieldMap() (fields []string, values []in
 		&rcv.TocDo,
 		&rcv.SanPhamNguon,
 		&rcv.BanInNguon,
+		&rcv.InkID,
 	}
 
 	return

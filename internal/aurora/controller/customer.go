@@ -50,7 +50,7 @@ func (s customerController) CreateCustomer(c *gin.Context) {
 		ContactPersonPhone: req.ContactPersonPhone,
 		ContactPersonRole:  req.ContactPersonRole,
 		Note:               req.Note,
-		Data:               req.Data,
+		Data:               req.UserField,
 		Status:             enum.CustomerStatusActivate,
 		CreatedBy:          userID,
 	})
@@ -75,17 +75,17 @@ func (s customerController) EditCustomer(c *gin.Context) {
 	userID := interceptor.UserIDFromCtx(c)
 
 	err = s.customerService.EditCustomer(c, &customer.EditCustomerOpts{
-		ID:             req.ID,
-		Name:           req.Name,
-		Tax:            req.Tax,
-		Code:           req.Code,
-		Country:        req.Country,
-		Province:       req.Province,
-		Address:        req.Address,
-		Fax:            req.Fax,
-		CompanyWebsite: req.CompanyWebsite,
-		CompanyPhone:   req.CompanyPhone,
-
+		ID:                 req.ID,
+		Name:               req.Name,
+		Tax:                req.Tax,
+		Code:               req.Code,
+		Country:            req.Country,
+		Province:           req.Province,
+		Address:            req.Address,
+		Fax:                req.Fax,
+		CompanyWebsite:     req.CompanyWebsite,
+		CompanyPhone:       req.CompanyPhone,
+		Data:               req.UserField,
 		ContactPersonName:  req.ContactPersonName,
 		ContactPersonEmail: req.ContactPersonEmail,
 		ContactPersonPhone: req.ContactPersonPhone,
@@ -129,6 +129,9 @@ func (s customerController) FindCustomers(c *gin.Context) {
 
 	customers, cnt, err := s.customerService.FindCustomers(c, &customer.FindCustomersOpts{
 		Name: req.Filter.Name,
+		Code: req.Filter.Code,
+		ID:   req.Filter.ID,
+		IDs:  req.Filter.IDs,
 	}, &repository.Sort{
 		Order: repository.SortOrderDESC,
 		By:    "ID",
@@ -161,11 +164,13 @@ func toCustomerResp(f *customer.Data) *dto.Customer {
 		Fax:                f.Fax.String,
 		CompanyWebsite:     f.CompanyWebsite.String,
 		CompanyPhone:       f.CompanyPhone.String,
-		ContactPersonName:  f.ContactPersonName,
-		ContactPersonPhone: f.ContactPersonPhone,
-		ContactPersonEmail: f.ContactPersonEmail,
-		ContactPersonRole:  f.ContactPersonRole,
+		ContactPersonName:  f.ContactPersonName.String,
+		ContactPersonPhone: f.ContactPersonPhone.String,
+		ContactPersonEmail: f.ContactPersonEmail.String,
+		ContactPersonRole:  f.ContactPersonRole.String,
+		CompanyEmail:       f.CompanyEmail.String,
 		Note:               f.Note.String,
+		UserField:          f.Data,
 		Status:             f.Status,
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_export"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_import"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/ink_return"
@@ -471,6 +472,10 @@ func (s inkController) ImportInk(c *gin.Context) {
 			ExpirationDate: f.ExpirationDate,
 			Description:    f.Description,
 			Data:           f.Data,
+			Kho:            f.Kho,
+			LoaiMuc:        f.LoaiMuc,
+			NhaCungCap:     f.NhaCungCap,
+			TinhTrang:      f.TinhTrang,
 		})
 	}
 	id, err := s.inkImportService.Create(c, &ink_import.CreateInkImportOpts{
@@ -546,6 +551,10 @@ func (s inkController) EditInk(c *gin.Context) {
 		ColorDetail:    req.ColorDetail,
 		ExpirationDate: req.ExpirationDate,
 		Description:    req.Description,
+		Kho:            req.Kho,
+		LoaiMuc:        req.LoaiMuc,
+		NhaCungCap:     req.NhaCungCap,
+		TinhTrang:      req.TinhTrang,
 		Data:           req.Data,
 		Status:         req.Status,
 		Quantity:       req.Quantity,
@@ -560,6 +569,18 @@ func (s inkController) EditInk(c *gin.Context) {
 
 func toInkResp(f *ink.InkData) *dto.Ink {
 	var mixingData *dto.MixInk = nil
+	productionPlanIDs := make([]string, 0)
+	productionOrderIDs := make([]string, 0)
+	if f.ProductionOrderDeviceConfigData != nil {
+		for _, datum := range f.ProductionOrderDeviceConfigData {
+			if datum.ProductionOrderID.Valid {
+				productionOrderIDs = append(productionOrderIDs, datum.ProductionOrderID.String)
+			}
+			if datum.ProductionPlanID.Valid {
+				productionPlanIDs = append(productionPlanIDs, datum.ProductionPlanID.String)
+			}
+		}
+	}
 	if f.MixingData != nil && f.MixingData.ID != "" {
 		inkFormula := make([]dto.InkMixingFormulation, 0)
 		for _, detail := range f.MixingData.InkFormula {
@@ -593,25 +614,31 @@ func toInkResp(f *ink.InkData) *dto.Ink {
 		}
 	}
 	return &dto.Ink{
-		ID:             f.ID,
-		ImportID:       f.ImportID.String,
-		Name:           f.Name,
-		Code:           f.Code,
-		ProductCodes:   f.ProductCodes,
-		MixInk:         mixingData,
-		Position:       f.Position,
-		Location:       f.Location,
-		Manufacturer:   f.Manufacturer,
-		ColorDetail:    f.ColorDetail,
-		Quantity:       f.Quantity,
-		ExpirationDate: f.ExpirationDate,
-		Description:    f.Description.String,
-		Data:           f.Data,
-		Status:         f.Status,
-		CreatedBy:      f.CreatedBy,
-		UpdatedBy:      f.UpdatedBy,
-		CreatedAt:      f.CreatedAt,
-		UpdatedAt:      f.UpdatedAt,
+		ID:                 f.ID,
+		ImportID:           f.ImportID.String,
+		Name:               f.Name,
+		Code:               f.Code,
+		ProductCodes:       f.ProductCodes,
+		MixInk:             mixingData,
+		Position:           f.Position,
+		Location:           f.Location,
+		Manufacturer:       f.Manufacturer,
+		ColorDetail:        f.ColorDetail,
+		Quantity:           f.Quantity,
+		ExpirationDate:     f.ExpirationDate,
+		Description:        f.Description.String,
+		ProductionPlanIDs:  productionPlanIDs,
+		ProductionOrderIDs: productionOrderIDs,
+		Kho:                f.Kho,
+		LoaiMuc:            f.LoaiMuc,
+		NhaCungCap:         f.NhaCungCap,
+		TinhTrang:          f.TinhTrang,
+		Data:               f.Data,
+		Status:             f.Status,
+		CreatedBy:          f.CreatedBy,
+		UpdatedBy:          f.UpdatedBy,
+		CreatedAt:          f.CreatedAt,
+		UpdatedAt:          f.UpdatedAt,
 	}
 }
 

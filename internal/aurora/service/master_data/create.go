@@ -19,6 +19,17 @@ func (s *masterDataService) CreateMasterData(ctx context.Context, opt *CreateMas
 	masterDataID := idutil.ULIDNow()
 	now := time.Now()
 	errTx := cockroach.ExecInTx(ctx, func(ctx context.Context) error {
+		// 0. check code is exist
+		existed, _ := s.masterDataRep.Search(ctx, &repository.SearchMasterDataOpts{
+			Code:   opt.Code,
+			Type:   opt.Type,
+			Limit:  10,
+			Offset: 0,
+		})
+
+		if len(existed) > 0 {
+			return fmt.Errorf("mã code đã tồn tại, %s", opt.Code)
+		}
 		// 0. count master data
 		count, err := s.masterDataRep.Count(ctx, &repository.SearchMasterDataOpts{
 			Type:         opt.Type,

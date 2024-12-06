@@ -18,8 +18,8 @@ type ProductionOrderStageDeviceFilter struct {
 	ProcessStatuses              []enum.ProductionOrderStageDeviceStatus `json:"processStatus"`
 	//EstimatedStartAtFrom  time.Time                             `json:"estimatedAtFrom"`
 	//EstimatedCompleteAtTo time.Time                             `json:"estimatedAtTo"`
-	//StartAt               time.Time                             `json:"startAt"`
-	//CompleteAt            time.Time                             `json:"completeAt"`
+	StartAt    time.Time `json:"startAt"`
+	CompleteAt time.Time `json:"completeAt"`
 }
 
 type FindTaskByIDRequest struct {

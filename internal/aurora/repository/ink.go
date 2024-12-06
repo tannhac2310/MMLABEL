@@ -60,7 +60,7 @@ func (i *inkRepo) FindByID(ctx context.Context, id string) (*InkData, error) {
 	sql := `SELECT b.* FROM ink AS b WHERE b.id = $1 AND b.deleted_at IS NULL`
 	err := cockroach.Select(ctx, sql, id).ScanOne(inkData)
 	if err != nil {
-		return nil, fmt.Errorf("cockroach.Select: %w", err)
+		return nil, fmt.Errorf("inkRepo.Select: %w", err)
 	}
 	return inkData, nil
 }
@@ -143,7 +143,6 @@ func (i *SearchInkOpts) buildQuery(isCount bool) (string, []interface{}) {
 		%s
 		LIMIT %d
 		OFFSET %d`, strings.Join(fields, ", b."), b.TableName(), joins, conds, order, i.Limit, i.Offset), args
-
 }
 
 func (i *inkRepo) Search(ctx context.Context, s *SearchInkOpts) ([]*InkData, error) {
@@ -151,7 +150,7 @@ func (i *inkRepo) Search(ctx context.Context, s *SearchInkOpts) ([]*InkData, err
 	sql, args := s.buildQuery(false)
 	err := cockroach.Select(ctx, sql, args...).ScanAll(&inkData)
 	if err != nil {
-		return nil, fmt.Errorf("cockroach.Select: %w", err)
+		return nil, fmt.Errorf("inkRepo.Select: %w", err)
 	}
 
 	return inkData, nil
@@ -162,7 +161,7 @@ func (i *inkRepo) Count(ctx context.Context, s *SearchInkOpts) (*CountResult, er
 	sql, args := s.buildQuery(true)
 	err := cockroach.Select(ctx, sql, args...).ScanOne(countResult)
 	if err != nil {
-		return nil, fmt.Errorf("chat.Count: %w", err)
+		return nil, fmt.Errorf("inkRepo.Count: %w", err)
 	}
 
 	return countResult, nil

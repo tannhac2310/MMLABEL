@@ -54,9 +54,15 @@ func (r *customFieldsRepo) Delete(ctx context.Context, id string) error {
 }
 
 func (r *customFieldsRepo) DeleteByEntity(ctx context.Context, entityType enum.CustomFieldType, entityId string) error {
-	sql := `UPDATE custom_fields
-		SET deleted_at = NOW()
-		WHERE entity_type = $1 AND entity_id = $2`
+	if entityId == "" {
+		return fmt.Errorf("entityId is required to delete")
+	}
+
+	if entityType == 0 {
+		return fmt.Errorf("entityType is required to delete")
+	}
+
+	sql := `DELETE FROM custom_fields WHERE entity_type = $1 AND entity_id = $2`
 
 	cmd, err := cockroach.Exec(ctx, sql, entityType, entityId)
 	if err != nil {

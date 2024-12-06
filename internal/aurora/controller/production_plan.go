@@ -237,7 +237,7 @@ func (s productionPlanController) FindProductionPlans(c *gin.Context) {
 
 	sort := &repository.Sort{
 		Order: repository.SortOrderDESC,
-		By:    "ID",
+		By:    "created_at",
 	}
 	if req.Sort != nil {
 		sort = &repository.Sort{
@@ -276,10 +276,10 @@ func (s productionPlanController) FindProductionPlans(c *gin.Context) {
 				Fax:                f.CustomerData.Fax.String,
 				CompanyWebsite:     f.CustomerData.CompanyWebsite.String,
 				CompanyPhone:       f.CustomerData.CompanyPhone.String,
-				ContactPersonName:  f.CustomerData.ContactPersonName,
-				ContactPersonEmail: f.CustomerData.ContactPersonEmail,
-				ContactPersonPhone: f.CustomerData.ContactPersonPhone,
-				ContactPersonRole:  f.CustomerData.ContactPersonRole,
+				ContactPersonName:  f.CustomerData.ContactPersonName.String,
+				ContactPersonEmail: f.CustomerData.ContactPersonEmail.String,
+				ContactPersonPhone: f.CustomerData.ContactPersonPhone.String,
+				ContactPersonRole:  f.CustomerData.ContactPersonRole.String,
 				Note:               f.CustomerData.Note.String,
 				Status:             f.CustomerData.Status,
 			}
