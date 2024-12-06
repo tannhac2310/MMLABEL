@@ -274,6 +274,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			}
 
 			tableDevice := model.Device{}
+			tableStageDevice := model.ProductionOrderStageDevice{}
 			orderStageDevice, err := p.productionOrderStageDeviceRepo.FindByID(ctx, iotData.WorkOrderID)
 			fmt.Println("============>>> orderStageDevice: ", orderStageDevice)
 			if err != nil {
@@ -346,7 +347,22 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				p.logger.Error("Error updating production order stage device", zap.Error(err))
 				return err
 			}
-
+			if deviceStateStatus == enum.ProductionOrderStageDeviceStatusStart && orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusNone {
+				updaterDeviceStage := cockroach.NewUpdater(tableStageDevice.TableName(), model.ProductionOrderStageDeviceFieldID, orderStageDevice.ID)
+				updaterDeviceStage.Set(model.ProductionOrderStageDeviceFieldStartAt, now)
+				if err := cockroach.UpdateFields(ctx, updaterDeviceStage); err != nil {
+					p.logger.Error("Error tableStageDevice", zap.Error(err))
+					return err
+				}
+			}
+			if deviceStateStatus == enum.ProductionOrderStageDeviceStatusComplete && orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart {
+				updaterDeviceStage := cockroach.NewUpdater(tableStageDevice.TableName(), model.ProductionOrderStageDeviceFieldID, orderStageDevice.ID)
+				updaterDeviceStage.Set(model.ProductionOrderStageDeviceFieldCompleteAt, now)
+				if err := cockroach.UpdateFields(ctx, updaterDeviceStage); err != nil {
+					p.logger.Error("Error tableStageDevice", zap.Error(err))
+					return err
+				}
+			}
 			if err := upsertDeviceWorkingHistory(ctx, orderStageDevice, item, dateStr, now); err != nil {
 				p.logger.Error("Error upserting device working history", zap.Error(err))
 				return err
