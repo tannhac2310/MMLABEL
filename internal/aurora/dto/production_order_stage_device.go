@@ -152,6 +152,7 @@ type DeviceStatusHistoryFilter struct {
 type FindDeviceStatusHistoryFilter struct {
 	ProcessStatus []int8    `json:"processStatus"`
 	DeviceID      string    `json:"deviceID"`
+	DeviceIDs     []string  `json:"deviceIDs"`
 	IsResolved    int16     `json:"isResolved"`
 	ErrorCodes    []string  `json:"errorCodes"`
 	CreatedFrom   time.Time `json:"createdFrom"`

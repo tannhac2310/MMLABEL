@@ -298,6 +298,7 @@ func (p productionOrderStageDeviceService) FindProcessDeviceHistory(ctx context.
 		CreatedFrom:   opt.CreatedFrom,
 		CreatedTo:     opt.CreatedTo,
 		DeviceID:      opt.DeviceID,
+		DeviceIDs:     opt.DeviceIDs,
 		IsResolved:    opt.IsResolved,
 		Limit:         limit,
 		Offset:        offset,
@@ -325,6 +326,7 @@ func (p productionOrderStageDeviceService) FindProcessDeviceHistory(ctx context.
 type FindProcessDeviceHistoryOpts struct {
 	ProcessStatus []int8
 	DeviceID      string
+	DeviceIDs     []string
 	IsResolved    int16
 	ErrorCodes    []string
 	CreatedFrom   time.Time
