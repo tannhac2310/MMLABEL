@@ -2,7 +2,6 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/interceptor"
@@ -154,6 +153,8 @@ func (s productionOrderStageDeviceController) Find(c *gin.Context) {
 		ID:                           req.Filter.ID,
 		IDs:                          req.Filter.IDs,
 		ProcessStatuses:              req.Filter.ProcessStatuses,
+		StartAt:                      req.Filter.StartAt,
+		CompleteAt:                   req.Filter.CompleteAt,
 		Limit:                        req.Paging.Limit,
 		Offset:                       req.Paging.Offset,
 	})

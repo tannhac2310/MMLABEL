@@ -162,6 +162,8 @@ type SearchProductionOrderStageDevicesOpts struct {
 	Responsible                  []string
 	Limit                        int64
 	Offset                       int64
+	StartAt                      time.Time
+	CompleteAt                   time.Time
 	Sort                         *Sort
 }
 
@@ -202,6 +204,16 @@ func (s *SearchProductionOrderStageDevicesOpts) buildQuery(isCount bool) (string
 		args = append(args, s.ProductionOrderStageStatuses)
 		conds += fmt.Sprintf(" AND pos.%s = ANY($%d)", model.ProductionOrderStageFieldStatus, len(args))
 	}
+
+	if s.StartAt.IsZero() == false {
+		args = append(args, s.StartAt)
+		conds += fmt.Sprintf(" AND b.%s >= $%d", model.ProductionOrderStageDeviceFieldStartAt, len(args))
+	}
+	if s.CompleteAt.IsZero() == false {
+		args = append(args, s.CompleteAt)
+		conds += fmt.Sprintf(" AND b.%s <= $%d", model.ProductionOrderStageDeviceFieldCompleteAt, len(args))
+	}
+
 	if len(s.Responsible) > 0 {
 		args = append(args, s.Responsible)
 
