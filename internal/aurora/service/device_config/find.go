@@ -56,8 +56,8 @@ func (c *deviceConfigService) FindDeviceConfigs(ctx context.Context, opts *FindD
 		if deviceConfig.InkID.String != "" {
 			ink, ok := inkMap[deviceConfig.InkID.String]
 			if ok {
-				tenLoaiMuc = ink.Name
-				tenMauMuc = ink.LoaiMuc
+				tenLoaiMuc = ink.LoaiMuc
+				tenMauMuc = ink.Name
 			}
 		}
 		deviceConfig.TenMauMuc = cockroach.String(tenMauMuc)
