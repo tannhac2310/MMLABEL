@@ -165,11 +165,11 @@ func (s statisticsRepo) SumSalesRevenue(ctx context.Context, month, year int16) 
 	`
 
 	// Thực hiện truy vấn với tham số tháng và năm
-	err := cockroach.Select(ctx, query, month, year).ScanAll(&sumSalesRevenue)
+	err := cockroach.QueryRow(ctx, query, month, year).ScanAll(&sumSalesRevenue)
 	if err != nil {
 		return 0, fmt.Errorf("cockroach.Select: %w", err)
 	}
-
+	
 	// Trả về kết quả
 	return sumSalesRevenue, nil
 }
