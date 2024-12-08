@@ -159,11 +159,14 @@ type SearchProductionOrderStageDevicesOpts struct {
 	ProcessStatuses              []enum.ProductionOrderStageDeviceStatus
 	DeviceIDs                    []string
 	ProductionOrderStageStatuses []enum.ProductionOrderStageStatus
+	StageIDs                     []string
 	Responsible                  []string
 	Limit                        int64
 	Offset                       int64
 	StartAt                      time.Time
 	CompleteAt                   time.Time
+	EstimatedStartAtFrom         time.Time
+	EstimatedStartAtTo           time.Time
 	Sort                         *Sort
 }
 
@@ -205,6 +208,11 @@ func (s *SearchProductionOrderStageDevicesOpts) buildQuery(isCount bool) (string
 		conds += fmt.Sprintf(" AND pos.%s = ANY($%d)", model.ProductionOrderStageFieldStatus, len(args))
 	}
 
+	if len(s.StageIDs) > 0 {
+		args = append(args, s.StageIDs)
+		conds += fmt.Sprintf(" AND( s.%s = ANY($%d) OR s.parent_id  = ANY($%d))", model.StageFieldID, len(args), len(args))
+	}
+
 	if s.StartAt.IsZero() == false {
 		args = append(args, s.StartAt)
 		conds += fmt.Sprintf(" AND b.%s >= $%d", model.ProductionOrderStageDeviceFieldStartAt, len(args))
@@ -212,6 +220,15 @@ func (s *SearchProductionOrderStageDevicesOpts) buildQuery(isCount bool) (string
 	if s.CompleteAt.IsZero() == false {
 		args = append(args, s.CompleteAt)
 		conds += fmt.Sprintf(" AND b.%s <= $%d", model.ProductionOrderStageDeviceFieldCompleteAt, len(args))
+	}
+
+	if s.EstimatedStartAtFrom.IsZero() == false {
+		args = append(args, s.EstimatedStartAtFrom)
+		conds += fmt.Sprintf(" AND b.%s >= $%d", model.ProductionOrderStageDeviceFieldEstimatedStartAt, len(args))
+	}
+	if s.EstimatedStartAtTo.IsZero() == false {
+		args = append(args, s.EstimatedStartAtTo)
+		conds += fmt.Sprintf(" AND b.%s <= $%d", model.ProductionOrderStageDeviceFieldEstimatedStartAt, len(args))
 	}
 
 	if len(s.Responsible) > 0 {

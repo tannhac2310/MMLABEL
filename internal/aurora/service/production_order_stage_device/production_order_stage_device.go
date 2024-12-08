@@ -58,6 +58,9 @@ type FindProductionOrderStageDeviceOpts struct {
 	Offset                       int64
 	StartAt                      time.Time
 	CompleteAt                   time.Time
+	EstimatedStartAtFrom         time.Time
+	EstimatedStartAtTo           time.Time
+	StageIDs                     []string
 }
 type ProductionOrderStageDeviceData struct {
 	*repository.ProductionOrderStageDeviceData
@@ -386,6 +389,9 @@ func (p productionOrderStageDeviceService) Find(ctx context.Context, opt *FindPr
 		ProductionOrderStageStatuses: opt.ProductionOrderStageStatuses,
 		StartAt:                      opt.StartAt,
 		CompleteAt:                   opt.CompleteAt,
+		StageIDs:                     opt.StageIDs,
+		EstimatedStartAtFrom:         opt.EstimatedStartAtFrom,
+		EstimatedStartAtTo:           opt.EstimatedStartAtTo,
 		Limit:                        opt.Limit,
 		Offset:                       opt.Offset,
 		Sort:                         nil,
