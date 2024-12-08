@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/apperror"
@@ -51,6 +52,6 @@ func RegisterStatisticsController(
 		&dto.StatisticsRequest{},
 		&dto.StatisticsResponse{},
 		"Get statistics",
-		routeutil.RegisterOptionSkipAuth,
+		//routeutil.RegisterOptionSkipAuth,
 	)
 }

@@ -3,12 +3,13 @@ package repository
 import (
 	"context"
 	"fmt"
+
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
-type StatisticsRepository interface {
+type StatisticsRepo interface {
 	FindDevicesError(ctx context.Context, month, year int16) ([]model.DevicesError, error)
 	FindDevicesProgressHistory(ctx context.Context, month, year int16) (map[string][]model.DevicesProgressHistory, error)
 	FindDevicesErrorByStage(ctx context.Context, month, year int16) ([]model.DevicesErrorByStage, error)
@@ -19,10 +20,10 @@ type StatisticsRepository interface {
 	FindOntimeRatio(ctx context.Context, month, year int16) (float64, error)
 }
 
-type statisticsRepository struct {
+type statisticsRepo struct {
 }
 
-func (s statisticsRepository) FindProductionRatio(ctx context.Context, month, year int16) (float64, error) {
+func (s statisticsRepo) FindProductionRatio(ctx context.Context, month, year int16) (float64, error) {
 	// Biến để lưu tỷ lệ sản xuất
 	var ratio float64
 
@@ -54,7 +55,7 @@ func (s statisticsRepository) FindProductionRatio(ctx context.Context, month, ye
 	// Trả về tỷ lệ sản xuất tính theo phần trăm
 	return ratio * 100, nil
 }
-func (s statisticsRepository) FindOntimeRatio(ctx context.Context, month, year int16) (float64, error) {
+func (s statisticsRepo) FindOntimeRatio(ctx context.Context, month, year int16) (float64, error) {
 	// Biến để lưu tỷ lệ sản xuất
 	var ratio float64
 
@@ -83,7 +84,7 @@ func (s statisticsRepository) FindOntimeRatio(ctx context.Context, month, year i
 	// Trả về tỷ lệ sản xuất tính theo phần trăm
 	return ratio * 100, nil
 }
-func (s statisticsRepository) CountDeviceWorking(ctx context.Context) (int64, error) {
+func (s statisticsRepo) CountDeviceWorking(ctx context.Context) (int64, error) {
 	// Biến để lưu số lượng kết quả
 	var count int64
 
@@ -104,7 +105,7 @@ func (s statisticsRepository) CountDeviceWorking(ctx context.Context) (int64, er
 	return count, nil
 }
 
-func (s statisticsRepository) FindDevicesError(ctx context.Context, month, year int16) ([]model.DevicesError, error) {
+func (s statisticsRepo) FindDevicesError(ctx context.Context, month, year int16) ([]model.DevicesError, error) {
 	// Khai báo slice để lưu kết quả
 	result := make([]model.DevicesError, 0)
 
@@ -137,7 +138,7 @@ func (s statisticsRepository) FindDevicesError(ctx context.Context, month, year 
 	return result, nil
 }
 
-func (s statisticsRepository) ManufacturedQuantity(ctx context.Context, month, year int16) (map[int16]int64, error) {
+func (s statisticsRepo) ManufacturedQuantity(ctx context.Context, month, year int16) (map[int16]int64, error) {
 	// Khai báo slice để lưu kết quả
 	result := make([]model.QuantityByDate, 0)
 
@@ -173,7 +174,7 @@ func (s statisticsRepository) ManufacturedQuantity(ctx context.Context, month, y
 	return resultMap, nil
 }
 
-func (s statisticsRepository) QuantityDelivery(ctx context.Context, month, year int16) (map[int16]int64, error) {
+func (s statisticsRepo) QuantityDelivery(ctx context.Context, month, year int16) (map[int16]int64, error) {
 	// Khai báo slice để lưu kết quả
 	result := make([]model.QuantityDeliveryByDate, 0)
 
@@ -206,7 +207,7 @@ func (s statisticsRepository) QuantityDelivery(ctx context.Context, month, year 
 	return resultMap, nil
 }
 
-func (s statisticsRepository) FindDevicesProgressHistory(ctx context.Context, month, year int16) (map[string][]model.DevicesProgressHistory, error) {
+func (s statisticsRepo) FindDevicesProgressHistory(ctx context.Context, month, year int16) (map[string][]model.DevicesProgressHistory, error) {
 	// Khai báo slice để lưu kết quả
 	result := make([]model.DevicesProgressHistory, 0)
 
@@ -261,7 +262,7 @@ func (s statisticsRepository) FindDevicesProgressHistory(ctx context.Context, mo
 	return deviceMap, nil
 }
 
-func (s statisticsRepository) FindDevicesErrorByStage(ctx context.Context, month, year int16) ([]model.DevicesErrorByStage, error) {
+func (s statisticsRepo) FindDevicesErrorByStage(ctx context.Context, month, year int16) ([]model.DevicesErrorByStage, error) {
 	// Khai báo slice để lưu kết quả
 	result := make([]model.DevicesErrorByStage, 0)
 
@@ -294,6 +295,6 @@ func (s statisticsRepository) FindDevicesErrorByStage(ctx context.Context, month
 	return result, nil
 }
 
-func NewStatisticsRepository() StatisticsRepository {
-	return &statisticsRepository{}
+func NewStatisticsRepo() StatisticsRepo {
+	return &statisticsRepo{}
 }

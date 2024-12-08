@@ -3,10 +3,11 @@ package service
 import (
 	"context"
 	"fmt"
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"sort"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 )
 
 type StatisticsService interface {
@@ -14,7 +15,7 @@ type StatisticsService interface {
 }
 
 type statisticsService struct {
-	statisticsRepo repository.StatisticsRepository
+	statisticsRepo repository.StatisticsRepo
 }
 
 func (s statisticsService) GetStatistics(ctx context.Context, request *dto.StatisticsRequest) (*dto.StatisticsResponse, error) {
@@ -230,7 +231,7 @@ func (s statisticsService) getQuantityDelivery(ctx context.Context, month, year 
 	return quantityCompleteResponse, nil
 }
 
-func NewStatisticsService(statisticsRepo repository.StatisticsRepository) StatisticsService {
+func NewStatisticsService(statisticsRepo repository.StatisticsRepo) StatisticsService {
 	return &statisticsService{
 		statisticsRepo: statisticsRepo,
 	}
