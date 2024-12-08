@@ -29,28 +29,39 @@ func (s statisticsRepo) FindProductionRatio(ctx context.Context, month, year int
 	var ratio float64
 
 	// Câu truy vấn SQL
+	// query := `
+	// 	SELECT
+	// 		COALESCE(
+	// 			(SUM(quantity) - SUM(value::numeric)) / NULLIF(SUM(qty_delivered), 1),
+	// 			0
+	// 		) AS production_ratio
+	// 	FROM
+	// 		production_order_stage_devices posd
+	// 	JOIN
+	// 		production_order_stages pos
+	// 		ON posd.production_order_stage_id = pos.id
+	// 	JOIN
+	// 		production_orders po
+	// 		ON pos.production_order_id = po.id
+	// 	JOIN
+	// 		LATERAL jsonb_each_text(posd.settings) AS settings(key, value)
+	// 		ON TRUE
+	// 	WHERE
+	// 		jsonb_typeof(posd.settings) = 'object'
+	// 		AND EXTRACT(MONTH FROM delivery_date) = $1
+	// 		AND EXTRACT(YEAR FROM delivery_date) = $2
+	// 		AND settings.key = 'san_pham_loi';
+	// `
+
 	query := `
-		SELECT 
-			COALESCE(
-				(SUM(quantity) - SUM(value::numeric)) / NULLIF(SUM(qty_delivered), 1), 
-				0
-			) AS production_ratio
-		FROM 
-			production_order_stage_devices posd
-		JOIN 
-			production_order_stages pos 
-			ON posd.production_order_stage_id = pos.id
-		JOIN 
-			production_orders po 
-			ON pos.production_order_id = po.id
-		JOIN 
-			LATERAL jsonb_each_text(posd.settings) AS settings(key, value) 
-			ON TRUE
-		WHERE 
-			jsonb_typeof(posd.settings) = 'object' 
-			AND EXTRACT(MONTH FROM delivery_date) = $1 
-			AND EXTRACT(YEAR FROM delivery_date) = $2
-			AND settings.key = 'san_pham_loi';
+        SELECT total_quantity/total_assigned_quantity as ratio
+   			 FROM (SELECT
+              SUM(quantity) as total_quantity, SUM(assigned_quantity) as total_assigned_quantity
+          FROM
+              production_order_stage_devices posd
+          WHERE
+              EXTRACT(MONTH FROM estimated_start_at) = $1
+            AND EXTRACT(YEAR FROM estimated_start_at) = $2);
     `
 
 	// Thực hiện truy vấn và lưu kết quả vào biến `ratio`
@@ -135,6 +146,8 @@ func (s statisticsRepo) FindDevicesError(ctx context.Context, month, year int16)
             AND EXTRACT(YEAR FROM complete_at) = $2
             AND key = 'san_pham_loi'
 		GROUP BY 
+			device_id
+		ORDER BY
 			device_id;
 	`
 
@@ -169,7 +182,7 @@ func (s statisticsRepo) SumSalesRevenue(ctx context.Context, month, year int16) 
 	if err != nil {
 		return 0, fmt.Errorf("cockroach.Select: %w", err)
 	}
-	
+
 	// Trả về kết quả
 	return sumSalesRevenue, nil
 }
@@ -226,7 +239,8 @@ func (s statisticsRepo) QuantityDelivery(ctx context.Context, month, year int16)
 			AND EXTRACT(YEAR FROM delivery_date) = $2
 		GROUP BY 
 			day
-		order by day;
+		ORDER BY
+			day;
 	`
 
 	// Thực hiện truy vấn với tham số tháng và năm
