@@ -64,6 +64,11 @@ func (s statisticsService) GetStatistics(ctx context.Context, request *dto.Stati
 		return nil, err
 	}
 
+	salesRevenue, err := s.statisticsRepo.SumSalesRevenue(ctx, month, year)
+	if err != nil {
+		return nil, err
+	}
+
 	onTimeRatio, err := s.statisticsRepo.FindOntimeRatio(ctx, month, year)
 	if err != nil {
 		return nil, err
@@ -76,7 +81,7 @@ func (s statisticsService) GetStatistics(ctx context.Context, request *dto.Stati
 		QuantityComplete:   quantityCompleteResponse,
 		TotalDeviceWorking: totalDeviceWorking,
 		QuantityDelivery:   quantityDeliveryResponse,
-		SalesRevenue:       100000000,
+		SalesRevenue:       salesRevenue,
 		ProductionRatio:    fmt.Sprintf("%.2f%%", productionRation),
 		OnTimeRatio:        fmt.Sprintf("%.2f%%", onTimeRatio),
 	}

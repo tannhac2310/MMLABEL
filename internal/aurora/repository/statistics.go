@@ -18,6 +18,7 @@ type StatisticsRepo interface {
 	CountDeviceWorking(ctx context.Context) (int64, error)
 	FindProductionRatio(ctx context.Context, month, year int16) (float64, error)
 	FindOntimeRatio(ctx context.Context, month, year int16) (float64, error)
+	SumSalesRevenue(ctx context.Context, month, year int16) (int64, error)
 }
 
 type statisticsRepo struct {
@@ -29,21 +30,27 @@ func (s statisticsRepo) FindProductionRatio(ctx context.Context, month, year int
 
 	// Câu truy vấn SQL
 	query := `
-        SELECT 
-            (SUM(quantity) - SUM(value::numeric)) / NULLIF(SUM(qty_delivered), 0) AS production_ratio
-        FROM 
-            production_order_stage_devices posd
-        JOIN 
-            production_order_stages pos ON posd.production_order_stage_id = pos.id
-        JOIN 
-            production_orders po ON pos.production_order_id = po.id
-        JOIN 
-            LATERAL jsonb_each_text(posd.settings) AS settings(key, value) ON TRUE
-        WHERE 
-            jsonb_typeof(posd.settings) = 'object' 
-            AND EXTRACT(MONTH FROM delivery_date) = $1 
-            AND EXTRACT(YEAR FROM delivery_date) = $2
-            AND settings.key = 'san_pham_loi';
+		SELECT 
+			COALESCE(
+				(SUM(quantity) - SUM(value::numeric)) / NULLIF(SUM(qty_delivered), 1), 
+				0
+			) AS production_ratio
+		FROM 
+			production_order_stage_devices posd
+		JOIN 
+			production_order_stages pos 
+			ON posd.production_order_stage_id = pos.id
+		JOIN 
+			production_orders po 
+			ON pos.production_order_id = po.id
+		JOIN 
+			LATERAL jsonb_each_text(posd.settings) AS settings(key, value) 
+			ON TRUE
+		WHERE 
+			jsonb_typeof(posd.settings) = 'object' 
+			AND EXTRACT(MONTH FROM delivery_date) = $1 
+			AND EXTRACT(YEAR FROM delivery_date) = $2
+			AND settings.key = 'san_pham_loi';
     `
 
 	// Thực hiện truy vấn và lưu kết quả vào biến `ratio`
@@ -61,11 +68,14 @@ func (s statisticsRepo) FindOntimeRatio(ctx context.Context, month, year int16) 
 
 	// Câu truy vấn SQL
 	query := `
-        SELECT 
-			SUM(CASE 
-					WHEN delivery_date <= estimated_complete_at THEN 1 
-					ELSE 0 
-				END) / COUNT(*) AS on_time_ratio
+		SELECT 
+			COALESCE(
+				SUM(CASE 
+						WHEN delivery_date <= estimated_complete_at THEN 1 
+						ELSE 0 
+					END) / NULLIF(COUNT(*), 0), 
+				0
+			) AS on_time_ratio
 		FROM 
 			public.production_orders
 		WHERE 
@@ -136,6 +146,32 @@ func (s statisticsRepo) FindDevicesError(ctx context.Context, month, year int16)
 
 	// Trả về kết quả
 	return result, nil
+}
+
+func (s statisticsRepo) SumSalesRevenue(ctx context.Context, month, year int16) (int64, error) {
+	// Khai báo slice để lưu kết quả
+	var sumSalesRevenue int64
+
+	// Câu truy vấn SQL với tham số tháng và năm
+	query := `
+		SELECT 
+			sum(total_amount) AS total_amount
+		FROM 
+			order_items od
+		WHERE 
+			EXTRACT(MONTH FROM estimated_delivery_date) = $1 
+            AND EXTRACT(YEAR FROM estimated_delivery_date) = $2
+		;
+	`
+
+	// Thực hiện truy vấn với tham số tháng và năm
+	err := cockroach.Select(ctx, query, month, year).ScanAll(&sumSalesRevenue)
+	if err != nil {
+		return 0, fmt.Errorf("cockroach.Select: %w", err)
+	}
+
+	// Trả về kết quả
+	return sumSalesRevenue, nil
 }
 
 func (s statisticsRepo) ManufacturedQuantity(ctx context.Context, month, year int16) (map[int16]int64, error) {
