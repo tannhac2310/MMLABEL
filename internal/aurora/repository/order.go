@@ -8,6 +8,7 @@ import (
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
 type OrderRepo interface {
@@ -67,6 +68,7 @@ func (r *sOrderRepo) SoftDelete(ctx context.Context, id string) error {
 // SearchOrderOpts all params is options
 type SearchOrderOpts struct {
 	IDs    []string
+	Status enum.OrderStatus
 	Search string
 	Limit  int64
 	Offset int64
@@ -89,6 +91,10 @@ func (s *SearchOrderOpts) buildQuery(isCount bool) (string, []interface{}) {
 		conds += fmt.Sprintf(" AND (b.title LIKE $%d or b.ma_dat_hang_mm LIKE $%d or b.ma_hop_dong_khach_hang LIKE $%d or b.ma_hop_dong LIKE $%d or b.sale_name LIKE $%d or b.sale_admin_name LIKE $%d)", len(args), len(args), len(args), len(args), len(args), len(args))
 	}
 
+	if s.Status != "" {
+		args = append(args, s.Status)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.OrderFieldStatus, len(args))
+	}
 	b := &model.Order{}
 	fields, _ := b.FieldMap()
 	if isCount {
