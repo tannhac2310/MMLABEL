@@ -59,13 +59,18 @@ type UpdateProductResponse struct {
 }
 
 type FindProductOpts struct {
-	IDs               []string `json:"ids"`
-	Name              string   `json:"name"`
-	Code              string   `json:"code"`
-	CustomerID        string   `json:"customerID"`
-	SaleID            string   `json:"saleID"`
-	ProductionPlanID  string   `json:"productionPlanID"`
-	ProductionOrderID string   `json:"productionOrderID"`
+	IDs                           []string `json:"ids"`
+	Name                          string   `json:"name"`
+	Code                          string   `json:"code"`
+	CustomerID                    string   `json:"customerID"`
+	SaleID                        string   `json:"saleID"`
+	ProductionPlanID              string   `json:"productionPlanID"`
+	ProductionOrderID             string   `json:"productionOrderID"`
+	SaleSurveyCustomerProductName string   `json:"sale_survey_customer_product_name"`
+	ProductName                   string   `json:"productName"`
+	ProductCode                   string   `json:"productCode"`
+	SaleSurveyCustomerProductCode string   `json:"sale_survey_customer_product_code"`
+	SaleSurveyBravoCode           string   `json:"sale_survey_bravo_code"`
 }
 type SearchProductFilter struct {
 	Filter FindProductOpts   `json:"filter" binding:"required"`

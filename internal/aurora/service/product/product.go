@@ -63,13 +63,18 @@ type UpdateProductOpts struct {
 }
 
 type FindProductOpts struct {
-	IDs            []string
-	Name           string
-	Code           string
-	CustomerID     string
-	SaleID         string
-	ProductPlanID  string
-	ProductOrderID string
+	IDs                           []string
+	Name                          string
+	Code                          string
+	CustomerID                    string
+	SaleID                        string
+	ProductPlanID                 string
+	ProductOrderID                string
+	SaleSurveyCustomerProductName string
+	ProductName                   string
+	ProductCode                   string
+	SaleSurveyCustomerProductCode string
+	SaleSurveyBravoCode           string
 }
 type productService struct {
 	productRepo        repository.ProductRepo

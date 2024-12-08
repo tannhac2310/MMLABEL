@@ -116,13 +116,22 @@ func (p productController) FindProduct(c *gin.Context) {
 	}
 
 	filter := product.FindProductOpts{
-		IDs:            req.Filter.IDs,
-		Name:           req.Filter.Name,
-		Code:           req.Filter.Code,
-		CustomerID:     req.Filter.CustomerID,
-		SaleID:         req.Filter.SaleID,
-		ProductPlanID:  req.Filter.ProductionPlanID,
-		ProductOrderID: req.Filter.ProductionOrderID,
+		IDs:                           req.Filter.IDs,
+		Name:                          req.Filter.Name,
+		Code:                          req.Filter.Code,
+		CustomerID:                    req.Filter.CustomerID,
+		SaleID:                        req.Filter.SaleID,
+		ProductPlanID:                 req.Filter.ProductionPlanID,
+		ProductOrderID:                req.Filter.ProductionOrderID,
+		SaleSurveyCustomerProductName: req.Filter.SaleSurveyCustomerProductName,
+		ProductName:                   req.Filter.ProductName,
+		ProductCode:                   req.Filter.ProductCode,
+		SaleSurveyCustomerProductCode: req.Filter.SaleSurveyCustomerProductCode,
+		SaleSurveyBravoCode:           req.Filter.SaleSurveyBravoCode,
+		//	sale_survey_customer_product_name
+		//productName
+		//productCode
+		//sale_survey_customer_product_code
 	}
 
 	sort := &repository.Sort{
