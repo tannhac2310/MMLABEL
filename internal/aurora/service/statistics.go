@@ -108,8 +108,8 @@ func (s statisticsService) getTop5DevicesError(ctx context.Context, month, year 
 	})
 
 	// Lấy top 5 thiết bị có tỷ lệ lỗi thấp nhất
-	if len(devicesError) > 5 {
-		devicesError = devicesError[:5]
+	if len(devicesError) > 20 {
+		devicesError = devicesError[:20]
 	}
 
 	devicesErrorResponese := make([]dto.DevicesErrorResponese, 0, len(devicesError))
