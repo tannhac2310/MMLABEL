@@ -478,6 +478,14 @@ func (p productionOrderStageDeviceService) UpdateProcessStatus(ctx context.Conte
 		updater.Set(model.ProductionOrderStageDeviceFieldProcessStatus, opt.ProcessStatus)
 		updater.Set(model.ProductionOrderStageDeviceFieldUpdatedAt, time.Now())
 
+		if opt.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart {
+			updater.Set(model.ProductionOrderStageDeviceFieldStartAt, time.Now())
+		}
+
+		if opt.ProcessStatus == enum.ProductionOrderStageDeviceStatusComplete {
+			updater.Set(model.ProductionOrderStageDeviceFieldCompleteAt, time.Now())
+		}
+
 		err := cockroach.UpdateFields(ctx, updater)
 		if err != nil {
 			return fmt.Errorf("update process status: %w", err)

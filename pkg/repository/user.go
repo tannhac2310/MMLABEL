@@ -117,7 +117,10 @@ func (s *SearchUsersOpts) buildQuery(isCount bool) (string, []interface{}) {
 
 	if s.Name != "" {
 		args = append(args, "%"+s.Name+"%")
-		conds += fmt.Sprintf(" AND u.%s ILIKE $%d", model.UserFieldName, len(args))
+		args = append(args, s.Name)
+		// username_passwords
+		joins += fmt.Sprintf(` LEFT JOIN username_passwords AS up ON up.user_id = u.id`)
+		conds += fmt.Sprintf(" AND (u.%s ILIKE $%d or up.username = $%d)", model.UserFieldName, len(args)-1, len(args))
 	}
 	if s.Department != "" {
 		var departs = []string{"%" + s.Department + "%"}
