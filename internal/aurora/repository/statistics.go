@@ -62,9 +62,9 @@ func (s statisticsRepo) FindProductionRatio(ctx context.Context, month, year int
           FROM
               production_order_stage_devices posd
           WHERE
-		  	EXTRACT(DAY FROM complete_at) = $1
-            AND  EXTRACT(MONTH FROM complete_at) = $2
-            AND EXTRACT(YEAR FROM complete_at) = $3);
+		  	EXTRACT(DAY FROM start_at) = $1
+            AND  EXTRACT(MONTH FROM start_at) = $2
+            AND EXTRACT(YEAR FROM start_at) = $3);
     `
 
 	// Thực hiện truy vấn và lưu kết quả vào biến `ratio`
