@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
@@ -52,7 +53,8 @@ func (s statisticsRepo) FindProductionRatio(ctx context.Context, month, year int
 	// 		AND EXTRACT(YEAR FROM delivery_date) = $2
 	// 		AND settings.key = 'san_pham_loi';
 	// `
-
+	currentTime := time.Now()
+	day := currentTime.Day()
 	query := `
         SELECT total_quantity/total_assigned_quantity as ratio
    			 FROM (SELECT
@@ -60,12 +62,13 @@ func (s statisticsRepo) FindProductionRatio(ctx context.Context, month, year int
           FROM
               production_order_stage_devices posd
           WHERE
-              EXTRACT(MONTH FROM estimated_start_at) = $1
-            AND EXTRACT(YEAR FROM estimated_start_at) = $2);
+		  	EXTRACT(DAY FROM complete_at) = $1
+            AND  EXTRACT(MONTH FROM complete_at) = $2
+            AND EXTRACT(YEAR FROM complete_at) = $3);
     `
 
 	// Thực hiện truy vấn và lưu kết quả vào biến `ratio`
-	err := cockroach.QueryRow(ctx, query, month, year).Scan(&ratio)
+	err := cockroach.QueryRow(ctx, query, day, month, year).Scan(&ratio)
 	if err != nil {
 		return 0, fmt.Errorf("cockroach.QueryRow: %w", err)
 	}
