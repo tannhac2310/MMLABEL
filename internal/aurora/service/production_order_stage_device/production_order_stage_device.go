@@ -319,6 +319,7 @@ func (p productionOrderStageDeviceService) FindProcessDeviceHistory(ctx context.
 		CreatedFrom:   opt.CreatedFrom,
 		CreatedTo:     opt.CreatedTo,
 		DeviceID:      opt.DeviceID,
+		DeviceIDs:     opt.DeviceIDs,
 		IsResolved:    opt.IsResolved,
 	})
 	if err != nil {
