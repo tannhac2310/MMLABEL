@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
@@ -52,7 +53,8 @@ func (s statisticsRepo) FindProductionRatio(ctx context.Context, month, year int
 	// 		AND EXTRACT(YEAR FROM delivery_date) = $2
 	// 		AND settings.key = 'san_pham_loi';
 	// `
-
+	currentTime := time.Now()
+	day := currentTime.Day()
 	query := `
         SELECT total_quantity/total_assigned_quantity as ratio
    			 FROM (SELECT
@@ -60,12 +62,13 @@ func (s statisticsRepo) FindProductionRatio(ctx context.Context, month, year int
           FROM
               production_order_stage_devices posd
           WHERE
-              EXTRACT(MONTH FROM estimated_start_at) = $1
-            AND EXTRACT(YEAR FROM estimated_start_at) = $2);
+		  	EXTRACT(DAY FROM start_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') = $1
+            AND  EXTRACT(MONTH FROM start_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') = $2
+            AND EXTRACT(YEAR FROM start_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') = $3);
     `
 
 	// Thực hiện truy vấn và lưu kết quả vào biến `ratio`
-	err := cockroach.QueryRow(ctx, query, month, year).Scan(&ratio)
+	err := cockroach.QueryRow(ctx, query, day, month, year).Scan(&ratio)
 	if err != nil {
 		return 0, fmt.Errorf("cockroach.QueryRow: %w", err)
 	}
@@ -90,8 +93,8 @@ func (s statisticsRepo) FindOntimeRatio(ctx context.Context, month, year int16) 
 		FROM 
 			public.production_orders
 		WHERE 
-			EXTRACT(MONTH FROM delivery_date) = $1 
-			AND EXTRACT(YEAR FROM delivery_date) = $2
+			EXTRACT(MONTH FROM delivery_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') = $1 
+			AND EXTRACT(YEAR FROM delivery_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') = $2
 			AND estimated_complete_at IS NOT NULL;
 
     `
@@ -142,8 +145,8 @@ func (s statisticsRepo) FindDevicesError(ctx context.Context, month, year int16)
 			LATERAL jsonb_each_text(pos.settings) AS settings(key, value) ON TRUE
 		WHERE 
 			jsonb_typeof(pos.settings) = 'object' 
-			AND EXTRACT(MONTH FROM complete_at) = $1 
-            AND EXTRACT(YEAR FROM complete_at) = $2
+			AND EXTRACT(MONTH FROM complete_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') = $1 
+            AND EXTRACT(YEAR FROM complete_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') = $2
             AND key = 'san_pham_loi'
 		GROUP BY 
 			device_id
@@ -172,8 +175,8 @@ func (s statisticsRepo) SumSalesRevenue(ctx context.Context, month, year int16) 
 		FROM 
 			order_items od
 		WHERE 
-			EXTRACT(MONTH FROM estimated_delivery_date) = $1 
-            AND EXTRACT(YEAR FROM estimated_delivery_date) = $2
+			EXTRACT(MONTH FROM estimated_delivery_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') = $1 
+            AND EXTRACT(YEAR FROM estimated_delivery_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') = $2
 		;
 	`
 
@@ -194,7 +197,7 @@ func (s statisticsRepo) ManufacturedQuantity(ctx context.Context, month, year in
 	// Câu truy vấn SQL với tham số tháng và năm
 	query := `
 		SELECT 
-			EXTRACT(DAY FROM complete_at) AS day,
+			EXTRACT(DAY FROM complete_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') AS day,
 			sum(quantity) - sum(value::numeric) AS quantity_complete
 		FROM 
 			production_order_stage_devices pos
@@ -202,8 +205,8 @@ func (s statisticsRepo) ManufacturedQuantity(ctx context.Context, month, year in
 			LATERAL jsonb_each_text(pos.settings) AS settings(key, value) ON TRUE
 		WHERE 
 			jsonb_typeof(pos.settings) = 'object' 
-			AND EXTRACT(MONTH FROM complete_at) = $1 
-			AND EXTRACT(YEAR FROM complete_at) = $2
+			AND EXTRACT(MONTH FROM complete_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') = $1 
+			AND EXTRACT(YEAR FROM complete_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') = $2
 			AND settings.key = 'san_pham_loi'
 		GROUP BY 
 			day;
@@ -230,13 +233,13 @@ func (s statisticsRepo) QuantityDelivery(ctx context.Context, month, year int16)
 	// Câu truy vấn SQL với tham số tháng và năm
 	query := `
 		SELECT 
-			EXTRACT(DAY FROM delivery_date) AS day,
-			sum(qty_delivered) AS quantity_delivery
+			EXTRACT(DAY FROM estimated_delivery_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') AS day,
+			sum(quantity) AS quantity_delivery
 		FROM 
-			production_orders
+			order_items
 		WHERE 
-			EXTRACT(MONTH FROM delivery_date) = $1 
-			AND EXTRACT(YEAR FROM delivery_date) = $2
+			EXTRACT(MONTH FROM estimated_delivery_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') = $1 
+			AND EXTRACT(YEAR FROM estimated_delivery_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') = $2
 		GROUP BY 
 			day
 		ORDER BY
@@ -265,7 +268,8 @@ func (s statisticsRepo) FindDevicesProgressHistory(ctx context.Context, month, y
 	query := `
 		SELECT device_id, process_status, created_at 
 		FROM device_progress_status_history
-		WHERE EXTRACT(MONTH FROM created_at) = $1 AND EXTRACT(YEAR FROM created_at) = $2
+		WHERE EXTRACT(MONTH FROM created_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') = $1 
+		AND EXTRACT(YEAR FROM created_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') = $2
 		ORDER BY created_at ASC
 	`
 
@@ -329,8 +333,8 @@ func (s statisticsRepo) FindDevicesErrorByStage(ctx context.Context, month, year
 			LATERAL jsonb_each_text(pos.settings) AS settings(key, value) ON TRUE
 		WHERE 
 			jsonb_typeof(pos.settings) = 'object' 
-			AND EXTRACT(MONTH FROM complete_at) = $1 
-            AND EXTRACT(YEAR FROM complete_at) = $2
+			AND EXTRACT(MONTH FROM complete_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') = $1 
+            AND EXTRACT(YEAR FROM complete_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') = $2
             AND key = 'san_pham_loi'
 		GROUP BY 
 			stages.stage_id;
