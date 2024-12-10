@@ -353,6 +353,10 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				updaterDeviceStage.Set(model.ProductionOrderStageDeviceFieldSettings, deviceStageSettings)
 				hasUpdate = true
 			}
+			if item.Quantity > 0 {
+				updaterDeviceStage.Set(model.ProductionOrderStageDeviceFieldQuantity, item.Quantity)
+				hasUpdate = true
+			}
 			//err = p.productionOrderStageDeviceService.Edit(ctx, &production_order_stage_device.EditProductionOrderStageDeviceOpts{
 			//	ID:                  orderStageDevice.ID,
 			//	DeviceID:            orderStageDevice.DeviceID,
