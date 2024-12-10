@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/production_order_stage_device"
 	"strconv"
 	"time"
 
@@ -26,12 +25,12 @@ type EventMQTTSubscription struct {
 	config *configs.Config
 	db     cockroach.Ext
 	//busFactory nats.BusFactory
-	productionOrderStageDeviceRepo    repository.ProductionOrderStageDeviceRepo
-	deviceWorkingHistoryRepo          repository.DeviceWorkingHistoryRepo
-	device                            model.Device
-	productionOrderStageDeviceService production_order_stage_device.Service
-	logger                            *zap.Logger
-	wsService                         ws.WebSocketService
+	productionOrderStageDeviceRepo  repository.ProductionOrderStageDeviceRepo
+	deviceWorkingHistoryRepo        repository.DeviceWorkingHistoryRepo
+	deviceProgressStatusHistoryRepo repository.DeviceProgressStatusHistoryRepo
+	device                          model.Device
+	logger                          *zap.Logger
+	wsService                       ws.WebSocketService
 }
 
 func NewMQTTSubscription(
@@ -39,18 +38,18 @@ func NewMQTTSubscription(
 	db cockroach.Ext,
 	productionOrderStageDeviceRepo repository.ProductionOrderStageDeviceRepo,
 	deviceWorkingHistoryRepo repository.DeviceWorkingHistoryRepo,
-	productionOrderStageDeviceService production_order_stage_device.Service,
+	deviceProgressStatusHistoryRepo repository.DeviceProgressStatusHistoryRepo,
 	logger *zap.Logger,
 	wsService ws.WebSocketService,
 ) *EventMQTTSubscription {
 	return &EventMQTTSubscription{
-		config:                            config,
-		db:                                db,
-		productionOrderStageDeviceRepo:    productionOrderStageDeviceRepo,
-		deviceWorkingHistoryRepo:          deviceWorkingHistoryRepo,
-		productionOrderStageDeviceService: productionOrderStageDeviceService,
-		logger:                            logger,
-		wsService:                         wsService,
+		config:                          config,
+		db:                              db,
+		productionOrderStageDeviceRepo:  productionOrderStageDeviceRepo,
+		deviceWorkingHistoryRepo:        deviceWorkingHistoryRepo,
+		deviceProgressStatusHistoryRepo: deviceProgressStatusHistoryRepo,
+		logger:                          logger,
+		wsService:                       wsService,
 	}
 }
 
@@ -243,6 +242,24 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			return p.deviceWorkingHistoryRepo.Update(ctx, existingHistory)
 		}
 
+		upsertDeviceProcessHistory := func(ctx context.Context, orderStageDevice *model.ProductionOrderStageDevice, deviceStateStatus enum.ProductionOrderStageDeviceStatus, note string, now time.Time) error {
+			modelData := &model.DeviceProgressStatusHistory{
+				ID:                           idutil.ULIDNow(),
+				ProductionOrderStageDeviceID: orderStageDevice.ID,
+				DeviceID:                     orderStageDevice.DeviceID,
+				ProcessStatus:                deviceStateStatus,
+				CreatedBy:                    cockroach.String("HMI"),
+				CreatedAt:                    now,
+			}
+			if deviceStateStatus == enum.ProductionOrderStageDeviceStatusFailed || deviceStateStatus == enum.ProductionOrderStageDeviceStatusPause {
+				modelData.IsResolved = 0
+				modelData.ErrorCode = cockroach.String(note)
+				modelData.ErrorReason = cockroach.String(note)
+				modelData.Description = cockroach.String(note)
+			}
+			return p.deviceProgressStatusHistoryRepo.Insert(ctx, modelData)
+		}
+
 		insertEventLog := func(ctx context.Context, orderStageDevice *model.ProductionOrderStageDevice, item IotData, dateStr string, now time.Time, payload string) error {
 			eventLog := &model.EventLog{
 				ID:          time.Now().UnixNano(),
@@ -257,6 +274,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			return p.productionOrderStageDeviceRepo.InsertEventLog(ctx, eventLog)
 		}
 		processIotData := func(ctx context.Context, item IotData, dateStr string, now time.Time, jsonStr string) error {
+			hasUpdate := false
 			mapping := map[int]string{
 				1:  "PP1",
 				2:  "CN3",
@@ -269,11 +287,11 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				9:  "MAU",
 				10: "KH1",
 			}
+			note := ""
 			if item.PauseReason > 10 || item.PauseReason < 1 {
 				item.PauseReason = 10
 			}
-
-			tableDevice := model.Device{}
+			note = mapping[item.PauseReason]
 			tableStageDevice := model.ProductionOrderStageDevice{}
 			orderStageDevice, err := p.productionOrderStageDeviceRepo.FindByID(ctx, iotData.WorkOrderID)
 			fmt.Println("============>>> orderStageDevice: ", orderStageDevice)
@@ -289,8 +307,6 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				fmt.Println("============>>> E: ", orderStageDevice)
 				return nil
 			}
-			note := ""
-			settings := &production_order_stage_device.Settings{}
 			deviceStateStatus := orderStageDevice.ProcessStatus
 			fmt.Println("============>>> deviceStateStatus: ", deviceStateStatus)
 			if deviceStateStatus == enum.ProductionOrderStageDeviceStatusFailed {
@@ -312,11 +328,6 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				} else if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart {
 					if item.Pause {
 						deviceStateStatus = enum.ProductionOrderStageDeviceStatusFailed
-						note = mapping[item.PauseReason]
-						settings = &production_order_stage_device.Settings{
-							DefectiveError: note,
-							Description:    note,
-						}
 						fmt.Println("============>>> deviceStateStatus After 306: ", deviceStateStatus)
 					} else if item.StartProduction == false {
 						deviceStateStatus = enum.ProductionOrderStageDeviceStatusComplete
@@ -331,66 +342,67 @@ func (p *EventMQTTSubscription) Subscribe() error {
 					p.logger.Warn("Unexpected device state status", zap.Any("deviceStateStatus", deviceStateStatus))
 				}
 			}
+			updaterDeviceStage := cockroach.NewUpdater(tableStageDevice.TableName(), model.ProductionOrderStageDeviceFieldID, orderStageDevice.ID)
 			fmt.Println("============>>> deviceStateStatus After 2: ", deviceStateStatus)
-			err = p.productionOrderStageDeviceService.Edit(ctx, &production_order_stage_device.EditProductionOrderStageDeviceOpts{
-				ID:            orderStageDevice.ID,
-				DeviceID:      orderStageDevice.DeviceID,
-				UserID:        "HMI",
-				ProcessStatus: deviceStateStatus,
-				Status:        orderStageDevice.Status,
-				SanPhamLoi:    item.DefectQuantity,
-				Quantity:      item.Quantity,
-				Settings:      settings,
-				Note:          note,
-			})
-			if err != nil {
-				p.logger.Error("Error updating production order stage device", zap.Error(err))
-				return err
+			if item.DefectQuantity > 0 {
+				deviceStageSettings := orderStageDevice.Settings
+				if deviceStageSettings == nil {
+					deviceStageSettings = make(map[string]interface{})
+				}
+				deviceStageSettings["san_pham_loi"] = item.DefectQuantity
+				updaterDeviceStage.Set(model.ProductionOrderStageDeviceFieldSettings, deviceStageSettings)
+				hasUpdate = true
+			}
+			//err = p.productionOrderStageDeviceService.Edit(ctx, &production_order_stage_device.EditProductionOrderStageDeviceOpts{
+			//	ID:                  orderStageDevice.ID,
+			//	DeviceID:            orderStageDevice.DeviceID,
+			//	UserID:              "HMI",
+			//	ProcessStatus:       deviceStateStatus,
+			//	Status:              orderStageDevice.Status,
+			//	SanPhamLoi:          item.DefectQuantity,
+			//	Quantity:            item.Quantity,
+			//	Settings:            settings,
+			//	Note:                note,
+			//	EstimatedStartAt:    orderStageDevice.EstimatedStartAt,
+			//	EstimatedCompleteAt: orderStageDevice.EstimatedCompleteAt,
+			//})
+			if deviceStateStatus != orderStageDevice.ProcessStatus {
+				updaterDeviceStage.Set(model.ProductionOrderStageDeviceFieldProcessStatus, deviceStateStatus)
+				hasUpdate = true
 			}
 			if deviceStateStatus == enum.ProductionOrderStageDeviceStatusStart && orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusNone {
-				updaterDeviceStage := cockroach.NewUpdater(tableStageDevice.TableName(), model.ProductionOrderStageDeviceFieldID, orderStageDevice.ID)
 				updaterDeviceStage.Set(model.ProductionOrderStageDeviceFieldStartAt, now)
-				if err := cockroach.UpdateFields(ctx, updaterDeviceStage); err != nil {
-					p.logger.Error("Error tableStageDevice", zap.Error(err))
-					return err
-				}
+				hasUpdate = true
 			}
 			if deviceStateStatus == enum.ProductionOrderStageDeviceStatusComplete && orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart {
-				updaterDeviceStage := cockroach.NewUpdater(tableStageDevice.TableName(), model.ProductionOrderStageDeviceFieldID, orderStageDevice.ID)
 				updaterDeviceStage.Set(model.ProductionOrderStageDeviceFieldCompleteAt, now)
+				hasUpdate = true
+			}
+
+			if hasUpdate {
 				if err := cockroach.UpdateFields(ctx, updaterDeviceStage); err != nil {
 					p.logger.Error("Error tableStageDevice", zap.Error(err))
 					return err
 				}
 			}
+			if err := upsertDeviceProcessHistory(ctx, orderStageDevice, deviceStateStatus, note, now); err != nil {
+				p.logger.Error("Error upsertDeviceProcessHistory", zap.Error(err))
+				return err
+			}
 			if err := upsertDeviceWorkingHistory(ctx, orderStageDevice, item, dateStr, now); err != nil {
-				p.logger.Error("Error upserting device working history", zap.Error(err))
+				p.logger.Error("Error upsertDeviceWorkingHistory", zap.Error(err))
 				return err
 			}
 			if err := insertEventLog(ctx, orderStageDevice, item, dateStr, now, jsonStr); err != nil {
-				p.logger.Error("Error upserting device working history", zap.Error(err))
+				p.logger.Error("Error insertEventLog", zap.Error(err))
 				return err
 			}
-
-			if item.Pause {
-				if item.PauseReason == 1 {
-					updaterDevice := cockroach.NewUpdater(tableDevice.TableName(), model.DeviceFieldID, orderStageDevice.DeviceID)
-					updaterDevice.Set(model.DeviceFieldStatus, enum.CommonStatusDamage)
-					if err := cockroach.UpdateFields(ctx, updaterDevice); err != nil {
-						p.logger.Error("Error upserting device working history", zap.Error(err))
-						return err
-					}
-				}
-			}
-
 			return nil
 		}
-
 		err = processIotData(ctx, iotData, dateStr, now, string(jsonStr))
 		if err != nil {
 			return
 		}
-
 		message.Ack()
 	})
 	fmt.Printf("Subscribed to topic '%s'\n", topic)
