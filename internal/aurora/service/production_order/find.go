@@ -176,17 +176,18 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 			Offset:     0,
 		})
 
-		poCustomFields := c.GetCustomField()
+		//poCustomFields := c.GetCustomField()
 		customFieldMap := make(map[string]string)
-		for _, customField := range poCustomFields {
-			customFieldMap[customField] = ""
-			for _, datum := range customFieldData {
-				if datum.Field == customField {
-					customFieldMap[customField] = datum.Value
-					break
-				}
-			}
+		//for _, customField := range poCustomFields {
+		//	customFieldMap[customField] = ""
+		for _, datum := range customFieldData {
+			//if datum.Field == customField {
+			customFieldMap[datum.Field] = datum.Value
+			//break
+			//}
 		}
+		//}
+
 		results = append(results, &Data{
 			ProductionOrderData:  productionOrder,
 			ProductionOrderStage: stageData,
