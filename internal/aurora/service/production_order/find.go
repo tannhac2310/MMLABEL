@@ -182,7 +182,11 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 		//	customFieldMap[customField] = ""
 		for _, datum := range customFieldData {
 			//if datum.Field == customField {
-			customFieldMap[datum.Field] = datum.Value
+			if _, ok := customFieldMap[datum.Field]; ok {
+				customFieldMap[datum.Field] = customFieldMap[datum.Field] + "," + datum.Value // nếu trùng field thì nối chuỗi. todo: this is not good. need to improve
+			} else {
+				customFieldMap[datum.Field] = datum.Value
+			}
 			//break
 			//}
 		}

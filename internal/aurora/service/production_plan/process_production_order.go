@@ -74,6 +74,7 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 		CreatedAt:           now,
 		UpdatedAt:           now,
 		Name:                plan.Name,
+		Version:             2, // version 2
 		EstimatedStartAt:    cockroach.Time(opt.EstimatedStartAt),
 		EstimatedCompleteAt: cockroach.Time(opt.EstimatedCompleteAt),
 	}

@@ -400,6 +400,7 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 		CreatedBy:             f.CreatedBy,
 		CreatedAt:             f.CreatedAt,
 		UpdatedAt:             f.UpdatedAt,
+		Version:               f.Version,
 	}
 }
 

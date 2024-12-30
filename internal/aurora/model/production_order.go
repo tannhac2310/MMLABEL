@@ -2,8 +2,9 @@ package model
 
 import (
 	"database/sql"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
 const (
@@ -27,6 +28,8 @@ const (
 	ProductionOrderFieldName                  = "name"
 	ProductionOrderFieldEstimatedStartAt      = "estimated_start_at"
 	ProductionOrderFieldEstimatedCompleteAt   = "estimated_complete_at"
+	//version
+	ProductionOrderFieldVersion = "version"
 )
 
 type ProductionOrder struct {
@@ -50,6 +53,7 @@ type ProductionOrder struct {
 	Name                  string                     `db:"name"`
 	EstimatedStartAt      sql.NullTime               `db:"estimated_start_at"`
 	EstimatedCompleteAt   sql.NullTime               `db:"estimated_complete_at"`
+	Version               int64                      `db:"version"`
 }
 
 func (rcv *ProductionOrder) FieldMap() (fields []string, values []interface{}) {
@@ -74,6 +78,7 @@ func (rcv *ProductionOrder) FieldMap() (fields []string, values []interface{}) {
 		ProductionOrderFieldName,
 		ProductionOrderFieldEstimatedStartAt,
 		ProductionOrderFieldEstimatedCompleteAt,
+		ProductionOrderFieldVersion,
 	}
 
 	values = []interface{}{
@@ -97,6 +102,7 @@ func (rcv *ProductionOrder) FieldMap() (fields []string, values []interface{}) {
 		&rcv.Name,
 		&rcv.EstimatedStartAt,
 		&rcv.EstimatedCompleteAt,
+		&rcv.Version,
 	}
 
 	return

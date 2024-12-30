@@ -65,6 +65,7 @@ type ProductionOrder2 struct {
 	DeliveryImage       string                     `json:"deliveredImage"`
 	Status              enum.ProductionOrderStatus `json:"status"`
 	Note                string                     `json:"note"`
+	Version             int64                      `json:"version"`
 }
 type ProductionOrder struct {
 	ID                    string                     `json:"id"`
@@ -88,6 +89,7 @@ type ProductionOrder struct {
 	CreatedBy             string                     `json:"createdBy"`
 	CreatedAt             time.Time                  `json:"createdAt"`
 	UpdatedAt             time.Time                  `json:"updatedAt"`
+	Version               int64                      `json:"version"`
 }
 
 type CreateProductionOrderRequest struct {
