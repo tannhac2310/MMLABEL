@@ -378,6 +378,7 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 			Status:             f.CustomerData.Status,
 		}
 	}
+	
 	return &dto.ProductionOrder{
 		ID:                    f.ID,
 		Name:                  f.Name,
@@ -401,6 +402,7 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 		CreatedAt:             f.CreatedAt,
 		UpdatedAt:             f.UpdatedAt,
 		Version:               f.Version,
+		Data:                  f.Data,
 	}
 }
 

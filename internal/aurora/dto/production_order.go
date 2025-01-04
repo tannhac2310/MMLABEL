@@ -90,6 +90,7 @@ type ProductionOrder struct {
 	CreatedAt             time.Time                  `json:"createdAt"`
 	UpdatedAt             time.Time                  `json:"updatedAt"`
 	Version               int64                      `json:"version"`
+	Data                  any                        `json:"data"`
 }
 
 type CreateProductionOrderRequest struct {

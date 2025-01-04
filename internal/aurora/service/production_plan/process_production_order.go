@@ -18,6 +18,7 @@ type ProcessProductionOrderOpts struct {
 	EstimatedStartAt    time.Time
 	EstimatedCompleteAt time.Time
 	CreatedBy           string
+	Data                any
 }
 
 type ProductionOrderStage struct {
@@ -75,6 +76,7 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 		UpdatedAt:           now,
 		Name:                plan.Name,
 		Version:             2, // version 2
+		Data:                opt.Data,
 		EstimatedStartAt:    cockroach.Time(opt.EstimatedStartAt),
 		EstimatedCompleteAt: cockroach.Time(opt.EstimatedCompleteAt),
 	}

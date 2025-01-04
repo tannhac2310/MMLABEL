@@ -69,10 +69,11 @@ type DeleteProductionPlanRequest struct {
 type DeleteProductionPlanResponse struct{}
 
 type ProcessProductionOrderRequest struct {
-	ID                  string             `json:"id"`
-	Stages              []CreateOrderStage `json:"productionOrderStages"`
-	EstimatedStartAt    time.Time          `json:"estimatedStartAt"`
-	EstimatedCompleteAt time.Time          `json:"estimatedCompleteAt"`
+	ID                  string             `json:"id" binding:"required"`
+	Stages              []CreateOrderStage `json:"productionOrderStages" binding:"required"`
+	EstimatedStartAt    time.Time          `json:"estimatedStartAt" binding:"required"`
+	EstimatedCompleteAt time.Time          `json:"estimatedCompleteAt" binding:"required"`
+	Data                any                `json:"data" binding:"required"`
 }
 
 type ProcessProductionOrderResponse struct {
@@ -133,3 +134,10 @@ type SummaryProductionPlanItem struct {
 	Status enum.ProductionPlanStatus `json:"status,omitempty"`
 	Count  int64                     `json:"count,omitempty"`
 }
+
+type UpdateWorkflowRequest struct {
+	ProductionPlanID string         `json:"productionPlanID" binding:"required"`
+	Workflows        map[string]any `json:"workflows" binding:"required"`
+}
+
+type UpdateWorkflowResponse struct{}

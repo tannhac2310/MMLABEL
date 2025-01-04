@@ -23,6 +23,7 @@ type ProductionPlanController interface {
 	UpdateCustomFields(c *gin.Context)
 	UpdateCurrentStage(c *gin.Context)
 	SummaryProductionPlan(c *gin.Context)
+	UpdateWorkflow(c *gin.Context)
 }
 
 type productionPlanController struct {
@@ -45,6 +46,24 @@ func (s productionPlanController) UpdateCurrentStage(c *gin.Context) {
 
 	transportutil.SendJSONResponse(c, &dto.UpdateCurrentStageResponse{})
 }
+
+func (s productionPlanController) UpdateWorkflow(c *gin.Context) {
+	req := &dto.UpdateWorkflowRequest{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+
+	err = s.productionPlanService.UpdateWorkflow(c, req.ProductionPlanID, req.Workflows)
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+
+	transportutil.SendJSONResponse(c, &dto.UpdateWorkflowResponse{})
+}
+
 func (s productionPlanController) UpdateCustomFields(c *gin.Context) {
 	req := &dto.UpdateCustomFieldPLValuesRequest{}
 	err := c.ShouldBind(req)
@@ -358,6 +377,7 @@ func (s productionPlanController) ProcessProductionOrder(c *gin.Context) {
 		Stages:              orderStages,
 		EstimatedStartAt:    req.EstimatedStartAt,
 		EstimatedCompleteAt: req.EstimatedCompleteAt,
+		Data:                req.Data,
 		CreatedBy:           userID,
 	})
 	if err != nil {
