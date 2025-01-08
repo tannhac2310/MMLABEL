@@ -28,8 +28,8 @@ const (
 	ProductionOrderFieldName                  = "name"
 	ProductionOrderFieldEstimatedStartAt      = "estimated_start_at"
 	ProductionOrderFieldEstimatedCompleteAt   = "estimated_complete_at"
-	//version
-	ProductionOrderFieldVersion = "version"
+	ProductionOrderFieldVersion               = "version"
+	ProductionOrderFieldData                  = "data"
 )
 
 type ProductionOrder struct {
@@ -54,6 +54,7 @@ type ProductionOrder struct {
 	EstimatedStartAt      sql.NullTime               `db:"estimated_start_at"`
 	EstimatedCompleteAt   sql.NullTime               `db:"estimated_complete_at"`
 	Version               int64                      `db:"version"`
+	Data                  any                        `db:"data"`
 }
 
 func (rcv *ProductionOrder) FieldMap() (fields []string, values []interface{}) {
@@ -79,6 +80,7 @@ func (rcv *ProductionOrder) FieldMap() (fields []string, values []interface{}) {
 		ProductionOrderFieldEstimatedStartAt,
 		ProductionOrderFieldEstimatedCompleteAt,
 		ProductionOrderFieldVersion,
+		ProductionOrderFieldData,
 	}
 
 	values = []interface{}{
@@ -103,6 +105,7 @@ func (rcv *ProductionOrder) FieldMap() (fields []string, values []interface{}) {
 		&rcv.EstimatedStartAt,
 		&rcv.EstimatedCompleteAt,
 		&rcv.Version,
+		&rcv.Data,
 	}
 
 	return
