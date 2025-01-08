@@ -3,8 +3,9 @@ package production_order
 import (
 	"context"
 	"fmt"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
@@ -53,6 +54,7 @@ func (c *productionOrderService) CreateProductionOrder(ctx context.Context, opt 
 				Status:              orderStage.Status,
 				Condition:           cockroach.String(orderStage.Condition),
 				Note:                cockroach.String(orderStage.Note),
+				SoLuong:             orderStage.SoLuong,
 				Data:                orderStage.Data,
 				CreatedAt:           now,
 				UpdatedAt:           now,
@@ -112,6 +114,7 @@ type ProductionOrderStage struct {
 	Condition           string
 	Note                string
 	Data                map[string]interface{}
+	SoLuong             int64
 	ID                  string
 	Sorting             int16
 }
