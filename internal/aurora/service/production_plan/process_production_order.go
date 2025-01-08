@@ -37,7 +37,6 @@ type ProductionOrderStage struct {
 
 func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt *ProcessProductionOrderOpts) (string, error) {
 	now := time.Now()
-	newProductionOrderID := idutil.ULIDNow()
 
 	plan, err := c.productionPlanRepo.FindByID(ctx, opt.ID)
 	if err != nil {
@@ -60,10 +59,22 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 			deliveryDate, _ = time.Parse(time.RFC3339, val.Value)
 		}
 	}
+	// find production order by created date
+	startToday := time.Now().Truncate(24 * time.Hour)
+	endToday := startToday.Add(24 * time.Hour)
+	count, err := c.productionOrderRepo.CountByCreatedDate(ctx, startToday, endToday)
+	if err != nil {
+		return "", fmt.Errorf("count production order by created date: %w", err)
+	}
+	newProductionOrderID := fmt.Sprintf("%s-%d", startToday.Format("20060102"), count+1)
+	countByCode, err := c.productionOrderRepo.CountByCode(ctx, fmt.Sprintf("%s-", plan.ProductCode))
+	if err != nil {
+		return "", fmt.Errorf("count production order by product code: %w", err)
+	}
 	productionOrder := &model.ProductionOrder{
 		ID:                  newProductionOrderID,
-		ProductCode:         plan.ProductCode,
-		ProductName:         plan.ProductName,
+		ProductCode:         fmt.Sprintf("%s-%d", plan.ProductCode, countByCode+2),
+		ProductName:         fmt.Sprintf("%s-%d", plan.ProductName, countByCode+2),
 		QtyPaper:            plan.QtyPaper,
 		QtyFinished:         plan.QtyFinished,
 		QtyDelivered:        plan.QtyDelivered,
