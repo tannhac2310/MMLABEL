@@ -136,8 +136,8 @@ type SummaryProductionPlanItem struct {
 }
 
 type UpdateWorkflowRequest struct {
-	ProductionPlanID string         `json:"productionPlanID" binding:"required"`
-	Workflows        map[string]any `json:"workflows" binding:"required"`
+	ProductionPlanID string `json:"productionPlanID" binding:"required"`
+	Workflows        any    `json:"workflows" binding:"required"`
 }
 
 type UpdateWorkflowResponse struct{}

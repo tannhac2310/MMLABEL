@@ -516,4 +516,14 @@ func RegisterProductionPlanController(
 		&dto.SummaryProductionPlanResponse{},
 		"Summary production plan",
 	)
+
+	// UpdateWorkflow
+	routeutil.AddEndpoint(
+		g,
+		"update-workflow",
+		c.UpdateWorkflow,
+		&dto.UpdateWorkflowRequest{},
+		&dto.UpdateWorkflowResponse{},
+		"Update workflow",
+	)
 }

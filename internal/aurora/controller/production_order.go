@@ -63,6 +63,7 @@ func (s productionOrderController) CreateProductionOrder(c *gin.Context) {
 			Condition:           stage.Condition,
 			Note:                stage.Note,
 			Data:                stage.Data,
+			SoLuong:             stage.SoLuong,
 			Sorting:             int16(len(req.ProductionOrderStages) - idx),
 		})
 	}
@@ -140,6 +141,7 @@ func (s productionOrderController) EditProductionOrder(c *gin.Context) {
 		DeliveryDate:        req.DeliveryDate,
 		DeliveryImage:       req.DeliveryImage,
 		Note:                req.Note,
+		SoLuong:             req.SoLuong,
 		//ProductionOrderStage: productionOderStage,
 		//CustomData: nil,
 	})
@@ -378,7 +380,7 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 			Status:             f.CustomerData.Status,
 		}
 	}
-	
+
 	return &dto.ProductionOrder{
 		ID:                    f.ID,
 		Name:                  f.Name,

@@ -86,8 +86,8 @@ type SummaryData struct {
 
 func (c *productionPlanService) UpdateWorkflow(ctx context.Context, productionPlanID string, workflow any) error {
 	table := model.ProductionPlan{}
+	updater := cockroach.NewUpdater(table.TableName(), model.ProductionPlanFieldID, productionPlanID)
 
-	updater := cockroach.NewUpdater(table.TableName(), table.ID, productionPlanID)
 	updater.Set("workflow", workflow)
 	updater.Set("updated_at", time.Now())
 

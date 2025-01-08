@@ -170,6 +170,7 @@ type CreateOrderStage struct {
 	CompletedAt         time.Time                       `json:"completedAt"`
 	Status              enum.ProductionOrderStageStatus `json:"status"`
 	Condition           string                          `json:"condition"`
+	SoLuong             int64                           `json:"soLuong"`
 	Note                string                          `json:"note"`
 	Data                map[string]interface{}          `json:"data"`
 }
@@ -195,6 +196,7 @@ type EditProductionOrderRequest struct {
 	DeliveryDate        time.Time                  `json:"deliveryDate"`
 	DeliveryImage       string                     `json:"deliveredImage"`
 	Status              enum.ProductionOrderStatus `json:"status"  binding:"required"`
+	SoLuong             int64                      `json:"soLuong"`
 	Note                string                     `json:"note"`
 	//ProductionOrderStages []EditOrderStage           `json:"production_order_stages" binding:"required"`
 }
