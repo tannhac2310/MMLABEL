@@ -18,6 +18,8 @@ type ProductionOrderRepo interface {
 	Search(ctx context.Context, s *SearchProductionOrdersOpts) ([]*ProductionOrderData, error)
 	Analysis(ctx context.Context, s *SearchProductionOrdersOpts) ([]*Analysis, error)
 	Count(ctx context.Context, s *SearchProductionOrdersOpts) (*CountResult, error)
+	CountByCreatedDate(ctx context.Context, from, to time.Time) (int64, error)
+	CountByCode(ctx context.Context, code string) (int64, error)
 }
 
 type productionOrdersRepo struct {
@@ -261,4 +263,26 @@ func (r *productionOrdersRepo) Count(ctx context.Context, s *SearchProductionOrd
 	}
 
 	return countResult, nil
+}
+
+func (r *productionOrdersRepo) CountByCreatedDate(ctx context.Context, from, to time.Time) (int64, error) {
+	sql := `SELECT count(*) FROM production_orders WHERE created_at >= $1 AND created_at <= $2`
+	var count int64
+	err := cockroach.Select(ctx, sql, from, to).ScanOne(&count)
+	if err != nil {
+		return 0, fmt.Errorf("cockroach.Select: %w", err)
+	}
+
+	return count, nil
+}
+
+func (r *productionOrdersRepo) CountByCode(ctx context.Context, code string) (int64, error) {
+	sql := `SELECT count(*) FROM production_orders WHERE product_code like $1`
+	var count int64
+	err := cockroach.Select(ctx, sql, "%"+code+"%").ScanOne(&count)
+	if err != nil {
+		return 0, fmt.Errorf("cockroach.Select: %w", err)
+	}
+
+	return count, nil
 }
