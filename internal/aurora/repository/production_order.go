@@ -78,6 +78,7 @@ func (r *productionOrdersRepo) SoftDelete(ctx context.Context, id string) error 
 // SearchProductionOrdersOpts all params is options
 type SearchProductionOrdersOpts struct {
 	IDs                             []string
+	ProductionPlanIDs               []string
 	CustomerID                      string
 	ProductCode                     string
 	ProductName                     string
@@ -127,6 +128,11 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (
 	if s.Status > 0 && !isAnalysis { // neu isAnalysis = true thi khong can check status
 		args = append(args, s.Status)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderFieldStatus, len(args))
+	}
+
+	if len(s.ProductionPlanIDs) > 0 {
+		args = append(args, s.ProductionPlanIDs)
+		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.ProductionOrderFieldProductionPlanID, len(args))
 	}
 
 	if len(s.Statuses) > 0 {

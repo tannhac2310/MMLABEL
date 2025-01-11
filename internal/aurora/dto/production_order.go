@@ -9,6 +9,7 @@ import (
 
 type ProductionOrderFilter struct {
 	IDs                             []string                        `json:"ids"`
+	ProductionPlanIDs               []string                        `json:"productionPlanIDs"`
 	Name                            string                          `json:"name"`
 	CustomerID                      string                          `json:"customerID"`
 	Status                          enum.ProductionOrderStatus      `json:"status"`
@@ -73,6 +74,7 @@ type ProductionOrder struct {
 	ProductCode           string                     `json:"productCode"`
 	ProductName           string                     `json:"productName"`
 	CustomerID            string                     `json:"customerID"`
+	ProductionPlanID      string                     `json:"productionPlanID"`
 	SalesID               string                     `json:"salesID"`
 	QtyPaper              int64                      `json:"qtyPaper"`
 	QtyFinished           int64                      `json:"qtyFinished"`
@@ -149,6 +151,7 @@ type OrderStage struct {
 	Condition              string                          `json:"condition"`
 	Note                   string                          `json:"note"`
 	Data                   map[string]interface{}          `json:"data"`
+	SoLuong                int64                           `json:"soLuong"`
 	CreatedAt              time.Time                       `json:"createdAt"`
 	UpdatedAt              time.Time                       `json:"updatedAt"`
 	WaitingAt              time.Time                       `json:"waitingAt"`

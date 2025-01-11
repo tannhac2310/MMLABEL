@@ -362,6 +362,7 @@ func (s productionPlanController) ProcessProductionOrder(c *gin.Context) {
 			StageID:             stage.StageID,
 			EstimatedStartAt:    stage.EstimatedStartAt,
 			EstimatedCompleteAt: stage.EstimatedCompleteAt,
+			SoLuong:             stage.SoLuong,
 			StartedAt:           stage.StartedAt,
 			CompletedAt:         stage.CompletedAt,
 			Status:              stage.Status,
