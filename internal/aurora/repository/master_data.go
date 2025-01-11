@@ -90,12 +90,14 @@ func (s *SearchMasterDataOpts) buildQuery(isCount bool) (string, []interface{}) 
 		args = append(args, s.Type)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.MasterDataFieldType, len(args))
 	}
-
-	if s.Search != "" {
-		args = append(args, "%"+s.Search+"%")
-		args = append(args, s.Search)
-
-		conds += fmt.Sprintf(" AND (b.name ILIKE $%d OR b.code = $%d OR b.id = $%d)", len(args)-1, len(args), len(args))
+	search := strings.Trim(s.Search, " ")
+	if search != "" {
+		args = append(args, "%"+search+"%")
+		args = append(args, search)
+		mayID := fmt.Sprintf("%s-%s", s.Type, search)
+		args = append(args, mayID)
+		//panic(mayID)
+		conds += fmt.Sprintf(" AND (b.name ILIKE $%d OR b.code = $%d OR b.id = $%d OR b.id = $%d)", len(args)-2, len(args)-1, len(args)-1, len(args))
 	}
 
 	if s.Code != "" {
