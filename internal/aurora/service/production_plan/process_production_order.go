@@ -29,6 +29,7 @@ type ProductionOrderStage struct {
 	CompletedAt         time.Time
 	Status              enum.ProductionOrderStageStatus
 	Condition           string
+	SoLuong             int64
 	Note                string
 	Data                map[string]interface{}
 	ID                  string
@@ -66,7 +67,7 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 	if err != nil {
 		return "", fmt.Errorf("count production order by created date: %w", err)
 	}
-	newProductionOrderID := fmt.Sprintf("%s-%d", startToday.Format("20060102"), count+1)
+	newProductionOrderID := fmt.Sprintf("LSX%s-%d", startToday.Format("20060102"), count+1)
 	countByCode, err := c.productionOrderRepo.CountByCode(ctx, fmt.Sprintf("%s-", plan.ProductCode))
 	if err != nil {
 		return "", fmt.Errorf("count production order by product code: %w", err)
@@ -75,6 +76,7 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 		ID:                  newProductionOrderID,
 		ProductCode:         fmt.Sprintf("%s-%d", plan.ProductCode, countByCode+2),
 		ProductName:         fmt.Sprintf("%s-%d", plan.ProductName, countByCode+2),
+		ProductionPlanID:    cockroach.String(plan.ID),
 		QtyPaper:            plan.QtyPaper,
 		QtyFinished:         plan.QtyFinished,
 		QtyDelivered:        plan.QtyDelivered,
@@ -127,6 +129,7 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 				StartedAt:           cockroach.Time(orderStage.StartedAt),
 				CompletedAt:         cockroach.Time(orderStage.CompletedAt),
 				Status:              orderStage.Status,
+				SoLuong:             orderStage.SoLuong,
 				Condition:           cockroach.String(orderStage.Condition),
 				Note:                cockroach.String(orderStage.Note),
 				Data:                orderStage.Data,

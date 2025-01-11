@@ -46,6 +46,8 @@ func (c *productionOrderService) EditProductionOrderStage(ctx context.Context, o
 	updater.Set(model.ProductionOrderStageFieldStatus, opt.Status)
 	updater.Set(model.ProductionOrderStageFieldCondition, cockroach.String(opt.Condition))
 	updater.Set(model.ProductionOrderStageFieldNote, cockroach.String(opt.Note))
+	//SoLuong
+	updater.Set(model.ProductionOrderStageFieldSoLuong, opt.SoLuong)
 	updater.Set(model.ProductionOrderStageFieldData, opt.Data)
 	updater.Set(model.ProductionOrderStageFieldSorting, opt.Sorting)
 

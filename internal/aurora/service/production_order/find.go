@@ -48,6 +48,7 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 
 	filter := &repository.SearchProductionOrdersOpts{
 		IDs:                             opts.IDs,
+		ProductionPlanIDs:               opts.ProductionPlanIDs,
 		CustomerID:                      opts.CustomerID,
 		ProductCode:                     opts.ProductCode,
 		ProductName:                     opts.ProductName,
@@ -219,6 +220,7 @@ func (c *productionOrderService) FindProductionOrdersWithNoPermission(ctx contex
 		CustomerID:           opts.CustomerID,
 		ProductCode:          opts.ProductCode,
 		ProductName:          opts.ProductName,
+		ProductionPlanIDs:    opts.ProductionPlanIDs,
 		Name:                 opts.Name,
 		EstimatedStartAtFrom: opts.EstimatedStartAtFrom,
 		EstimatedStartAtTo:   opts.EstimatedStartAtTo,
@@ -263,6 +265,7 @@ type FindProductionOrdersOpts struct {
 	ProductCode                     string
 	Status                          enum.ProductionOrderStatus
 	Statuses                        []enum.ProductionOrderStatus
+	ProductionPlanIDs               []string
 	EstimatedStartAtFrom            time.Time
 	EstimatedStartAtTo              time.Time
 	EstimatedCompleteAtFrom         time.Time
