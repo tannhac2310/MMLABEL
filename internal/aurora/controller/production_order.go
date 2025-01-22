@@ -382,7 +382,10 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 			Status:             f.CustomerData.Status,
 		}
 	}
-
+	productionPlanName := ""
+	if f.ProductionPlanData != nil {
+		productionPlanName = f.ProductionPlanData.Name
+	}
 	return &dto.ProductionOrder{
 		ID:                    f.ID,
 		Name:                  f.Name,
@@ -404,6 +407,8 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 		CustomData:            f.CustomData,
 		CustomerData:          customerData,
 		CreatedBy:             f.CreatedBy,
+		CreatedByName:         f.CreatedByName,
+		ProductionPlanName:    productionPlanName,
 		CreatedAt:             f.CreatedAt,
 		UpdatedAt:             f.UpdatedAt,
 		Version:               f.Version,
