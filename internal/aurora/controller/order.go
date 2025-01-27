@@ -139,12 +139,14 @@ func (o orderController) FindOrder(ctx *gin.Context) {
 	}
 
 	orders, total, err := o.orderSvc.SearchOrders(ctx, &repository.SearchOrderOpts{
-		IDs:    req.Filter.IDs,
-		Search: req.Filter.Search,
-		Status: req.Filter.Status,
-		Limit:  req.Paging.Limit,
-		Offset: req.Paging.Offset,
-		Sort:   nil,
+		IDs:                     req.Filter.IDs,
+		Search:                  req.Filter.Search,
+		ProductionPlanID:        req.Filter.ProductionPlanID,
+		ProductionPlanProductID: req.Filter.ProductionPlanProductID,
+		Status:                  req.Filter.Status,
+		Limit:                   req.Paging.Limit,
+		Offset:                  req.Paging.Offset,
+		Sort:                    nil,
 	})
 	if err != nil {
 		transportutil.Error(ctx, err)
@@ -181,6 +183,8 @@ func (o orderController) FindOrder(ctx *gin.Context) {
 				Status:             orderWithItems.Order.Status,
 			},
 			Items: items,
+			ID:    orderWithItems.Order.ID,
+			Title: orderWithItems.Order.Title,
 		})
 	}
 

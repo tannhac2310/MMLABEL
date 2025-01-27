@@ -18,6 +18,7 @@ type ProcessProductionOrderOpts struct {
 	EstimatedStartAt    time.Time
 	EstimatedCompleteAt time.Time
 	CreatedBy           string
+	OrderID             string
 	Data                any
 }
 
@@ -92,6 +93,7 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 		Data:                opt.Data,
 		EstimatedStartAt:    cockroach.Time(opt.EstimatedStartAt),
 		EstimatedCompleteAt: cockroach.Time(opt.EstimatedCompleteAt),
+		OrderID:             cockroach.String(opt.OrderID),
 	}
 
 	errTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
@@ -131,7 +133,7 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 				Status:              orderStage.Status,
 				SoLuong:             orderStage.SoLuong,
 				Condition:           cockroach.String(orderStage.Condition),
-				Note:                cockroach.String(orderStage.Note),
+				GhiChuBanInNguon:    cockroach.String(orderStage.Note),
 				Data:                orderStage.Data,
 				CreatedAt:           now,
 				UpdatedAt:           now,

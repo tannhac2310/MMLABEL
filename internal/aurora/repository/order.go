@@ -67,19 +67,20 @@ func (r *sOrderRepo) SoftDelete(ctx context.Context, id string) error {
 
 // SearchOrderOpts all params is options
 type SearchOrderOpts struct {
-	IDs    []string
-	Status enum.OrderStatus
-	Search string
-	Limit  int64
-	Offset int64
-	Sort   *Sort
+	IDs                     []string
+	Status                  enum.OrderStatus
+	Search                  string
+	ProductionPlanID        string
+	ProductionPlanProductID string
+	Limit                   int64
+	Offset                  int64
+	Sort                    *Sort
 }
 
 func (s *SearchOrderOpts) buildQuery(isCount bool) (string, []interface{}) {
 	var args []interface{}
 	conds := ""
 	joins := ""
-
 	if len(s.IDs) > 0 {
 		args = append(args, s.IDs)
 		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.OrderFieldID)
@@ -89,6 +90,16 @@ func (s *SearchOrderOpts) buildQuery(isCount bool) (string, []interface{}) {
 		args = append(args, "%"+s.Search+"%")
 		// ma_dat_hang_mm ma_hop_dong_khach_hang ma_hop_dong sale_name sale_admin_name
 		conds += fmt.Sprintf(" AND (b.title LIKE $%d or b.ma_dat_hang_mm LIKE $%d or b.ma_hop_dong_khach_hang LIKE $%d or b.ma_hop_dong LIKE $%d or b.sale_name LIKE $%d or b.sale_admin_name LIKE $%d)", len(args), len(args), len(args), len(args), len(args), len(args))
+	}
+
+	if s.ProductionPlanID != "" {
+		args = append(args, s.ProductionPlanID)
+		conds += fmt.Sprintf(" AND b.id = ANY(SELECT order_id FROM order_items WHERE production_plan_id = $%d)", len(args))
+	}
+
+	if s.ProductionPlanProductID != "" {
+		args = append(args, s.ProductionPlanProductID)
+		conds += fmt.Sprintf(" AND b.id = ANY(SELECT order_id FROM order_items WHERE production_plan_product_id = $%d)", len(args))
 	}
 
 	if s.Status != "" {

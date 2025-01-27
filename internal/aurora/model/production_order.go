@@ -31,6 +31,7 @@ const (
 	ProductionOrderFieldVersion               = "version"
 	ProductionOrderFieldData                  = "data"
 	ProductionOrderFieldProductionPlanID      = "production_plan_id"
+	ProductionOrderFieldOrderID               = "order_id"
 )
 
 type ProductionOrder struct {
@@ -57,6 +58,7 @@ type ProductionOrder struct {
 	Version               int64                      `db:"version"`
 	Data                  any                        `db:"data"`
 	ProductionPlanID      sql.NullString             `db:"production_plan_id"`
+	OrderID               sql.NullString             `db:"order_id"`
 }
 
 func (rcv *ProductionOrder) FieldMap() (fields []string, values []interface{}) {
@@ -84,6 +86,7 @@ func (rcv *ProductionOrder) FieldMap() (fields []string, values []interface{}) {
 		ProductionOrderFieldVersion,
 		ProductionOrderFieldData,
 		ProductionOrderFieldProductionPlanID,
+		ProductionOrderFieldOrderID,
 	}
 
 	values = []interface{}{
@@ -110,6 +113,7 @@ func (rcv *ProductionOrder) FieldMap() (fields []string, values []interface{}) {
 		&rcv.Version,
 		&rcv.Data,
 		&rcv.ProductionPlanID,
+		&rcv.OrderID,
 	}
 
 	return
