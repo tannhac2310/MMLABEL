@@ -380,6 +380,7 @@ func (s productionPlanController) ProcessProductionOrder(c *gin.Context) {
 		EstimatedCompleteAt: req.EstimatedCompleteAt,
 		Data:                req.Data,
 		CreatedBy:           userID,
+		OrderID:             req.OrderID,
 	})
 	if err != nil {
 		transportutil.Error(c, err)

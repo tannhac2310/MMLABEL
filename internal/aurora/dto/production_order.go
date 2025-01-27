@@ -95,6 +95,8 @@ type ProductionOrder struct {
 	UpdatedAt             time.Time                  `json:"updatedAt"`
 	Version               int64                      `json:"version"`
 	Data                  any                        `json:"data"`
+	OrderID               string                     `json:"orderID"`
+	OrderData             *OrderData                 `json:"orderData"`
 }
 
 type CreateProductionOrderRequest struct {
@@ -154,6 +156,7 @@ type OrderStage struct {
 	Note                   string                          `json:"note"`
 	Data                   map[string]interface{}          `json:"data"`
 	SoLuong                int64                           `json:"soLuong"`
+	GhiChuBanInNguon       string                          `json:"ghiChuBanInNguon"`
 	CreatedAt              time.Time                       `json:"createdAt"`
 	UpdatedAt              time.Time                       `json:"updatedAt"`
 	WaitingAt              time.Time                       `json:"waitingAt"`

@@ -74,6 +74,7 @@ type ProcessProductionOrderRequest struct {
 	EstimatedStartAt    time.Time          `json:"estimatedStartAt" binding:"required"`
 	EstimatedCompleteAt time.Time          `json:"estimatedCompleteAt" binding:"required"`
 	Data                any                `json:"data" binding:"required"`
+	OrderID             string             `json:"orderID" binding:"required"`
 }
 
 type ProcessProductionOrderResponse struct {

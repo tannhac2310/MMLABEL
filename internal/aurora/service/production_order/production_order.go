@@ -34,6 +34,7 @@ type productionOrderService struct {
 	customFieldRepo                repository.CustomFieldRepo
 	customerRepo                   repository.CustomerRepo
 	userRepo                       repository2.UserRepo
+	orderRepo                      repository.OrderRepo
 	stageRepo                      repository.StageRepo
 	roleService                    role.Service
 	cfg                            *configs.Config
@@ -120,6 +121,7 @@ func NewService(
 	userRepo repository2.UserRepo,
 	stageRepo repository.StageRepo,
 	productionPlanRepo repository.ProductionPlanRepo,
+	orderRepo repository.OrderRepo,
 	cfg *configs.Config,
 	redisDB redis.Cmdable,
 	roleService role.Service,
@@ -132,6 +134,7 @@ func NewService(
 		productionPlanRepo:             productionPlanRepo,
 		customerRepo:                   customerRepo,
 		userRepo:                       userRepo,
+		orderRepo:                      orderRepo,
 		stageRepo:                      stageRepo,
 		cfg:                            cfg,
 		redisDB:                        redisDB,
@@ -143,6 +146,7 @@ type Data struct {
 	*repository.ProductionOrderData
 	ProductionOrderStage []*ProductionOrderStageData
 	ProductionPlanData   *repository.ProductionPlanData
+	OrderData            *repository.OrderData
 	CustomData           map[string]string
 	CustomerData         *repository.CustomerData
 	CreatedByName        string

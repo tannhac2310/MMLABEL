@@ -89,12 +89,17 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 	customerIds := make([]string, 0, len(productionOrders))
 	userIds := make([]string, 0)
 	productionPlanIDs := make([]string, 0)
+	orderIDs := make([]string, 0)
 
 	for _, productionOrder := range productionOrders {
 		customerIds = append(customerIds, productionOrder.CustomerID)
 		userIds = append(userIds, productionOrder.CreatedBy)
 		if productionOrder.ProductionPlanID.String != "" {
 			productionPlanIDs = append(productionPlanIDs, productionOrder.ProductionPlanID.String)
+		}
+
+		if productionOrder.OrderID.String != "" {
+			orderIDs = append(orderIDs, productionOrder.OrderID.String)
 		}
 	}
 	// find customer name
@@ -140,6 +145,21 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 	productionPlanMap := make(map[string]*repository.ProductionPlanData)
 	for _, productionPlan := range productionPlanData {
 		productionPlanMap[productionPlan.ID] = productionPlan
+	}
+
+	// find order
+	orderData, err := c.orderRepo.Search(ctx, &repository.SearchOrderOpts{
+		IDs:    orderIDs,
+		Limit:  int64(len(orderIDs)),
+		Offset: 0,
+	})
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("c.orderRepo.FindByIDs: %w", err)
+	}
+
+	orderMap := make(map[string]*repository.OrderData)
+	for _, order := range orderData {
+		orderMap[order.ID] = order
 	}
 
 	// find stage for each production order
@@ -237,6 +257,7 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 			CustomerData:         customerMap[productionOrder.CustomerID],
 			CreatedByName:        userMap[productionOrder.CreatedBy].Name,
 			ProductionPlanData:   productionPlanMap[productionOrder.ProductionPlanID.String],
+			OrderData:            orderMap[productionOrder.OrderID.String],
 		})
 	}
 
