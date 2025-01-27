@@ -75,6 +75,7 @@ type ProductionOrder struct {
 	ProductName           string                     `json:"productName"`
 	CustomerID            string                     `json:"customerID"`
 	ProductionPlanID      string                     `json:"productionPlanID"`
+	ProductionPlanName    string                     `json:"productionPlanName"`
 	SalesID               string                     `json:"salesID"`
 	QtyPaper              int64                      `json:"qtyPaper"`
 	QtyFinished           int64                      `json:"qtyFinished"`
@@ -89,10 +90,13 @@ type ProductionOrder struct {
 	CustomData            map[string]string          `json:"customData"`
 	CustomerData          *Customer                  `json:"customerData"`
 	CreatedBy             string                     `json:"createdBy"`
+	CreatedByName         string                     `json:"createdByName"`
 	CreatedAt             time.Time                  `json:"createdAt"`
 	UpdatedAt             time.Time                  `json:"updatedAt"`
 	Version               int64                      `json:"version"`
 	Data                  any                        `json:"data"`
+	OrderID               string                     `json:"orderID"`
+	OrderData             *OrderData                 `json:"orderData"`
 }
 
 type CreateProductionOrderRequest struct {
@@ -152,6 +156,7 @@ type OrderStage struct {
 	Note                   string                          `json:"note"`
 	Data                   map[string]interface{}          `json:"data"`
 	SoLuong                int64                           `json:"soLuong"`
+	GhiChuBanInNguon       string                          `json:"ghiChuBanInNguon"`
 	CreatedAt              time.Time                       `json:"createdAt"`
 	UpdatedAt              time.Time                       `json:"updatedAt"`
 	WaitingAt              time.Time                       `json:"waitingAt"`

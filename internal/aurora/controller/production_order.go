@@ -348,6 +348,7 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 			Note:                   item.Note.String,
 			Data:                   item.Data,
 			SoLuong:                item.SoLuong,
+			GhiChuBanInNguon:       item.GhiChuBanInNguon.String,
 			CreatedAt:              item.CreatedAt,
 			UpdatedAt:              item.UpdatedAt,
 			WaitingAt:              item.WaitingAt.Time,
@@ -382,7 +383,23 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 			Status:             f.CustomerData.Status,
 		}
 	}
-
+	productionPlanName := ""
+	if f.ProductionPlanData != nil {
+		productionPlanName = f.ProductionPlanData.Name
+	}
+	var orderData *dto.OrderData
+	if f.OrderData != nil {
+		orderData = &dto.OrderData{
+			ID:                 f.OrderData.ID,
+			Title:              f.OrderData.Title,
+			MaDatHangMm:        f.OrderData.MaDatHangMm,
+			MaHopDongKhachHang: f.OrderData.MaHopDongKhachHang,
+			MaHopDong:          f.OrderData.MaHopDong,
+			SaleName:           f.OrderData.SaleName.String,
+			SaleAdminName:      f.OrderData.SaleAdminName.String,
+			Status:             f.OrderData.Status,
+		}
+	}
 	return &dto.ProductionOrder{
 		ID:                    f.ID,
 		Name:                  f.Name,
@@ -404,10 +421,14 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 		CustomData:            f.CustomData,
 		CustomerData:          customerData,
 		CreatedBy:             f.CreatedBy,
+		CreatedByName:         f.CreatedByName,
+		ProductionPlanName:    productionPlanName,
 		CreatedAt:             f.CreatedAt,
 		UpdatedAt:             f.UpdatedAt,
 		Version:               f.Version,
 		Data:                  f.Data,
+		OrderID:               f.OrderID.String,
+		OrderData:             orderData,
 	}
 }
 

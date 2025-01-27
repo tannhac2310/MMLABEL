@@ -29,6 +29,7 @@ const (
 	ProductionOrderStageFieldEstimatedCompleteAt    = "estimated_complete_at"
 	ProductionOrderStageFieldSorting                = "sorting"
 	ProductionOrderStageFieldSoLuong                = "so_luong"
+	ProductionOrderStageFieldGhiChuBanInNguon       = "ghi_chu_ban_in_nguon"
 )
 
 type ProductionOrderStage struct {
@@ -53,6 +54,7 @@ type ProductionOrderStage struct {
 	EstimatedCompleteAt    sql.NullTime                    `db:"estimated_complete_at"`
 	Sorting                int16                           `db:"sorting"`
 	SoLuong                int64                           `db:"so_luong"`
+	GhiChuBanInNguon       sql.NullString                  `db:"ghi_chu_ban_in_nguon"`
 }
 
 func (rcv *ProductionOrderStage) FieldMap() (fields []string, values []interface{}) {
@@ -78,6 +80,7 @@ func (rcv *ProductionOrderStage) FieldMap() (fields []string, values []interface
 		ProductionOrderStageFieldEstimatedCompleteAt,
 		ProductionOrderStageFieldSorting,
 		ProductionOrderStageFieldSoLuong,
+		ProductionOrderStageFieldGhiChuBanInNguon,
 	}
 
 	values = []interface{}{
@@ -102,6 +105,7 @@ func (rcv *ProductionOrderStage) FieldMap() (fields []string, values []interface
 		&rcv.EstimatedCompleteAt,
 		&rcv.Sorting,
 		&rcv.SoLuong,
+		&rcv.GhiChuBanInNguon,
 	}
 
 	return
