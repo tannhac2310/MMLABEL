@@ -58,7 +58,7 @@ func (c *deviceConfigService) CreateDeviceConfig(ctx context.Context, opt *Creat
 		TocDo:                  cockroach.String(opt.TocDo),
 		InkID:                  cockroach.String(opt.InkID),
 		//SanPhamNguon:           sql.NullString{},
-		//BanInNguon:             sql.NullString{},
+		//BanInNguon: cockroach.String(opt.ProductionPlanID), //no use
 	}
 	fmt.Printf("deviceConfig: %+v\n", deviceConfig)
 
