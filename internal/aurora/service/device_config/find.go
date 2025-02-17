@@ -53,15 +53,18 @@ func (c *deviceConfigService) FindDeviceConfigs(ctx context.Context, opts *FindD
 	for _, deviceConfig := range deviceConfigs {
 		tenMauMuc := ""
 		tenLoaiMuc := ""
+		maMauMuc := ""
 		if deviceConfig.InkID.String != "" {
 			ink, ok := inkMap[deviceConfig.InkID.String]
 			if ok {
 				tenLoaiMuc = ink.LoaiMuc
 				tenMauMuc = ink.Name
+				maMauMuc = ink.Code
 			}
 		}
 		deviceConfig.TenMauMuc = cockroach.String(tenMauMuc)
 		deviceConfig.TenLoaiMuc = cockroach.String(tenLoaiMuc)
+		deviceConfig.MaMauMuc = cockroach.String(maMauMuc)
 
 		results = append(results, &Data{
 			ProductionOrderDeviceConfigData: deviceConfig,
