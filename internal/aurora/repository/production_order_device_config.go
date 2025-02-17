@@ -107,7 +107,7 @@ func (s *SearchProductionOrderDeviceConfigOpts) buildQuery(isCount bool) (string
 
 	if s.Search != "" {
 		args = append(args, "%"+s.Search+"%")
-		conds += fmt.Sprintf(" AND (b.id like $%[1]d  or b.color ILIKE $%[1]d OR d.name ILIKE $%[1]d OR d.code ILIKE $%[1]d OR po.name ILIKE $%[1]d) or pp.name ILIKE $%[1]d or b.ma_thong_so_may ILIKE $%[1]d or b.ma_tai_lieu_huong_dan ILIKE $%[1]d ", len(args))
+		conds += fmt.Sprintf(" AND ((b.id like $%[1]d  or b.color ILIKE $%[1]d OR d.name ILIKE $%[1]d OR d.code ILIKE $%[1]d OR po.name ILIKE $%[1]d) or pp.name ILIKE $%[1]d or b.ma_thong_so_may ILIKE $%[1]d or b.ma_tai_lieu_huong_dan ILIKE $%[1]d )", len(args))
 	}
 
 	b := &model.ProductionOrderDeviceConfig{}
