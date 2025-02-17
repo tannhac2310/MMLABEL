@@ -3,9 +3,10 @@ package production_order
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/idutil"
-	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
@@ -62,6 +63,7 @@ type EditProductionOrderOpts struct {
 	DeliveryDate         time.Time
 	DeliveryImage        string
 	Note                 string
+	SoLuong              int64
 	ProductionOrderStage []*ProductionOrderStage
 	CustomData           map[string]string
 }

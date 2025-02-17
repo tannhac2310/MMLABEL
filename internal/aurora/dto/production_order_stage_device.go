@@ -16,10 +16,11 @@ type ProductionOrderStageDeviceFilter struct {
 	ProductionOrderStageStatuses []enum.ProductionOrderStageStatus       `json:"productionOrderStageStatuses"`
 	Responsible                  []string                                `json:"responsible"`
 	ProcessStatuses              []enum.ProductionOrderStageDeviceStatus `json:"processStatus"`
-	//EstimatedStartAtFrom  time.Time                             `json:"estimatedAtFrom"`
-	//EstimatedCompleteAtTo time.Time                             `json:"estimatedAtTo"`
-	StartAt    time.Time `json:"startAt"`
-	CompleteAt time.Time `json:"completeAt"`
+	EstimatedStartAtFrom         time.Time                               `json:"estimatedStartAtFrom"`
+	EstimatedStartAtTo           time.Time                               `json:"estimatedStartAtTo"`
+	StartAt                      time.Time                               `json:"startAt"`
+	CompleteAt                   time.Time                               `json:"completeAt"`
+	StageIDs                     []string                                `json:"stageIDs"`
 }
 
 type FindTaskByIDRequest struct {
@@ -152,6 +153,7 @@ type DeviceStatusHistoryFilter struct {
 type FindDeviceStatusHistoryFilter struct {
 	ProcessStatus []int8    `json:"processStatus"`
 	DeviceID      string    `json:"deviceID"`
+	DeviceIDs     []string  `json:"deviceIDs"`
 	IsResolved    int16     `json:"isResolved"`
 	ErrorCodes    []string  `json:"errorCodes"`
 	CreatedFrom   time.Time `json:"createdFrom"`

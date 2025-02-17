@@ -8,13 +8,15 @@ import (
 type UserStatus uint8
 
 const (
-	UserStatusActive UserStatus = iota + 1
-	UserStatusBan
+	UserStatusUnknown UserStatus = 0
+	UserStatusActive  UserStatus = 1
+	UserStatusBan     UserStatus = 2
 )
 
 var UserStatusName = map[UserStatus]string{
-	UserStatusActive: "active",
-	UserStatusBan:    "ban",
+	UserStatusUnknown: "unknown",
+	UserStatusActive:  "active",
+	UserStatusBan:     "ban",
 }
 
 var UserStatusValue = func() map[string]UserStatus {

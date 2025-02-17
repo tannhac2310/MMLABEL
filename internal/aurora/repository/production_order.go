@@ -18,6 +18,8 @@ type ProductionOrderRepo interface {
 	Search(ctx context.Context, s *SearchProductionOrdersOpts) ([]*ProductionOrderData, error)
 	Analysis(ctx context.Context, s *SearchProductionOrdersOpts) ([]*Analysis, error)
 	Count(ctx context.Context, s *SearchProductionOrdersOpts) (*CountResult, error)
+	CountByCreatedDate(ctx context.Context, from, to time.Time) (int64, error)
+	CountByCode(ctx context.Context, code string) (int64, error)
 }
 
 type productionOrdersRepo struct {
@@ -76,6 +78,7 @@ func (r *productionOrdersRepo) SoftDelete(ctx context.Context, id string) error 
 // SearchProductionOrdersOpts all params is options
 type SearchProductionOrdersOpts struct {
 	IDs                             []string
+	ProductionPlanIDs               []string
 	CustomerID                      string
 	ProductCode                     string
 	ProductName                     string
@@ -125,6 +128,11 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (
 	if s.Status > 0 && !isAnalysis { // neu isAnalysis = true thi khong can check status
 		args = append(args, s.Status)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderFieldStatus, len(args))
+	}
+
+	if len(s.ProductionPlanIDs) > 0 {
+		args = append(args, s.ProductionPlanIDs)
+		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.ProductionOrderFieldProductionPlanID, len(args))
 	}
 
 	if len(s.Statuses) > 0 {
@@ -261,4 +269,26 @@ func (r *productionOrdersRepo) Count(ctx context.Context, s *SearchProductionOrd
 	}
 
 	return countResult, nil
+}
+
+func (r *productionOrdersRepo) CountByCreatedDate(ctx context.Context, from, to time.Time) (int64, error) {
+	sql := `SELECT count(*) FROM production_orders WHERE created_at >= $1 AND created_at <= $2`
+	var count int64
+	err := cockroach.Select(ctx, sql, from, to).ScanOne(&count)
+	if err != nil {
+		return 0, fmt.Errorf("cockroach.Select: %w", err)
+	}
+
+	return count, nil
+}
+
+func (r *productionOrdersRepo) CountByCode(ctx context.Context, code string) (int64, error) {
+	sql := `SELECT count(*) FROM production_orders WHERE product_code like $1`
+	var count int64
+	err := cockroach.Select(ctx, sql, "%"+code+"%").ScanOne(&count)
+	if err != nil {
+		return 0, fmt.Errorf("cockroach.Select: %w", err)
+	}
+
+	return count, nil
 }

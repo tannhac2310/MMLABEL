@@ -58,6 +58,9 @@ type FindProductionOrderStageDeviceOpts struct {
 	Offset                       int64
 	StartAt                      time.Time
 	CompleteAt                   time.Time
+	EstimatedStartAtFrom         time.Time
+	EstimatedStartAtTo           time.Time
+	StageIDs                     []string
 }
 type ProductionOrderStageDeviceData struct {
 	*repository.ProductionOrderStageDeviceData
@@ -300,6 +303,7 @@ func (p productionOrderStageDeviceService) FindProcessDeviceHistory(ctx context.
 		CreatedFrom:   opt.CreatedFrom,
 		CreatedTo:     opt.CreatedTo,
 		DeviceID:      opt.DeviceID,
+		DeviceIDs:     opt.DeviceIDs,
 		IsResolved:    opt.IsResolved,
 		Limit:         limit,
 		Offset:        offset,
@@ -315,6 +319,7 @@ func (p productionOrderStageDeviceService) FindProcessDeviceHistory(ctx context.
 		CreatedFrom:   opt.CreatedFrom,
 		CreatedTo:     opt.CreatedTo,
 		DeviceID:      opt.DeviceID,
+		DeviceIDs:     opt.DeviceIDs,
 		IsResolved:    opt.IsResolved,
 	})
 	if err != nil {
@@ -327,6 +332,7 @@ func (p productionOrderStageDeviceService) FindProcessDeviceHistory(ctx context.
 type FindProcessDeviceHistoryOpts struct {
 	ProcessStatus []int8
 	DeviceID      string
+	DeviceIDs     []string
 	IsResolved    int16
 	ErrorCodes    []string
 	CreatedFrom   time.Time
@@ -384,6 +390,9 @@ func (p productionOrderStageDeviceService) Find(ctx context.Context, opt *FindPr
 		ProductionOrderStageStatuses: opt.ProductionOrderStageStatuses,
 		StartAt:                      opt.StartAt,
 		CompleteAt:                   opt.CompleteAt,
+		StageIDs:                     opt.StageIDs,
+		EstimatedStartAtFrom:         opt.EstimatedStartAtFrom,
+		EstimatedStartAtTo:           opt.EstimatedStartAtTo,
 		Limit:                        opt.Limit,
 		Offset:                       opt.Offset,
 		Sort:                         nil,
@@ -469,6 +478,14 @@ func (p productionOrderStageDeviceService) UpdateProcessStatus(ctx context.Conte
 		updater := cockroach.NewUpdater(device.TableName(), model.ProductionOrderStageDeviceFieldID, opt.ProductionOrderStageDeviceID)
 		updater.Set(model.ProductionOrderStageDeviceFieldProcessStatus, opt.ProcessStatus)
 		updater.Set(model.ProductionOrderStageDeviceFieldUpdatedAt, time.Now())
+
+		if opt.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart {
+			updater.Set(model.ProductionOrderStageDeviceFieldStartAt, time.Now())
+		}
+
+		if opt.ProcessStatus == enum.ProductionOrderStageDeviceStatusComplete {
+			updater.Set(model.ProductionOrderStageDeviceFieldCompleteAt, time.Now())
+		}
 
 		err := cockroach.UpdateFields(ctx, updater)
 		if err != nil {

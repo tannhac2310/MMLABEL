@@ -7,6 +7,7 @@ stages:
   - test
   - deploy
 variables:
+  GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
   DOCKER_TLS_CERTDIR: ""
   DOCKER_HOST: tcp://localhost:2375
   BUILDER_IMAGE: ${CI_REGISTRY_IMAGE}:builder
@@ -105,3 +106,4 @@ deploy_production:
   when: manual
   only:
     - tags
+

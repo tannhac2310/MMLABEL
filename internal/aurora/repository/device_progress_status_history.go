@@ -64,6 +64,7 @@ type SearchDeviceProgressStatusHistoryOpts struct {
 	CreatedFrom   time.Time
 	CreatedTo     time.Time
 	DeviceID      string
+	DeviceIDs     []string
 	IsResolved    int16
 	ErrorCodes    []string
 	//ProductionOrderStageID string
@@ -101,6 +102,12 @@ func (s *SearchDeviceProgressStatusHistoryOpts) buildQuery(isCount bool) (string
 		args = append(args, s.DeviceID)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.DeviceProgressStatusHistoryFieldDeviceID, len(args))
 	}
+
+	if len(s.DeviceIDs) > 0 {
+		args = append(args, s.DeviceIDs)
+		conds += fmt.Sprintf(" AND b.%s = ANY($%d)", model.DeviceProgressStatusHistoryFieldDeviceID, len(args))
+	}
+
 	//if s.ProductionOrderStageID != "" {
 	//	args = append(args, s.ProductionOrderStageID)
 	//	conds += fmt.Sprintf(" AND b.%s = $%d", model.DeviceProgressStatusHistoryFieldProductionOrderStageDeviceID, len(args))

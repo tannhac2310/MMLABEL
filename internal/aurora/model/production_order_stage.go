@@ -2,8 +2,9 @@ package model
 
 import (
 	"database/sql"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"time"
+
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 )
 
 const (
@@ -27,6 +28,8 @@ const (
 	ProductionOrderStageFieldEstimatedStartAt       = "estimated_start_at"
 	ProductionOrderStageFieldEstimatedCompleteAt    = "estimated_complete_at"
 	ProductionOrderStageFieldSorting                = "sorting"
+	ProductionOrderStageFieldSoLuong                = "so_luong"
+	ProductionOrderStageFieldGhiChuBanInNguon       = "ghi_chu_ban_in_nguon"
 )
 
 type ProductionOrderStage struct {
@@ -50,6 +53,8 @@ type ProductionOrderStage struct {
 	EstimatedStartAt       sql.NullTime                    `db:"estimated_start_at"`
 	EstimatedCompleteAt    sql.NullTime                    `db:"estimated_complete_at"`
 	Sorting                int16                           `db:"sorting"`
+	SoLuong                int64                           `db:"so_luong"`
+	GhiChuBanInNguon       sql.NullString                  `db:"ghi_chu_ban_in_nguon"`
 }
 
 func (rcv *ProductionOrderStage) FieldMap() (fields []string, values []interface{}) {
@@ -74,6 +79,8 @@ func (rcv *ProductionOrderStage) FieldMap() (fields []string, values []interface
 		ProductionOrderStageFieldEstimatedStartAt,
 		ProductionOrderStageFieldEstimatedCompleteAt,
 		ProductionOrderStageFieldSorting,
+		ProductionOrderStageFieldSoLuong,
+		ProductionOrderStageFieldGhiChuBanInNguon,
 	}
 
 	values = []interface{}{
@@ -97,6 +104,8 @@ func (rcv *ProductionOrderStage) FieldMap() (fields []string, values []interface
 		&rcv.EstimatedStartAt,
 		&rcv.EstimatedCompleteAt,
 		&rcv.Sorting,
+		&rcv.SoLuong,
+		&rcv.GhiChuBanInNguon,
 	}
 
 	return

@@ -7,6 +7,7 @@ import (
 
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	model2 "mmlabel.gitlab.com/mm-printing-backend/pkg/model"
+	repository2 "mmlabel.gitlab.com/mm-printing-backend/pkg/repository"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 )
@@ -48,6 +49,7 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 
 	filter := &repository.SearchProductionOrdersOpts{
 		IDs:                             opts.IDs,
+		ProductionPlanIDs:               opts.ProductionPlanIDs,
 		CustomerID:                      opts.CustomerID,
 		ProductCode:                     opts.ProductCode,
 		ProductName:                     opts.ProductName,
@@ -85,9 +87,20 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 	results := make([]*Data, 0, len(productionOrders))
 	idMap := make(map[string]bool)
 	customerIds := make([]string, 0, len(productionOrders))
+	userIds := make([]string, 0)
+	productionPlanIDs := make([]string, 0)
+	orderIDs := make([]string, 0)
 
 	for _, productionOrder := range productionOrders {
 		customerIds = append(customerIds, productionOrder.CustomerID)
+		userIds = append(userIds, productionOrder.CreatedBy)
+		if productionOrder.ProductionPlanID.String != "" {
+			productionPlanIDs = append(productionPlanIDs, productionOrder.ProductionPlanID.String)
+		}
+
+		if productionOrder.OrderID.String != "" {
+			orderIDs = append(orderIDs, productionOrder.OrderID.String)
+		}
 	}
 	// find customer name
 	customerData, err := c.customerRepo.Search(ctx, &repository.SearchCustomerOpts{
@@ -102,6 +115,51 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 	customerMap := make(map[string]*repository.CustomerData)
 	for _, customer := range customerData {
 		customerMap[customer.ID] = customer
+	}
+
+	// find users
+	userData, err := c.userRepo.Search(ctx, &repository2.SearchUsersOpts{
+		IDs:    userIds,
+		Limit:  int64(len(userIds)),
+		Offset: 0,
+	})
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("c.userRepo.FindByIDs: %w", err)
+	}
+
+	userMap := make(map[string]*model2.User)
+	for _, user := range userData {
+		userMap[user.ID] = user.User
+	}
+
+	// find production plan
+	productionPlanData, err := c.productionPlanRepo.Search(ctx, &repository.SearchProductionPlanOpts{
+		IDs:    productionPlanIDs,
+		Limit:  int64(len(productionPlanIDs)),
+		Offset: 0,
+	})
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("c.productionPlanRepo.FindByIDs: %w", err)
+	}
+
+	productionPlanMap := make(map[string]*repository.ProductionPlanData)
+	for _, productionPlan := range productionPlanData {
+		productionPlanMap[productionPlan.ID] = productionPlan
+	}
+
+	// find order
+	orderData, err := c.orderRepo.Search(ctx, &repository.SearchOrderOpts{
+		IDs:    orderIDs,
+		Limit:  int64(len(orderIDs)),
+		Offset: 0,
+	})
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("c.orderRepo.FindByIDs: %w", err)
+	}
+
+	orderMap := make(map[string]*repository.OrderData)
+	for _, order := range orderData {
+		orderMap[order.ID] = order
 	}
 
 	// find stage for each production order
@@ -176,22 +234,30 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 			Offset:     0,
 		})
 
-		poCustomFields := c.GetCustomField()
+		//poCustomFields := c.GetCustomField()
 		customFieldMap := make(map[string]string)
-		for _, customField := range poCustomFields {
-			customFieldMap[customField] = ""
-			for _, datum := range customFieldData {
-				if datum.Field == customField {
-					customFieldMap[customField] = datum.Value
-					break
-				}
+		//for _, customField := range poCustomFields {
+		//	customFieldMap[customField] = ""
+		for _, datum := range customFieldData {
+			//if datum.Field == customField {
+			if _, ok := customFieldMap[datum.Field]; ok {
+				customFieldMap[datum.Field] = customFieldMap[datum.Field] + "," + datum.Value // nếu trùng field thì nối chuỗi. todo: this is not good. need to improve
+			} else {
+				customFieldMap[datum.Field] = datum.Value
 			}
+			//break
+			//}
 		}
+		//}
+
 		results = append(results, &Data{
 			ProductionOrderData:  productionOrder,
 			ProductionOrderStage: stageData,
 			CustomData:           customFieldMap,
 			CustomerData:         customerMap[productionOrder.CustomerID],
+			CreatedByName:        userMap[productionOrder.CreatedBy].Name,
+			ProductionPlanData:   productionPlanMap[productionOrder.ProductionPlanID.String],
+			OrderData:            orderMap[productionOrder.OrderID.String],
 		})
 	}
 
@@ -214,6 +280,7 @@ func (c *productionOrderService) FindProductionOrdersWithNoPermission(ctx contex
 		CustomerID:           opts.CustomerID,
 		ProductCode:          opts.ProductCode,
 		ProductName:          opts.ProductName,
+		ProductionPlanIDs:    opts.ProductionPlanIDs,
 		Name:                 opts.Name,
 		EstimatedStartAtFrom: opts.EstimatedStartAtFrom,
 		EstimatedStartAtTo:   opts.EstimatedStartAtTo,
@@ -258,6 +325,7 @@ type FindProductionOrdersOpts struct {
 	ProductCode                     string
 	Status                          enum.ProductionOrderStatus
 	Statuses                        []enum.ProductionOrderStatus
+	ProductionPlanIDs               []string
 	EstimatedStartAtFrom            time.Time
 	EstimatedStartAtTo              time.Time
 	EstimatedCompleteAtFrom         time.Time
