@@ -75,7 +75,7 @@ func (s *SearchProductionOrderDeviceConfigOpts) buildQuery(isCount bool) (string
 	// join production_plans table
 	joins += " Left JOIN production_plans AS pp ON pp.id = b.production_plan_id"
 	// join devices table
-	joins += " JOIN devices AS d ON d.id = b.device_id"
+	joins += " Left JOIN devices AS d ON d.id = b.device_id"
 
 	if s.ProductionOrderID != "" {
 		args = append(args, s.ProductionOrderID)
@@ -87,7 +87,7 @@ func (s *SearchProductionOrderDeviceConfigOpts) buildQuery(isCount bool) (string
 	}
 	if s.ProductionPlanID != "" {
 		args = append(args, s.ProductionPlanID)
-		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderDeviceConfigFieldProductionPlanID, len(args))
+		conds += fmt.Sprintf(" AND b.production_plan_id = $%d", len(args))
 	}
 	if s.DeviceType != "" {
 		args = append(args, s.DeviceType)
