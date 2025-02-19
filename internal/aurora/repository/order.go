@@ -112,7 +112,7 @@ func (s *SearchOrderOpts) buildQuery(isCount bool) (string, []interface{}) {
 		return fmt.Sprintf("SELECT count(*) as cnt FROM %s AS b %s WHERE TRUE %s AND b.deleted_at IS NULL", b.TableName(), joins, conds), args
 	}
 
-	order := " ORDER BY b.id DESC "
+	order := " ORDER BY b.created_at DESC "
 	if s.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", s.Sort.By, s.Sort.Order)
 	}
