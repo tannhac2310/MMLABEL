@@ -18,6 +18,8 @@ type ProcessProductionOrderOpts struct {
 	EstimatedStartAt    time.Time
 	EstimatedCompleteAt time.Time
 	CreatedBy           string
+	OrderID             string
+	Data                any
 }
 
 type ProductionOrderStage struct {
@@ -28,6 +30,7 @@ type ProductionOrderStage struct {
 	CompletedAt         time.Time
 	Status              enum.ProductionOrderStageStatus
 	Condition           string
+	SoLuong             int64
 	Note                string
 	Data                map[string]interface{}
 	ID                  string
@@ -36,7 +39,6 @@ type ProductionOrderStage struct {
 
 func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt *ProcessProductionOrderOpts) (string, error) {
 	now := time.Now()
-	newProductionOrderID := idutil.ULIDNow()
 
 	plan, err := c.productionPlanRepo.FindByID(ctx, opt.ID)
 	if err != nil {
@@ -59,10 +61,23 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 			deliveryDate, _ = time.Parse(time.RFC3339, val.Value)
 		}
 	}
+	// find production order by created date
+	startToday := time.Now().Truncate(24 * time.Hour)
+	endToday := startToday.Add(24 * time.Hour)
+	count, err := c.productionOrderRepo.CountByCreatedDate(ctx, startToday, endToday)
+	if err != nil {
+		return "", fmt.Errorf("count production order by created date: %w", err)
+	}
+	newProductionOrderID := fmt.Sprintf("LSX%s-%d", startToday.Format("20060102"), count+1)
+	countByCode, err := c.productionOrderRepo.CountByCode(ctx, fmt.Sprintf("%s-", plan.ProductCode))
+	if err != nil {
+		return "", fmt.Errorf("count production order by product code: %w", err)
+	}
 	productionOrder := &model.ProductionOrder{
 		ID:                  newProductionOrderID,
-		ProductCode:         plan.ProductCode,
-		ProductName:         plan.ProductName,
+		ProductCode:         fmt.Sprintf("%s-%d", plan.ProductCode, countByCode+2),
+		ProductName:         fmt.Sprintf("%s-%d", plan.ProductName, countByCode+2),
+		ProductionPlanID:    cockroach.String(plan.ID),
 		QtyPaper:            plan.QtyPaper,
 		QtyFinished:         plan.QtyFinished,
 		QtyDelivered:        plan.QtyDelivered,
@@ -74,8 +89,11 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 		CreatedAt:           now,
 		UpdatedAt:           now,
 		Name:                plan.Name,
+		Version:             2, // version 2
+		Data:                opt.Data,
 		EstimatedStartAt:    cockroach.Time(opt.EstimatedStartAt),
 		EstimatedCompleteAt: cockroach.Time(opt.EstimatedCompleteAt),
+		OrderID:             cockroach.String(opt.OrderID),
 	}
 
 	errTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
@@ -113,8 +131,9 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 				StartedAt:           cockroach.Time(orderStage.StartedAt),
 				CompletedAt:         cockroach.Time(orderStage.CompletedAt),
 				Status:              orderStage.Status,
+				SoLuong:             orderStage.SoLuong,
 				Condition:           cockroach.String(orderStage.Condition),
-				Note:                cockroach.String(orderStage.Note),
+				GhiChuBanInNguon:    cockroach.String(orderStage.Note),
 				Data:                orderStage.Data,
 				CreatedAt:           now,
 				UpdatedAt:           now,

@@ -60,9 +60,11 @@ type DeleteOrderResponse struct {
 }
 
 type SearchOrderFilter struct {
-	IDs    []string         `json:"ids"`
-	Search string           `json:"search"`
-	Status enum.OrderStatus `json:"status"`
+	IDs                     []string         `json:"ids"`
+	ProductionPlanID        string           `json:"productionPlanID"`
+	ProductionPlanProductID string           `json:"productionPlanProductID"`
+	Search                  string           `json:"search"`
+	Status                  enum.OrderStatus `json:"status"`
 }
 
 type SearchOrderRequest struct {
@@ -78,4 +80,6 @@ type SearchOrderResponse struct {
 type OrderWithItems struct {
 	Order OrderData        `json:"order"`
 	Items []*OrderItemData `json:"items"`
+	ID    string           `json:"id"`
+	Title string           `json:"title"`
 }

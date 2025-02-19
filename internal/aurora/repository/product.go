@@ -66,15 +66,21 @@ func (r *sProductRepo) SoftDelete(ctx context.Context, id string) error {
 
 // SearchProductOpts all params is options
 type SearchProductOpts struct {
-	IDs           []string
-	Name          string
-	Code          string
-	CustomerID    string
-	SaleID        string
-	ProductPlanID string
-	Limit         int64
-	Offset        int64
-	Sort          *Sort
+	IDs                           []string
+	Name                          string
+	Code                          string
+	CustomerID                    string
+	SaleID                        string
+	ProductPlanID                 string
+	SaleSurveyCustomerProductName string
+	ProductName                   string
+	ProductCode                   string
+	SaleSurveyCustomerProductCode string
+	//sale_survey_bravo_code
+	SaleSurveyBravoCode string
+	Limit               int64
+	Offset              int64
+	Sort                *Sort
 }
 
 func (s *SearchProductOpts) buildQuery(isCount bool) (string, []interface{}) {
@@ -112,6 +118,34 @@ func (s *SearchProductOpts) buildQuery(isCount bool) (string, []interface{}) {
 	if s.ProductPlanID != "" {
 		args = append(args, s.ProductPlanID)
 		conds += fmt.Sprintf(" AND pp.production_plan_id = $%d", len(args))
+	}
+
+	if s.SaleSurveyCustomerProductName != "" {
+		args = append(args, "%"+s.SaleSurveyCustomerProductName+"%")
+		joins += fmt.Sprintf(" LEFT JOIN custom_fields AS cf ON cf.field = 'sale_survey_customer_product_name' AND cf.entity_id = b.id ")
+		conds += fmt.Sprintf(" AND cf.value ILIKE $%d", len(args))
+	}
+
+	if s.ProductName != "" {
+		args = append(args, "%"+s.ProductName+"%")
+		conds += fmt.Sprintf(" AND b.%s ILIKE $%d", model.ProductFieldName, len(args))
+	}
+
+	if s.ProductCode != "" {
+		args = append(args, s.ProductCode)
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductFieldCode, len(args))
+	}
+
+	if s.SaleSurveyBravoCode != "" {
+		args = append(args, "%"+s.SaleSurveyBravoCode+"%")
+		joins += fmt.Sprintf(" LEFT JOIN custom_fields AS cf ON cf.field = 'sale_survey_bravo_code' AND cf.entity_id = b.id ")
+		conds += fmt.Sprintf(" AND cf.value ILIKE $%d", len(args))
+	}
+
+	if s.SaleSurveyCustomerProductCode != "" {
+		args = append(args, "%"+s.SaleSurveyCustomerProductCode+"%")
+		joins += fmt.Sprintf(" LEFT JOIN custom_fields AS cf ON cf.field = 'sale_survey_customer_product_code' AND cf.entity_id = b.id ")
+		conds += fmt.Sprintf(" AND cf.value ILIKE $%d", len(args))
 	}
 
 	b := &model.Product{}

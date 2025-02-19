@@ -3,6 +3,7 @@ package master_data
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
@@ -19,7 +20,8 @@ func (s *masterDataService) UpdateMasterData(ctx context.Context, opt *UpdateMas
 		// 1. Update master data
 		table := model.MasterData{}
 		updater := cockroach.NewUpdater(table.TableName(), model.MasterDataFieldID, opt.ID)
-		updater.Set(model.MasterDataFieldName, opt.Name)
+		updater.Set(model.MasterDataFieldName, strings.Trim(opt.Name, " "))
+		updater.Set(model.MasterDataFieldCode, strings.Trim(opt.Code, " "))
 		updater.Set(model.MasterDataFieldDescription, opt.Description)
 		updater.Set(model.MasterDataFieldUpdatedBy, opt.UpdateBy)
 		updater.Set(model.MasterDataFieldUpdatedAt, time.Now())

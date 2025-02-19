@@ -64,6 +64,7 @@ func (s productionOrderStageController) EditProductionOrderStage(c *gin.Context)
 		StartedAt:           req.StartedAt,
 		CompletedAt:         req.CompletedAt,
 		Status:              req.Status,
+		SoLuong:             req.SoLuong,
 		Condition:           req.Condition,
 		Note:                req.Note,
 		Data:                req.Data,

@@ -115,9 +115,12 @@ func (s *SearchUsersOpts) buildQuery(isCount bool) (string, []interface{}) {
 		conds += fmt.Sprintf(" AND %s.%s IS NULL", userRoleTable.TableName(), model.UserRoleFieldUserID)
 	}
 
-	if s.Name != "" {
+	if s.Name != "" && s.Search == "" {
 		args = append(args, "%"+s.Name+"%")
-		conds += fmt.Sprintf(" AND u.%s ILIKE $%d", model.UserFieldName, len(args))
+		args = append(args, s.Name)
+		// username_passwords
+		joins += fmt.Sprintf(` LEFT JOIN username_passwords AS up ON up.user_id = u.id`)
+		conds += fmt.Sprintf(" AND (u.%s ILIKE $%d or up.username = $%d)", model.UserFieldName, len(args)-1, len(args))
 	}
 	if s.Department != "" {
 		var departs = []string{"%" + s.Department + "%"}
@@ -143,9 +146,12 @@ func (s *SearchUsersOpts) buildQuery(isCount bool) (string, []interface{}) {
 	fmt.Println("Minh:", s.Department)
 	if s.Search != "" {
 		args = append(args, "%"+s.Search+"%")
-		conds += fmt.Sprintf(" AND (u.%s ILIKE $%d", model.UserFieldName, len(args))
-		conds += fmt.Sprintf(" OR u.%s ILIKE $%d", model.UserFieldPhoneNumber, len(args))
-		conds += fmt.Sprintf(" OR u.%s ILIKE $%d) ", model.UserFieldEmail, len(args))
+		args = append(args, s.Search)
+		joins += fmt.Sprintf(` LEFT JOIN username_passwords AS up ON up.user_id = u.id`)
+		conds += fmt.Sprintf(" AND (u.%s ILIKE $%d", model.UserFieldName, len(args)-1)
+		conds += fmt.Sprintf(" OR u.%s ILIKE $%d", model.UserFieldPhoneNumber, len(args)-1)
+		conds += fmt.Sprintf(" OR up.username = $%d", len(args))
+		conds += fmt.Sprintf(" OR u.%s ILIKE $%d) ", model.UserFieldEmail, len(args)-1)
 	}
 
 	if s.PhoneNumber != "" {

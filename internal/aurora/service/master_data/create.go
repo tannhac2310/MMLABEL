@@ -3,6 +3,7 @@ package master_data
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
@@ -44,8 +45,8 @@ func (s *masterDataService) CreateMasterData(ctx context.Context, opt *CreateMas
 		masterData := &model.MasterData{
 			ID:          masterDataID,
 			Type:        opt.Type,
-			Name:        opt.Name,
-			Code:        opt.Code,
+			Name:        strings.Trim(opt.Name, " "),
+			Code:        strings.Trim(opt.Code, " "),
 			Description: opt.Description,
 			Status:      opt.Status,
 			CreatedBy:   opt.CreatedBy,

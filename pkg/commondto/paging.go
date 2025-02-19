@@ -28,7 +28,7 @@ func (p *Paging) UnmarshalJSON(data []byte) error {
 	}
 
 	if p.Limit == 0 {
-		p.Limit = 10000
+		p.Limit = 1
 	}
 
 	return nil

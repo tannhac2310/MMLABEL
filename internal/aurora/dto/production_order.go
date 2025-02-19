@@ -9,6 +9,7 @@ import (
 
 type ProductionOrderFilter struct {
 	IDs                             []string                        `json:"ids"`
+	ProductionPlanIDs               []string                        `json:"productionPlanIDs"`
 	Name                            string                          `json:"name"`
 	CustomerID                      string                          `json:"customerID"`
 	Status                          enum.ProductionOrderStatus      `json:"status"`
@@ -65,6 +66,7 @@ type ProductionOrder2 struct {
 	DeliveryImage       string                     `json:"deliveredImage"`
 	Status              enum.ProductionOrderStatus `json:"status"`
 	Note                string                     `json:"note"`
+	Version             int64                      `json:"version"`
 }
 type ProductionOrder struct {
 	ID                    string                     `json:"id"`
@@ -72,6 +74,8 @@ type ProductionOrder struct {
 	ProductCode           string                     `json:"productCode"`
 	ProductName           string                     `json:"productName"`
 	CustomerID            string                     `json:"customerID"`
+	ProductionPlanID      string                     `json:"productionPlanID"`
+	ProductionPlanName    string                     `json:"productionPlanName"`
 	SalesID               string                     `json:"salesID"`
 	QtyPaper              int64                      `json:"qtyPaper"`
 	QtyFinished           int64                      `json:"qtyFinished"`
@@ -86,8 +90,13 @@ type ProductionOrder struct {
 	CustomData            map[string]string          `json:"customData"`
 	CustomerData          *Customer                  `json:"customerData"`
 	CreatedBy             string                     `json:"createdBy"`
+	CreatedByName         string                     `json:"createdByName"`
 	CreatedAt             time.Time                  `json:"createdAt"`
 	UpdatedAt             time.Time                  `json:"updatedAt"`
+	Version               int64                      `json:"version"`
+	Data                  any                        `json:"data"`
+	OrderID               string                     `json:"orderID"`
+	OrderData             *OrderData                 `json:"orderData"`
 }
 
 type CreateProductionOrderRequest struct {
@@ -146,6 +155,8 @@ type OrderStage struct {
 	Condition              string                          `json:"condition"`
 	Note                   string                          `json:"note"`
 	Data                   map[string]interface{}          `json:"data"`
+	SoLuong                int64                           `json:"soLuong"`
+	GhiChuBanInNguon       string                          `json:"ghiChuBanInNguon"`
 	CreatedAt              time.Time                       `json:"createdAt"`
 	UpdatedAt              time.Time                       `json:"updatedAt"`
 	WaitingAt              time.Time                       `json:"waitingAt"`
@@ -167,6 +178,7 @@ type CreateOrderStage struct {
 	CompletedAt         time.Time                       `json:"completedAt"`
 	Status              enum.ProductionOrderStageStatus `json:"status"`
 	Condition           string                          `json:"condition"`
+	SoLuong             int64                           `json:"soLuong"`
 	Note                string                          `json:"note"`
 	Data                map[string]interface{}          `json:"data"`
 }
@@ -192,6 +204,7 @@ type EditProductionOrderRequest struct {
 	DeliveryDate        time.Time                  `json:"deliveryDate"`
 	DeliveryImage       string                     `json:"deliveredImage"`
 	Status              enum.ProductionOrderStatus `json:"status"  binding:"required"`
+	SoLuong             int64                      `json:"soLuong"`
 	Note                string                     `json:"note"`
 	//ProductionOrderStages []EditOrderStage           `json:"production_order_stages" binding:"required"`
 }

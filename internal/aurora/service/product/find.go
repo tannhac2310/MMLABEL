@@ -11,15 +11,20 @@ import (
 
 func (p productService) FindProduct(ctx context.Context, opts *FindProductOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error) {
 	filter := repository.SearchProductOpts{
-		IDs:           opts.IDs,
-		Name:          opts.Name,
-		Code:          opts.Code,
-		CustomerID:    opts.CustomerID,
-		SaleID:        opts.SaleID,
-		ProductPlanID: opts.ProductPlanID,
-		Limit:         limit,
-		Offset:        offset,
-		Sort:          nil,
+		IDs:                           opts.IDs,
+		Name:                          opts.Name,
+		Code:                          opts.Code,
+		CustomerID:                    opts.CustomerID,
+		SaleID:                        opts.SaleID,
+		ProductPlanID:                 opts.ProductPlanID,
+		SaleSurveyCustomerProductName: opts.SaleSurveyCustomerProductName,
+		ProductName:                   opts.ProductName,
+		ProductCode:                   opts.ProductCode,
+		SaleSurveyCustomerProductCode: opts.SaleSurveyCustomerProductCode,
+		SaleSurveyBravoCode:           opts.SaleSurveyBravoCode,
+		Limit:                         limit,
+		Offset:                        offset,
+		Sort:                          nil,
 	}
 
 	// 1. Find products

@@ -18,17 +18,20 @@ type Service interface {
 
 type deviceConfigService struct {
 	deviceConfigRepo repository.ProductionOrderDeviceConfigRepo
+	inkRepo          repository.InkRepo
 	cfg              *configs.Config
 	redisDB          redis.Cmdable
 }
 
 func NewService(
 	deviceConfigRepo repository.ProductionOrderDeviceConfigRepo,
+	inkRepo repository.InkRepo,
 	cfg *configs.Config,
 	redisDB redis.Cmdable,
 ) Service {
 	return &deviceConfigService{
 		deviceConfigRepo: deviceConfigRepo,
+		inkRepo:          inkRepo,
 		cfg:              cfg,
 		redisDB:          redisDB,
 	}

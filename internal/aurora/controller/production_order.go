@@ -63,6 +63,7 @@ func (s productionOrderController) CreateProductionOrder(c *gin.Context) {
 			Condition:           stage.Condition,
 			Note:                stage.Note,
 			Data:                stage.Data,
+			SoLuong:             stage.SoLuong,
 			Sorting:             int16(len(req.ProductionOrderStages) - idx),
 		})
 	}
@@ -140,6 +141,7 @@ func (s productionOrderController) EditProductionOrder(c *gin.Context) {
 		DeliveryDate:        req.DeliveryDate,
 		DeliveryImage:       req.DeliveryImage,
 		Note:                req.Note,
+		SoLuong:             req.SoLuong,
 		//ProductionOrderStage: productionOderStage,
 		//CustomData: nil,
 	})
@@ -257,6 +259,7 @@ func (s productionOrderController) FindProductionOrders(c *gin.Context) {
 		CustomerID:                      req.Filter.CustomerID,
 		Name:                            req.Filter.Name,
 		Status:                          req.Filter.Status,
+		ProductionPlanIDs:               req.Filter.ProductionPlanIDs,
 		Statuses:                        req.Filter.Statuses,
 		EstimatedStartAtFrom:            req.Filter.EstimatedStartAtFrom,
 		EstimatedStartAtTo:              req.Filter.EstimatedStartAtTo,
@@ -344,6 +347,8 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 			Condition:              item.Condition.String,
 			Note:                   item.Note.String,
 			Data:                   item.Data,
+			SoLuong:                item.SoLuong,
+			GhiChuBanInNguon:       item.GhiChuBanInNguon.String,
 			CreatedAt:              item.CreatedAt,
 			UpdatedAt:              item.UpdatedAt,
 			WaitingAt:              item.WaitingAt.Time,
@@ -378,12 +383,30 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 			Status:             f.CustomerData.Status,
 		}
 	}
+	productionPlanName := ""
+	if f.ProductionPlanData != nil {
+		productionPlanName = f.ProductionPlanData.Name
+	}
+	var orderData *dto.OrderData
+	if f.OrderData != nil {
+		orderData = &dto.OrderData{
+			ID:                 f.OrderData.ID,
+			Title:              f.OrderData.Title,
+			MaDatHangMm:        f.OrderData.MaDatHangMm,
+			MaHopDongKhachHang: f.OrderData.MaHopDongKhachHang,
+			MaHopDong:          f.OrderData.MaHopDong,
+			SaleName:           f.OrderData.SaleName.String,
+			SaleAdminName:      f.OrderData.SaleAdminName.String,
+			Status:             f.OrderData.Status,
+		}
+	}
 	return &dto.ProductionOrder{
 		ID:                    f.ID,
 		Name:                  f.Name,
 		ProductCode:           f.ProductCode,
 		ProductName:           f.ProductName,
 		CustomerID:            f.CustomerID,
+		ProductionPlanID:      f.ProductionPlanID.String,
 		SalesID:               f.SalesID,
 		QtyPaper:              f.QtyPaper,
 		QtyFinished:           f.QtyFinished,
@@ -398,8 +421,14 @@ func toProductionOrderResp(f *production_order.Data) *dto.ProductionOrder {
 		CustomData:            f.CustomData,
 		CustomerData:          customerData,
 		CreatedBy:             f.CreatedBy,
+		CreatedByName:         f.CreatedByName,
+		ProductionPlanName:    productionPlanName,
 		CreatedAt:             f.CreatedAt,
 		UpdatedAt:             f.UpdatedAt,
+		Version:               f.Version,
+		Data:                  f.Data,
+		OrderID:               f.OrderID.String,
+		OrderData:             orderData,
 	}
 }
 

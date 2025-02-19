@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/interceptor"
@@ -155,6 +156,9 @@ func (s productionOrderStageDeviceController) Find(c *gin.Context) {
 		ProcessStatuses:              req.Filter.ProcessStatuses,
 		StartAt:                      req.Filter.StartAt,
 		CompleteAt:                   req.Filter.CompleteAt,
+		StageIDs:                     req.Filter.StageIDs,
+		EstimatedStartAtFrom:         req.Filter.EstimatedStartAtFrom,
+		EstimatedStartAtTo:           req.Filter.EstimatedStartAtTo,
 		Limit:                        req.Paging.Limit,
 		Offset:                       req.Paging.Offset,
 	})
@@ -285,6 +289,7 @@ func (s productionOrderStageDeviceController) FindProcessDeviceHistory(c *gin.Co
 	deviceProcessStatusHistoryData, total, err := s.productionOrderStageDeviceService.FindProcessDeviceHistory(c, &production_order_stage_device.FindProcessDeviceHistoryOpts{
 		ProcessStatus: req.Filter.ProcessStatus,
 		DeviceID:      req.Filter.DeviceID,
+		DeviceIDs:     req.Filter.DeviceIDs,
 		IsResolved:    req.Filter.IsResolved,
 		ErrorCodes:    req.Filter.ErrorCodes,
 		CreatedFrom:   req.Filter.CreatedFrom,

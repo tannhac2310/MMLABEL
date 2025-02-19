@@ -2,11 +2,15 @@ package production_plan
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/go-redis/redis"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/configs"
+	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	repository2 "mmlabel.gitlab.com/mm-printing-backend/pkg/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/service/role"
@@ -21,6 +25,7 @@ type Service interface {
 	ProcessProductionOrder(ctx context.Context, opt *ProcessProductionOrderOpts) (string, error)
 	UpdateCustomFields(ctx context.Context, productionPlanID string, values []*CustomField) error
 	UpdateCurrentStage(ctx context.Context, productionPlanID string, stageID enum.ProductionPlanStage) error
+	UpdateWorkflow(ctx context.Context, productionPlanID string, workflow any) error
 	SummaryProductionPlans(ctx context.Context, opts *SummaryProductionPlanOpts) ([]*SummaryData, error)
 }
 
@@ -77,4 +82,19 @@ type DataWithNoPermission struct {
 
 type SummaryData struct {
 	*repository.SummaryProductionPlanData
+}
+
+func (c *productionPlanService) UpdateWorkflow(ctx context.Context, productionPlanID string, workflow any) error {
+	table := model.ProductionPlan{}
+	updater := cockroach.NewUpdater(table.TableName(), model.ProductionPlanFieldID, productionPlanID)
+
+	updater.Set("workflow", workflow)
+	updater.Set("updated_at", time.Now())
+
+	err := cockroach.UpdateFields(ctx, updater)
+	if err != nil {
+		return fmt.Errorf("update workflow failed: %w", err)
+	}
+
+	return nil
 }

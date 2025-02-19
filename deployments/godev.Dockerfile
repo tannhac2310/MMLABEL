@@ -8,7 +8,7 @@ RUN curl -OL https://github.com/cortesi/modd/releases/download/v0.8/modd-0.8-lin
 RUN tar zxvf modd-0.8-linux64.tgz -C /
 RUN mv /modd-0.8-linux64/modd /usr/local/bin/modd
 
-ENV GOPROXY="https://goproxy.io,direct"
+#ENV GOPROXY="https://goproxy.io,direct"
 
 COPY ./go.mod /
 COPY ./go.sum /
