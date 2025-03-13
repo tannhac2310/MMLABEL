@@ -3,9 +3,12 @@ package subscriptions
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
+
+	"github.com/go-redis/redis"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/iot/configs"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/idutil"
@@ -31,6 +34,7 @@ type EventMQTTSubscription struct {
 	device                          model.Device
 	logger                          *zap.Logger
 	wsService                       ws.WebSocketService
+	redisDB                         redis.Cmdable
 }
 
 func NewMQTTSubscription(
@@ -41,6 +45,7 @@ func NewMQTTSubscription(
 	deviceProgressStatusHistoryRepo repository.DeviceProgressStatusHistoryRepo,
 	logger *zap.Logger,
 	wsService ws.WebSocketService,
+	redisDB redis.Cmdable,
 ) *EventMQTTSubscription {
 	return &EventMQTTSubscription{
 		config:                          config,
@@ -50,6 +55,7 @@ func NewMQTTSubscription(
 		deviceProgressStatusHistoryRepo: deviceProgressStatusHistoryRepo,
 		logger:                          logger,
 		wsService:                       wsService,
+		redisDB:                         redisDB,
 	}
 }
 
@@ -173,12 +179,13 @@ func (p *EventMQTTSubscription) Subscribe() error {
 
 		return nil
 	}
-	client.AddRoute("toppic1", func(client mqtt.Client, message mqtt.Message) {
-		fmt.Println("============>>> Received message for topic 1: ", message.MessageID())
-		message.Ack()
-	})
 
-	client.AddRoute("toppic", func(client mqtt.Client, message mqtt.Message) {
+	//client.AddRoute("toppic1", func(client mqtt.Client, message mqtt.Message) {
+	//	fmt.Println("============>>> Received message for topic 1: ", message.MessageID())
+	//	message.Ack()
+	//})
+
+	client.AddRoute(topic, func(client mqtt.Client, message mqtt.Message) {
 		fmt.Println("============>>> Received message for topic ====", string(message.Payload()))
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
@@ -213,33 +220,44 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			}
 		}
 		upsertDeviceWorkingHistory := func(ctx context.Context, orderStageDevice *model.ProductionOrderStageDevice, item IotData, dateStr string, now time.Time) error {
-			deviceWorkingHistories, err := p.deviceWorkingHistoryRepo.Search(ctx, &repository.SearchDeviceWorkingHistoryOpts{
-				DeviceID: orderStageDevice.DeviceID,
-				Date:     dateStr,
-				Limit:    1,
-			})
-			if err != nil {
-				return err
-			}
+			redisKey := fmt.Sprintf("device_working_history:%s:%s", orderStageDevice.DeviceID, dateStr)
 
-			if len(deviceWorkingHistories) == 0 {
-				// Chèn mới
+			deviceHistoryID, err := p.redisDB.Get(redisKey).Result()
+			if errors.Is(err, redis.Nil) {
+				id := idutil.ULIDNow()
 				newHistory := &model.DeviceWorkingHistory{
-					ID:                           idutil.ULIDNow(),
+					ID:                           id,
 					ProductionOrderStageDeviceID: cockroach.String(orderStageDevice.ID),
 					DeviceID:                     orderStageDevice.DeviceID,
 					Date:                         dateStr,
 					NumberOfPrintsPerDay:         item.Quantity,
 					CreatedAt:                    now,
 				}
-				return p.deviceWorkingHistoryRepo.Insert(ctx, newHistory)
+
+				expiration := time.Until(time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location()))
+				return cockroach.ExecInTx(ctx, func(tx context.Context) error {
+
+					if err := p.deviceWorkingHistoryRepo.Insert(ctx, newHistory); err != nil {
+						return err
+					}
+
+					return p.redisDB.Set(redisKey, id, expiration).Err()
+				})
+
+			} else if err != nil {
+				return err
 			}
 
-			// Cập nhật
-			existingHistory := deviceWorkingHistories[0].DeviceWorkingHistory
-			existingHistory.Quantity = item.Quantity
-			existingHistory.UpdatedAt = cockroach.Time(now)
-			return p.deviceWorkingHistoryRepo.Update(ctx, existingHistory)
+			if item.Quantity == orderStageDevice.Quantity {
+				return nil
+			}
+
+			history := model.DeviceWorkingHistory{}
+			updater := cockroach.NewUpdater(history.TableName(), model.DeviceWorkingHistoryFieldID, deviceHistoryID)
+			updater.Set(model.DeviceWorkingHistoryFieldQuantity, item.Quantity)
+			updater.Set(model.DeviceWorkingHistoryFieldUpdatedAt, cockroach.Time(now))
+
+			return cockroach.UpdateFields(ctx, updater)
 		}
 
 		upsertDeviceProcessHistory := func(ctx context.Context, orderStageDevice *model.ProductionOrderStageDevice, deviceStateStatus enum.ProductionOrderStageDeviceStatus, note string, now time.Time) error {
@@ -303,6 +321,10 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				fmt.Println("============>>> D: ", orderStageDevice)
 				return nil
 			}
+			if orderStageDevice.DeviceID != item.DeviceId {
+				fmt.Println("============>>> DeviceID mismatch: ", orderStageDevice.DeviceID, item.DeviceId)
+				return nil
+			}
 			if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusComplete {
 				fmt.Println("============>>> E: ", orderStageDevice)
 				return nil
@@ -345,15 +367,18 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			updaterDeviceStage := cockroach.NewUpdater(tableStageDevice.TableName(), model.ProductionOrderStageDeviceFieldID, orderStageDevice.ID)
 			fmt.Println("============>>> deviceStateStatus After 2: ", deviceStateStatus)
 			if item.DefectQuantity > 0 {
-				deviceStageSettings := orderStageDevice.Settings
-				if deviceStageSettings == nil {
-					deviceStageSettings = make(map[string]interface{})
+				if orderStageDevice.Settings == nil {
+					orderStageDevice.Settings = make(map[string]interface{})
 				}
-				deviceStageSettings["san_pham_loi"] = item.DefectQuantity
-				updaterDeviceStage.Set(model.ProductionOrderStageDeviceFieldSettings, deviceStageSettings)
-				hasUpdate = true
+
+				val, ok := orderStageDevice.Settings["san_pham_loi"].(int64)
+				if !ok || item.DefectQuantity != val {
+					orderStageDevice.Settings["san_pham_loi"] = item.DefectQuantity
+					updaterDeviceStage.Set(model.ProductionOrderStageDeviceFieldSettings, orderStageDevice.Settings)
+					hasUpdate = true
+				}
 			}
-			if item.Quantity > 0 {
+			if item.Quantity > 0 && item.Quantity != orderStageDevice.Quantity {
 				updaterDeviceStage.Set(model.ProductionOrderStageDeviceFieldQuantity, item.Quantity)
 				hasUpdate = true
 			}
@@ -389,10 +414,13 @@ func (p *EventMQTTSubscription) Subscribe() error {
 					return err
 				}
 			}
-			if err := upsertDeviceProcessHistory(ctx, orderStageDevice, deviceStateStatus, note, now); err != nil {
-				p.logger.Error("Error upsertDeviceProcessHistory", zap.Error(err))
-				return err
+			if deviceStateStatus != orderStageDevice.ProcessStatus {
+				if err := upsertDeviceProcessHistory(ctx, orderStageDevice, deviceStateStatus, note, now); err != nil {
+					p.logger.Error("Error upsertDeviceProcessHistory", zap.Error(err))
+					return err
+				}
 			}
+
 			if err := upsertDeviceWorkingHistory(ctx, orderStageDevice, item, dateStr, now); err != nil {
 				p.logger.Error("Error upsertDeviceWorkingHistory", zap.Error(err))
 				return err
