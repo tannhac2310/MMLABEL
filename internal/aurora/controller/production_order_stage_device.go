@@ -26,10 +26,46 @@ type ProductionOrderStageDeviceController interface {
 	FindAvailabilityTime(c *gin.Context)
 	FindWorkingDevice(c *gin.Context)
 	UpdateProcessStatus(c *gin.Context)
+	CalcOEE(c *gin.Context)
 }
 
 type productionOrderStageDeviceController struct {
 	productionOrderStageDeviceService production_order_stage_device.Service
+}
+
+func (s productionOrderStageDeviceController) CalcOEE(c *gin.Context) {
+	var req dto.FindOEERequest
+	if err := c.ShouldBind(&req); err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+
+	datas, err := s.productionOrderStageDeviceService.CalcOEE(c, req.DateFrom, req.DateTo)
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+
+	oeeList := make([]dto.OEE, 0, len(datas))
+	for deviceID, data := range datas {
+		oeeList = append(oeeList, dto.OEE{
+			DeviceID:           deviceID,
+			ActualWorkingTime:  data.ActualWorkingTime,
+			JobRunningTime:     data.JobRunningTime,
+			AssignedWorkTime:   data.AssignedWorkTime,
+			DowntimeStatistics: data.DowntimeStatistics,
+			Availability:       float64(data.ActualWorkingTime-data.Downtime) / float64(data.ActualWorkingTime),
+			Performance:        float64(data.JobRunningTime) / float64(data.AssignedWorkTime),
+			Quality:            float64(data.TotalQuantity-data.TotalDefective) / float64(data.TotalQuantity),
+			TotalQuantity:      data.TotalQuantity,
+			TotalDefective:     data.TotalDefective,
+		})
+	}
+
+	transportutil.SendJSONResponse(c, &dto.FindOEEResponse{
+		Total:   int64(len(oeeList)),
+		OEEList: oeeList,
+	})
 }
 
 func (s productionOrderStageDeviceController) UpdateProcessStatus(c *gin.Context) {
@@ -587,5 +623,14 @@ func RegisterProductionOrderStageDeviceController(
 		&dto.UpdateProcessStatusRequest{},
 		&dto.UpdateProcessStatusResponse{},
 		"Update process status",
+	)
+
+	routeutil.AddEndpoint(
+		g,
+		"oee",
+		c.CalcOEE,
+		&dto.FindOEERequest{},
+		&dto.FindOEEResponse{},
+		"Calc OEE",
 	)
 }

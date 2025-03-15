@@ -3,7 +3,6 @@ package device
 import (
 	"context"
 	"fmt"
-
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 )
 
