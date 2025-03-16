@@ -55,6 +55,7 @@ func (p productionOrderStageDeviceService) CalcOEE(ctx context.Context, dateFrom
 				DowntimeStatistics: make(map[string]string),
 			}
 			lastDeviceProgressStatusHistory = &deviceProgressStatusHistory
+			result[deviceProgressStatusHistory.DeviceID] = tmp
 			continue
 		}
 		if lastDeviceProgressStatusHistory == nil {
@@ -78,8 +79,6 @@ func (p productionOrderStageDeviceService) CalcOEE(ctx context.Context, dateFrom
 
 		lastDeviceProgressStatusHistory = &deviceProgressStatusHistory
 		result[deviceProgressStatusHistory.DeviceID] = tmp
-
 	}
-
 	return result, nil
 }

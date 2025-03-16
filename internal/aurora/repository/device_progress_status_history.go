@@ -61,7 +61,7 @@ func (i *sDeviceProgressStatusHistoryRepo) Update(ctx context.Context, e *model.
 func (i *sDeviceProgressStatusHistoryRepo) FindByDate(ctx context.Context, dateFrom string, dateTo string) ([]DeviceProgressStatusHistoryData, error) {
 	var deviceProcessStatusHistoryData []DeviceProgressStatusHistoryData
 	sql := `SELECT * FROM device_progress_status_history WHERE created_at::DATE BETWEEN $1 AND $2 ORDER BY device_id, created_at;`
-	err := cockroach.Select(ctx, sql, dateFrom, dateTo).ScanAll(deviceProcessStatusHistoryData)
+	err := cockroach.Select(ctx, sql, dateFrom, dateTo).ScanAll(&deviceProcessStatusHistoryData)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.Select: %w", err)
 	}

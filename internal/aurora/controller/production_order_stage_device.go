@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"math"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
@@ -47,16 +48,41 @@ func (s productionOrderStageDeviceController) CalcOEE(c *gin.Context) {
 	}
 
 	oeeList := make([]dto.OEE, 0, len(datas))
+
 	for deviceID, data := range datas {
+		availability := 0.0
+		performance := 0.0
+		quality := 0.0
+
+		if data.ActualWorkingTime > 0 {
+			availability = float64(data.ActualWorkingTime-data.Downtime) / float64(data.ActualWorkingTime)
+		}
+		if data.AssignedWorkTime > 0 {
+			performance = float64(data.JobRunningTime) / float64(data.AssignedWorkTime)
+		}
+		if data.TotalQuantity > 0 {
+			quality = float64(data.TotalQuantity-data.TotalDefective) / float64(data.TotalQuantity)
+		}
+
+		if math.IsNaN(availability) {
+			availability = 0
+		}
+		if math.IsNaN(performance) {
+			performance = 0
+		}
+		if math.IsNaN(quality) {
+			quality = 0
+		}
+
 		oeeList = append(oeeList, dto.OEE{
 			DeviceID:           deviceID,
 			ActualWorkingTime:  data.ActualWorkingTime,
 			JobRunningTime:     data.JobRunningTime,
 			AssignedWorkTime:   data.AssignedWorkTime,
 			DowntimeStatistics: data.DowntimeStatistics,
-			Availability:       float64(data.ActualWorkingTime-data.Downtime) / float64(data.ActualWorkingTime),
-			Performance:        float64(data.JobRunningTime) / float64(data.AssignedWorkTime),
-			Quality:            float64(data.TotalQuantity-data.TotalDefective) / float64(data.TotalQuantity),
+			Availability:       availability,
+			Performance:        performance,
+			Quality:            quality,
 			TotalQuantity:      data.TotalQuantity,
 			TotalDefective:     data.TotalDefective,
 		})
@@ -632,5 +658,6 @@ func RegisterProductionOrderStageDeviceController(
 		&dto.FindOEERequest{},
 		&dto.FindOEEResponse{},
 		"Calc OEE",
+		routeutil.RegisterOptionSkipAuth,
 	)
 }
