@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/go-redis/redis"
 	"strconv"
 	"time"
 
@@ -331,8 +332,37 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			}
 			deviceStateStatus := orderStageDevice.ProcessStatus
 			fmt.Println("============>>> deviceStateStatus: ", deviceStateStatus)
-			if deviceStateStatus == enum.ProductionOrderStageDeviceStatusFailed {
-				if item.Pause == false {
+			switch orderStageDevice.ProcessStatus {
+			case enum.ProductionOrderStageDeviceStatusFailed:
+				if !item.Pause || item.StartProduction {
+					deviceStateStatus = enum.ProductionOrderStageDeviceStatusStart
+				} else {
+					return nil
+				}
+			case enum.ProductionOrderStageDeviceStatusNone:
+				if item.StartProduction {
+					deviceStateStatus = enum.ProductionOrderStageDeviceStatusStart
+					fmt.Println("============>>> deviceStateStatus After 279: ", deviceStateStatus)
+				}
+				if item.Pause {
+					return nil
+				}
+				item.Quantity = 0
+			case enum.ProductionOrderStageDeviceStatusStart:
+				if item.Pause {
+					deviceStateStatus = enum.ProductionOrderStageDeviceStatusFailed
+					fmt.Println("============>>> deviceStateStatus After 306: ", deviceStateStatus)
+				} else if !item.StartProduction {
+					deviceStateStatus = enum.ProductionOrderStageDeviceStatusComplete
+					fmt.Println("============>>> deviceStateStatus After 317: ", deviceStateStatus)
+				}
+			case enum.ProductionOrderStageDeviceStatusPause:
+				break
+			default:
+				p.logger.Warn("Unexpected device state status", zap.Any("deviceStateStatus", deviceStateStatus))
+			}
+			if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed {
+				if item.Pause == false || item.StartProduction {
 					deviceStateStatus = enum.ProductionOrderStageDeviceStatusStart
 				} else {
 					return nil
@@ -341,7 +371,6 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusNone {
 					if item.StartProduction {
 						deviceStateStatus = enum.ProductionOrderStageDeviceStatusStart
-						fmt.Println("============>>> deviceStateStatus After 279: ", deviceStateStatus)
 					}
 					if item.Pause {
 						return nil
@@ -350,18 +379,17 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				} else if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart {
 					if item.Pause {
 						deviceStateStatus = enum.ProductionOrderStageDeviceStatusFailed
-						fmt.Println("============>>> deviceStateStatus After 306: ", deviceStateStatus)
 					} else if item.StartProduction == false {
 						deviceStateStatus = enum.ProductionOrderStageDeviceStatusComplete
-						fmt.Println("============>>> deviceStateStatus After 317: ", deviceStateStatus)
 					}
-				} else if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed {
-					if item.StartProduction {
-						deviceStateStatus = enum.ProductionOrderStageDeviceStatusStart
-						fmt.Println("============>>> deviceStateStatus After 322: ", deviceStateStatus)
-					}
+					//} else if orderStageDevice.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed {
+					//	if item.StartProduction {
+					//		deviceStateStatus = enum.ProductionOrderStageDeviceStatusStart
+					//		fmt.Println("============>>> deviceStateStatus After 322: ", deviceStateStatus)
+					//	}
 				} else {
 					p.logger.Warn("Unexpected device state status", zap.Any("deviceStateStatus", deviceStateStatus))
+					return nil
 				}
 			}
 			updaterDeviceStage := cockroach.NewUpdater(tableStageDevice.TableName(), model.ProductionOrderStageDeviceFieldID, orderStageDevice.ID)
