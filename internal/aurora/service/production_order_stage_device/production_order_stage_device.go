@@ -77,6 +77,7 @@ type Service interface {
 	EditDeviceProcessHistoryIsSolved(ctx context.Context, opt *EditDeviceProcessHistoryIsSolvedOpts) error
 	FindAvailabilityTime(ctx context.Context, opt *FindLostTimeOpts) (*AvailabilityTime, error)
 	UpdateProcessStatus(ctx context.Context, opt *UpdateProcessStatusOpts) error
+	CalcOEE(ctx context.Context, dateFrom string, dateTo string) (map[string]model.OEE, error)
 }
 type productionOrderStageDeviceService struct {
 	productionOrderRepo              repository.ProductionOrderRepo
