@@ -62,7 +62,7 @@ func (i *sDeviceProgressStatusHistoryRepo) FindByDate(ctx context.Context, dateF
 	var deviceProcessStatusHistoryData []DeviceProgressStatusHistoryData
 	sqlQuery := `SELECT * FROM device_progress_status_history 
          WHERE created_at::DATE BETWEEN $1 AND $2 
-  			AND created_at::TIME BETWEEN '07:45:00' AND '16:30:00'
+  			AND created_at::TIME >= '07:45:00'
          ORDER BY device_id, created_at;`
 	err := cockroach.Select(ctx, sqlQuery, dateFrom, dateTo).ScanAll(&deviceProcessStatusHistoryData)
 	if err != nil {
