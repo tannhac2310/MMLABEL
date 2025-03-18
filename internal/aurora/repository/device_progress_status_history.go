@@ -29,8 +29,8 @@ func NewDeviceProgressStatusHistoryRepo() DeviceProgressStatusHistoryRepo {
 }
 func (i *sDeviceProgressStatusHistoryRepo) FindProductionOrderStageDeviceID(ctx context.Context, ProductionOrderStageDeviceID string, deviceID string) (*DeviceProgressStatusHistoryData, error) {
 	deviceProcessStatusHistoryData := &DeviceProgressStatusHistoryData{}
-	sql := `SELECT * FROM device_progress_status_history WHERE production_order_stage_device_id = $1 AND device_id = $2 AND is_resolved = 0 ORDER BY ID DESC LIMIT 1`
-	err := cockroach.Select(ctx, sql, ProductionOrderStageDeviceID, deviceID).ScanOne(deviceProcessStatusHistoryData)
+	sqlQuery := `SELECT * FROM device_progress_status_history WHERE production_order_stage_device_id = $1 AND device_id = $2 AND is_resolved = 0 ORDER BY ID DESC LIMIT 1`
+	err := cockroach.Select(ctx, sqlQuery, ProductionOrderStageDeviceID, deviceID).ScanOne(deviceProcessStatusHistoryData)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.Select: %w", err)
 	}
@@ -38,8 +38,8 @@ func (i *sDeviceProgressStatusHistoryRepo) FindProductionOrderStageDeviceID(ctx 
 }
 func (i *sDeviceProgressStatusHistoryRepo) FindByID(ctx context.Context, ID string) (*DeviceProgressStatusHistoryData, error) {
 	deviceProcessStatusHistoryData := &DeviceProgressStatusHistoryData{}
-	sql := `SELECT * FROM device_progress_status_history WHERE ID = $1 ORDER BY ID DESC LIMIT 1`
-	err := cockroach.Select(ctx, sql, ID).ScanOne(deviceProcessStatusHistoryData)
+	sqlQuery := `SELECT * FROM device_progress_status_history WHERE ID = $1 ORDER BY ID DESC LIMIT 1`
+	err := cockroach.Select(ctx, sqlQuery, ID).ScanOne(deviceProcessStatusHistoryData)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.Select: %w", err)
 	}
@@ -60,8 +60,11 @@ func (i *sDeviceProgressStatusHistoryRepo) Update(ctx context.Context, e *model.
 
 func (i *sDeviceProgressStatusHistoryRepo) FindByDate(ctx context.Context, dateFrom string, dateTo string) ([]DeviceProgressStatusHistoryData, error) {
 	var deviceProcessStatusHistoryData []DeviceProgressStatusHistoryData
-	sql := `SELECT * FROM device_progress_status_history WHERE created_at::DATE BETWEEN $1 AND $2 ORDER BY device_id, created_at;`
-	err := cockroach.Select(ctx, sql, dateFrom, dateTo).ScanAll(&deviceProcessStatusHistoryData)
+	sqlQuery := `SELECT * FROM device_progress_status_history 
+         WHERE created_at::DATE BETWEEN $1 AND $2 
+  			AND created_at::TIME BETWEEN '07:45:00' AND '16:30:00'
+         ORDER BY device_id, created_at;`
+	err := cockroach.Select(ctx, sqlQuery, dateFrom, dateTo).ScanAll(&deviceProcessStatusHistoryData)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.Select: %w", err)
 	}
@@ -159,9 +162,9 @@ type DeviceProgressStatusHistoryData struct {
 
 func (i *sDeviceProgressStatusHistoryRepo) Search(ctx context.Context, s *SearchDeviceProgressStatusHistoryOpts) ([]*DeviceProgressStatusHistoryData, error) {
 	DeviceProgressStatusHistory := make([]*DeviceProgressStatusHistoryData, 0)
-	sql, args := s.buildQuery(false)
+	sqlQuery, args := s.buildQuery(false)
 
-	err := cockroach.Select(ctx, sql, args...).ScanAll(&DeviceProgressStatusHistory)
+	err := cockroach.Select(ctx, sqlQuery, args...).ScanAll(&DeviceProgressStatusHistory)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.Select: %w", err)
 	}
@@ -171,8 +174,8 @@ func (i *sDeviceProgressStatusHistoryRepo) Search(ctx context.Context, s *Search
 
 func (i *sDeviceProgressStatusHistoryRepo) Count(ctx context.Context, s *SearchDeviceProgressStatusHistoryOpts) (*CountResult, error) {
 	countResult := &CountResult{}
-	sql, args := s.buildQuery(true)
-	err := cockroach.Select(ctx, sql, args...).ScanOne(countResult)
+	sqlQuery, args := s.buildQuery(true)
+	err := cockroach.Select(ctx, sqlQuery, args...).ScanOne(countResult)
 	if err != nil {
 		return nil, fmt.Errorf("sDeviceProgressStatusHistoryRepo.Count: %w", err)
 	}
