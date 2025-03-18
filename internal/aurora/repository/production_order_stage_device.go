@@ -26,7 +26,7 @@ type ProductionOrderStageDeviceRepo interface {
 	InsertEventLog(ctx context.Context, e *model.EventLog) error
 	FindEventLog(ctx context.Context, s *SearchEventLogOpts) ([]*EventLogData, error)
 	FindByID(ctx context.Context, id string) (*model.ProductionOrderStageDevice, error)
-	GetAssignedTimeByDate(ctx context.Context, dateFrom, dateTo string) (map[string]DeviceAssignedTime, error)
+	GetAssignedByDate(ctx context.Context, dateFrom, dateTo string) (map[string][]model.ProductionOrderStageDevice, error)
 }
 type SearchEventLogOpts struct {
 	DeviceID string
@@ -60,41 +60,36 @@ func NewProductionOrderStageDeviceRepo() ProductionOrderStageDeviceRepo {
 	return &productionOrderStageDevicesRepo{}
 }
 
-type DeviceAssignedTime struct {
-	DeviceID       string `json:"device_id"`
-	TotalRuntime   int64  `json:"total_runtime"`
-	TotalQuantity  int64  `json:"total_quantity"`
-	TotalDefective int64  `json:"total_defective"`
-}
-
-func (p *productionOrderStageDevicesRepo) GetAssignedTimeByDate(ctx context.Context, dateFrom, dateTo string) (map[string]DeviceAssignedTime, error) {
+func (p *productionOrderStageDevicesRepo) GetAssignedByDate(ctx context.Context, dateFrom, dateTo string) (map[string][]model.ProductionOrderStageDevice, error) {
 	rows, err := cockroach.Query(ctx, `
-		SELECT 
-			device_id, 
-			SUM(EXTRACT(EPOCH FROM estimated_complete_at) - EXTRACT(EPOCH FROM estimated_start_at))::BIGINT AS total_runtime, 
-			SUM(quantity) AS total_quantity, 
-			SUM(
-				COALESCE(
-					(settings->>'san_pham_loi')::BIGINT, 
-					0
-				)
-			) AS total_defective
+		SELECT id, production_order_stage_id, device_id, quantity, settings, estimated_start_at, estimated_complete_at
 		FROM production_order_stage_devices 
-		WHERE estimated_start_at::DATE BETWEEN $1 AND $2 
-		GROUP BY device_id;
+		WHERE estimated_start_at::DATE = estimated_complete_at::DATE
+		AND estimated_start_at::DATE BETWEEN $1 AND $2
+		AND estimated_start_at::TIME >= '07:45:00'
+		AND estimated_complete_at::TIME <= '16:30:00';
 	`, dateFrom, dateTo)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.Query: %w", err)
 	}
 	defer rows.Close()
 
-	assignedTime := make(map[string]DeviceAssignedTime)
+	assignedTime := make(map[string][]model.ProductionOrderStageDevice)
 	for rows.Next() {
-		var data DeviceAssignedTime
-		if err := rows.Scan(&data.DeviceID, &data.TotalRuntime, &data.TotalQuantity, &data.TotalDefective); err != nil {
+		var data model.ProductionOrderStageDevice
+		err := rows.Scan(
+			&data.ID,
+			&data.ProductionOrderStageID,
+			&data.DeviceID,
+			&data.Quantity,
+			&data.Settings,
+			&data.EstimatedStartAt,
+			&data.EstimatedCompleteAt,
+		)
+		if err != nil {
 			return nil, fmt.Errorf("rows.Scan: %w", err)
 		}
-		assignedTime[data.DeviceID] = data
+		assignedTime[data.DeviceID] = append(assignedTime[data.DeviceID], data)
 	}
 
 	if err := rows.Err(); err != nil {
@@ -124,11 +119,11 @@ func (p *productionOrderStageDevicesRepo) InsertEventLog(ctx context.Context, e 
 
 // CountRows count all rows in the table
 func (p *productionOrderStageDevicesRepo) CountRows(ctx context.Context) (int64, error) {
-	sql := `SELECT count(*) as cnt
+	sqlQuery := `SELECT count(*) as cnt
 		FROM production_order_stage_devices`
 
 	countResult := &CountResult{}
-	err := cockroach.Select(ctx, sql).ScanOne(countResult)
+	err := cockroach.Select(ctx, sqlQuery).ScanOne(countResult)
 	if err != nil {
 		return 0, fmt.Errorf("cockroach.Select: %w", err)
 	}
@@ -136,11 +131,11 @@ func (p *productionOrderStageDevicesRepo) CountRows(ctx context.Context) (int64,
 	return countResult.Count, nil
 }
 func (p *productionOrderStageDevicesRepo) DeleteByProductionOrderStageID(ctx context.Context, poStageID string) error {
-	sql := `UPDATE production_order_stage_devices
+	sqlQuery := `UPDATE production_order_stage_devices
 		SET deleted_at = NOW()
 		WHERE production_order_stage_id = $1`
 
-	cmd, err := cockroach.Exec(ctx, sql, poStageID)
+	cmd, err := cockroach.Exec(ctx, sqlQuery, poStageID)
 	if err != nil {
 		return fmt.Errorf("cockroach.Exec: %w", err)
 	}
@@ -151,7 +146,7 @@ func (p *productionOrderStageDevicesRepo) DeleteByProductionOrderStageID(ctx con
 	return nil
 }
 
-func (r *productionOrderStageDevicesRepo) Insert(ctx context.Context, e *model.ProductionOrderStageDevice) error {
+func (p *productionOrderStageDevicesRepo) Insert(ctx context.Context, e *model.ProductionOrderStageDevice) error {
 	err := cockroach.Create(ctx, e)
 	if err != nil {
 		return fmt.Errorf("r.baseRepo.Create: %w", err)
@@ -160,17 +155,17 @@ func (r *productionOrderStageDevicesRepo) Insert(ctx context.Context, e *model.P
 	return nil
 }
 
-func (r *productionOrderStageDevicesRepo) Update(ctx context.Context, e *model.ProductionOrderStageDevice) error {
+func (p *productionOrderStageDevicesRepo) Update(ctx context.Context, e *model.ProductionOrderStageDevice) error {
 	e.UpdatedAt = time.Now()
 	return cockroach.Update(ctx, e)
 }
 
-func (r *productionOrderStageDevicesRepo) SoftDelete(ctx context.Context, id string) error {
-	sql := `UPDATE production_order_stage_devices
+func (p *productionOrderStageDevicesRepo) SoftDelete(ctx context.Context, id string) error {
+	sqlQuery := `UPDATE production_order_stage_devices
 		SET deleted_at = NOW()
 		WHERE id = $1`
 
-	cmd, err := cockroach.Exec(ctx, sql, id)
+	cmd, err := cockroach.Exec(ctx, sqlQuery, id)
 	if err != nil {
 		return fmt.Errorf("cockroach.Exec: %w", err)
 	}
@@ -180,12 +175,12 @@ func (r *productionOrderStageDevicesRepo) SoftDelete(ctx context.Context, id str
 
 	return nil
 }
-func (r *productionOrderStageDevicesRepo) SoftDeletes(ctx context.Context, ids []string) error {
-	sql := `UPDATE production_order_stage_devices
+func (p *productionOrderStageDevicesRepo) SoftDeletes(ctx context.Context, ids []string) error {
+	sqlQuery := `UPDATE production_order_stage_devices
 		SET deleted_at = NOW()
 		WHERE id IN ($1)`
 
-	cmd, err := cockroach.Exec(ctx, sql, strings.Join(ids, ","))
+	cmd, err := cockroach.Exec(ctx, sqlQuery, strings.Join(ids, ","))
 	if err != nil {
 		return fmt.Errorf("cockroach.Exec: %w", err)
 	}
@@ -312,10 +307,10 @@ func (s *SearchProductionOrderStageDevicesOpts) buildQuery(isCount bool) (string
 		OFFSET %d`, strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
 }
 
-func (r *productionOrderStageDevicesRepo) Search(ctx context.Context, s *SearchProductionOrderStageDevicesOpts) ([]*ProductionOrderStageDeviceData, error) {
+func (p *productionOrderStageDevicesRepo) Search(ctx context.Context, s *SearchProductionOrderStageDevicesOpts) ([]*ProductionOrderStageDeviceData, error) {
 	message := make([]*ProductionOrderStageDeviceData, 0)
-	sql, args := s.buildQuery(false)
-	err := cockroach.Select(ctx, sql, args...).ScanAll(&message)
+	sqlQuery, args := s.buildQuery(false)
+	err := cockroach.Select(ctx, sqlQuery, args...).ScanAll(&message)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.Select: %w", err)
 	}
@@ -354,10 +349,10 @@ func (s *SearchEventLogOpts) buildQuery(isCount bool) (string, []interface{}) {
 		OFFSET %d`, strings.Join(fields, ", el."), b.TableName(), joins, conds, order, 50000, 0), args
 
 }
-func (r *productionOrderStageDevicesRepo) FindEventLog(ctx context.Context, s *SearchEventLogOpts) ([]*EventLogData, error) {
+func (p *productionOrderStageDevicesRepo) FindEventLog(ctx context.Context, s *SearchEventLogOpts) ([]*EventLogData, error) {
 	message := make([]*EventLogData, 0)
-	sql, args := s.buildQuery(false)
-	err := cockroach.Select(ctx, sql, args...).ScanAll(&message)
+	sqlQuery, args := s.buildQuery(false)
+	err := cockroach.Select(ctx, sqlQuery, args...).ScanAll(&message)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.Select: %w", err)
 	}
@@ -365,10 +360,10 @@ func (r *productionOrderStageDevicesRepo) FindEventLog(ctx context.Context, s *S
 	return message, nil
 }
 
-func (r *productionOrderStageDevicesRepo) Count(ctx context.Context, s *SearchProductionOrderStageDevicesOpts) (*CountResult, error) {
+func (p *productionOrderStageDevicesRepo) Count(ctx context.Context, s *SearchProductionOrderStageDevicesOpts) (*CountResult, error) {
 	countResult := &CountResult{}
-	sql, args := s.buildQuery(true)
-	err := cockroach.Select(ctx, sql, args...).ScanOne(countResult)
+	sqlQuery, args := s.buildQuery(true)
+	err := cockroach.Select(ctx, sqlQuery, args...).ScanOne(countResult)
 	if err != nil {
 		return nil, fmt.Errorf("productionOrderStageDevicesRepo.Count: %w", err)
 	}
