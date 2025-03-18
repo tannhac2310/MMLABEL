@@ -2,8 +2,6 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"math"
-
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/interceptor"
@@ -50,9 +48,9 @@ func (s productionOrderStageDeviceController) CalcOEE(c *gin.Context) {
 	oeeList := make([]dto.OEE, 0, len(datas))
 
 	for deviceID, data := range datas {
-		availability := 0.0
-		performance := 0.0
-		quality := 0.0
+		availability := 1.0
+		performance := 1.0
+		quality := 1.0
 
 		if data.ActualWorkingTime > 0 {
 			availability = float64(data.ActualWorkingTime-data.Downtime) / float64(data.ActualWorkingTime)
@@ -64,15 +62,6 @@ func (s productionOrderStageDeviceController) CalcOEE(c *gin.Context) {
 			quality = float64(data.TotalQuantity-data.TotalDefective) / float64(data.TotalQuantity)
 		}
 
-		if math.IsNaN(availability) {
-			availability = 0
-		}
-		if math.IsNaN(performance) {
-			performance = 0
-		}
-		if math.IsNaN(quality) {
-			quality = 0
-		}
 		oee := dto.OEE{
 			DeviceID:           deviceID,
 			ActualWorkingTime:  data.ActualWorkingTime,
@@ -84,6 +73,7 @@ func (s productionOrderStageDeviceController) CalcOEE(c *gin.Context) {
 			Quality:            quality,
 			TotalQuantity:      data.TotalQuantity,
 			TotalDefective:     data.TotalDefective,
+			OEE:                availability * performance * quality,
 		}
 
 		assignedWork := make([]dto.AssignedWork, 0, len(data.AssignedWork))
@@ -91,7 +81,7 @@ func (s productionOrderStageDeviceController) CalcOEE(c *gin.Context) {
 			var defective int64 = 0
 			if work.Settings != nil {
 				if val, ok := work.Settings["san_pham_loi"].(int64); ok {
-					defective = int64(val)
+					defective = val
 				}
 			}
 			assignedWork = append(assignedWork, dto.AssignedWork{
