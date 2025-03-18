@@ -43,7 +43,6 @@ func (p productionOrderStageDeviceService) CalcOEE(ctx context.Context, dateFrom
 	if err != nil {
 		return nil, fmt.Errorf("p.CalcOEE: %w", err)
 	}
-	fmt.Println(assignedWork)
 	// Initialize result map
 	result := make(map[string]model.OEE)
 
@@ -70,26 +69,27 @@ func (p productionOrderStageDeviceService) CalcOEE(ctx context.Context, dateFrom
 				}
 				oee.AssignedWorkTime += assigned.EstimatedCompleteAt.Time.Unix() - assigned.EstimatedStartAt.Time.Unix()
 			}
-
+			result[deviceID] = oee
+			lastHistory = history
+			continue
+		}
+		if lastHistory == nil {
+			continue
 		}
 
-		if lastHistory != nil {
-			duration := history.CreatedAt.Sub(lastHistory.CreatedAt).Seconds()
+		duration := history.CreatedAt.Sub(lastHistory.CreatedAt).Seconds()
+		if history.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart &&
+			lastHistory.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed {
+			oee.Downtime += int64(duration)
+		}
 
-			if history.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart &&
-				lastHistory.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed {
-				oee.Downtime += int64(duration)
+		if history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed ||
+			history.ProcessStatus == enum.ProductionOrderStageDeviceStatusComplete {
+			oee.JobRunningTime += int64(duration)
+
+			if history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed {
+				oee.DowntimeStatistics[history.CreatedAt.Format(time.RFC3339)] = history.ErrorReason.String
 			}
-
-			if history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed ||
-				history.ProcessStatus == enum.ProductionOrderStageDeviceStatusComplete {
-				oee.JobRunningTime += int64(duration)
-
-				if history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed {
-					oee.DowntimeStatistics[history.CreatedAt.Format(time.RFC3339)] = history.ErrorReason.String
-				}
-			}
-
 		}
 
 		result[deviceID] = oee
