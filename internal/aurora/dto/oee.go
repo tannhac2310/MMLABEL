@@ -24,6 +24,7 @@ type OEE struct {
 	Quality            float64           `json:"quality"`
 	TotalQuantity      int64             `json:"totalQuantity"`
 	TotalDefective     int64             `json:"totalDefective"`
+	OEE                float64           `json:"oee"`
 }
 
 type AssignedWork struct {
