@@ -66,8 +66,7 @@ func (p *productionOrderStageDevicesRepo) GetAssignedByDate(ctx context.Context,
 		FROM production_order_stage_devices 
 		WHERE estimated_start_at::DATE = estimated_complete_at::DATE
 		AND estimated_start_at::DATE BETWEEN $1 AND $2
-		AND estimated_start_at::TIME >= '07:45:00'
-		AND estimated_complete_at::TIME <= '16:30:00';
+		AND estimated_start_at::TIME >= '07:45:00';
 	`, dateFrom, dateTo)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.Query: %w", err)
