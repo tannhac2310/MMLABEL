@@ -73,8 +73,7 @@ func (s productionOrderStageDeviceController) CalcOEE(c *gin.Context) {
 		if math.IsNaN(quality) {
 			quality = 0
 		}
-
-		oeeList = append(oeeList, dto.OEE{
+		oee := dto.OEE{
 			DeviceID:           deviceID,
 			ActualWorkingTime:  data.ActualWorkingTime,
 			JobRunningTime:     data.JobRunningTime,
@@ -85,7 +84,27 @@ func (s productionOrderStageDeviceController) CalcOEE(c *gin.Context) {
 			Quality:            quality,
 			TotalQuantity:      data.TotalQuantity,
 			TotalDefective:     data.TotalDefective,
-		})
+		}
+
+		assignedWork := make([]dto.AssignedWork, 0, len(data.AssignedWork))
+		for _, work := range data.AssignedWork {
+			var defective int64 = 0
+			if work.Settings != nil {
+				if val, ok := work.Settings["san_pham_loi"].(int64); ok {
+					defective = int64(val)
+				}
+			}
+			assignedWork = append(assignedWork, dto.AssignedWork{
+				ID:                     work.ID,
+				ProductionOrderStageID: work.ProductionOrderStageID,
+				EstimatedStartAt:       work.EstimatedStartAt.Time,
+				EstimatedCompleteAt:    work.EstimatedCompleteAt.Time,
+				Quantity:               work.Quantity,
+				Defective:              defective,
+			})
+		}
+		oee.AssignedWork = assignedWork
+		oeeList = append(oeeList, oee)
 	}
 
 	transportutil.SendJSONResponse(c, &dto.FindOEEResponse{
