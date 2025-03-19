@@ -26,7 +26,7 @@ type ProductionOrderStageDeviceRepo interface {
 	InsertEventLog(ctx context.Context, e *model.EventLog) error
 	FindEventLog(ctx context.Context, s *SearchEventLogOpts) ([]*EventLogData, error)
 	FindByID(ctx context.Context, id string) (*model.ProductionOrderStageDevice, error)
-	GetAssignedByDate(ctx context.Context, dateFrom, dateTo string) (map[string][]model.ProductionOrderStageDevice, error)
+	GetAssignedByDate(ctx context.Context, dateFrom, dateTo string) ([]model.ProductionOrderStageDevice, error)
 }
 type SearchEventLogOpts struct {
 	DeviceID string
@@ -60,42 +60,22 @@ func NewProductionOrderStageDeviceRepo() ProductionOrderStageDeviceRepo {
 	return &productionOrderStageDevicesRepo{}
 }
 
-func (p *productionOrderStageDevicesRepo) GetAssignedByDate(ctx context.Context, dateFrom, dateTo string) (map[string][]model.ProductionOrderStageDevice, error) {
-	rows, err := cockroach.Query(ctx, `
+func (p *productionOrderStageDevicesRepo) GetAssignedByDate(ctx context.Context, dateFrom, dateTo string) ([]model.ProductionOrderStageDevice, error) {
+	var result []model.ProductionOrderStageDevice
+	sqlQuery := `
 		SELECT id, production_order_stage_id, device_id, quantity, settings, estimated_start_at, estimated_complete_at
 		FROM production_order_stage_devices 
 		WHERE estimated_start_at::DATE = estimated_complete_at::DATE
 		AND estimated_start_at::DATE BETWEEN $1 AND $2
-		AND estimated_start_at::TIME >= '07:45:00';
-	`, dateFrom, dateTo)
+		AND estimated_start_at::TIME >= '07:45:00'
+		ORDER BY device_id, estimated_start_at;
+	`
+	err := cockroach.Select(ctx, sqlQuery, dateFrom, dateTo).ScanAll(&result)
 	if err != nil {
 		return nil, fmt.Errorf("cockroach.Query: %w", err)
 	}
-	defer rows.Close()
 
-	assignedTime := make(map[string][]model.ProductionOrderStageDevice)
-	for rows.Next() {
-		var data model.ProductionOrderStageDevice
-		err := rows.Scan(
-			&data.ID,
-			&data.ProductionOrderStageID,
-			&data.DeviceID,
-			&data.Quantity,
-			&data.Settings,
-			&data.EstimatedStartAt,
-			&data.EstimatedCompleteAt,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("rows.Scan: %w", err)
-		}
-		assignedTime[data.DeviceID] = append(assignedTime[data.DeviceID], data)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("rows.Err: %w", err)
-	}
-
-	return assignedTime, nil
+	return result, nil
 }
 
 func (p *productionOrderStageDevicesRepo) FindByID(ctx context.Context, id string) (*model.ProductionOrderStageDevice, error) {

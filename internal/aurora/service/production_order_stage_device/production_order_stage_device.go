@@ -77,7 +77,8 @@ type Service interface {
 	EditDeviceProcessHistoryIsSolved(ctx context.Context, opt *EditDeviceProcessHistoryIsSolvedOpts) error
 	FindAvailabilityTime(ctx context.Context, opt *FindLostTimeOpts) (*AvailabilityTime, error)
 	UpdateProcessStatus(ctx context.Context, opt *UpdateProcessStatusOpts) error
-	CalcOEE(ctx context.Context, dateFrom string, dateTo string) (map[string]model.OEE, error)
+	CalcOEEByDevice(ctx context.Context, dateFrom string, dateTo string) (map[string]model.OEE, error)
+	CalcOEEByAssignedWork(ctx context.Context, dateFrom string, dateTo string) (map[string]model.OEE, error)
 }
 type productionOrderStageDeviceService struct {
 	productionOrderRepo              repository.ProductionOrderRepo
@@ -186,13 +187,15 @@ func (p productionOrderStageDeviceService) Edit(ctx context.Context, opt *EditPr
 	if opt.Note != "" {
 		updater.Set(model.ProductionOrderStageDeviceFieldNote, cockroach.String(opt.Note))
 	}
-	settings := data.Settings
-	if opt.SanPhamLoi > 0 {
-		if settings == nil {
-			settings = make(map[string]interface{})
+	if data != nil {
+		settings := data.Settings
+		if opt.SanPhamLoi > 0 {
+			if settings == nil {
+				settings = make(map[string]interface{})
+			}
+			settings["san_pham_loi"] = opt.SanPhamLoi
+			updater.Set(model.ProductionOrderStageDeviceFieldSettings, settings)
 		}
-		settings["san_pham_loi"] = opt.SanPhamLoi
-		updater.Set(model.ProductionOrderStageDeviceFieldSettings, settings)
 	}
 
 	updater.Set(model.ProductionOrderFieldEstimatedStartAt, opt.EstimatedStartAt)
