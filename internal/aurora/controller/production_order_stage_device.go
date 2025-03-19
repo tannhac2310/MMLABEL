@@ -738,6 +738,7 @@ func RegisterProductionOrderStageDeviceController(
 		&dto.FindOEERequest{},
 		&dto.FindOEEByDeviceResponse{},
 		"Calc OEE by device",
+		routeutil.RegisterOptionSkipAuth,
 	)
 
 	routeutil.AddEndpoint(
@@ -747,5 +748,6 @@ func RegisterProductionOrderStageDeviceController(
 		&dto.FindOEERequest{},
 		&dto.FindOEEByAssignedWorkResponse{},
 		"Calc OEE By assigned work",
+		routeutil.RegisterOptionSkipAuth,
 	)
 }

@@ -53,8 +53,16 @@ func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, 
 
 		oee, exists := result[deviceID]
 		if !exists {
+			if lastHistory != nil {
+				loc, _ := time.LoadLocation("Asia/Ho_Chi_Minh")
+				startOfDay := time.Date(lastHistory.CreatedAt.Year(), lastHistory.CreatedAt.Month(), lastHistory.CreatedAt.Day(), 7, 45, 0, 0, loc)
+
+				deviceData := result[lastHistory.DeviceID]
+				deviceData.ActualWorkingTime = lastHistory.CreatedAt.Sub(startOfDay).Milliseconds()
+				result[lastHistory.DeviceID] = deviceData
+			}
+
 			oee = model.OEE{
-				ActualWorkingTime:  28800,
 				DowntimeStatistics: make(map[string]string),
 				AssignedWork:       assignedWorkByDeviceID[deviceID],
 			}
@@ -94,7 +102,14 @@ func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, 
 		result[deviceID] = oee
 		lastHistory = history
 	}
+	if lastHistory != nil {
+		loc, _ := time.LoadLocation("Asia/Ho_Chi_Minh")
+		startOfDay := time.Date(lastHistory.CreatedAt.Year(), lastHistory.CreatedAt.Month(), lastHistory.CreatedAt.Day(), 7, 45, 0, 0, loc)
 
+		deviceData := result[lastHistory.DeviceID]
+		deviceData.ActualWorkingTime = lastHistory.CreatedAt.Sub(startOfDay).Milliseconds()
+		result[lastHistory.DeviceID] = deviceData
+	}
 	return result, nil
 }
 func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Context, dateFrom, dateTo string) (map[string]model.OEE, error) {
@@ -159,6 +174,9 @@ func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Con
 
 				lastHistory = history
 			}
+			loc, _ := time.LoadLocation("Asia/Ho_Chi_Minh")
+			startOfDay := time.Date(lastHistory.CreatedAt.Year(), lastHistory.CreatedAt.Month(), lastHistory.CreatedAt.Day(), 7, 45, 0, 0, loc)
+			oee.ActualWorkingTime = lastHistory.CreatedAt.Sub(startOfDay).Milliseconds()
 		}
 
 		result[assignedWork.ID] = oee
