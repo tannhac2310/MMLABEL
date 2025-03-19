@@ -54,8 +54,7 @@ func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, 
 		oee, exists := result[deviceID]
 		if !exists {
 			if lastHistory != nil {
-				loc, _ := time.LoadLocation("Asia/Ho_Chi_Minh")
-				startOfDay := time.Date(lastHistory.CreatedAt.Year(), lastHistory.CreatedAt.Month(), lastHistory.CreatedAt.Day(), 7, 45, 0, 0, loc)
+				startOfDay := time.Date(lastHistory.CreatedAt.Year(), lastHistory.CreatedAt.Month(), lastHistory.CreatedAt.Day(), 0, 45, 0, 0, lastHistory.CreatedAt.Location())
 
 				deviceData := result[lastHistory.DeviceID]
 				deviceData.ActualWorkingTime = lastHistory.CreatedAt.Sub(startOfDay).Milliseconds()
@@ -103,8 +102,7 @@ func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, 
 		lastHistory = history
 	}
 	if lastHistory != nil {
-		loc, _ := time.LoadLocation("Asia/Ho_Chi_Minh")
-		startOfDay := time.Date(lastHistory.CreatedAt.Year(), lastHistory.CreatedAt.Month(), lastHistory.CreatedAt.Day(), 7, 45, 0, 0, loc)
+		startOfDay := time.Date(lastHistory.CreatedAt.Year(), lastHistory.CreatedAt.Month(), lastHistory.CreatedAt.Day(), 0, 45, 0, 0, lastHistory.CreatedAt.Location())
 
 		deviceData := result[lastHistory.DeviceID]
 		deviceData.ActualWorkingTime = lastHistory.CreatedAt.Sub(startOfDay).Milliseconds()
@@ -173,8 +171,7 @@ func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Con
 
 				lastHistory = history
 			}
-			loc, _ := time.LoadLocation("Asia/Ho_Chi_Minh")
-			startOfDay := time.Date(lastHistory.CreatedAt.Year(), lastHistory.CreatedAt.Month(), lastHistory.CreatedAt.Day(), 7, 45, 0, 0, loc)
+			startOfDay := time.Date(lastHistory.CreatedAt.Year(), lastHistory.CreatedAt.Month(), lastHistory.CreatedAt.Day(), 0, 45, 0, 0, lastHistory.CreatedAt.Location())
 			oee.ActualWorkingTime = lastHistory.CreatedAt.Sub(startOfDay).Milliseconds()
 		}
 
