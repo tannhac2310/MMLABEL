@@ -145,7 +145,6 @@ func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Con
 		}
 
 		oee := model.OEE{
-			ActualWorkingTime:             28800,
 			DowntimeStatistics:            make(map[string]string),
 			AssignedWorkTime:              assignedWork.EstimatedCompleteAt.Time.Sub(assignedWork.EstimatedStartAt.Time).Milliseconds(),
 			DeviceProgressStatusHistories: processDeviceProgressStatusHistory[assignedWork.ID],
