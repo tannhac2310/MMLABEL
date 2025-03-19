@@ -21,10 +21,9 @@ func parseDateOrDefault(date, defaultDate string) (string, error) {
 	return date, nil
 }
 
-func (p productionOrderStageDeviceService) CalcOEE(ctx context.Context, dateFrom, dateTo string) (map[string]model.OEE, error) {
+func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, dateFrom, dateTo string) (map[string]model.OEE, error) {
 	now := time.Now().Format("2006-01-02")
 
-	// Parse dates with default values
 	var err error
 	if dateFrom, err = parseDateOrDefault(dateFrom, now); err != nil {
 		return nil, err
@@ -33,7 +32,6 @@ func (p productionOrderStageDeviceService) CalcOEE(ctx context.Context, dateFrom
 		return nil, err
 	}
 
-	// Fetch necessary data
 	listDeviceProgressStatusHistory, err := p.sDeviceProgressStatusHistoryRepo.FindByDate(ctx, dateFrom, dateTo)
 	if err != nil {
 		return nil, fmt.Errorf("p.CalcOEE: %w", err)
@@ -43,7 +41,8 @@ func (p productionOrderStageDeviceService) CalcOEE(ctx context.Context, dateFrom
 	if err != nil {
 		return nil, fmt.Errorf("p.CalcOEE: %w", err)
 	}
-	// Initialize result map
+	assignedWorkByDeviceID := processAssignedWorkByDeviceID(assignedWork)
+
 	result := make(map[string]model.OEE)
 
 	var lastHistory *repository.DeviceProgressStatusHistoryData
@@ -57,17 +56,17 @@ func (p productionOrderStageDeviceService) CalcOEE(ctx context.Context, dateFrom
 			oee = model.OEE{
 				ActualWorkingTime:  28800,
 				DowntimeStatistics: make(map[string]string),
-				AssignedWork:       assignedWork[deviceID],
+				AssignedWork:       assignedWorkByDeviceID[deviceID],
 			}
 
-			for _, assigned := range assignedWork[deviceID] {
+			for _, assigned := range assignedWorkByDeviceID[deviceID] {
 				oee.TotalQuantity += assigned.Quantity
 				if assigned.Settings != nil {
 					if val, ok := assigned.Settings["san_pham_loi"].(int64); ok {
 						oee.TotalDefective += val
 					}
 				}
-				oee.AssignedWorkTime += assigned.EstimatedCompleteAt.Time.Unix() - assigned.EstimatedStartAt.Time.Unix()
+				oee.AssignedWorkTime += assigned.EstimatedCompleteAt.Time.Sub(assigned.EstimatedStartAt.Time).Milliseconds()
 			}
 			result[deviceID] = oee
 			lastHistory = history
@@ -77,18 +76,18 @@ func (p productionOrderStageDeviceService) CalcOEE(ctx context.Context, dateFrom
 			continue
 		}
 
-		duration := history.CreatedAt.Sub(lastHistory.CreatedAt).Seconds()
+		duration := history.CreatedAt.Sub(lastHistory.CreatedAt).Milliseconds()
 		if history.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart &&
 			lastHistory.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed {
-			oee.Downtime += int64(duration)
+			oee.Downtime += duration
 		}
 
 		if history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed ||
 			history.ProcessStatus == enum.ProductionOrderStageDeviceStatusComplete {
-			oee.JobRunningTime += int64(duration)
+			oee.JobRunningTime += duration
 
 			if history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed {
-				oee.DowntimeStatistics[history.CreatedAt.Format(time.RFC3339)] = history.ErrorReason.String
+				oee.DowntimeStatistics[history.CreatedAt.Format(time.RFC3339)] = history.ErrorCode.String
 			}
 		}
 
@@ -97,4 +96,89 @@ func (p productionOrderStageDeviceService) CalcOEE(ctx context.Context, dateFrom
 	}
 
 	return result, nil
+}
+func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Context, dateFrom, dateTo string) (map[string]model.OEE, error) {
+	now := time.Now().Format("2006-01-02")
+
+	var err error
+	if dateFrom, err = parseDateOrDefault(dateFrom, now); err != nil {
+		return nil, err
+	}
+	if dateTo, err = parseDateOrDefault(dateTo, now); err != nil {
+		return nil, err
+	}
+
+	listDeviceProgressStatusHistory, err := p.sDeviceProgressStatusHistoryRepo.FindByDate(ctx, dateFrom, dateTo)
+	if err != nil {
+		return nil, fmt.Errorf("p.CalcOEE: %w", err)
+	}
+	processDeviceProgressStatusHistory := processDeviceProgressStatusHistoryByProductionOrderStageDeviceID(listDeviceProgressStatusHistory)
+
+	assignedWorks, err := p.productionOrderStageDeviceRepo.GetAssignedByDate(ctx, dateFrom, dateTo)
+	if err != nil {
+		return nil, fmt.Errorf("p.CalcOEE: %w", err)
+	}
+
+	result := make(map[string]model.OEE, len(assignedWorks))
+
+	for _, assignedWork := range assignedWorks {
+		defective := int64(0)
+		if assignedWork.Settings != nil {
+			if val, ok := assignedWork.Settings["san_pham_loi"].(int64); ok {
+				defective = val
+			}
+		}
+
+		oee := model.OEE{
+			ActualWorkingTime:             28800,
+			DowntimeStatistics:            make(map[string]string),
+			AssignedWorkTime:              assignedWork.EstimatedCompleteAt.Time.Sub(assignedWork.EstimatedStartAt.Time).Milliseconds(),
+			DeviceProgressStatusHistories: processDeviceProgressStatusHistory[assignedWork.ID],
+			TotalQuantity:                 assignedWork.Quantity,
+			TotalDefective:                defective,
+		}
+
+		histories := processDeviceProgressStatusHistory[assignedWork.ID]
+		if len(histories) > 0 {
+			lastHistory := histories[0]
+			for _, history := range histories[1:] {
+				duration := history.CreatedAt.Sub(lastHistory.CreatedAt).Milliseconds()
+
+				switch {
+				case history.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart &&
+					lastHistory.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed:
+					oee.Downtime += duration
+
+				case history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed ||
+					history.ProcessStatus == enum.ProductionOrderStageDeviceStatusComplete:
+					oee.JobRunningTime += duration
+					if history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed {
+						oee.DowntimeStatistics[history.CreatedAt.Format(time.RFC3339)] = history.ErrorCode.String
+					}
+				}
+
+				lastHistory = history
+			}
+		}
+
+		result[assignedWork.ID] = oee
+	}
+
+	return result, nil
+}
+
+func processAssignedWorkByDeviceID(datas []model.ProductionOrderStageDevice) map[string][]model.ProductionOrderStageDevice {
+	result := make(map[string][]model.ProductionOrderStageDevice, len(datas))
+	for i := range datas {
+		result[datas[i].DeviceID] = append(result[datas[i].DeviceID], datas[i])
+	}
+	return result
+}
+
+func processDeviceProgressStatusHistoryByProductionOrderStageDeviceID(datas []repository.DeviceProgressStatusHistoryData) map[string][]model.DeviceProgressStatusHistory {
+	result := make(map[string][]model.DeviceProgressStatusHistory, len(datas))
+	for i := range datas {
+		result[datas[i].ProductionOrderStageDeviceID] = append(result[datas[i].ProductionOrderStageDeviceID], *datas[i].DeviceProgressStatusHistory)
+	}
+	return result
 }

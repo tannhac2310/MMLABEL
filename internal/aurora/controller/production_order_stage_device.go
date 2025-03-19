@@ -25,27 +25,28 @@ type ProductionOrderStageDeviceController interface {
 	FindAvailabilityTime(c *gin.Context)
 	FindWorkingDevice(c *gin.Context)
 	UpdateProcessStatus(c *gin.Context)
-	CalcOEE(c *gin.Context)
+	CalcOEEByDevice(c *gin.Context)
+	CalcOEEByAssignedWork(c *gin.Context)
 }
 
 type productionOrderStageDeviceController struct {
 	productionOrderStageDeviceService production_order_stage_device.Service
 }
 
-func (s productionOrderStageDeviceController) CalcOEE(c *gin.Context) {
+func (s productionOrderStageDeviceController) CalcOEEByDevice(c *gin.Context) {
 	var req dto.FindOEERequest
 	if err := c.ShouldBind(&req); err != nil {
 		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
 		return
 	}
 
-	datas, err := s.productionOrderStageDeviceService.CalcOEE(c, req.DateFrom, req.DateTo)
+	datas, err := s.productionOrderStageDeviceService.CalcOEEByDevice(c, req.DateFrom, req.DateTo)
 	if err != nil {
 		transportutil.Error(c, err)
 		return
 	}
 
-	oeeList := make([]dto.OEE, 0, len(datas))
+	oeeList := make([]dto.OEEByDevice, 0, len(datas))
 
 	for deviceID, data := range datas {
 		availability := 1.0
@@ -62,7 +63,7 @@ func (s productionOrderStageDeviceController) CalcOEE(c *gin.Context) {
 			quality = float64(data.TotalQuantity-data.TotalDefective) / float64(data.TotalQuantity)
 		}
 
-		oee := dto.OEE{
+		oee := dto.OEEByDevice{
 			DeviceID:           deviceID,
 			ActualWorkingTime:  data.ActualWorkingTime,
 			JobRunningTime:     data.JobRunningTime,
@@ -97,7 +98,77 @@ func (s productionOrderStageDeviceController) CalcOEE(c *gin.Context) {
 		oeeList = append(oeeList, oee)
 	}
 
-	transportutil.SendJSONResponse(c, &dto.FindOEEResponse{
+	transportutil.SendJSONResponse(c, &dto.FindOEEByDeviceResponse{
+		Total:   int64(len(oeeList)),
+		OEEList: oeeList,
+	})
+}
+
+func (s productionOrderStageDeviceController) CalcOEEByAssignedWork(c *gin.Context) {
+	var req dto.FindOEERequest
+	if err := c.ShouldBind(&req); err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+
+	datas, err := s.productionOrderStageDeviceService.CalcOEEByAssignedWork(c, req.DateFrom, req.DateTo)
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
+
+	oeeList := make([]dto.OEEByAssignedWork, 0, len(datas))
+
+	for assignedWorkID, data := range datas {
+		availability := 1.0
+		performance := 1.0
+		quality := 1.0
+
+		if data.ActualWorkingTime > 0 {
+			availability = float64(data.ActualWorkingTime-data.Downtime) / float64(data.ActualWorkingTime)
+		}
+		if data.AssignedWorkTime > 0 {
+			performance = float64(data.JobRunningTime) / float64(data.AssignedWorkTime)
+		}
+		if data.TotalQuantity > 0 {
+			quality = float64(data.TotalQuantity-data.TotalDefective) / float64(data.TotalQuantity)
+		}
+
+		oee := dto.OEEByAssignedWork{
+			AssignedWorkID:     assignedWorkID,
+			ActualWorkingTime:  data.ActualWorkingTime,
+			JobRunningTime:     data.JobRunningTime,
+			AssignedWorkTime:   data.AssignedWorkTime,
+			DowntimeStatistics: data.DowntimeStatistics,
+			Availability:       availability,
+			Performance:        performance,
+			Quality:            quality,
+			TotalQuantity:      data.TotalQuantity,
+			TotalDefective:     data.TotalDefective,
+			OEE:                availability * performance * quality,
+		}
+
+		deviceProgressStatusHistories := make([]dto.DeviceStatusHistory, 0, len(data.DeviceProgressStatusHistories))
+		for _, deviceProcessStatusHistory := range data.DeviceProgressStatusHistories {
+			deviceProgressStatusHistories = append(deviceProgressStatusHistories, dto.DeviceStatusHistory{
+				ID:                           deviceProcessStatusHistory.ID,
+				ProductionOrderStageDeviceID: deviceProcessStatusHistory.ProductionOrderStageDeviceID,
+				DeviceID:                     deviceProcessStatusHistory.DeviceID,
+				ProcessStatus:                deviceProcessStatusHistory.ProcessStatus,
+				IsResolved:                   deviceProcessStatusHistory.IsResolved,
+				UpdatedAt:                    deviceProcessStatusHistory.UpdatedAt.Time,
+				UpdatedBy:                    deviceProcessStatusHistory.UpdatedBy.String,
+				ErrorCode:                    deviceProcessStatusHistory.ErrorCode.String,
+				ErrorReason:                  deviceProcessStatusHistory.ErrorReason.String,
+				Description:                  deviceProcessStatusHistory.Description.String,
+				CreatedAt:                    deviceProcessStatusHistory.CreatedAt,
+			})
+		}
+		oee.DeviceProgressStatusHistories = deviceProgressStatusHistories
+		oeeList = append(oeeList, oee)
+	}
+
+	transportutil.SendJSONResponse(c, &dto.FindOEEByAssignedWorkResponse{
 		Total:   int64(len(oeeList)),
 		OEEList: oeeList,
 	})
@@ -662,11 +733,19 @@ func RegisterProductionOrderStageDeviceController(
 
 	routeutil.AddEndpoint(
 		g,
-		"oee",
-		c.CalcOEE,
+		"oee-by-device",
+		c.CalcOEEByDevice,
 		&dto.FindOEERequest{},
-		&dto.FindOEEResponse{},
-		"Calc OEE",
-		routeutil.RegisterOptionSkipAuth,
+		&dto.FindOEEByDeviceResponse{},
+		"Calc OEE by device",
+	)
+
+	routeutil.AddEndpoint(
+		g,
+		"oee-by-assigned-work",
+		c.CalcOEEByAssignedWork,
+		&dto.FindOEERequest{},
+		&dto.FindOEEByAssignedWorkResponse{},
+		"Calc OEE By assigned work",
 	)
 }
