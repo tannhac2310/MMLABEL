@@ -117,6 +117,7 @@ func Run(ctx context.Context, configPath string) {
 			repository2.NewOptionRepo,
 			repository2.NewProductionOrderDeviceConfigRepo,
 			repository2.NewDeviceProgressStatusHistoryRepo,
+			repository2.NewDeviceBrokenHistoryRepo,
 			repository2.NewDeviceWorkingHistoryRepo,
 			repository.NewUserRoleRepo,
 			repository.NewRoleRepo,
