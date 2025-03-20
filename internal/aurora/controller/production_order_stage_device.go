@@ -146,6 +146,7 @@ func (s productionOrderStageDeviceController) CalcOEEByAssignedWork(c *gin.Conte
 			TotalQuantity:      data.TotalQuantity,
 			TotalDefective:     data.TotalDefective,
 			OEE:                availability * performance * quality,
+			DeviceID:           data.DeviceID,
 		}
 
 		deviceProgressStatusHistories := make([]dto.DeviceStatusHistory, 0, len(data.DeviceProgressStatusHistories))
