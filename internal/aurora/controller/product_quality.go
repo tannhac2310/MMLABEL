@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
@@ -32,19 +34,33 @@ func (s productQualityController) CreateProductQuality(c *gin.Context) {
 	}
 
 	userID := interceptor.UserIDFromCtx(c)
-
+	inspectionErrors := make([]*product_quality.InspectionError, 0, len(req.InspectionErrors))
+	for _, e := range req.InspectionErrors {
+		inspectionErrors = append(inspectionErrors, &product_quality.InspectionError{
+			DeviceID:         e.DeviceID,
+			DeviceName:       e.DeviceName,
+			ErrorType:        e.ErrorType,
+			Quantity:         e.Quantity,
+			NhanVienThucHien: e.NhanVienThucHien,
+			Note:             e.Note,
+		})
+	}
 	id, err := s.productQualityService.CreateProductQuality(c, &product_quality.CreateProductQualityOpts{
-		ProductionOrderID: req.ProductionOrderID,
-		ProductID:         req.ProductID,
-		DeviceIDs:         req.DeviceIDs,
-		DefectType:        req.DefectType,
-		DefectCode:        req.DefectCode,
-		DefectLevel:       req.DefectLevel,
-		ProductionStageID: req.ProductionStageID,
-		DefectiveQuantity: req.DefectiveQuantity,
-		GoodQuantity:      req.GoodQuantity,
-		Description:       req.Description,
-		CreatedBy:         userID,
+		ProductionOrderID:   req.ProductionOrderID,
+		InspectionDate:      req.InspectionDate,
+		InspectorName:       req.InspectorName,
+		Quantity:            req.Quantity,
+		Note:                req.Note,
+		MaSanPham:           req.MaSanPham,
+		TenSanPham:          req.TenSanPham,
+		SoLuongHopDong:      req.SoLuongHopDong,
+		SoLuongIn:           req.SoLuongIn,
+		MaDonDatHang:        req.MaDonDatHang,
+		NguoiKiemTra:        req.NguoiKiemTra,
+		NguoiPheDuyet:       req.NguoiPheDuyet,
+		SoLuongThanhPhamDat: req.SoLuongThanhPhamDat,
+		CreatedBy:           userID,
+		InspectionErrors:    inspectionErrors,
 	})
 	if err != nil {
 		transportutil.Error(c, err)
@@ -63,17 +79,33 @@ func (s productQualityController) EditProductQuality(c *gin.Context) {
 		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
 		return
 	}
-
+	inspectionErrors := make([]*product_quality.EditInspectionError, 0, len(req.InspectionErrors))
+	for _, e := range req.InspectionErrors {
+		inspectionErrors = append(inspectionErrors, &product_quality.EditInspectionError{
+			DeviceID:         e.DeviceID,
+			DeviceName:       e.DeviceName,
+			ErrorType:        e.ErrorType,
+			Quantity:         e.Quantity,
+			Note:             e.Note,
+			NhanVienThucHien: e.NhanVienThucHien,
+		})
+	}
 	err = s.productQualityService.EditProductQuality(c, &product_quality.EditProductQualityOpts{
-		ID:                req.ID,
-		DefectType:        req.DefectType,
-		DeviceIDs:         req.DeviceIDs,
-		DefectCode:        req.DefectCode,
-		DefectLevel:       req.DefectLevel,
-		ProductionStageID: req.ProductionStageID,
-		DefectiveQuantity: req.DefectiveQuantity,
-		GoodQuantity:      req.GoodQuantity,
-		Description:       req.Description,
+		ID:                  req.ID,
+		InspectionDate:      req.InspectionDate,
+		InspectorName:       req.InspectorName,
+		Quantity:            req.Quantity,
+		Note:                req.Note,
+		MaSanPham:           req.MaSanPham,
+		TenSanPham:          req.TenSanPham,
+		SoLuongHopDong:      req.SoLuongHopDong,
+		SoLuongIn:           req.SoLuongIn,
+		MaDonDatHang:        req.MaDonDatHang,
+		NguoiKiemTra:        req.NguoiKiemTra,
+		NguoiPheDuyet:       req.NguoiPheDuyet,
+		SoLuongThanhPhamDat: req.SoLuongThanhPhamDat,
+		InspectionErrors:    inspectionErrors,
+		CreatedBy:           interceptor.UserIDFromCtx(c),
 	})
 	if err != nil {
 		transportutil.Error(c, err)
@@ -108,11 +140,10 @@ func (s productQualityController) FindProductQuality(c *gin.Context) {
 		return
 	}
 
-	productQuality, cnt, analysis, err := s.productQualityService.FindProductQuality(c, &product_quality.FindProductQualityOpts{
+	productQuality, cnt, err := s.productQualityService.FindProductQuality(c, &product_quality.FindProductQualityOpts{
+		IDs:               req.Filter.IDs,
 		ProductionOrderID: req.Filter.ProductionOrderID,
-		DeviceIDs:         req.Filter.DeviceIDs,
-		DefectType:        req.Filter.DefectType,
-		DefectCode:        req.Filter.DefectCode,
+		DefectTypes:       req.Filter.DefectTypes,
 		CreatedAtFrom:     req.Filter.CreatedAtFrom,
 		CreatedAtTo:       req.Filter.CreatedAtTo,
 	}, &repository.Sort{
@@ -128,48 +159,48 @@ func (s productQualityController) FindProductQuality(c *gin.Context) {
 	for _, f := range productQuality {
 		productQualityResp = append(productQualityResp, toProductQualityResp(f))
 	}
-
-	analysisResp := make([]*dto.ProductQualityAnalysis, 0, len(analysis))
-	for _, a := range analysis {
-		analysisResp = append(analysisResp, &dto.ProductQualityAnalysis{
-			DefectType: a.DefectType,
-			Count:      a.Count,
-		})
-	}
-
+	fmt.Println(cnt)
 	transportutil.SendJSONResponse(c, &dto.FindProductQualityResponse{
 		ProductQuality: productQualityResp,
 		Total:          cnt.Count,
-		Analysis:       analysisResp,
+		Analysis:       nil,
 	})
 }
-
 func toProductQualityResp(f *product_quality.Data) *dto.ProductQuality {
-	devices := make([]*dto.DeviceData, 0)
-	for _, device := range f.Devices {
-		devices = append(devices, &dto.DeviceData{
-			ID:   device.ID,
-			Name: device.Name,
+	inspectionErrors := make([]dto.InspectionError, 0)
+	for _, err := range f.InspectionErrors {
+		inspectionErrors = append(inspectionErrors, dto.InspectionError{
+			ID:               err.ID,
+			DeviceID:         err.DeviceID,
+			DeviceName:       err.DeviceName,
+			InspectionFormID: err.InspectionFormID,
+			ErrorType:        err.ErrorType,
+			Quantity:         err.Quantity,
+			Note:             err.Note,
+			NhanVienThucHien: err.NhanVienThucHien,
 		})
 	}
+
 	return &dto.ProductQuality{
-		ID:                      f.ID,
-		ProductionOrderID:       f.ProductionOrderID.String,
-		ProductionOrderName:     f.ProductionOrderName,
-		ProductionOrderQtyPaper: f.ProductionOrderQtyPaper,
-		DeviceIDs:               f.DeviceIDs,
-		Devices:                 devices,
-		ProductID:               f.ProductID.String,
-		DefectType:              f.DefectType.String,
-		DefectCode:              f.DefectCode.String,
-		DefectLevel:             f.DefectLevel,
-		ProductionStageID:       f.ProductionStageID.String,
-		DefectiveQuantity:       f.DefectiveQuantity,
-		GoodQuantity:            f.GoodQuantity,
-		Description:             f.Description.String,
-		CreatedBy:               f.CreatedBy,
-		CreatedAt:               f.CreatedAt,
-		UpdatedAt:               f.UpdatedAt,
+		ID:                  f.ID,
+		ProductionOrderID:   f.ProductionOrderID,
+		InspectionDate:      f.InspectionDate,
+		InspectorName:       f.InspectorName,
+		Quantity:            f.Quantity,
+		MaSanPham:           f.MaSanPham,
+		TenSanPham:          f.TenSanPham,
+		SoLuongHopDong:      f.SoLuongHopDong,
+		SoLuongIn:           f.SoLuongIn,
+		MaDonDatHang:        f.MaDonDatHang,
+		NguoiKiemTra:        f.NguoiKiemTra,
+		NguoiPheDuyet:       f.NguoiPheDuyet,
+		SoLuongThanhPhamDat: f.SoLuongThanhPhamDat,
+		Note:                f.Note,
+		InspectionErrors:    inspectionErrors,
+		CreatedBy:           f.CreatedBy,
+		UpdatedBy:           f.UpdatedBy,
+		CreatedAt:           f.CreatedAt,
+		UpdatedAt:           f.UpdatedAt,
 	}
 }
 

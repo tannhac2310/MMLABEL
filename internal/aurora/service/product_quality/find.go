@@ -2,71 +2,71 @@ package product_quality
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 )
 
-func (c *productQualityService) FindProductQuality(ctx context.Context, opts *FindProductQualityOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, []*ProductQualityAnalysis, error) {
-	filter := &repository.SearchProductQualitysOpts{
-		ProductionOrderID: opts.ProductionOrderID,
-		DefectType:        opts.DefectType,
-		DeviceIDs:         opts.DeviceIDs,
-		DefectCode:        opts.DefectCode,
-		CreatedAtFrom:     opts.CreatedAtFrom,
-		CreatedAtTo:       opts.CreatedAtTo,
-		Limit:             limit,
-		Offset:            offset,
-		Sort:              sort,
-	}
-	productQuality, err := c.productQualityRepo.Search(ctx, filter)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	total, err := c.productQualityRepo.Count(ctx, filter)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	results := make([]*Data, 0, len(productQuality))
-	for _, productQuality := range productQuality {
-		if err != nil {
-			return nil, nil, nil, err
-		}
-		deviceIds := productQuality.DeviceIDs
-		devices, _ := c.deviceRepo.Search(ctx, &repository.SearchDevicesOpts{
-			IDs:    deviceIds,
-			Limit:  int64(len(deviceIds)),
-			Offset: 0,
-		})
-
-		results = append(results, &Data{
-			ProductQualityData: productQuality,
-			Devices:            devices,
-		})
-	}
-
-	analysis, err := c.productQualityRepo.Analysis(ctx, filter)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	analysisData := make([]*ProductQualityAnalysis, 0, len(analysis))
-	for _, a := range analysis {
-		analysisData = append(analysisData, &ProductQualityAnalysis{
-			DefectType: a.DefectType,
-			Count:      a.Count,
-		})
-	}
-	return results, total, analysisData, nil
-}
-
+// FindProductQualityOpts defines the filter options for querying product quality.
 type FindProductQualityOpts struct {
+	IDs               []string
 	ProductionOrderID string
-	DeviceIDs         []string
-	DefectType        string
-	DefectCode        string
+	DefectTypes       []string
 	CreatedAtFrom     time.Time
 	CreatedAtTo       time.Time
-	UserID            string
+}
+
+func (c *productQualityService) FindProductQuality(ctx context.Context, opts *FindProductQualityOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error) {
+	params := &repository.SearchInspectionFormOpts{
+		IDs:               opts.IDs,
+		ProductionOrderID: opts.ProductionOrderID,
+		DefectType:        opts.DefectTypes,
+		CreatedAtFrom:     opts.CreatedAtFrom,
+		CreatedAtTo:       opts.CreatedAtTo,
+		//ProductSearch:     opts.ProductSearch,
+		Limit:  limit,
+		Offset: offset,
+		Sort:   sort,
+	}
+	// Find inspection forms based on filter converted to repository options.
+	forms, err := c.inspectionFormRepo.Search(ctx, params)
+	if err != nil {
+		return nil, nil, fmt.Errorf("lỗi khi tìm kiếm form: %w", err)
+	}
+	count, err := c.inspectionFormRepo.Count(ctx, params)
+	if err != nil {
+		return nil, nil, fmt.Errorf("lỗi khi đếm số lượng form: %w", err)
+	}
+
+	// Collect inspection form IDs.
+	var formIDs []string
+	for _, form := range forms {
+		formIDs = append(formIDs, form.ID)
+	}
+
+	inspectionErrors, err := c.inspectionErrorRepo.Search(ctx, &repository.SearchInspectionErrorOpts{
+		InspectionFormIDs: formIDs,
+		Limit:             10000,
+		Offset:            0,
+	})
+	if err != nil {
+		return nil, nil, fmt.Errorf("lỗi khi tìm kiếm lỗi: %w", err)
+	}
+	result := make([]*Data, 0, len(forms))
+	for _, form := range forms {
+		var errors []*repository.InspectionErrorData
+		for _, e := range inspectionErrors {
+			if e.InspectionFormID == form.ID {
+				errors = append(errors, e)
+			}
+		}
+
+		result = append(result, &Data{
+			InspectionFormData: form,
+			InspectionErrors:   errors,
+		})
+	}
+
+	return result, count, nil
 }

@@ -113,7 +113,7 @@ func Run(ctx context.Context, configPath string) {
 			repository2.NewInkReturnRepo,
 			repository2.NewInkReturnDetailRepo,
 			repository2.NewHistoryRepo,
-			repository2.NewProductQualityRepo,
+			//repository2.NewProductQualityRepo,
 			repository2.NewOptionRepo,
 			repository2.NewProductionOrderDeviceConfigRepo,
 			repository2.NewDeviceProgressStatusHistoryRepo,
