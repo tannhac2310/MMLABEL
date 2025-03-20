@@ -46,7 +46,7 @@ func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, 
 	result := make(map[string]model.OEE)
 
 	var lastHistory *repository.DeviceProgressStatusHistoryData
-
+	var startOfDay time.Time
 	for i := range listDeviceProgressStatusHistory {
 		history := &listDeviceProgressStatusHistory[i]
 		deviceID := history.DeviceID
@@ -54,8 +54,6 @@ func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, 
 		oee, exists := result[deviceID]
 		if !exists {
 			if lastHistory != nil {
-				startOfDay := time.Date(lastHistory.CreatedAt.Year(), lastHistory.CreatedAt.Month(), lastHistory.CreatedAt.Day(), 0, 45, 0, 0, lastHistory.CreatedAt.Location())
-
 				deviceData := result[lastHistory.DeviceID]
 				deviceData.ActualWorkingTime = lastHistory.CreatedAt.Sub(startOfDay).Milliseconds()
 				result[lastHistory.DeviceID] = deviceData
@@ -77,6 +75,7 @@ func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, 
 			}
 			result[deviceID] = oee
 			lastHistory = history
+			startOfDay = history.CreatedAt
 			continue
 		}
 		if lastHistory == nil {
@@ -102,8 +101,6 @@ func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, 
 		lastHistory = history
 	}
 	if lastHistory != nil {
-		startOfDay := time.Date(lastHistory.CreatedAt.Year(), lastHistory.CreatedAt.Month(), lastHistory.CreatedAt.Day(), 0, 45, 0, 0, lastHistory.CreatedAt.Location())
-
 		deviceData := result[lastHistory.DeviceID]
 		deviceData.ActualWorkingTime = lastHistory.CreatedAt.Sub(startOfDay).Milliseconds()
 		result[lastHistory.DeviceID] = deviceData
@@ -141,18 +138,18 @@ func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Con
 				defective = val
 			}
 		}
-
 		oee := model.OEE{
 			DowntimeStatistics:            make(map[string]string),
 			AssignedWorkTime:              assignedWork.EstimatedCompleteAt.Time.Sub(assignedWork.EstimatedStartAt.Time).Milliseconds(),
 			DeviceProgressStatusHistories: processDeviceProgressStatusHistory[assignedWork.ID],
 			TotalQuantity:                 assignedWork.Quantity,
 			TotalDefective:                defective,
+			DeviceID:                      assignedWork.DeviceID,
 		}
-
 		histories := processDeviceProgressStatusHistory[assignedWork.ID]
 		if len(histories) > 0 {
 			lastHistory := histories[0]
+			startOfDay := lastHistory.CreatedAt
 			for _, history := range histories[1:] {
 				duration := history.CreatedAt.Sub(lastHistory.CreatedAt).Milliseconds()
 
@@ -171,7 +168,6 @@ func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Con
 
 				lastHistory = history
 			}
-			startOfDay := time.Date(lastHistory.CreatedAt.Year(), lastHistory.CreatedAt.Month(), lastHistory.CreatedAt.Day(), 0, 45, 0, 0, lastHistory.CreatedAt.Location())
 			oee.ActualWorkingTime = lastHistory.CreatedAt.Sub(startOfDay).Milliseconds()
 		}
 

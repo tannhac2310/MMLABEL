@@ -67,7 +67,6 @@ func (p *productionOrderStageDevicesRepo) GetAssignedByDate(ctx context.Context,
 		FROM production_order_stage_devices 
 		WHERE estimated_start_at::DATE = estimated_complete_at::DATE
 		AND estimated_start_at::DATE BETWEEN $1 AND $2
-		AND estimated_start_at::TIME >= '07:45:00'
 		ORDER BY device_id, estimated_start_at;
 	`
 	err := cockroach.Select(ctx, sqlQuery, dateFrom, dateTo).ScanAll(&result)

@@ -10,4 +10,5 @@ type OEE struct {
 	TotalQuantity                 int64
 	TotalDefective                int64
 	DeviceProgressStatusHistories []DeviceProgressStatusHistory
+	DeviceID                      string
 }
