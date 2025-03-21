@@ -8,7 +8,10 @@ type OEE struct {
 	DowntimeStatistics            map[string]string
 	Downtime                      int64
 	TotalQuantity                 int64
+	TotalAssignQuantity           int64
 	TotalDefective                int64
 	DeviceProgressStatusHistories []DeviceProgressStatusHistory
 	DeviceID                      string
+	DowntimeDetails               map[string]int64
+	MachineOperator               []string
 }
