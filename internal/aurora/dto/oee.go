@@ -23,9 +23,10 @@ type OEEByDevice struct {
 	DeviceID           string            `json:"deviceID"`
 	ActualWorkingTime  int64             `json:"actualWorkingTime"`
 	JobRunningTime     int64             `json:"jobRunningTime"`
+	DownTime           int64             `json:"downTime"`
 	AssignedWorkTime   int64             `json:"assignedWorkTime"`
 	AssignedWork       []AssignedWork    `json:"assignedWork"`
-	DowntimeStatistics map[string]string `json:"downtimeStatistics"`
+	DownTimeStatistics map[string]string `json:"downTimeStatistics"`
 	Availability       float64           `json:"availability"`
 	Performance        float64           `json:"performance"`
 	Quality            float64           `json:"quality"`
@@ -49,6 +50,7 @@ type OEEByAssignedWork struct {
 	DeviceID            string  `json:"deviceID"`
 	ActualWorkingTime   int64   `json:"actualWorkingTime"`
 	JobRunningTime      int64   `json:"jobRunningTime"`
+	DownTime            int64   `json:"downTime"`
 	AssignedWorkTime    int64   `json:"assignedWorkTime"`
 	Availability        float64 `json:"availability"`
 	Performance         float64 `json:"performance"`

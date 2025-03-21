@@ -147,6 +147,8 @@ func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Con
 			TotalDefective:      defective,
 			DeviceID:            assignedWork.DeviceID,
 			TotalAssignQuantity: assignedWork.AssignedQuantity,
+			Downtime:            0,
+			JobRunningTime:      0,
 		}
 		histories := processDeviceProgressStatusHistory[assignedWork.ID]
 		if len(histories) > 0 {
