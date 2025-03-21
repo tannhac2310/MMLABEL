@@ -14,4 +14,13 @@ type OEE struct {
 	DeviceID                      string
 	DowntimeDetails               map[string]int64
 	MachineOperator               []string
+	ProductionOrderName           string
+}
+
+type SummaryOEE struct {
+	TotalDowntime          int64
+	TotalJobRunningTime    int64
+	TotalAssignedWorkTime  int64
+	TotalActualWorkingTime int64
+	Total                  int64
 }
