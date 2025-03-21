@@ -108,30 +108,30 @@ func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, 
 	}
 	return result, nil
 }
-func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Context, dateFrom, dateTo string, limit int64, offset int64) (map[string]model.OEE, *model.SummaryOEE, error) {
+func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Context, dateFrom, dateTo string, limit int64, offset int64) (map[string]model.OEE, map[string]model.SummaryOEE, int64, error) {
 	now := time.Now().Format("2006-01-02")
 
 	var err error
 	if dateFrom, err = parseDateOrDefault(dateFrom, now); err != nil {
-		return nil, nil, err
+		return nil, nil, 0, err
 	}
 	if dateTo, err = parseDateOrDefault(dateTo, now); err != nil {
-		return nil, nil, err
+		return nil, nil, 0, err
 	}
 
 	listDeviceProgressStatusHistory, err := p.sDeviceProgressStatusHistoryRepo.FindByDate(ctx, dateFrom, dateTo)
 	if err != nil {
-		return nil, nil, fmt.Errorf("p.CalcOEE: %w", err)
+		return nil, nil, 0, fmt.Errorf("p.CalcOEE: %w", err)
 	}
 	processDeviceProgressStatusHistory := processDeviceProgressStatusHistoryByProductionOrderStageDeviceID(listDeviceProgressStatusHistory)
 
 	assignedWorks, err := p.productionOrderStageDeviceRepo.GetAssignedByDate(ctx, dateFrom, dateTo)
 	if err != nil {
-		return nil, nil, fmt.Errorf("p.CalcOEE: %w", err)
+		return nil, nil, 0, fmt.Errorf("p.CalcOEE: %w", err)
 	}
 
 	result := make(map[string]model.OEE, len(assignedWorks))
-	summary := &model.SummaryOEE{}
+	summary := make(map[string]model.SummaryOEE, 0)
 	for i, assignedWork := range assignedWorks {
 		defective := int64(0)
 		if assignedWork.Settings != nil {
@@ -166,18 +166,22 @@ func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Con
 				case history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed ||
 					history.ProcessStatus == enum.ProductionOrderStageDeviceStatusComplete:
 					oee.JobRunningTime += duration
-					//if history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed {
-					//	oee.DowntimeStatistics[history.CreatedAt.Format(time.RFC3339)] = history.ErrorCode.String
-					//}
 				}
 				lastHistory = history
 			}
 			oee.ActualWorkingTime = lastHistory.CreatedAt.Sub(startOfDay).Milliseconds()
 		}
-		summary.TotalAssignedWorkTime += oee.AssignedWorkTime
-		summary.TotalJobRunningTime += oee.JobRunningTime
-		summary.TotalDowntime += oee.Downtime
-		summary.TotalActualWorkingTime += oee.ActualWorkingTime
+		val, exists := summary[assignedWork.DeviceID]
+		if !exists {
+			val = model.SummaryOEE{}
+		}
+		val.TotalAssignedWorkTime += oee.AssignedWorkTime
+		val.TotalJobRunningTime += oee.JobRunningTime
+		val.TotalDowntime += oee.Downtime
+		val.TotalActualWorkingTime += oee.ActualWorkingTime
+
+		summary[assignedWork.DeviceID] = val
+
 		if (int64(i) < limit*offset || int64(i) >= (limit*(offset+1))) && limit != 0 {
 			continue
 		}
@@ -189,7 +193,7 @@ func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Con
 			WHERE posr.po_stage_device_id = $1;
 		`
 		if err := cockroach.Select(ctx, sqlQuery, assignedWork.ID).ScanAll(&usernames); err != nil {
-			return nil, nil, fmt.Errorf("p.CalcOEE: %w", err)
+			return nil, nil, 0, fmt.Errorf("p.CalcOEE: %w", err)
 		}
 		var productionOrderName string
 		sqlQuery = `
@@ -199,15 +203,14 @@ func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Con
 			WHERE pos.id = $1;
 		`
 		if err := cockroach.Select(ctx, sqlQuery, assignedWork.ProductionOrderStageID).ScanOne(&productionOrderName); err != nil {
-			return nil, nil, fmt.Errorf("p.CalcOEE: %w", err)
+			return nil, nil, 0, fmt.Errorf("p.CalcOEE: %w", err)
 		}
 		oee.MachineOperator = usernames
 		oee.ProductionOrderName = productionOrderName
 		result[assignedWork.ID] = oee
 
 	}
-	summary.Total = int64(len(assignedWorks))
-	return result, summary, nil
+	return result, summary, int64(len(assignedWorks)), nil
 }
 
 func processAssignedWorkByDeviceID(datas []model.ProductionOrderStageDevice) map[string][]model.ProductionOrderStageDevice {

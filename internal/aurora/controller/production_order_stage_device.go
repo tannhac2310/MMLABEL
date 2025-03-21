@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
@@ -47,7 +46,7 @@ func (s productionOrderStageDeviceController) CalcOEEByDevice(c *gin.Context) {
 		return
 	}
 
-	oeeList := make([]dto.OEEByDevice, 0, len(datas))
+	oeeList := make([]dto.OEEByDeviceResponse, 0, len(datas))
 
 	for deviceID, data := range datas {
 		availability := 1.0
@@ -64,7 +63,7 @@ func (s productionOrderStageDeviceController) CalcOEEByDevice(c *gin.Context) {
 			quality = float64(data.TotalQuantity-data.TotalDefective) / float64(data.TotalQuantity)
 		}
 
-		oee := dto.OEEByDevice{
+		oee := dto.OEEByDeviceResponse{
 			DeviceID:           deviceID,
 			ActualWorkingTime:  data.ActualWorkingTime,
 			JobRunningTime:     data.JobRunningTime,
@@ -79,7 +78,7 @@ func (s productionOrderStageDeviceController) CalcOEEByDevice(c *gin.Context) {
 			OEE:                availability * performance * quality,
 		}
 
-		assignedWork := make([]dto.AssignedWork, 0, len(data.AssignedWork))
+		assignedWork := make([]dto.AssignedWorkResponse, 0, len(data.AssignedWork))
 		for _, work := range data.AssignedWork {
 			var defective int64 = 0
 			if work.Settings != nil {
@@ -87,7 +86,7 @@ func (s productionOrderStageDeviceController) CalcOEEByDevice(c *gin.Context) {
 					defective = val
 				}
 			}
-			assignedWork = append(assignedWork, dto.AssignedWork{
+			assignedWork = append(assignedWork, dto.AssignedWorkResponse{
 				ID:                     work.ID,
 				ProductionOrderStageID: work.ProductionOrderStageID,
 				EstimatedStartAt:       work.EstimatedStartAt.Time,
@@ -112,15 +111,14 @@ func (s productionOrderStageDeviceController) CalcOEEByAssignedWork(c *gin.Conte
 		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
 		return
 	}
-	fmt.Println(req)
 
-	datas, summary, err := s.productionOrderStageDeviceService.CalcOEEByAssignedWork(c, req.Filter.DateFrom, req.Filter.DateTo, req.Paging.Limit, req.Paging.Offset)
+	datas, summary, total, err := s.productionOrderStageDeviceService.CalcOEEByAssignedWork(c, req.Filter.DateFrom, req.Filter.DateTo, req.Paging.Limit, req.Paging.Offset)
 	if err != nil {
 		transportutil.Error(c, err)
 		return
 	}
 
-	oeeList := make([]dto.OEEByAssignedWork, 0, len(datas))
+	oeeList := make([]dto.OEEByAssignedWorkResponse, 0, len(datas))
 
 	for assignedWorkID, data := range datas {
 		availability := 1.0
@@ -137,7 +135,7 @@ func (s productionOrderStageDeviceController) CalcOEEByAssignedWork(c *gin.Conte
 			quality = float64(data.TotalQuantity-data.TotalDefective) / float64(data.TotalQuantity)
 		}
 
-		oee := dto.OEEByAssignedWork{
+		oee := dto.OEEByAssignedWorkResponse{
 			AssignedWorkID:      assignedWorkID,
 			ProductionOrderName: data.ProductionOrderName,
 			ActualWorkingTime:   data.ActualWorkingTime,
@@ -176,16 +174,21 @@ func (s productionOrderStageDeviceController) CalcOEEByAssignedWork(c *gin.Conte
 		oeeList = append(oeeList, oee)
 	}
 
+	summaryList := make([]dto.SummaryOEEResponse, 0, len(datas))
+	for deviceID, data := range summary {
+		summaryList = append(summaryList, dto.SummaryOEEResponse{
+			DeviceID:               deviceID,
+			TotalActualWorkingTime: data.TotalActualWorkingTime,
+			TotalJobRunningTime:    data.TotalJobRunningTime,
+			TotalAssignedWorkTime:  data.TotalAssignedWorkTime,
+			TotalDownTime:          data.TotalDowntime,
+		})
+	}
+
 	transportutil.SendJSONResponse(c, &dto.FindOEEByAssignedWorkResponse{
-		Total:   int64(len(oeeList)),
+		Total:   total,
 		OEEList: oeeList,
-		Summary: &dto.SummaryOEEResponse{
-			TotalActualWorkingTime: summary.TotalActualWorkingTime,
-			TotalJobRunningTime:    summary.TotalJobRunningTime,
-			TotalAssignedWorkTime:  summary.TotalAssignedWorkTime,
-			TotalDownTime:          summary.TotalDowntime,
-			Total:                  summary.Total,
-		},
+		Summary: summaryList,
 	})
 }
 
@@ -762,6 +765,5 @@ func RegisterProductionOrderStageDeviceController(
 		&dto.FindOEERequest{},
 		&dto.FindOEEByAssignedWorkResponse{},
 		"Calc OEE By assigned work",
-		routeutil.RegisterOptionSkipAuth,
 	)
 }
