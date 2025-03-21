@@ -1,12 +1,17 @@
 package dto
 
 import (
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/commondto"
 	"time"
 )
 
-type FindOEERequest struct {
+type FindOEEFilter struct {
 	DateFrom string `json:"dateFrom"`
 	DateTo   string `json:"dateTo"`
+}
+type FindOEERequest struct {
+	Filter *FindOEEFilter    `json:"filter" binding:"required"`
+	Paging *commondto.Paging `json:"paging" binding:"required"`
 }
 
 type FindOEEByDeviceResponse struct {
@@ -16,6 +21,7 @@ type FindOEEByDeviceResponse struct {
 
 type FindOEEByAssignedWorkResponse struct {
 	OEEList []OEEByAssignedWork `json:"oeeList"`
+	Summary *SummaryOEEResponse `json:"summary"`
 	Total   int64               `json:"total"`
 }
 
@@ -62,4 +68,12 @@ type OEEByAssignedWork struct {
 	//DeviceProgressStatusHistories []DeviceStatusHistory `json:"deviceStatusHistory"`
 	DowntimeDetails map[string]int64 `json:"downtimeDetails"`
 	MachineOperator []string         `json:"machineOperator"`
+}
+
+type SummaryOEEResponse struct {
+	TotalActualWorkingTime int64 `json:"totalActualWorkingTime"`
+	TotalJobRunningTime    int64 `json:"totalJobRunningTime"`
+	TotalDownTime          int64 `json:"totalDownTime"`
+	TotalAssignedWorkTime  int64 `json:"totalAssignedWorkTime"`
+	Total                  int64 `json:"total"`
 }

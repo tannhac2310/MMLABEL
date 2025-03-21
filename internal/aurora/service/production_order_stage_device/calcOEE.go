@@ -108,31 +108,31 @@ func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, 
 	}
 	return result, nil
 }
-func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Context, dateFrom, dateTo string) (map[string]model.OEE, error) {
+func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Context, dateFrom, dateTo string, limit int64, offset int64) (map[string]model.OEE, *model.SummaryOEE, error) {
 	now := time.Now().Format("2006-01-02")
 
 	var err error
 	if dateFrom, err = parseDateOrDefault(dateFrom, now); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if dateTo, err = parseDateOrDefault(dateTo, now); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	listDeviceProgressStatusHistory, err := p.sDeviceProgressStatusHistoryRepo.FindByDate(ctx, dateFrom, dateTo)
 	if err != nil {
-		return nil, fmt.Errorf("p.CalcOEE: %w", err)
+		return nil, nil, fmt.Errorf("p.CalcOEE: %w", err)
 	}
 	processDeviceProgressStatusHistory := processDeviceProgressStatusHistoryByProductionOrderStageDeviceID(listDeviceProgressStatusHistory)
 
 	assignedWorks, err := p.productionOrderStageDeviceRepo.GetAssignedByDate(ctx, dateFrom, dateTo)
 	if err != nil {
-		return nil, fmt.Errorf("p.CalcOEE: %w", err)
+		return nil, nil, fmt.Errorf("p.CalcOEE: %w", err)
 	}
 
 	result := make(map[string]model.OEE, len(assignedWorks))
-
-	for _, assignedWork := range assignedWorks {
+	summary := &model.SummaryOEE{}
+	for i, assignedWork := range assignedWorks {
 		defective := int64(0)
 		if assignedWork.Settings != nil {
 			if val, ok := assignedWork.Settings["san_pham_loi"].(int64); ok {
@@ -174,6 +174,14 @@ func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Con
 			}
 			oee.ActualWorkingTime = lastHistory.CreatedAt.Sub(startOfDay).Milliseconds()
 		}
+		summary.TotalAssignedWorkTime += oee.AssignedWorkTime
+		summary.TotalJobRunningTime += oee.JobRunningTime
+		summary.TotalDowntime += oee.Downtime
+		summary.TotalActualWorkingTime += oee.ActualWorkingTime
+		if (int64(i) < limit*offset || int64(i) >= (limit*(offset+1))) && limit != 0 {
+			continue
+		}
+
 		var usernames []string
 		sqlQuery := `SELECT DISTINCT u."name"
 			FROM production_order_stage_responsible posr
@@ -181,13 +189,25 @@ func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Con
 			WHERE posr.po_stage_device_id = $1;
 		`
 		if err := cockroach.Select(ctx, sqlQuery, assignedWork.ID).ScanAll(&usernames); err != nil {
-			return nil, fmt.Errorf("p.CalcOEE: %w", err)
+			return nil, nil, fmt.Errorf("p.CalcOEE: %w", err)
+		}
+		var productionOrderName string
+		sqlQuery = `
+			SELECT po."name" 
+			FROM production_orders po 
+			JOIN production_order_stages pos ON po.id = pos.production_order_id 
+			WHERE pos.id = $1;
+		`
+		if err := cockroach.Select(ctx, sqlQuery, assignedWork.ProductionOrderStageID).ScanOne(&productionOrderName); err != nil {
+			return nil, nil, fmt.Errorf("p.CalcOEE: %w", err)
 		}
 		oee.MachineOperator = usernames
+		oee.ProductionOrderName = productionOrderName
 		result[assignedWork.ID] = oee
-	}
 
-	return result, nil
+	}
+	summary.Total = int64(len(assignedWorks))
+	return result, summary, nil
 }
 
 func processAssignedWorkByDeviceID(datas []model.ProductionOrderStageDevice) map[string][]model.ProductionOrderStageDevice {
