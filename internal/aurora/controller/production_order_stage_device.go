@@ -122,7 +122,7 @@ func (s productionOrderStageDeviceController) CalcOEEByAssignedWork(c *gin.Conte
 
 	oeeList := make([]dto.OEEByAssignedWork, 0, len(datas))
 
-	for _, data := range datas {
+	for assignedWorkID, data := range datas {
 		availability := 1.0
 		performance := 1.0
 		quality := 1.0
@@ -138,7 +138,8 @@ func (s productionOrderStageDeviceController) CalcOEEByAssignedWork(c *gin.Conte
 		}
 
 		oee := dto.OEEByAssignedWork{
-			AssignedWorkID:      data.ProductionOrderName,
+			AssignedWorkID:      assignedWorkID,
+			ProductionOrderName: data.ProductionOrderName,
 			ActualWorkingTime:   data.ActualWorkingTime,
 			JobRunningTime:      data.JobRunningTime,
 			AssignedWorkTime:    data.AssignedWorkTime,

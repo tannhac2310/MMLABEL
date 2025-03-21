@@ -53,6 +53,7 @@ type AssignedWork struct {
 
 type OEEByAssignedWork struct {
 	AssignedWorkID      string  `json:"assignedWorkID"`
+	ProductionOrderName string  `json:"ProductionOrderID"`
 	DeviceID            string  `json:"deviceID"`
 	ActualWorkingTime   int64   `json:"actualWorkingTime"`
 	JobRunningTime      int64   `json:"jobRunningTime"`
