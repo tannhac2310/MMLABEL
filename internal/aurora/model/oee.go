@@ -22,5 +22,4 @@ type SummaryOEE struct {
 	TotalJobRunningTime    int64
 	TotalAssignedWorkTime  int64
 	TotalActualWorkingTime int64
-	Total                  int64
 }
