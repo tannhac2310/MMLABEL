@@ -78,7 +78,7 @@ type Service interface {
 	FindAvailabilityTime(ctx context.Context, opt *FindLostTimeOpts) (*AvailabilityTime, error)
 	UpdateProcessStatus(ctx context.Context, opt *UpdateProcessStatusOpts) error
 	CalcOEEByDevice(ctx context.Context, dateFrom string, dateTo string) (map[string]model.OEE, error)
-	CalcOEEByAssignedWork(ctx context.Context, dateFrom string, dateTo string, limit int64, offset int64) (map[string]model.OEE, *model.SummaryOEE, error)
+	CalcOEEByAssignedWork(ctx context.Context, dateFrom string, dateTo string, limit int64, offset int64) (map[string]model.OEE, int64, error)
 }
 type productionOrderStageDeviceService struct {
 	productionOrderRepo              repository.ProductionOrderRepo

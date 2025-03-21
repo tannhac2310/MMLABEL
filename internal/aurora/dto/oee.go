@@ -15,33 +15,32 @@ type FindOEERequest struct {
 }
 
 type FindOEEByDeviceResponse struct {
-	OEEList []OEEByDevice `json:"oeeList"`
-	Total   int64         `json:"total"`
+	OEEList []OEEByDeviceResponse `json:"oeeList"`
+	Total   int64                 `json:"total"`
 }
 
 type FindOEEByAssignedWorkResponse struct {
-	OEEList []OEEByAssignedWork `json:"oeeList"`
-	Summary *SummaryOEEResponse `json:"summary"`
-	Total   int64               `json:"total"`
+	OEEList []OEEByAssignedWorkResponse `json:"oeeList"`
+	Total   int64                       `json:"total"`
 }
 
-type OEEByDevice struct {
-	DeviceID           string            `json:"deviceID"`
-	ActualWorkingTime  int64             `json:"actualWorkingTime"`
-	JobRunningTime     int64             `json:"jobRunningTime"`
-	DownTime           int64             `json:"downTime"`
-	AssignedWorkTime   int64             `json:"assignedWorkTime"`
-	AssignedWork       []AssignedWork    `json:"assignedWork"`
-	DownTimeStatistics map[string]string `json:"downTimeStatistics"`
-	Availability       float64           `json:"availability"`
-	Performance        float64           `json:"performance"`
-	Quality            float64           `json:"quality"`
-	TotalQuantity      int64             `json:"totalQuantity"`
-	TotalDefective     int64             `json:"totalDefective"`
-	OEE                float64           `json:"oee"`
+type OEEByDeviceResponse struct {
+	DeviceID           string                 `json:"deviceID"`
+	ActualWorkingTime  int64                  `json:"actualWorkingTime"`
+	JobRunningTime     int64                  `json:"jobRunningTime"`
+	DownTime           int64                  `json:"downTime"`
+	AssignedWorkTime   int64                  `json:"assignedWorkTime"`
+	AssignedWork       []AssignedWorkResponse `json:"assignedWork"`
+	DownTimeStatistics map[string]string      `json:"downTimeStatistics"`
+	Availability       float64                `json:"availability"`
+	Performance        float64                `json:"performance"`
+	Quality            float64                `json:"quality"`
+	TotalQuantity      int64                  `json:"totalQuantity"`
+	TotalDefective     int64                  `json:"totalDefective"`
+	OEE                float64                `json:"oee"`
 }
 
-type AssignedWork struct {
+type AssignedWorkResponse struct {
 	ID                     string    `json:"id"`
 	ProductionOrderStageID string    `json:"productionOrderID"`
 	StageID                string    `json:"stageID"`
@@ -51,7 +50,7 @@ type AssignedWork struct {
 	Defective              int64     `json:"defective"`
 }
 
-type OEEByAssignedWork struct {
+type OEEByAssignedWorkResponse struct {
 	AssignedWorkID      string  `json:"assignedWorkID"`
 	ProductionOrderName string  `json:"ProductionOrderID"`
 	DeviceID            string  `json:"deviceID"`
@@ -69,12 +68,4 @@ type OEEByAssignedWork struct {
 	//DeviceProgressStatusHistories []DeviceStatusHistory `json:"deviceStatusHistory"`
 	DowntimeDetails map[string]int64 `json:"downtimeDetails"`
 	MachineOperator []string         `json:"machineOperator"`
-}
-
-type SummaryOEEResponse struct {
-	TotalActualWorkingTime int64 `json:"totalActualWorkingTime"`
-	TotalJobRunningTime    int64 `json:"totalJobRunningTime"`
-	TotalDownTime          int64 `json:"totalDownTime"`
-	TotalAssignedWorkTime  int64 `json:"totalAssignedWorkTime"`
-	Total                  int64 `json:"total"`
 }
