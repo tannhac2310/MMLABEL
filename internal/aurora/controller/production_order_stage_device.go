@@ -135,37 +135,39 @@ func (s productionOrderStageDeviceController) CalcOEEByAssignedWork(c *gin.Conte
 		}
 
 		oee := dto.OEEByAssignedWork{
-			AssignedWorkID:     assignedWorkID,
-			ActualWorkingTime:  data.ActualWorkingTime,
-			JobRunningTime:     data.JobRunningTime,
-			AssignedWorkTime:   data.AssignedWorkTime,
-			DowntimeStatistics: data.DowntimeStatistics,
-			Availability:       availability,
-			Performance:        performance,
-			Quality:            quality,
-			TotalQuantity:      data.TotalQuantity,
-			TotalDefective:     data.TotalDefective,
-			OEE:                availability * performance * quality,
-			DeviceID:           data.DeviceID,
+			AssignedWorkID:      assignedWorkID,
+			ActualWorkingTime:   data.ActualWorkingTime,
+			JobRunningTime:      data.JobRunningTime,
+			AssignedWorkTime:    data.AssignedWorkTime,
+			DowntimeDetails:     data.DowntimeDetails,
+			Availability:        availability,
+			Performance:         performance,
+			Quality:             quality,
+			TotalQuantity:       data.TotalQuantity,
+			TotalAssignQuantity: data.TotalAssignQuantity,
+			TotalDefective:      data.TotalDefective,
+			OEE:                 availability * performance * quality,
+			DeviceID:            data.DeviceID,
+			MachineOperator:     data.MachineOperator,
 		}
 
-		deviceProgressStatusHistories := make([]dto.DeviceStatusHistory, 0, len(data.DeviceProgressStatusHistories))
-		for _, deviceProcessStatusHistory := range data.DeviceProgressStatusHistories {
-			deviceProgressStatusHistories = append(deviceProgressStatusHistories, dto.DeviceStatusHistory{
-				ID:                           deviceProcessStatusHistory.ID,
-				ProductionOrderStageDeviceID: deviceProcessStatusHistory.ProductionOrderStageDeviceID,
-				DeviceID:                     deviceProcessStatusHistory.DeviceID,
-				ProcessStatus:                deviceProcessStatusHistory.ProcessStatus,
-				IsResolved:                   deviceProcessStatusHistory.IsResolved,
-				UpdatedAt:                    deviceProcessStatusHistory.UpdatedAt.Time,
-				UpdatedBy:                    deviceProcessStatusHistory.UpdatedBy.String,
-				ErrorCode:                    deviceProcessStatusHistory.ErrorCode.String,
-				ErrorReason:                  deviceProcessStatusHistory.ErrorReason.String,
-				Description:                  deviceProcessStatusHistory.Description.String,
-				CreatedAt:                    deviceProcessStatusHistory.CreatedAt,
-			})
-		}
-		oee.DeviceProgressStatusHistories = deviceProgressStatusHistories
+		//deviceProgressStatusHistories := make([]dto.DeviceStatusHistory, 0, len(data.DeviceProgressStatusHistories))
+		//for _, deviceProcessStatusHistory := range data.DeviceProgressStatusHistories {
+		//	deviceProgressStatusHistories = append(deviceProgressStatusHistories, dto.DeviceStatusHistory{
+		//		ID:                           deviceProcessStatusHistory.ID,
+		//		ProductionOrderStageDeviceID: deviceProcessStatusHistory.ProductionOrderStageDeviceID,
+		//		DeviceID:                     deviceProcessStatusHistory.DeviceID,
+		//		ProcessStatus:                deviceProcessStatusHistory.ProcessStatus,
+		//		IsResolved:                   deviceProcessStatusHistory.IsResolved,
+		//		UpdatedAt:                    deviceProcessStatusHistory.UpdatedAt.Time,
+		//		UpdatedBy:                    deviceProcessStatusHistory.UpdatedBy.String,
+		//		ErrorCode:                    deviceProcessStatusHistory.ErrorCode.String,
+		//		ErrorReason:                  deviceProcessStatusHistory.ErrorReason.String,
+		//		Description:                  deviceProcessStatusHistory.Description.String,
+		//		CreatedAt:                    deviceProcessStatusHistory.CreatedAt,
+		//	})
+		//}
+		//oee.DeviceProgressStatusHistories = deviceProgressStatusHistories
 		oeeList = append(oeeList, oee)
 	}
 
