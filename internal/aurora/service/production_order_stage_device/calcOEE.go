@@ -3,6 +3,7 @@ package production_order_stage_device
 import (
 	"context"
 	"fmt"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"time"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
@@ -139,12 +140,13 @@ func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Con
 			}
 		}
 		oee := model.OEE{
-			DowntimeStatistics:            make(map[string]string),
-			AssignedWorkTime:              assignedWork.EstimatedCompleteAt.Time.Sub(assignedWork.EstimatedStartAt.Time).Milliseconds(),
-			DeviceProgressStatusHistories: processDeviceProgressStatusHistory[assignedWork.ID],
-			TotalQuantity:                 assignedWork.Quantity,
-			TotalDefective:                defective,
-			DeviceID:                      assignedWork.DeviceID,
+			DowntimeDetails:  make(map[string]int64),
+			AssignedWorkTime: assignedWork.EstimatedCompleteAt.Time.Sub(assignedWork.EstimatedStartAt.Time).Milliseconds(),
+			//DeviceProgressStatusHistories: processDeviceProgressStatusHistory[assignedWork.ID],
+			TotalQuantity:       assignedWork.Quantity,
+			TotalDefective:      defective,
+			DeviceID:            assignedWork.DeviceID,
+			TotalAssignQuantity: assignedWork.AssignedQuantity,
 		}
 		histories := processDeviceProgressStatusHistory[assignedWork.ID]
 		if len(histories) > 0 {
@@ -157,20 +159,29 @@ func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Con
 				case history.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart &&
 					lastHistory.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed:
 					oee.Downtime += duration
+					oee.DowntimeDetails[lastHistory.ErrorCode.String] += duration
 
 				case history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed ||
 					history.ProcessStatus == enum.ProductionOrderStageDeviceStatusComplete:
 					oee.JobRunningTime += duration
-					if history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed {
-						oee.DowntimeStatistics[history.CreatedAt.Format(time.RFC3339)] = history.ErrorCode.String
-					}
+					//if history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed {
+					//	oee.DowntimeStatistics[history.CreatedAt.Format(time.RFC3339)] = history.ErrorCode.String
+					//}
 				}
-
 				lastHistory = history
 			}
 			oee.ActualWorkingTime = lastHistory.CreatedAt.Sub(startOfDay).Milliseconds()
 		}
-
+		var usernames []string
+		sqlQuery := `SELECT DISTINCT u."name"
+			FROM production_order_stage_responsible posr
+			JOIN users u ON u.id = posr.user_id
+			WHERE posr.po_stage_device_id = $1;
+		`
+		if err := cockroach.Select(ctx, sqlQuery, assignedWork.ID).ScanAll(&usernames); err != nil {
+			return nil, fmt.Errorf("p.CalcOEE: %w", err)
+		}
+		oee.MachineOperator = usernames
 		result[assignedWork.ID] = oee
 	}
 
