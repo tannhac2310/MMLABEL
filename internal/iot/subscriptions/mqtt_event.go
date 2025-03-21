@@ -202,6 +202,22 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			fmt.Println("Lỗi:", err)
 			return
 		}
+		if iotData.DeviceBroken {
+			e := &model.Device{}
+			err := cockroach.FindOne(ctx, e, "id = $1", iotData.DeviceId)
+			if err != nil {
+				fmt.Println("Lỗi không tìm thấy device: ", iotData.DeviceId, " ---> ", err)
+				return
+			}
+			if e.Status == enum.CommonStatusDamage {
+				return
+			}
+			updaterDevice := cockroach.NewUpdater(e.TableName(), model.DeviceFieldID, iotData.DeviceId)
+			updaterDevice.Set(model.DeviceFieldStatus, enum.CommonStatusDamage)
+			if err := cockroach.UpdateFields(ctx, updaterDevice); err != nil {
+				fmt.Println("Lỗi update device: ", iotData.DeviceId, " ---> ", err)
+			}
+		}
 
 		upsertDeviceBrokenHistory := func(ctx context.Context, orderStageDevice *model.ProductionOrderStageDevice, note string, now time.Time) error {
 			modelData := &model.DeviceBrokenHistory{
@@ -218,23 +234,6 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			}
 
 			return p.deviceBrokenHistoryRepo.Insert(ctx, modelData)
-		}
-
-		if iotData.DeviceBroken {
-			e := &model.Device{}
-			err := cockroach.FindOne(ctx, e, "id = $1", iotData.DeviceId)
-			if err != nil {
-				fmt.Println("Lỗi không tìm thấy device: ", iotData.DeviceId, " ---> ", err)
-				return
-			}
-			if e.Status == enum.CommonStatusDamage {
-				return
-			}
-			updaterDevice := cockroach.NewUpdater(e.TableName(), model.DeviceFieldID, iotData.DeviceId)
-			updaterDevice.Set(model.DeviceFieldStatus, enum.CommonStatusDamage)
-			if err := cockroach.UpdateFields(ctx, updaterDevice); err != nil {
-				fmt.Println("Lỗi update device: ", iotData.DeviceId, " ---> ", err)
-			}
 		}
 
 		upsertDeviceWorkingHistory := func(ctx context.Context, orderStageDevice *model.ProductionOrderStageDevice, item IotData, dateStr string, now time.Time) error {
@@ -435,6 +434,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 				p.logger.Error("Error upsertDeviceWorkingHistory", zap.Error(err))
 				return err
 			}
+
 			if err := insertEventLog(ctx, orderStageDevice, item, dateStr, now, jsonStr); err != nil {
 				p.logger.Error("Error insertEventLog", zap.Error(err))
 				return err
