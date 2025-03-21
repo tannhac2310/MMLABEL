@@ -38,7 +38,7 @@ func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, 
 		return nil, fmt.Errorf("p.CalcOEE: %w", err)
 	}
 
-	assignedWork, err := p.productionOrderStageDeviceRepo.GetAssignedByDate(ctx, dateFrom, dateTo)
+	assignedWork, _, err := p.productionOrderStageDeviceRepo.GetAssignedByDate(ctx, dateFrom, dateTo, -1, -1)
 	if err != nil {
 		return nil, fmt.Errorf("p.CalcOEE: %w", err)
 	}
@@ -79,18 +79,20 @@ func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, 
 			startOfDay = history.CreatedAt
 			continue
 		}
+
 		if lastHistory == nil {
 			continue
 		}
 
 		duration := history.CreatedAt.Sub(lastHistory.CreatedAt).Milliseconds()
-		if history.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart &&
-			lastHistory.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed {
+		switch {
+		case history.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart &&
+			lastHistory.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed:
 			oee.Downtime += duration
-		}
 
-		if history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed ||
-			history.ProcessStatus == enum.ProductionOrderStageDeviceStatusComplete {
+		case (history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed ||
+			history.ProcessStatus == enum.ProductionOrderStageDeviceStatusComplete) &&
+			lastHistory.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart:
 			oee.JobRunningTime += duration
 
 			if history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed {
@@ -101,38 +103,33 @@ func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, 
 		result[deviceID] = oee
 		lastHistory = history
 	}
-	if lastHistory != nil {
-		deviceData := result[lastHistory.DeviceID]
-		deviceData.ActualWorkingTime = lastHistory.CreatedAt.Sub(startOfDay).Milliseconds()
-		result[lastHistory.DeviceID] = deviceData
-	}
 	return result, nil
 }
-func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Context, dateFrom, dateTo string, limit int64, offset int64) (map[string]model.OEE, map[string]model.SummaryOEE, int64, error) {
+
+func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Context, dateFrom, dateTo string, limit int64, offset int64) (map[string]model.OEE, int64, error) {
 	now := time.Now().Format("2006-01-02")
 
 	var err error
 	if dateFrom, err = parseDateOrDefault(dateFrom, now); err != nil {
-		return nil, nil, 0, err
+		return nil, 0, err
 	}
 	if dateTo, err = parseDateOrDefault(dateTo, now); err != nil {
-		return nil, nil, 0, err
+		return nil, 0, err
 	}
 
 	listDeviceProgressStatusHistory, err := p.sDeviceProgressStatusHistoryRepo.FindByDate(ctx, dateFrom, dateTo)
 	if err != nil {
-		return nil, nil, 0, fmt.Errorf("p.CalcOEE: %w", err)
+		return nil, 0, fmt.Errorf("p.CalcOEE: %w", err)
 	}
 	processDeviceProgressStatusHistory := processDeviceProgressStatusHistoryByProductionOrderStageDeviceID(listDeviceProgressStatusHistory)
 
-	assignedWorks, err := p.productionOrderStageDeviceRepo.GetAssignedByDate(ctx, dateFrom, dateTo)
+	assignedWorks, total, err := p.productionOrderStageDeviceRepo.GetAssignedByDate(ctx, dateFrom, dateTo, limit, offset)
 	if err != nil {
-		return nil, nil, 0, fmt.Errorf("p.CalcOEE: %w", err)
+		return nil, 0, fmt.Errorf("p.CalcOEE: %w", err)
 	}
 
 	result := make(map[string]model.OEE, len(assignedWorks))
-	summary := make(map[string]model.SummaryOEE, 0)
-	for i, assignedWork := range assignedWorks {
+	for _, assignedWork := range assignedWorks {
 		defective := int64(0)
 		if assignedWork.Settings != nil {
 			if val, ok := assignedWork.Settings["san_pham_loi"].(int64); ok {
@@ -140,9 +137,8 @@ func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Con
 			}
 		}
 		oee := model.OEE{
-			DowntimeDetails:  make(map[string]int64),
-			AssignedWorkTime: assignedWork.EstimatedCompleteAt.Time.Sub(assignedWork.EstimatedStartAt.Time).Milliseconds(),
-			//DeviceProgressStatusHistories: processDeviceProgressStatusHistory[assignedWork.ID],
+			DowntimeDetails:     make(map[string]int64),
+			AssignedWorkTime:    assignedWork.EstimatedCompleteAt.Time.Sub(assignedWork.EstimatedStartAt.Time).Milliseconds(),
 			TotalQuantity:       assignedWork.Quantity,
 			TotalDefective:      defective,
 			DeviceID:            assignedWork.DeviceID,
@@ -163,27 +159,17 @@ func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Con
 					oee.Downtime += duration
 					oee.DowntimeDetails[lastHistory.ErrorCode.String] += duration
 
-				case history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed ||
-					history.ProcessStatus == enum.ProductionOrderStageDeviceStatusComplete:
+				case (history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed ||
+					history.ProcessStatus == enum.ProductionOrderStageDeviceStatusComplete) &&
+					lastHistory.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart:
 					oee.JobRunningTime += duration
+					if history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed {
+						oee.DowntimeDetails[lastHistory.ErrorCode.String] += 0
+					}
 				}
 				lastHistory = history
 			}
 			oee.ActualWorkingTime = lastHistory.CreatedAt.Sub(startOfDay).Milliseconds()
-		}
-		val, exists := summary[assignedWork.DeviceID]
-		if !exists {
-			val = model.SummaryOEE{}
-		}
-		val.TotalAssignedWorkTime += oee.AssignedWorkTime
-		val.TotalJobRunningTime += oee.JobRunningTime
-		val.TotalDowntime += oee.Downtime
-		val.TotalActualWorkingTime += oee.ActualWorkingTime
-
-		summary[assignedWork.DeviceID] = val
-
-		if (int64(i) < limit*offset || int64(i) >= (limit*(offset+1))) && limit != 0 {
-			continue
 		}
 
 		var usernames []string
@@ -193,7 +179,7 @@ func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Con
 			WHERE posr.po_stage_device_id = $1;
 		`
 		if err := cockroach.Select(ctx, sqlQuery, assignedWork.ID).ScanAll(&usernames); err != nil {
-			return nil, nil, 0, fmt.Errorf("p.CalcOEE: %w", err)
+			return nil, 0, fmt.Errorf("p.CalcOEE: %w", err)
 		}
 		var productionOrderName string
 		sqlQuery = `
@@ -203,14 +189,14 @@ func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Con
 			WHERE pos.id = $1;
 		`
 		if err := cockroach.Select(ctx, sqlQuery, assignedWork.ProductionOrderStageID).ScanOne(&productionOrderName); err != nil {
-			return nil, nil, 0, fmt.Errorf("p.CalcOEE: %w", err)
+			return nil, 0, fmt.Errorf("p.CalcOEE: %w", err)
 		}
 		oee.MachineOperator = usernames
 		oee.ProductionOrderName = productionOrderName
 		result[assignedWork.ID] = oee
 
 	}
-	return result, summary, int64(len(assignedWorks)), nil
+	return result, total, nil
 }
 
 func processAssignedWorkByDeviceID(datas []model.ProductionOrderStageDevice) map[string][]model.ProductionOrderStageDevice {

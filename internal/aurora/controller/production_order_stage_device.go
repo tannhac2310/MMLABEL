@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
@@ -111,8 +112,8 @@ func (s productionOrderStageDeviceController) CalcOEEByAssignedWork(c *gin.Conte
 		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
 		return
 	}
-
-	datas, summary, total, err := s.productionOrderStageDeviceService.CalcOEEByAssignedWork(c, req.Filter.DateFrom, req.Filter.DateTo, req.Paging.Limit, req.Paging.Offset)
+	fmt.Println(req.Paging)
+	datas, total, err := s.productionOrderStageDeviceService.CalcOEEByAssignedWork(c, req.Filter.DateFrom, req.Filter.DateTo, req.Paging.Limit, req.Paging.Offset)
 	if err != nil {
 		transportutil.Error(c, err)
 		return
@@ -153,42 +154,12 @@ func (s productionOrderStageDeviceController) CalcOEEByAssignedWork(c *gin.Conte
 			DeviceID:            data.DeviceID,
 			MachineOperator:     data.MachineOperator,
 		}
-
-		//deviceProgressStatusHistories := make([]dto.DeviceStatusHistory, 0, len(data.DeviceProgressStatusHistories))
-		//for _, deviceProcessStatusHistory := range data.DeviceProgressStatusHistories {
-		//	deviceProgressStatusHistories = append(deviceProgressStatusHistories, dto.DeviceStatusHistory{
-		//		ID:                           deviceProcessStatusHistory.ID,
-		//		ProductionOrderStageDeviceID: deviceProcessStatusHistory.ProductionOrderStageDeviceID,
-		//		DeviceID:                     deviceProcessStatusHistory.DeviceID,
-		//		ProcessStatus:                deviceProcessStatusHistory.ProcessStatus,
-		//		IsResolved:                   deviceProcessStatusHistory.IsResolved,
-		//		UpdatedAt:                    deviceProcessStatusHistory.UpdatedAt.Time,
-		//		UpdatedBy:                    deviceProcessStatusHistory.UpdatedBy.String,
-		//		ErrorCode:                    deviceProcessStatusHistory.ErrorCode.String,
-		//		ErrorReason:                  deviceProcessStatusHistory.ErrorReason.String,
-		//		Description:                  deviceProcessStatusHistory.Description.String,
-		//		CreatedAt:                    deviceProcessStatusHistory.CreatedAt,
-		//	})
-		//}
-		//oee.DeviceProgressStatusHistories = deviceProgressStatusHistories
 		oeeList = append(oeeList, oee)
-	}
-
-	summaryList := make([]dto.SummaryOEEResponse, 0, len(datas))
-	for deviceID, data := range summary {
-		summaryList = append(summaryList, dto.SummaryOEEResponse{
-			DeviceID:               deviceID,
-			TotalActualWorkingTime: data.TotalActualWorkingTime,
-			TotalJobRunningTime:    data.TotalJobRunningTime,
-			TotalAssignedWorkTime:  data.TotalAssignedWorkTime,
-			TotalDownTime:          data.TotalDowntime,
-		})
 	}
 
 	transportutil.SendJSONResponse(c, &dto.FindOEEByAssignedWorkResponse{
 		Total:   total,
 		OEEList: oeeList,
-		Summary: summaryList,
 	})
 }
 

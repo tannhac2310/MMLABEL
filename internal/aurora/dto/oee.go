@@ -21,7 +21,6 @@ type FindOEEByDeviceResponse struct {
 
 type FindOEEByAssignedWorkResponse struct {
 	OEEList []OEEByAssignedWorkResponse `json:"oeeList"`
-	Summary []SummaryOEEResponse        `json:"summary"`
 	Total   int64                       `json:"total"`
 }
 
@@ -69,12 +68,4 @@ type OEEByAssignedWorkResponse struct {
 	//DeviceProgressStatusHistories []DeviceStatusHistory `json:"deviceStatusHistory"`
 	DowntimeDetails map[string]int64 `json:"downtimeDetails"`
 	MachineOperator []string         `json:"machineOperator"`
-}
-
-type SummaryOEEResponse struct {
-	DeviceID               string `json:"deviceID"`
-	TotalActualWorkingTime int64  `json:"totalActualWorkingTime"`
-	TotalJobRunningTime    int64  `json:"totalJobRunningTime"`
-	TotalDownTime          int64  `json:"totalDownTime"`
-	TotalAssignedWorkTime  int64  `json:"totalAssignedWorkTime"`
 }
