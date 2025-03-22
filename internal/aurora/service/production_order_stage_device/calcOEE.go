@@ -61,8 +61,9 @@ func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, 
 			}
 
 			oee = model.OEE{
-				DowntimeStatistics: make(map[string]string),
-				AssignedWork:       assignedWorkByDeviceID[deviceID],
+				DowntimeStatistics:            make(map[string]string),
+				AssignedWork:                  assignedWorkByDeviceID[deviceID],
+				DeviceProgressStatusHistories: make([]model.DeviceProgressStatusHistory, 0),
 			}
 
 			for _, assigned := range assignedWorkByDeviceID[deviceID] {
@@ -74,6 +75,7 @@ func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, 
 				}
 				oee.AssignedWorkTime += assigned.EstimatedCompleteAt.Time.Sub(assigned.EstimatedStartAt.Time).Milliseconds()
 			}
+			oee.DeviceProgressStatusHistories = append(oee.DeviceProgressStatusHistories, *history.DeviceProgressStatusHistory)
 			result[deviceID] = oee
 			lastHistory = history
 			startOfDay = history.CreatedAt
@@ -99,8 +101,9 @@ func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, 
 				oee.DowntimeStatistics[history.CreatedAt.Format(time.RFC3339)] = history.ErrorCode.String
 			}
 		}
-
+		oee.DeviceProgressStatusHistories = append(oee.DeviceProgressStatusHistories, *history.DeviceProgressStatusHistory)
 		result[deviceID] = oee
+
 		lastHistory = history
 	}
 	return result, nil
