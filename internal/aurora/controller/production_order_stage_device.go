@@ -97,6 +97,25 @@ func (s productionOrderStageDeviceController) CalcOEEByDevice(c *gin.Context) {
 			})
 		}
 		oee.AssignedWork = assignedWork
+
+		deviceProgressStatusHistories := make([]dto.DeviceStatusHistory, 0, len(data.DeviceProgressStatusHistories))
+		for _, deviceProcessStatusHistory := range data.DeviceProgressStatusHistories {
+			deviceProgressStatusHistories = append(deviceProgressStatusHistories, dto.DeviceStatusHistory{
+				ID:                           deviceProcessStatusHistory.ID,
+				ProductionOrderStageDeviceID: deviceProcessStatusHistory.ProductionOrderStageDeviceID,
+				DeviceID:                     deviceProcessStatusHistory.DeviceID,
+				ProcessStatus:                deviceProcessStatusHistory.ProcessStatus,
+				IsResolved:                   deviceProcessStatusHistory.IsResolved,
+				UpdatedAt:                    deviceProcessStatusHistory.UpdatedAt.Time,
+				UpdatedBy:                    deviceProcessStatusHistory.UpdatedBy.String,
+				ErrorCode:                    deviceProcessStatusHistory.ErrorCode.String,
+				ErrorReason:                  deviceProcessStatusHistory.ErrorReason.String,
+				Description:                  deviceProcessStatusHistory.Description.String,
+				CreatedAt:                    deviceProcessStatusHistory.CreatedAt,
+			})
+		}
+		oee.DeviceProgressStatusHistories = deviceProgressStatusHistories
+
 		oeeList = append(oeeList, oee)
 	}
 
@@ -727,6 +746,7 @@ func RegisterProductionOrderStageDeviceController(
 		&dto.FindOEERequest{},
 		&dto.FindOEEByDeviceResponse{},
 		"Calc OEE by device",
+		routeutil.RegisterOptionSkipAuth,
 	)
 
 	routeutil.AddEndpoint(

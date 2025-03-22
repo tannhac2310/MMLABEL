@@ -25,19 +25,20 @@ type FindOEEByAssignedWorkResponse struct {
 }
 
 type OEEByDeviceResponse struct {
-	DeviceID           string                 `json:"deviceID"`
-	ActualWorkingTime  int64                  `json:"actualWorkingTime"`
-	JobRunningTime     int64                  `json:"jobRunningTime"`
-	DownTime           int64                  `json:"downTime"`
-	AssignedWorkTime   int64                  `json:"assignedWorkTime"`
-	AssignedWork       []AssignedWorkResponse `json:"assignedWork"`
-	DownTimeStatistics map[string]string      `json:"downTimeStatistics"`
-	Availability       float64                `json:"availability"`
-	Performance        float64                `json:"performance"`
-	Quality            float64                `json:"quality"`
-	TotalQuantity      int64                  `json:"totalQuantity"`
-	TotalDefective     int64                  `json:"totalDefective"`
-	OEE                float64                `json:"oee"`
+	DeviceID                      string                 `json:"deviceID"`
+	ActualWorkingTime             int64                  `json:"actualWorkingTime"`
+	JobRunningTime                int64                  `json:"jobRunningTime"`
+	DownTime                      int64                  `json:"downTime"`
+	AssignedWorkTime              int64                  `json:"assignedWorkTime"`
+	AssignedWork                  []AssignedWorkResponse `json:"assignedWork"`
+	DownTimeStatistics            map[string]string      `json:"downTimeStatistics"`
+	Availability                  float64                `json:"availability"`
+	Performance                   float64                `json:"performance"`
+	Quality                       float64                `json:"quality"`
+	TotalQuantity                 int64                  `json:"totalQuantity"`
+	TotalDefective                int64                  `json:"totalDefective"`
+	OEE                           float64                `json:"oee"`
+	DeviceProgressStatusHistories []DeviceStatusHistory  `json:"deviceStatusHistory"`
 }
 
 type AssignedWorkResponse struct {
