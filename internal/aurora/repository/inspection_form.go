@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"strings"
 	"time"
@@ -145,7 +146,7 @@ func (s *SearchInspectionFormOpts) buildQuery(isCount bool) (string, []interface
 	}
 	return fmt.Sprintf(`
 SELECT b.%s, po.product_name as production_order_name,  po.product_code as production_order_code, po.order_id as order_id,
-p.code as product_code, p.name as product_name,
+p.code as product_code, p.name as product_name, po.estimated_start_at as production_order_start_date,
     c.id as customer_id,
 c.name as customer_name, c.code as customer_code,
 -- po.order_id as ma_don_dat_hang,
@@ -158,18 +159,19 @@ FROM %s AS b %s WHERE TRUE %s AND b.deleted_at IS NULL %s LIMIT %d OFFSET %d
 
 type InspectionFormData struct {
 	*model.InspectionForm
-	OrderID             string `db:"order_id"`
-	ProductionOrderName string `db:"production_order_name"`
-	ProductionOrderCode string `db:"production_order_code"`
-	ProductCode         string `db:"product_code"`
-	ProductID           string `db:"product_id"`
-	ProductName         string `db:"product_name"`
-	CustomerID          string `db:"customer_id"`
-	CustomerName        string `db:"customer_name"`
-	CustomerCode        string `db:"customer_code"`
-	CreatedByName       string `db:"created_by_name"`
-	MaDonDatHang        string `db:"ma_don_dat_hang"`
-	TrangThaiDonHang    string `db:"trang_thai_don_hang"`
+	OrderID                  string       `db:"order_id"`
+	ProductionOrderName      string       `db:"production_order_name"`
+	ProductionOrderCode      string       `db:"production_order_code"`
+	ProductionOrderStartDate sql.NullTime `db:"production_order_start_date"`
+	ProductCode              string       `db:"product_code"`
+	ProductID                string       `db:"product_id"`
+	ProductName              string       `db:"product_name"`
+	CustomerID               string       `db:"customer_id"`
+	CustomerName             string       `db:"customer_name"`
+	CustomerCode             string       `db:"customer_code"`
+	CreatedByName            string       `db:"created_by_name"`
+	MaDonDatHang             string       `db:"ma_don_dat_hang"`
+	TrangThaiDonHang         string       `db:"trang_thai_don_hang"`
 }
 
 func (r *sInspectionFormRepo) Search(ctx context.Context, s *SearchInspectionFormOpts) ([]*InspectionFormData, error) {
