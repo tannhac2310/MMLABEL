@@ -12,7 +12,7 @@ import (
 type Service interface {
 	CreateProductQuality(ctx context.Context, opt *CreateProductQualityOpts) (string, error)
 	EditProductQuality(ctx context.Context, opt *EditProductQualityOpts) error
-	FindProductQuality(ctx context.Context, opts *FindProductQualityOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, []*ProductQualityAnalysis, error)
+	FindProductQuality(ctx context.Context, opts *FindProductQualityOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error)
 	Delete(ctx context.Context, id string) error
 }
 type ProductQualityAnalysis struct {
@@ -20,27 +20,31 @@ type ProductQualityAnalysis struct {
 	Count      int64  `json:"count"`
 }
 type productQualityService struct {
-	productQualityRepo repository.ProductQualityRepo
-	deviceRepo         repository.DeviceRepo
-	cfg                *configs.Config
-	redisDB            redis.Cmdable
+	inspectionErrorRepo repository.InspectionErrorRepo
+	inspectionFormRepo  repository.InspectionFormRepo
+	deviceRepo          repository.DeviceRepo
+	cfg                 *configs.Config
+	redisDB             redis.Cmdable
 }
 
 func NewService(
-	productQualityRepo repository.ProductQualityRepo,
+	insectionErrorRepo repository.InspectionErrorRepo,
+	inspectionFormRepo repository.InspectionFormRepo,
 	deviceRepo repository.DeviceRepo,
 	cfg *configs.Config,
 	redisDB redis.Cmdable,
 ) Service {
 	return &productQualityService{
-		productQualityRepo: productQualityRepo,
-		deviceRepo:         deviceRepo,
-		cfg:                cfg,
-		redisDB:            redisDB,
+		inspectionErrorRepo: insectionErrorRepo,
+		inspectionFormRepo:  inspectionFormRepo,
+		deviceRepo:          deviceRepo,
+		cfg:                 cfg,
+		redisDB:             redisDB,
 	}
 }
 
 type Data struct {
-	*repository.ProductQualityData
-	Devices []*repository.DeviceData
+	*repository.InspectionFormData
+	InspectionErrors []*repository.InspectionErrorData
+	Devices          []*repository.DeviceData
 }

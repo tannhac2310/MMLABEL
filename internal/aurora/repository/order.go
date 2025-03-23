@@ -19,6 +19,7 @@ type OrderRepo interface {
 	Search(ctx context.Context, s *SearchOrderOpts) ([]*OrderData, error)
 	Count(ctx context.Context, s *SearchOrderOpts) (*CountResult, error)
 	CntRows(ctx context.Context) (int64, error)
+	UpdateStatus(ctx context.Context, id string, status enum.OrderStatus) error
 }
 
 type sOrderRepo struct {
@@ -154,4 +155,18 @@ func (r *sOrderRepo) CntRows(ctx context.Context) (int64, error) {
 	}
 
 	return count, nil
+}
+
+func (r *sOrderRepo) UpdateStatus(ctx context.Context, id string, status enum.OrderStatus) error {
+	sql := "UPDATE orders SET status = $1 WHERE id = $2;"
+
+	cmd, err := cockroach.Exec(ctx, sql, status, id)
+	if err != nil {
+		return fmt.Errorf("orders cockroach.Exec: %w", err)
+	}
+	if cmd.RowsAffected() == 0 {
+		return fmt.Errorf("*sOrderRepo not found any records to update")
+	}
+
+	return nil
 }

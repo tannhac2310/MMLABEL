@@ -83,3 +83,12 @@ type OrderWithItems struct {
 	ID    string           `json:"id"`
 	Title string           `json:"title"`
 }
+
+// update status
+type UpdateOrderStatusRequest struct {
+	ID     string           `json:"id"`
+	Status enum.OrderStatus `json:"status"`
+}
+
+type UpdateOrderStatusResponse struct {
+}

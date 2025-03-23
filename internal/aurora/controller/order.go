@@ -16,10 +16,27 @@ type OrderController interface {
 	UpdateOrder(ctx *gin.Context)
 	DeleteOrder(ctx *gin.Context)
 	FindOrder(ctx *gin.Context)
+	UpdateStatus(ctx *gin.Context)
 }
 
 type orderController struct {
 	orderSvc order.OrderService
+}
+
+func (o orderController) UpdateStatus(ctx *gin.Context) {
+	var req dto.UpdateOrderStatusRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		transportutil.Error(ctx, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+
+	err := o.orderSvc.UpdateOrderStatus(ctx, req.ID, req.Status)
+	if err != nil {
+		transportutil.Error(ctx, err)
+		return
+	}
+
+	transportutil.SendJSONResponse(ctx, dto.UpdateOrderStatusResponse{})
 }
 
 func (o orderController) CreateOrder(ctx *gin.Context) {
@@ -233,5 +250,13 @@ func RegisterOrderController(
 		&dto.SearchOrderRequest{},
 		&dto.SearchOrderResponse{},
 		"find order",
+	)
+
+	routeutil.AddEndpoint(
+		g, "update-status",
+		c.UpdateStatus,
+		&dto.UpdateOrderStatusRequest{},
+		&dto.UpdateOrderStatusResponse{},
+		"update order status",
 	)
 }
