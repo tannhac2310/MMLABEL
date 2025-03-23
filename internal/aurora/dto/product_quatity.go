@@ -36,26 +36,27 @@ type DeviceData struct {
 }
 
 type ProductQuality struct {
-	ID                  string    `json:"id"`
-	ProductionOrderID   string    `json:"productionOrderID"`
-	ProductionOrderCode string    `json:"productionOrderCode"`
-	ProductionOrderName string    `json:"productionOrderName"`
-	InspectionDate      time.Time `json:"inspectionDate"`
-	InspectorName       string    `json:"inspectorName"`
-	Quantity            int64     `json:"quantity"`
-	ProductID           string    `json:"productID"`
-	ProductName         string    `json:"productName"`
-	ProductCode         string    `json:"productCode"`
-	CustomerID          string    `json:"customerID"`
-	CustomerName        string    `json:"customerName"`
-	CustomerCode        string    `json:"customerCode"`
-	SoLuongHopDong      int64     `json:"soLuongHopDong"`
-	SoLuongIn           int64     `json:"soLuongIn"`
-	MaDonDatHang        string    `json:"maDonDatHang"`
-	NguoiKiemTra        string    `json:"nguoiKiemTra"`
-	NguoiPheDuyet       string    `json:"nguoiPheDuyet"`
-	SoLuongThanhPhamDat int64     `json:"soLuongThanhPhamDat"`
-	OrderData           struct {
+	ID                       string    `json:"id"`
+	ProductionOrderID        string    `json:"productionOrderID"`
+	ProductionOrderCode      string    `json:"productionOrderCode"`
+	ProductionOrderName      string    `json:"productionOrderName"`
+	ProductionOrderStartDate time.Time `json:"productionOrderStartDate"`
+	InspectionDate           time.Time `json:"inspectionDate"`
+	InspectorName            string    `json:"inspectorName"`
+	Quantity                 int64     `json:"quantity"`
+	ProductID                string    `json:"productID"`
+	ProductName              string    `json:"productName"`
+	ProductCode              string    `json:"productCode"`
+	CustomerID               string    `json:"customerID"`
+	CustomerName             string    `json:"customerName"`
+	CustomerCode             string    `json:"customerCode"`
+	SoLuongHopDong           int64     `json:"soLuongHopDong"`
+	SoLuongIn                int64     `json:"soLuongIn"`
+	MaDonDatHang             string    `json:"maDonDatHang"`
+	NguoiKiemTra             string    `json:"nguoiKiemTra"`
+	NguoiPheDuyet            string    `json:"nguoiPheDuyet"`
+	SoLuongThanhPhamDat      int64     `json:"soLuongThanhPhamDat"`
+	OrderData                struct {
 		ID          string `json:"id"`
 		MaDatHangMm string `json:"maDatHangMm"`
 		Status      string `json:"status"`
