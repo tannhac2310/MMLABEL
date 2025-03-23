@@ -11,7 +11,12 @@ import (
 )
 
 func (c *productQualityService) CreateProductQuality(ctx context.Context, opt *CreateProductQualityOpts) (string, error) {
-	formID := idutil.ULIDNow()
+	formID := ""
+	countAll, err := c.inspectionFormRepo.CountAll(ctx)
+	if err != nil {
+		return "", fmt.Errorf("c.inspectionFormRepo.CountAll: %w", err)
+	}
+	formID = fmt.Sprintf("OQC-%d", *countAll+1)
 	now := time.Now()
 	errTx := cockroach.ExecInTx(ctx, func(ctx2 context.Context) error {
 		err := c.inspectionFormRepo.Insert(ctx2, &model.InspectionForm{
@@ -20,11 +25,9 @@ func (c *productQualityService) CreateProductQuality(ctx context.Context, opt *C
 			InspectionDate:      opt.InspectionDate,
 			InspectorName:       opt.InspectorName,
 			Quantity:            opt.Quantity,
-			MaSanPham:           opt.MaSanPham,
-			TenSanPham:          opt.TenSanPham,
+			ProductID:           opt.ProductID,
 			SoLuongHopDong:      opt.SoLuongHopDong,
 			SoLuongIn:           opt.SoLuongIn,
-			MaDonDatHang:        opt.MaDonDatHang,
 			NguoiKiemTra:        opt.NguoiKiemTra,
 			NguoiPheDuyet:       opt.NguoiPheDuyet,
 			SoLuongThanhPhamDat: opt.SoLuongThanhPhamDat,
@@ -36,7 +39,7 @@ func (c *productQualityService) CreateProductQuality(ctx context.Context, opt *C
 		})
 
 		if err != nil {
-			return fmt.Errorf("c.inspectionFormRepo.Insert: %w", err)
+			return fmt.Errorf("c.inspectionFormRepo.Insert with id %s: %w", formID, err)
 		}
 
 		for _, e := range opt.InspectionErrors {
@@ -65,7 +68,7 @@ func (c *productQualityService) CreateProductQuality(ctx context.Context, opt *C
 	if errTx != nil {
 		return "", fmt.Errorf("cockroach.ExecInTx: %w", errTx)
 	}
-	return "", nil
+	return formID, nil
 }
 
 type CreateProductQualityOpts struct {
@@ -74,11 +77,9 @@ type CreateProductQualityOpts struct {
 	InspectorName       string
 	Quantity            int64
 	Note                string
-	MaSanPham           string
-	TenSanPham          string
+	ProductID           string
 	SoLuongHopDong      int64
 	SoLuongIn           int64
-	MaDonDatHang        string
 	NguoiKiemTra        string
 	NguoiPheDuyet       string
 	SoLuongThanhPhamDat int64

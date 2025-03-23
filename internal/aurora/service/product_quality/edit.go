@@ -21,20 +21,20 @@ func (c *productQualityService) EditProductQuality(ctx context.Context, opt *Edi
 
 		err := c.inspectionFormRepo.Update(ctx2, &model.InspectionForm{
 			ID:                  opt.ID,
-			ProductionOrderID:   inspectData.ProductionOrderID,
+			ProductionOrderID:   opt.ProductionOrderID,
 			InspectionDate:      opt.InspectionDate,
 			InspectorName:       opt.InspectorName,
 			Quantity:            opt.Quantity,
-			MaSanPham:           opt.MaSanPham,
-			TenSanPham:          opt.TenSanPham,
+			ProductID:           opt.ProductID,
 			SoLuongHopDong:      opt.SoLuongHopDong,
 			SoLuongIn:           opt.SoLuongIn,
-			MaDonDatHang:        opt.MaDonDatHang,
 			NguoiKiemTra:        opt.NguoiKiemTra,
 			NguoiPheDuyet:       opt.NguoiPheDuyet,
 			SoLuongThanhPhamDat: opt.SoLuongThanhPhamDat,
 			Note:                opt.Note,
+			CreatedBy:           inspectData.CreatedBy,
 			UpdatedBy:           opt.CreatedBy,
+			CreatedAt:           inspectData.CreatedAt,
 			UpdatedAt:           time.Now(),
 		})
 		if err != nil {
@@ -68,15 +68,14 @@ func (c *productQualityService) EditProductQuality(ctx context.Context, opt *Edi
 
 type EditProductQualityOpts struct {
 	ID                  string
+	ProductionOrderID   string
 	InspectionDate      time.Time
 	InspectorName       string
 	Quantity            int64
 	Note                string
-	MaSanPham           string
-	TenSanPham          string
+	ProductID           string
 	SoLuongHopDong      int64
 	SoLuongIn           int64
-	MaDonDatHang        string
 	NguoiKiemTra        string
 	NguoiPheDuyet       string
 	SoLuongThanhPhamDat int64

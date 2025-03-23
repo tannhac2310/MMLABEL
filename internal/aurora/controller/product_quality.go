@@ -36,6 +36,10 @@ func (s productQualityController) CreateProductQuality(c *gin.Context) {
 	userID := interceptor.UserIDFromCtx(c)
 	inspectionErrors := make([]*product_quality.InspectionError, 0, len(req.InspectionErrors))
 	for _, e := range req.InspectionErrors {
+		if e.DeviceID == "" {
+			transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage("DeviceID is required"))
+			return
+		}
 		inspectionErrors = append(inspectionErrors, &product_quality.InspectionError{
 			DeviceID:         e.DeviceID,
 			DeviceName:       e.DeviceName,
@@ -51,11 +55,9 @@ func (s productQualityController) CreateProductQuality(c *gin.Context) {
 		InspectorName:       req.InspectorName,
 		Quantity:            req.Quantity,
 		Note:                req.Note,
-		MaSanPham:           req.MaSanPham,
-		TenSanPham:          req.TenSanPham,
+		ProductID:           req.ProductID,
 		SoLuongHopDong:      req.SoLuongHopDong,
 		SoLuongIn:           req.SoLuongIn,
-		MaDonDatHang:        req.MaDonDatHang,
 		NguoiKiemTra:        req.NguoiKiemTra,
 		NguoiPheDuyet:       req.NguoiPheDuyet,
 		SoLuongThanhPhamDat: req.SoLuongThanhPhamDat,
@@ -92,15 +94,14 @@ func (s productQualityController) EditProductQuality(c *gin.Context) {
 	}
 	err = s.productQualityService.EditProductQuality(c, &product_quality.EditProductQualityOpts{
 		ID:                  req.ID,
+		ProductionOrderID:   req.ProductionOrderID,
 		InspectionDate:      req.InspectionDate,
 		InspectorName:       req.InspectorName,
 		Quantity:            req.Quantity,
 		Note:                req.Note,
-		MaSanPham:           req.MaSanPham,
-		TenSanPham:          req.TenSanPham,
+		ProductID:           req.ProductID,
 		SoLuongHopDong:      req.SoLuongHopDong,
 		SoLuongIn:           req.SoLuongIn,
-		MaDonDatHang:        req.MaDonDatHang,
 		NguoiKiemTra:        req.NguoiKiemTra,
 		NguoiPheDuyet:       req.NguoiPheDuyet,
 		SoLuongThanhPhamDat: req.SoLuongThanhPhamDat,
@@ -148,7 +149,7 @@ func (s productQualityController) FindProductQuality(c *gin.Context) {
 		CreatedAtTo:       req.Filter.CreatedAtTo,
 	}, &repository.Sort{
 		Order: repository.SortOrderDESC,
-		By:    "ID",
+		By:    "created_at",
 	}, req.Paging.Limit, req.Paging.Offset)
 	if err != nil {
 		transportutil.Error(c, err)
@@ -184,14 +185,25 @@ func toProductQualityResp(f *product_quality.Data) *dto.ProductQuality {
 	return &dto.ProductQuality{
 		ID:                  f.ID,
 		ProductionOrderID:   f.ProductionOrderID,
+		ProductionOrderCode: f.ProductionOrderCode,
+		ProductionOrderName: f.ProductionOrderName,
 		InspectionDate:      f.InspectionDate,
 		InspectorName:       f.InspectorName,
 		Quantity:            f.Quantity,
-		MaSanPham:           f.MaSanPham,
-		TenSanPham:          f.TenSanPham,
+		ProductID:           f.ProductID,
+		ProductCode:         f.ProductCode,
+		ProductName:         f.ProductName,
+		CustomerID:          f.CustomerID,
+		CustomerName:        f.CustomerName,
+		CustomerCode:        f.CustomerCode,
 		SoLuongHopDong:      f.SoLuongHopDong,
 		SoLuongIn:           f.SoLuongIn,
 		MaDonDatHang:        f.MaDonDatHang,
+		OrderData: struct {
+			ID          string `json:"id"`
+			MaDatHangMm string `json:"maDatHangMm"`
+			Status      string `json:"status"`
+		}{ID: f.OrderID, MaDatHangMm: f.MaDonDatHang, Status: f.TrangThaiDonHang},
 		NguoiKiemTra:        f.NguoiKiemTra,
 		NguoiPheDuyet:       f.NguoiPheDuyet,
 		SoLuongThanhPhamDat: f.SoLuongThanhPhamDat,

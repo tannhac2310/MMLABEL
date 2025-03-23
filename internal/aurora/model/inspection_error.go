@@ -1,6 +1,7 @@
 package model
 
 import (
+	"database/sql"
 	"time"
 )
 
@@ -17,21 +18,23 @@ const (
 	InspectionErrorFieldUpdatedBy        = "updated_by"
 	InspectionErrorFieldCreatedAt        = "created_at"
 	InspectionErrorFieldUpdatedAt        = "updated_at"
+	InspectionErrorFieldDeletedAt        = "deleted_at"
 )
 
 type InspectionError struct {
-	ID               string    `db:"id"`
-	DeviceID         string    `db:"device_id"`
-	DeviceName       string    `db:"device_name"`
-	InspectionFormID string    `db:"inspection_form_id"`
-	ErrorType        string    `db:"error_type"`
-	Quantity         int64     `db:"quantity"`
-	NhanVienThucHien string    `db:"nhan_vien_thuc_hien"`
-	Note             string    `db:"note"`
-	CreatedBy        string    `db:"created_by"`
-	UpdatedBy        string    `db:"updated_by"`
-	CreatedAt        time.Time `db:"created_at"`
-	UpdatedAt        time.Time `db:"updated_at"`
+	ID               string       `db:"id"`
+	DeviceID         string       `db:"device_id"`
+	DeviceName       string       `db:"device_name"`
+	InspectionFormID string       `db:"inspection_form_id"`
+	ErrorType        string       `db:"error_type"`
+	Quantity         int64        `db:"quantity"`
+	NhanVienThucHien string       `db:"nhan_vien_thuc_hien"`
+	Note             string       `db:"note"`
+	CreatedBy        string       `db:"created_by"`
+	UpdatedBy        string       `db:"updated_by"`
+	CreatedAt        time.Time    `db:"created_at"`
+	UpdatedAt        time.Time    `db:"updated_at"`
+	DeletedAt        sql.NullTime `db:"deleted_at"`
 }
 
 func (rcv *InspectionError) FieldMap() (fields []string, values []interface{}) {
@@ -48,6 +51,7 @@ func (rcv *InspectionError) FieldMap() (fields []string, values []interface{}) {
 		InspectionErrorFieldUpdatedBy,
 		InspectionErrorFieldCreatedAt,
 		InspectionErrorFieldUpdatedAt,
+		InspectionErrorFieldDeletedAt,
 	}
 
 	values = []interface{}{
@@ -63,6 +67,7 @@ func (rcv *InspectionError) FieldMap() (fields []string, values []interface{}) {
 		&rcv.UpdatedBy,
 		&rcv.CreatedAt,
 		&rcv.UpdatedAt,
+		&rcv.DeletedAt,
 	}
 
 	return

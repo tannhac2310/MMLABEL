@@ -15,6 +15,8 @@ type FindProductQualityOpts struct {
 	DefectTypes       []string
 	CreatedAtFrom     time.Time
 	CreatedAtTo       time.Time
+	ProductSearch     string
+	CustomerSearch    string
 }
 
 func (c *productQualityService) FindProductQuality(ctx context.Context, opts *FindProductQualityOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error) {
@@ -24,16 +26,18 @@ func (c *productQualityService) FindProductQuality(ctx context.Context, opts *Fi
 		DefectType:        opts.DefectTypes,
 		CreatedAtFrom:     opts.CreatedAtFrom,
 		CreatedAtTo:       opts.CreatedAtTo,
-		//ProductSearch:     opts.ProductSearch,
-		Limit:  limit,
-		Offset: offset,
-		Sort:   sort,
+		ProductSearch:     opts.ProductSearch,
+		CustomerSearch:    opts.CustomerSearch,
+		Limit:             limit,
+		Offset:            offset,
+		Sort:              sort,
 	}
 	// Find inspection forms based on filter converted to repository options.
 	forms, err := c.inspectionFormRepo.Search(ctx, params)
 	if err != nil {
 		return nil, nil, fmt.Errorf("lỗi khi tìm kiếm form: %w", err)
 	}
+
 	count, err := c.inspectionFormRepo.Count(ctx, params)
 	if err != nil {
 		return nil, nil, fmt.Errorf("lỗi khi đếm số lượng form: %w", err)
