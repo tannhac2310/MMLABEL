@@ -60,6 +60,7 @@ type OrderService interface {
 	UpdateOrder(ctx context.Context, orderWithItems *UpdateOrder) error
 	DeleteOrder(ctx context.Context, id string) error
 	SearchOrders(ctx context.Context, opts *repository.SearchOrderOpts) ([]*OrderWithItems, *repository.CountResult, error)
+	UpdateOrderStatus(ctx context.Context, id string, status enum.OrderStatus) error
 }
 
 type orderService struct {
@@ -268,4 +269,12 @@ func (s *orderService) CreateOrder(ctx context.Context, orderWithItems *CreateOr
 	}
 
 	return orderId, nil
+}
+
+func (s *orderService) UpdateOrderStatus(ctx context.Context, id string, status enum.OrderStatus) error {
+	err := s.orderRepo.UpdateStatus(ctx, id, status)
+	if err != nil {
+		return fmt.Errorf("cập nhật trạng thái đơn hàng thất bại: %w", err)
+	}
+	return nil
 }

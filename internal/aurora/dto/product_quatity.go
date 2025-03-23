@@ -7,12 +7,13 @@ import (
 )
 
 type ProductQualityFilter struct {
-	ProductionOrderID string    `json:"productionOrderID"`
-	DeviceIDs         []string  `json:"deviceIDs"`
-	DefectType        string    `json:"defectType"`
-	DefectCode        string    `json:"defectCode"`
-	CreatedAtFrom     time.Time `json:"createdAtFrom"`
-	CreatedAtTo       time.Time `json:"createdAtTo"`
+	IDs               []string `json:"ids"`
+	ProductionOrderID string   `json:"productionOrderID"`
+	DeviceIDs         []string `json:"deviceIDs"`
+	DefectTypes       []string `json:"defectType"`
+	//ProductSearch     string    `json:"productSearch"`
+	CreatedAtFrom time.Time `json:"createdAtFrom"`
+	CreatedAtTo   time.Time `json:"createdAtTo"`
 }
 
 type FindProductQualityRequest struct {
@@ -35,36 +36,63 @@ type DeviceData struct {
 }
 
 type ProductQuality struct {
-	ID                      string        `json:"id"`
-	ProductionOrderID       string        `json:"productionOrderID"`
-	ProductionOrderName     string        `json:"productionOrderName"`
-	ProductionOrderQtyPaper int64         `json:"productionOrderQtyPaper"`
-	DeviceIDs               []string      `json:"deviceIDs"`
-	Devices                 []*DeviceData `json:"devices"`
-	ProductID               string        `json:"productID"`
-	DefectType              string        `json:"defectType"`
-	DefectCode              string        `json:"defectCode"`
-	DefectLevel             int16         `json:"defectLevel"`
-	ProductionStageID       string        `json:"productionStageID"`
-	DefectiveQuantity       int64         `json:"defectiveQuantity"`
-	GoodQuantity            int64         `json:"goodQuantity"`
-	Description             string        `json:"description"`
-	CreatedBy               string        `json:"createdBy"`
-	CreatedAt               time.Time     `json:"createdAt"`
-	UpdatedAt               time.Time     `json:"updatedAt"`
+	ID                  string    `json:"id"`
+	ProductionOrderID   string    `json:"productionOrderID"`
+	ProductionOrderCode string    `json:"productionOrderCode"`
+	ProductionOrderName string    `json:"productionOrderName"`
+	InspectionDate      time.Time `json:"inspectionDate"`
+	InspectorName       string    `json:"inspectorName"`
+	Quantity            int64     `json:"quantity"`
+	ProductID           string    `json:"productID"`
+	ProductName         string    `json:"productName"`
+	ProductCode         string    `json:"productCode"`
+	CustomerID          string    `json:"customerID"`
+	CustomerName        string    `json:"customerName"`
+	CustomerCode        string    `json:"customerCode"`
+	SoLuongHopDong      int64     `json:"soLuongHopDong"`
+	SoLuongIn           int64     `json:"soLuongIn"`
+	MaDonDatHang        string    `json:"maDonDatHang"`
+	NguoiKiemTra        string    `json:"nguoiKiemTra"`
+	NguoiPheDuyet       string    `json:"nguoiPheDuyet"`
+	SoLuongThanhPhamDat int64     `json:"soLuongThanhPhamDat"`
+	OrderData           struct {
+		ID          string `json:"id"`
+		MaDatHangMm string `json:"maDatHangMm"`
+		Status      string `json:"status"`
+	} `json:"orderData"`
+	Note             string            `json:"note"`
+	InspectionErrors []InspectionError `json:"inspectionErrors"`
+	CreatedBy        string            `json:"createdBy"`
+	UpdatedBy        string            `json:"updatedBy"`
+	CreatedAt        time.Time         `json:"createdAt"`
+	UpdatedAt        time.Time         `json:"updatedAt"`
+}
+
+type InspectionError struct {
+	ID               string `json:"id"`
+	DeviceID         string `json:"deviceID" binding:"required"`
+	DeviceName       string `json:"deviceName" binding:"required"`
+	InspectionFormID string `json:"inspectionFormID"`
+	ErrorType        string `json:"errorType" binding:"required"`
+	Quantity         int64  `json:"quantity" binding:"required"`
+	Note             string `json:"note"`
+	NhanVienThucHien string `json:"nhanVienThucHien"`
 }
 
 type CreateProductQualityRequest struct {
-	ProductionOrderID string   `json:"productionOrderID"  binding:"required"`
-	ProductID         string   `json:"productID"`
-	DeviceIDs         []string `json:"deviceIDs"`
-	DefectType        string   `json:"defectType" binding:"required"`
-	DefectCode        string   `json:"defectCode" binding:"required"`
-	DefectLevel       int16    `json:"defectLevel"`
-	ProductionStageID string   `json:"productionStageID"`
-	DefectiveQuantity int64    `json:"defectiveQuantity"`
-	GoodQuantity      int64    `json:"goodQuantity"`
-	Description       string   `json:"description"`
+	ProductionOrderID string    `json:"productionOrderID" binding:"required"`
+	InspectionDate    time.Time `json:"inspectionDate"  binding:"required"`
+	InspectorName     string    `json:"inspectorName"`
+	Quantity          int64     `json:"quantity" binding:"required"`
+	ProductID         string    `json:"productID" binding:"required"`
+	SoLuongHopDong    int64     `json:"soLuongHopDong"`
+	SoLuongIn         int64     `json:"soLuongIn"`
+	//MaDonDatHang        string            `json:"maDonDatHang"`
+	NguoiKiemTra        string            `json:"nguoiKiemTra"`
+	NguoiPheDuyet       string            `json:"nguoiPheDuyet"`
+	SoLuongThanhPhamDat int64             `json:"soLuongThanhPhamDat" binding:"required"`
+	Note                string            `json:"note"`
+	InspectionErrors    []InspectionError `json:"inspectionErrors" binding:"required"`
 }
 
 type CreateProductQualityResponse struct {
@@ -72,15 +100,19 @@ type CreateProductQualityResponse struct {
 }
 
 type EditProductQualityRequest struct {
-	ID                string   `json:"id" binding:"required"`
-	DefectType        string   `json:"defectType"`
-	DeviceIDs         []string `json:"deviceIDs"`
-	DefectCode        string   `json:"defectCode"`
-	DefectLevel       string   `json:"defectLevel"`
-	ProductionStageID string   `json:"productionStageID"`
-	DefectiveQuantity int64    `json:"defectiveQuantity"`
-	GoodQuantity      int64    `json:"goodQuantity"`
-	Description       string   `json:"description"`
+	ID                  string            `json:"id" binding:"required"`
+	ProductionOrderID   string            `json:"productionOrderID" binding:"required"`
+	InspectionDate      time.Time         `json:"inspectionDate"`
+	InspectorName       string            `json:"inspectorName"`
+	Quantity            int64             `json:"quantity" binding:"required"`
+	ProductID           string            `json:"productID" binding:"required"`
+	SoLuongHopDong      int64             `json:"soLuongHopDong" binding:"required"`
+	SoLuongIn           int64             `json:"soLuongIn" binding:"required"`
+	NguoiKiemTra        string            `json:"nguoiKiemTra"`
+	NguoiPheDuyet       string            `json:"nguoiPheDuyet"`
+	SoLuongThanhPhamDat int64             `json:"soLuongThanhPhamDat" binding:"required"`
+	Note                string            `json:"note"`
+	InspectionErrors    []InspectionError `json:"inspectionErrors" binding:"required"`
 }
 
 type EditProductQualityResponse struct {

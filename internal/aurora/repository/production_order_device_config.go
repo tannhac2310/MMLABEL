@@ -79,7 +79,7 @@ func (s *SearchProductionOrderDeviceConfigOpts) buildQuery(isCount bool) (string
 
 	if s.ProductionOrderID != "" {
 		args = append(args, s.ProductionOrderID)
-		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductQualityFieldProductionOrderID, len(args))
+		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderDeviceConfigFieldProductionOrderID, len(args))
 	}
 	if len(s.IDs) > 0 {
 		args = append(args, s.IDs)
