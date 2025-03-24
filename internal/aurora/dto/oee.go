@@ -6,8 +6,11 @@ import (
 )
 
 type FindOEEFilter struct {
-	DateFrom string `json:"dateFrom"`
-	DateTo   string `json:"dateTo"`
+	DateFrom                     string `json:"dateFrom"`
+	DateTo                       string `json:"dateTo"`
+	ProductionOrderStageDeviceID string `json:"productionOrderStageDeviceID"`
+	ProductionOrderID            string `json:"productionOrderStageID"`
+	DeviceID                     string `json:"deviceID"`
 }
 type FindOEERequest struct {
 	Filter *FindOEEFilter    `json:"filter" binding:"required"`
@@ -31,7 +34,7 @@ type OEEByDeviceResponse struct {
 	DownTime                      int64                  `json:"downTime"`
 	AssignedWorkTime              int64                  `json:"assignedWorkTime"`
 	AssignedWork                  []AssignedWorkResponse `json:"assignedWork"`
-	DownTimeStatistics            map[string]string      `json:"downTimeStatistics"`
+	DowntimeDetails               map[string]int64       `json:"downtimeDetails"`
 	Availability                  float64                `json:"availability"`
 	Performance                   float64                `json:"performance"`
 	Quality                       float64                `json:"quality"`
@@ -52,21 +55,20 @@ type AssignedWorkResponse struct {
 }
 
 type OEEByAssignedWorkResponse struct {
-	AssignedWorkID      string  `json:"assignedWorkID"`
-	ProductionOrderName string  `json:"ProductionOrderID"`
-	DeviceID            string  `json:"deviceID"`
-	ActualWorkingTime   int64   `json:"actualWorkingTime"`
-	JobRunningTime      int64   `json:"jobRunningTime"`
-	DownTime            int64   `json:"downTime"`
-	AssignedWorkTime    int64   `json:"assignedWorkTime"`
-	Availability        float64 `json:"availability"`
-	Performance         float64 `json:"performance"`
-	Quality             float64 `json:"quality"`
-	TotalQuantity       int64   `json:"totalQuantity"`
-	TotalAssignQuantity int64   `json:"totalAssignQuantity"`
-	TotalDefective      int64   `json:"totalDefective"`
-	OEE                 float64 `json:"oee"`
-	//DeviceProgressStatusHistories []DeviceStatusHistory `json:"deviceStatusHistory"`
-	DowntimeDetails map[string]int64 `json:"downtimeDetails"`
-	MachineOperator []string         `json:"machineOperator"`
+	AssignedWorkID      string           `json:"assignedWorkID"`
+	ProductionOrderName string           `json:"ProductionOrderID"`
+	DeviceID            string           `json:"deviceID"`
+	ActualWorkingTime   int64            `json:"actualWorkingTime"`
+	JobRunningTime      int64            `json:"jobRunningTime"`
+	DownTime            int64            `json:"downTime"`
+	AssignedWorkTime    int64            `json:"assignedWorkTime"`
+	Availability        float64          `json:"availability"`
+	Performance         float64          `json:"performance"`
+	Quality             float64          `json:"quality"`
+	TotalQuantity       int64            `json:"totalQuantity"`
+	TotalAssignQuantity int64            `json:"totalAssignQuantity"`
+	TotalDefective      int64            `json:"totalDefective"`
+	OEE                 float64          `json:"oee"`
+	DowntimeDetails     map[string]int64 `json:"downtimeDetails"`
+	MachineOperator     []string         `json:"machineOperator"`
 }

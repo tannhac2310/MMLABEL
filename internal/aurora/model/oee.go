@@ -5,7 +5,6 @@ type OEE struct {
 	JobRunningTime                int64
 	AssignedWorkTime              int64
 	AssignedWork                  []ProductionOrderStageDevice
-	DowntimeStatistics            map[string]string
 	Downtime                      int64
 	TotalQuantity                 int64
 	TotalAssignQuantity           int64

@@ -1,18 +1,46 @@
-package production_order_stage_device
+package oee
 
 import (
 	"context"
 	"fmt"
-	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
-	"time"
-
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
+	"time"
 )
 
+type Service interface {
+	CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (map[string]model.OEE, error)
+	CalcOEEByAssignedWork(ctx context.Context, opt *CalcOEEOpts) (map[string]model.OEE, int64, error)
+}
+
+type calcOEEService struct {
+	oeeRepo repository.OEERepo
+}
+
+func NewService(
+	oeeRepo repository.OEERepo,
+) Service {
+	return &calcOEEService{
+		oeeRepo: oeeRepo,
+	}
+
+}
+
+type CalcOEEOpts struct {
+	ProductionOrderID            string
+	ProductionOrderStageDeviceID string
+	DateFrom                     string
+	DateTo                       string
+	DeviceID                     string
+	Limit                        int64
+	Offset                       int64
+}
+
 // parseDateOrDefault - Helper function to parse date or use default
-func parseDateOrDefault(date, defaultDate string) (string, error) {
+func parseDateOrDefault(date string) (string, error) {
+	defaultDate := time.Now().Format("2006-01-02")
 	if date == "" {
 		return defaultDate, nil
 	}
@@ -22,23 +50,29 @@ func parseDateOrDefault(date, defaultDate string) (string, error) {
 	return date, nil
 }
 
-func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, dateFrom, dateTo string) (map[string]model.OEE, error) {
-	now := time.Now().Format("2006-01-02")
-
+func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (map[string]model.OEE, error) {
 	var err error
-	if dateFrom, err = parseDateOrDefault(dateFrom, now); err != nil {
+	if opt.DateFrom, err = parseDateOrDefault(opt.DateFrom); err != nil {
 		return nil, err
 	}
-	if dateTo, err = parseDateOrDefault(dateTo, now); err != nil {
+	if opt.DateTo, err = parseDateOrDefault(opt.DateTo); err != nil {
 		return nil, err
 	}
 
-	listDeviceProgressStatusHistory, err := p.sDeviceProgressStatusHistoryRepo.FindByDate(ctx, dateFrom, dateTo)
+	optRepo := repository.OEEOpts{
+		ProductionOrderID:            opt.ProductionOrderID,
+		ProductionOrderStageDeviceID: opt.ProductionOrderStageDeviceID,
+		DateFrom:                     opt.DateFrom,
+		DateTo:                       opt.DateTo,
+		DeviceID:                     opt.DeviceID,
+	}
+
+	listDeviceProgressStatusHistory, err := p.oeeRepo.GetByDevice(ctx, optRepo)
 	if err != nil {
 		return nil, fmt.Errorf("p.CalcOEE: %w", err)
 	}
 
-	assignedWork, _, err := p.productionOrderStageDeviceRepo.GetAssignedByDate(ctx, dateFrom, dateTo, -1, -1)
+	assignedWork, _, err := p.oeeRepo.GetByAssigned(ctx, optRepo, opt.Limit, opt.Offset)
 	if err != nil {
 		return nil, fmt.Errorf("p.CalcOEE: %w", err)
 	}
@@ -61,7 +95,7 @@ func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, 
 			}
 
 			oee = model.OEE{
-				DowntimeStatistics:            make(map[string]string),
+				DowntimeDetails:               make(map[string]int64),
 				AssignedWork:                  assignedWorkByDeviceID[deviceID],
 				DeviceProgressStatusHistories: make([]model.DeviceProgressStatusHistory, 0),
 			}
@@ -91,6 +125,7 @@ func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, 
 		case history.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart &&
 			lastHistory.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed:
 			oee.Downtime += duration
+			oee.DowntimeDetails[lastHistory.ErrorCode.String] += duration
 
 		case (history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed ||
 			history.ProcessStatus == enum.ProductionOrderStageDeviceStatusComplete) &&
@@ -98,7 +133,7 @@ func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, 
 			oee.JobRunningTime += duration
 
 			if history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed {
-				oee.DowntimeStatistics[history.CreatedAt.Format(time.RFC3339)] = history.ErrorCode.String
+				oee.DowntimeDetails[history.ErrorCode.String] += 0
 			}
 		}
 		oee.DeviceProgressStatusHistories = append(oee.DeviceProgressStatusHistories, *history.DeviceProgressStatusHistory)
@@ -109,24 +144,29 @@ func (p productionOrderStageDeviceService) CalcOEEByDevice(ctx context.Context, 
 	return result, nil
 }
 
-func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Context, dateFrom, dateTo string, limit int64, offset int64) (map[string]model.OEE, int64, error) {
-	now := time.Now().Format("2006-01-02")
-
+func (o calcOEEService) CalcOEEByAssignedWork(ctx context.Context, opt *CalcOEEOpts) (map[string]model.OEE, int64, error) {
 	var err error
-	if dateFrom, err = parseDateOrDefault(dateFrom, now); err != nil {
+	if opt.DateFrom, err = parseDateOrDefault(opt.DateFrom); err != nil {
 		return nil, 0, err
 	}
-	if dateTo, err = parseDateOrDefault(dateTo, now); err != nil {
+	if opt.DateTo, err = parseDateOrDefault(opt.DateTo); err != nil {
 		return nil, 0, err
+	}
+	optRepo := repository.OEEOpts{
+		ProductionOrderID:            opt.ProductionOrderID,
+		ProductionOrderStageDeviceID: opt.ProductionOrderStageDeviceID,
+		DateFrom:                     opt.DateFrom,
+		DateTo:                       opt.DateTo,
+		DeviceID:                     opt.DeviceID,
 	}
 
-	listDeviceProgressStatusHistory, err := p.sDeviceProgressStatusHistoryRepo.FindByDate(ctx, dateFrom, dateTo)
+	listDeviceProgressStatusHistory, err := o.oeeRepo.GetByDevice(ctx, optRepo)
 	if err != nil {
 		return nil, 0, fmt.Errorf("p.CalcOEE: %w", err)
 	}
 	processDeviceProgressStatusHistory := processDeviceProgressStatusHistoryByProductionOrderStageDeviceID(listDeviceProgressStatusHistory)
 
-	assignedWorks, total, err := p.productionOrderStageDeviceRepo.GetAssignedByDate(ctx, dateFrom, dateTo, limit, offset)
+	assignedWorks, total, err := o.oeeRepo.GetByAssigned(ctx, optRepo, opt.Limit, opt.Offset)
 	if err != nil {
 		return nil, 0, fmt.Errorf("p.CalcOEE: %w", err)
 	}
@@ -167,7 +207,7 @@ func (p productionOrderStageDeviceService) CalcOEEByAssignedWork(ctx context.Con
 					lastHistory.ProcessStatus == enum.ProductionOrderStageDeviceStatusStart:
 					oee.JobRunningTime += duration
 					if history.ProcessStatus == enum.ProductionOrderStageDeviceStatusFailed {
-						oee.DowntimeDetails[lastHistory.ErrorCode.String] += 0
+						oee.DowntimeDetails[history.ErrorCode.String] += 0
 					}
 				}
 				lastHistory = history
