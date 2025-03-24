@@ -200,7 +200,6 @@ func RegisterOEEController(
 		&dto.FindOEERequest{},
 		&dto.FindOEEByDeviceResponse{},
 		"Calc OEE by device",
-		routeutil.RegisterOptionSkipAuth,
 	)
 
 	routeutil.AddEndpoint(
@@ -210,6 +209,5 @@ func RegisterOEEController(
 		&dto.FindOEERequest{},
 		&dto.FindOEEByAssignedWorkResponse{},
 		"Calc OEE By assigned work",
-		routeutil.RegisterOptionSkipAuth,
 	)
 }
