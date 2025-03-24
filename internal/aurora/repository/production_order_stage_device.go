@@ -26,7 +26,6 @@ type ProductionOrderStageDeviceRepo interface {
 	InsertEventLog(ctx context.Context, e *model.EventLog) error
 	FindEventLog(ctx context.Context, s *SearchEventLogOpts) ([]*EventLogData, error)
 	FindByID(ctx context.Context, id string) (*model.ProductionOrderStageDevice, error)
-	GetAssignedByDate(ctx context.Context, dateFrom, dateTo string, limit int64, offset int64) ([]model.ProductionOrderStageDevice, int64, error)
 }
 type SearchEventLogOpts struct {
 	DeviceID string
@@ -58,45 +57,6 @@ type productionOrderStageDevicesRepo struct {
 
 func NewProductionOrderStageDeviceRepo() ProductionOrderStageDeviceRepo {
 	return &productionOrderStageDevicesRepo{}
-}
-
-func (p *productionOrderStageDevicesRepo) GetAssignedByDate(ctx context.Context, dateFrom, dateTo string, limit int64, offset int64) ([]model.ProductionOrderStageDevice, int64, error) {
-	var result []model.ProductionOrderStageDevice
-	var total int64
-
-	// Lấy tổng số bản ghi trước khi phân trang
-	countQuery := `
-		SELECT COUNT(*) 
-		FROM production_order_stage_devices 
-		WHERE estimated_start_at::DATE = estimated_complete_at::DATE
-		AND estimated_start_at::DATE BETWEEN $1 AND $2
-	`
-	err := cockroach.QueryRow(ctx, countQuery, dateFrom, dateTo).Scan(&total)
-	if err != nil {
-		return nil, 0, fmt.Errorf("cockroach.QueryRow (count): %w", err)
-	}
-
-	// Truy vấn dữ liệu với LIMIT và OFFSET
-	sqlQuery := `
-		SELECT id, production_order_stage_id, device_id, quantity, settings, estimated_start_at, estimated_complete_at
-		FROM production_order_stage_devices 
-		WHERE estimated_start_at::DATE = estimated_complete_at::DATE
-		AND estimated_start_at::DATE BETWEEN $1 AND $2
-		ORDER BY device_id, estimated_start_at
-	`
-	if limit > 0 {
-		sqlQuery += fmt.Sprintf(" LIMIT %d", limit)
-		if offset >= 0 {
-			sqlQuery += fmt.Sprintf(" OFFSET %d", offset)
-		}
-	}
-
-	err = cockroach.Select(ctx, sqlQuery, dateFrom, dateTo).ScanAll(&result)
-	if err != nil {
-		return nil, 0, fmt.Errorf("cockroach.Select: %w", err)
-	}
-
-	return result, total, nil
 }
 
 func (p *productionOrderStageDevicesRepo) FindByID(ctx context.Context, id string) (*model.ProductionOrderStageDevice, error) {

@@ -18,7 +18,6 @@ type DeviceProgressStatusHistoryRepo interface {
 	Count(ctx context.Context, s *SearchDeviceProgressStatusHistoryOpts) (*CountResult, error)
 	FindProductionOrderStageDeviceID(ctx context.Context, ProductionOrderStageID string, deviceID string) (*DeviceProgressStatusHistoryData, error)
 	FindByID(ctx context.Context, ID string) (*DeviceProgressStatusHistoryData, error)
-	FindByDate(ctx context.Context, dateFrom string, dateTo string) ([]DeviceProgressStatusHistoryData, error)
 }
 
 type sDeviceProgressStatusHistoryRepo struct {
@@ -56,18 +55,6 @@ func (i *sDeviceProgressStatusHistoryRepo) Insert(ctx context.Context, e *model.
 
 func (i *sDeviceProgressStatusHistoryRepo) Update(ctx context.Context, e *model.DeviceProgressStatusHistory) error {
 	return cockroach.Update(ctx, e)
-}
-
-func (i *sDeviceProgressStatusHistoryRepo) FindByDate(ctx context.Context, dateFrom string, dateTo string) ([]DeviceProgressStatusHistoryData, error) {
-	var deviceProcessStatusHistoryData []DeviceProgressStatusHistoryData
-	sqlQuery := `SELECT * FROM device_progress_status_history 
-         WHERE created_at::DATE BETWEEN $1 AND $2 
-         ORDER BY device_id, created_at;`
-	err := cockroach.Select(ctx, sqlQuery, dateFrom, dateTo).ScanAll(&deviceProcessStatusHistoryData)
-	if err != nil {
-		return nil, fmt.Errorf("cockroach.Select: %w", err)
-	}
-	return deviceProcessStatusHistoryData, nil
 }
 
 // SearchDeviceProgressStatusHistoryOpts all params is options
