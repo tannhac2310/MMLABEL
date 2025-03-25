@@ -46,7 +46,7 @@ type OEEByDeviceResponse struct {
 
 type AssignedWorkResponse struct {
 	ID                     string    `json:"id"`
-	ProductionOrderStageID string    `json:"productionOrderID"`
+	ProductionOrderStageID string    `json:"productionOrderStageID"`
 	StageID                string    `json:"stageID"`
 	EstimatedStartAt       time.Time `json:"estimatedStartAt"`
 	EstimatedCompleteAt    time.Time `json:"estimatedCompleteAt"`
@@ -56,7 +56,7 @@ type AssignedWorkResponse struct {
 
 type OEEByAssignedWorkResponse struct {
 	AssignedWorkID      string           `json:"assignedWorkID"`
-	ProductionOrderName string           `json:"ProductionOrderID"`
+	ProductionOrderName string           `json:"productionOrderName"`
 	DeviceID            string           `json:"deviceID"`
 	ActualWorkingTime   int64            `json:"actualWorkingTime"`
 	JobRunningTime      int64            `json:"jobRunningTime"`
