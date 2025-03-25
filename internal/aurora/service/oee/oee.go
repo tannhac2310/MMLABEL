@@ -76,7 +76,10 @@ func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (
 	if err != nil {
 		return nil, fmt.Errorf("p.CalcOEE: %w", err)
 	}
-	assignedWorkByDeviceID := processAssignedWorkByDeviceID(assignedWork)
+	assignedWorkByDeviceID, mapProductionOrderStageDevice, err := processAssignedWorkByDeviceID(ctx, assignedWork)
+	if err != nil {
+		return nil, fmt.Errorf("p.CalcOEE: %w", err)
+	}
 
 	result := make(map[string]model.OEE)
 
@@ -98,16 +101,13 @@ func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (
 				DowntimeDetails:               make(map[string]int64),
 				AssignedWork:                  assignedWorkByDeviceID[deviceID],
 				DeviceProgressStatusHistories: make([]model.DeviceProgressStatusHistory, 0),
+				ProductionOrderStageDevice:    mapProductionOrderStageDevice,
 			}
 
 			for _, assigned := range assignedWorkByDeviceID[deviceID] {
 				oee.TotalQuantity += assigned.Quantity
-				if assigned.Settings != nil {
-					if val, ok := assigned.Settings["san_pham_loi"].(int64); ok {
-						oee.TotalDefective += val
-					}
-				}
-				oee.AssignedWorkTime += assigned.EstimatedCompleteAt.Time.Sub(assigned.EstimatedStartAt.Time).Milliseconds()
+				oee.TotalDefective += assigned.Defective
+				oee.AssignedWorkTime += assigned.EstimatedCompleteAt.Sub(assigned.EstimatedStartAt).Milliseconds()
 			}
 			oee.DeviceProgressStatusHistories = append(oee.DeviceProgressStatusHistories, *history.DeviceProgressStatusHistory)
 			result[deviceID] = oee
@@ -242,12 +242,37 @@ func (o calcOEEService) CalcOEEByAssignedWork(ctx context.Context, opt *CalcOEEO
 	return result, total, nil
 }
 
-func processAssignedWorkByDeviceID(datas []model.ProductionOrderStageDevice) map[string][]model.ProductionOrderStageDevice {
-	result := make(map[string][]model.ProductionOrderStageDevice, len(datas))
+func processAssignedWorkByDeviceID(ctx context.Context, datas []model.ProductionOrderStageDevice) (map[string][]model.AssignWorkOEE, map[string]string, error) {
+	result := make(map[string][]model.AssignWorkOEE, len(datas))
+	mapKeyProductOrderStage := make(map[string]string, 0)
 	for i := range datas {
-		result[datas[i].DeviceID] = append(result[datas[i].DeviceID], datas[i])
+		var stageID string
+		sqlQuery := `
+			SELECT pos."stage_id" 
+			FROM production_order_stages pos
+			WHERE pos.id = $1;
+		`
+		if err := cockroach.Select(ctx, sqlQuery, datas[i].ProductionOrderStageID).ScanOne(&stageID); err != nil {
+			return nil, nil, fmt.Errorf("p.CalcOEE: %w", err)
+		}
+		var defective int64 = 0
+		if datas[i].Settings != nil {
+			if val, ok := datas[i].Settings["san_pham_loi"].(int64); ok {
+				defective = val
+			}
+		}
+		result[datas[i].DeviceID] = append(result[datas[i].DeviceID], model.AssignWorkOEE{
+			StageID:                stageID,
+			ID:                     datas[i].ID,
+			ProductionOrderStageID: datas[i].ProductionOrderStageID,
+			EstimatedCompleteAt:    datas[i].EstimatedCompleteAt.Time,
+			EstimatedStartAt:       datas[i].EstimatedStartAt.Time,
+			Quantity:               datas[i].Quantity,
+			Defective:              defective,
+		})
+		mapKeyProductOrderStage[datas[i].ID] = stageID
 	}
-	return result
+	return result, mapKeyProductOrderStage, nil
 }
 
 func processDeviceProgressStatusHistoryByProductionOrderStageDeviceID(datas []repository.DeviceProgressStatusHistoryData) map[string][]model.DeviceProgressStatusHistory {
