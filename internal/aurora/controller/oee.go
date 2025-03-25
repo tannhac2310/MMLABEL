@@ -74,19 +74,14 @@ func (o oeeController) CalcOEEByDevice(c *gin.Context) {
 
 		assignedWork := make([]dto.AssignedWorkResponse, 0, len(data.AssignedWork))
 		for _, work := range data.AssignedWork {
-			var defective int64 = 0
-			if work.Settings != nil {
-				if val, ok := work.Settings["san_pham_loi"].(int64); ok {
-					defective = val
-				}
-			}
 			assignedWork = append(assignedWork, dto.AssignedWorkResponse{
 				ID:                     work.ID,
 				ProductionOrderStageID: work.ProductionOrderStageID,
-				EstimatedStartAt:       work.EstimatedStartAt.Time,
-				EstimatedCompleteAt:    work.EstimatedCompleteAt.Time,
+				StageID:                work.StageID,
+				EstimatedStartAt:       work.EstimatedStartAt,
+				EstimatedCompleteAt:    work.EstimatedCompleteAt,
 				Quantity:               work.Quantity,
-				Defective:              defective,
+				Defective:              work.Defective,
 			})
 		}
 		model.AssignedWork = assignedWork
@@ -96,6 +91,7 @@ func (o oeeController) CalcOEEByDevice(c *gin.Context) {
 			deviceProgressStatusHistories = append(deviceProgressStatusHistories, dto.DeviceStatusHistory{
 				ID:                           deviceProcessStatusHistory.ID,
 				ProductionOrderStageDeviceID: deviceProcessStatusHistory.ProductionOrderStageDeviceID,
+				StageID:                      data.ProductionOrderStageDevice[deviceProcessStatusHistory.ProductionOrderStageDeviceID],
 				DeviceID:                     deviceProcessStatusHistory.DeviceID,
 				ProcessStatus:                deviceProcessStatusHistory.ProcessStatus,
 				IsResolved:                   deviceProcessStatusHistory.IsResolved,
