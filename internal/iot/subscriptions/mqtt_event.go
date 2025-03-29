@@ -351,7 +351,7 @@ func (p *EventMQTTSubscription) Subscribe() error {
 			fmt.Println("============>>> deviceStateStatus: ", deviceStateStatus)
 			switch orderStageDevice.ProcessStatus {
 			case enum.ProductionOrderStageDeviceStatusFailed:
-				if !item.Pause || item.StartProduction {
+				if !item.Pause {
 					deviceStateStatus = enum.ProductionOrderStageDeviceStatusStart
 				} else {
 					return nil
