@@ -70,6 +70,8 @@ type DeleteProductionPlanResponse struct{}
 
 type ProcessProductionOrderRequest struct {
 	ID                  string             `json:"id" binding:"required"`
+	LxsCode             string             `json:"lxsCode" binding:"required"`
+	Note                string             `json:"note"`
 	Stages              []CreateOrderStage `json:"productionOrderStages" binding:"required"`
 	EstimatedStartAt    time.Time          `json:"estimatedStartAt" binding:"required"`
 	EstimatedCompleteAt time.Time          `json:"estimatedCompleteAt" binding:"required"`

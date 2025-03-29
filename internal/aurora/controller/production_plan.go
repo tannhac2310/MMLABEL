@@ -375,12 +375,14 @@ func (s productionPlanController) ProcessProductionOrder(c *gin.Context) {
 
 	id, err := s.productionPlanService.ProcessProductionOrder(c, &production_plan.ProcessProductionOrderOpts{
 		ID:                  req.ID,
+		LxsCode:             req.LxsCode,
 		Stages:              orderStages,
 		EstimatedStartAt:    req.EstimatedStartAt,
 		EstimatedCompleteAt: req.EstimatedCompleteAt,
 		Data:                req.Data,
 		CreatedBy:           userID,
 		OrderID:             req.OrderID,
+		Note:                req.Note,
 	})
 	if err != nil {
 		transportutil.Error(c, err)

@@ -14,6 +14,8 @@ import (
 
 type ProcessProductionOrderOpts struct {
 	ID                  string
+	LxsCode             string
+	Note                string
 	Stages              []*ProductionOrderStage
 	EstimatedStartAt    time.Time
 	EstimatedCompleteAt time.Time
@@ -69,14 +71,14 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 		return "", fmt.Errorf("count production order by created date: %w", err)
 	}
 	newProductionOrderID := fmt.Sprintf("LSX%s-%d", startToday.Format("20060102"), count+1)
-	countByCode, err := c.productionOrderRepo.CountByCode(ctx, fmt.Sprintf("%s-", plan.ProductCode))
-	if err != nil {
-		return "", fmt.Errorf("count production order by product code: %w", err)
-	}
+	//countByCode, err := c.productionOrderRepo.CountByCode(ctx, fmt.Sprintf("%s-", plan.ProductCode))
+	//if err != nil {
+	//	return "", fmt.Errorf("count production order by product code: %w", err)
+	//}
 	productionOrder := &model.ProductionOrder{
 		ID:                  newProductionOrderID,
-		ProductCode:         fmt.Sprintf("%s-%d", plan.ProductCode, countByCode+2),
-		ProductName:         fmt.Sprintf("%s-%d", plan.ProductName, countByCode+2),
+		ProductCode:         opt.LxsCode,
+		ProductName:         opt.LxsCode,
 		ProductionPlanID:    cockroach.String(plan.ID),
 		QtyPaper:            plan.QtyPaper,
 		QtyFinished:         plan.QtyFinished,
@@ -84,11 +86,11 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 		DeliveryDate:        deliveryDate,
 		DeliveryImage:       plan.Thumbnail,
 		Status:              enum.ProductionOrderStatusWaiting,
-		Note:                plan.Note,
+		Note:                cockroach.String(opt.Note),
 		CreatedBy:           opt.CreatedBy,
 		CreatedAt:           now,
 		UpdatedAt:           now,
-		Name:                plan.Name,
+		Name:                opt.LxsCode,
 		Version:             2, // version 2
 		Data:                opt.Data,
 		EstimatedStartAt:    cockroach.Time(opt.EstimatedStartAt),
