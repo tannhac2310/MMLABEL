@@ -18,14 +18,19 @@ type UpdateOrderRequest struct {
 }
 
 type OrderData struct {
-	ID                 string           `json:"id"`
-	Title              string           `json:"title"`
-	MaDatHangMm        string           `json:"maDatHangMm"`
-	MaHopDongKhachHang string           `json:"maHopDongKhachHang"`
-	MaHopDong          string           `json:"maHopDong"`
-	SaleName           string           `json:"saleName"`
-	SaleAdminName      string           `json:"saleAdminName"`
-	Status             enum.OrderStatus `json:"status"`
+	ID                     string           `json:"id"`
+	Title                  string           `json:"title"`
+	MaDatHangMm            string           `json:"maDatHangMm"`
+	MaHopDongKhachHang     string           `json:"maHopDongKhachHang"`
+	MaHopDong              string           `json:"maHopDong"`
+	SaleName               string           `json:"saleName"`
+	SaleAdminName          string           `json:"saleAdminName"`
+	Status                 enum.OrderStatus `json:"status"`
+	PaymentMethod          string           `json:"paymentMethod"`
+	PaymentMethodOther     string           `json:"paymentMethodOther"`
+	CustomerID             string           `json:"customerID"`
+	CustomerAddressOptions string           `json:"customerAddressOptions"`
+	DeliveryAddress        string           `json:"deliveryAddress"`
 }
 
 type OrderItemData struct {

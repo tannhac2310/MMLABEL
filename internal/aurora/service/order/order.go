@@ -18,14 +18,19 @@ type OrderWithItems struct {
 }
 
 type OrderData struct {
-	ID                 string
-	Title              string
-	MaDatHangMm        string
-	MaHopDongKhachHang string
-	MaHopDong          string
-	SaleName           string
-	SaleAdminName      string
-	Status             enum.OrderStatus
+	ID                     string
+	Title                  string
+	MaDatHangMm            string
+	MaHopDongKhachHang     string
+	MaHopDong              string
+	SaleName               string
+	SaleAdminName          string
+	Status                 enum.OrderStatus
+	PaymentMethod          string
+	PaymentMethodOther     string
+	CustomerID             string
+	CustomerAddressOptions string
+	DeliveryAddress        string
 }
 
 type OrderItemData struct {
@@ -80,6 +85,12 @@ func (s *orderService) UpdateOrder(ctx context.Context, orderWithItems *UpdateOr
 		oderUpdater.Set(model.OrderFieldSaleName, orderWithItems.Order.SaleName)
 		oderUpdater.Set(model.OrderFieldSaleAdminName, orderWithItems.Order.SaleAdminName)
 		oderUpdater.Set(model.OrderFieldStatus, orderWithItems.Order.Status)
+		oderUpdater.Set(model.OrderFieldPaymentMethod, orderWithItems.Order.PaymentMethod)
+		oderUpdater.Set(model.OrderFieldPaymentMethodOther, orderWithItems.Order.PaymentMethodOther)
+		oderUpdater.Set(model.OrderFieldCustomerID, orderWithItems.Order.CustomerID)
+		oderUpdater.Set(model.OrderFieldCustomerAddressOptions, orderWithItems.Order.CustomerAddressOptions)
+		oderUpdater.Set(model.OrderFieldDeliveryAddress, orderWithItems.Order.DeliveryAddress)
+
 		oderUpdater.Set(model.OrderFieldUpdatedBy, orderWithItems.UpdateBy)
 		oderUpdater.Set(model.OrderFieldUpdatedAt, time.Now())
 
@@ -187,14 +198,19 @@ func (s *orderService) SearchOrders(ctx context.Context, opts *repository.Search
 		}
 		orderWithItems = append(orderWithItems, &OrderWithItems{
 			Order: OrderData{
-				ID:                 order.ID,
-				Title:              order.Title,
-				MaDatHangMm:        order.MaDatHangMm,
-				MaHopDongKhachHang: order.MaHopDongKhachHang,
-				MaHopDong:          order.MaHopDong,
-				SaleName:           order.SaleName.String,
-				SaleAdminName:      order.SaleAdminName.String,
-				Status:             order.Status,
+				ID:                     order.ID,
+				Title:                  order.Title,
+				MaDatHangMm:            order.MaDatHangMm,
+				MaHopDongKhachHang:     order.MaHopDongKhachHang,
+				MaHopDong:              order.MaHopDong,
+				SaleName:               order.SaleName.String,
+				SaleAdminName:          order.SaleAdminName.String,
+				Status:                 order.Status,
+				PaymentMethod:          order.PaymentMethod,
+				PaymentMethodOther:     order.PaymentMethodOther,
+				CustomerID:             order.CustomerID,
+				CustomerAddressOptions: order.CustomerAddressOptions,
+				DeliveryAddress:        order.DeliveryAddress,
 			},
 			Items: orderItemData,
 		})
@@ -220,18 +236,23 @@ func (s *orderService) CreateOrder(ctx context.Context, orderWithItems *CreateOr
 		orderId = fmt.Sprintf("order-%d", cntRow+1)
 		now := time.Now()
 		order := &model.Order{
-			ID:                 orderId,
-			Title:              orderWithItems.Order.Title,
-			MaDatHangMm:        orderWithItems.Order.MaDatHangMm,
-			MaHopDongKhachHang: orderWithItems.Order.MaHopDongKhachHang,
-			MaHopDong:          orderWithItems.Order.MaHopDong,
-			SaleName:           cockroach.String(orderWithItems.Order.SaleName),
-			SaleAdminName:      cockroach.String(orderWithItems.Order.SaleAdminName),
-			Status:             orderWithItems.Order.Status,
-			CreatedBy:          orderWithItems.CreateBy,
-			UpdatedBy:          orderWithItems.CreateBy,
-			CreatedAt:          now,
-			UpdatedAt:          now,
+			ID:                     orderId,
+			Title:                  orderWithItems.Order.Title,
+			MaDatHangMm:            orderWithItems.Order.MaDatHangMm,
+			MaHopDongKhachHang:     orderWithItems.Order.MaHopDongKhachHang,
+			MaHopDong:              orderWithItems.Order.MaHopDong,
+			SaleName:               cockroach.String(orderWithItems.Order.SaleName),
+			SaleAdminName:          cockroach.String(orderWithItems.Order.SaleAdminName),
+			Status:                 orderWithItems.Order.Status,
+			PaymentMethod:          orderWithItems.Order.PaymentMethod,
+			PaymentMethodOther:     orderWithItems.Order.PaymentMethodOther,
+			CustomerID:             orderWithItems.Order.CustomerID,
+			CustomerAddressOptions: orderWithItems.Order.CustomerAddressOptions,
+			DeliveryAddress:        orderWithItems.Order.DeliveryAddress,
+			CreatedBy:              orderWithItems.CreateBy,
+			UpdatedBy:              orderWithItems.CreateBy,
+			CreatedAt:              now,
+			UpdatedAt:              now,
 		}
 
 		err = s.orderRepo.Insert(tx, order)
