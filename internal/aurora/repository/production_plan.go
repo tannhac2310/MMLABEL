@@ -147,12 +147,12 @@ func (s *SearchProductionPlanOpts) buildQuery(isCount bool) (string, []interface
 	}
 	if s.Name != "" {
 		args = append(args, "%"+s.Name+"%")
-		conds += fmt.Sprintf(" AND b.%[2]s ILIKE $%[1]d", len(args), model.ProductionPlanFieldName)
+		conds += fmt.Sprintf(" AND (b.%[2]s ILIKE $%[1]d OR b.id LIKE 'in-' || $%[1]d)", len(args), model.ProductionPlanFieldName)
 	}
 
 	if s.Search != "" {
 		args = append(args, "%"+s.Search+"%")
-		conds += fmt.Sprintf(" AND b.%[2]s ILIKE $%[1]d", len(args), model.ProductionPlanFieldSearchContent)
+		conds += fmt.Sprintf(" AND (b.%[2]s ILIKE $%[1]d OR id = 'in+' || $%[1]d)", len(args), model.ProductionPlanFieldSearchContent)
 	}
 
 	if s.ProductName != "" {
