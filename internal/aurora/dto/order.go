@@ -31,6 +31,10 @@ type OrderData struct {
 	CustomerID             string           `json:"customerID"`
 	CustomerAddressOptions string           `json:"customerAddressOptions"`
 	DeliveryAddress        string           `json:"deliveryAddress"`
+	CreatedBy              string           `json:"createdBy"`
+	UpdatedBy              string           `json:"updatedBy"`
+	CreatedAt              time.Time        `json:"createdAt"`
+	UpdatedAt              time.Time        `json:"updatedAt"`
 }
 
 type OrderItemData struct {

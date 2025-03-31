@@ -31,6 +31,10 @@ type OrderData struct {
 	CustomerID             string
 	CustomerAddressOptions string
 	DeliveryAddress        string
+	CreatedBy              string
+	UpdatedBy              string
+	CreatedAt              time.Time
+	UpdatedAt              time.Time
 }
 
 type OrderItemData struct {
@@ -211,6 +215,10 @@ func (s *orderService) SearchOrders(ctx context.Context, opts *repository.Search
 				CustomerID:             order.CustomerID,
 				CustomerAddressOptions: order.CustomerAddressOptions,
 				DeliveryAddress:        order.DeliveryAddress,
+				CreatedBy:              order.CreatedByName.String,
+				UpdatedBy:              order.UpdatedByName.String,
+				CreatedAt:              order.CreatedAt,
+				UpdatedAt:              order.UpdatedAt,
 			},
 			Items: orderItemData,
 		})

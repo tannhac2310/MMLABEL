@@ -7,6 +7,7 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/order"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/apperror"
+	"mmlabel.gitlab.com/mm-printing-backend/pkg/interceptor"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/routeutil"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/transportutil"
 )
@@ -125,8 +126,9 @@ func (o orderController) UpdateOrder(ctx *gin.Context) {
 	}
 
 	err := o.orderSvc.UpdateOrder(ctx, &order.UpdateOrder{
-		Order: oderData,
-		Items: orderItems,
+		Order:    oderData,
+		Items:    orderItems,
+		UpdateBy: interceptor.UserIDFromCtx(ctx),
 	})
 
 	if err != nil {
@@ -195,14 +197,23 @@ func (o orderController) FindOrder(ctx *gin.Context) {
 		}
 		orderData = append(orderData, &dto.OrderWithItems{
 			Order: dto.OrderData{
-				ID:                 orderWithItems.Order.ID,
-				Title:              orderWithItems.Order.Title,
-				MaDatHangMm:        orderWithItems.Order.MaDatHangMm,
-				MaHopDongKhachHang: orderWithItems.Order.MaHopDongKhachHang,
-				MaHopDong:          orderWithItems.Order.MaHopDong,
-				SaleName:           orderWithItems.Order.SaleName,
-				SaleAdminName:      orderWithItems.Order.SaleAdminName,
-				Status:             orderWithItems.Order.Status,
+				ID:                     orderWithItems.Order.ID,
+				Title:                  orderWithItems.Order.Title,
+				MaDatHangMm:            orderWithItems.Order.MaDatHangMm,
+				MaHopDongKhachHang:     orderWithItems.Order.MaHopDongKhachHang,
+				MaHopDong:              orderWithItems.Order.MaHopDong,
+				SaleName:               orderWithItems.Order.SaleName,
+				SaleAdminName:          orderWithItems.Order.SaleAdminName,
+				Status:                 orderWithItems.Order.Status,
+				PaymentMethod:          orderWithItems.Order.PaymentMethod,
+				PaymentMethodOther:     orderWithItems.Order.PaymentMethodOther,
+				CustomerID:             orderWithItems.Order.CustomerID,
+				CustomerAddressOptions: orderWithItems.Order.CustomerAddressOptions,
+				DeliveryAddress:        orderWithItems.Order.DeliveryAddress,
+				CreatedBy:              orderWithItems.Order.CreatedBy,
+				UpdatedBy:              orderWithItems.Order.UpdatedBy,
+				CreatedAt:              orderWithItems.Order.CreatedAt,
+				UpdatedAt:              orderWithItems.Order.UpdatedAt,
 			},
 			Items: items,
 			ID:    orderWithItems.Order.ID,

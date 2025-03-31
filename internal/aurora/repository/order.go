@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"strings"
 	"time"
@@ -82,6 +83,9 @@ func (s *SearchOrderOpts) buildQuery(isCount bool) (string, []interface{}) {
 	var args []interface{}
 	conds := ""
 	joins := ""
+	//created_by_name
+	joins += " LEFT JOIN users AS cu ON cu.id = b.created_by"
+	joins += " LEFT JOIN users AS uu ON uu.id = b.updated_by"
 	if len(s.IDs) > 0 {
 		args = append(args, s.IDs)
 		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.OrderFieldID)
@@ -117,11 +121,13 @@ func (s *SearchOrderOpts) buildQuery(isCount bool) (string, []interface{}) {
 	if s.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", s.Sort.By, s.Sort.Order)
 	}
-	return fmt.Sprintf("SELECT b.%s FROM %s AS b %s WHERE TRUE %s AND b.deleted_at IS NULL %s LIMIT %d OFFSET %d", strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
+	return fmt.Sprintf("SELECT b.%s, cu.name AS created_by_name, uu.name AS updated_by_name FROM %s AS b %s WHERE TRUE %s AND b.deleted_at IS NULL %s LIMIT %d OFFSET %d", strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
 }
 
 type OrderData struct {
 	*model.Order
+	CreatedByName sql.NullString `db:"created_by_name"`
+	UpdatedByName sql.NullString `db:"updated_by_name"`
 }
 
 func (r *sOrderRepo) Search(ctx context.Context, s *SearchOrderOpts) ([]*OrderData, error) {
