@@ -139,7 +139,8 @@ type SearchProductionPlanOpts struct {
 func (s *SearchProductionPlanOpts) buildQuery(isCount bool) (string, []interface{}) {
 	var args []interface{}
 	conds := ""
-	joins := " LEFT JOIN users AS cu ON b.created_by = cu.id LEFT JOIN users AS uu ON b.updated_by = uu.id "
+	joins := " LEFT JOIN users AS cu ON b.created_by = cu.id " +
+		" LEFT JOIN users AS uu ON b.updated_by = uu.id "
 
 	if len(s.IDs) > 0 {
 		args = append(args, s.IDs)
@@ -152,7 +153,7 @@ func (s *SearchProductionPlanOpts) buildQuery(isCount bool) (string, []interface
 
 	if s.Search != "" {
 		args = append(args, "%"+s.Search+"%")
-		conds += fmt.Sprintf(" AND (b.%[2]s ILIKE $%[1]d OR id = 'in+' || $%[1]d)", len(args), model.ProductionPlanFieldSearchContent)
+		conds += fmt.Sprintf(" AND (b.%[2]s ILIKE $%[1]d OR b.id = 'in+' || $%[1]d)", len(args), model.ProductionPlanFieldSearchContent)
 	}
 
 	if s.ProductName != "" {
