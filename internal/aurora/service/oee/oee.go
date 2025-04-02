@@ -166,6 +166,11 @@ func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (
 
 		lastHistory = history
 	}
+	if lastHistory != nil {
+		deviceData := result[lastHistory.DeviceID]
+		deviceData.ActualWorkingTime = lastHistory.CreatedAt.Sub(startOfDay).Milliseconds()
+		result[lastHistory.DeviceID] = deviceData
+	}
 	return result, nil
 }
 

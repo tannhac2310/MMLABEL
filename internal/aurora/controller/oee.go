@@ -48,7 +48,7 @@ func (o oeeController) CalcOEEByDevice(c *gin.Context) {
 		quality := 1.0
 
 		if data.ActualWorkingTime > 0 {
-			availability = float64(data.ActualWorkingTime-data.Downtime) / float64(data.ActualWorkingTime)
+			availability = float64(data.JobRunningTime) / float64(data.JobRunningTime+data.Downtime)
 		}
 		if data.AssignedWorkTime > 0 {
 			performance = float64(data.JobRunningTime) / float64(data.AssignedWorkTime)
@@ -143,7 +143,7 @@ func (o oeeController) CalcOEEByAssignedWork(c *gin.Context) {
 		quality := 1.0
 
 		if data.ActualWorkingTime > 0 {
-			availability = float64(data.ActualWorkingTime-data.Downtime) / float64(data.ActualWorkingTime)
+			availability = float64(data.JobRunningTime) / float64(data.JobRunningTime+data.Downtime)
 		}
 		if data.AssignedWorkTime > 0 {
 			performance = float64(data.JobRunningTime) / float64(data.AssignedWorkTime)
