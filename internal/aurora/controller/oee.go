@@ -47,7 +47,7 @@ func (o oeeController) CalcOEEByDevice(c *gin.Context) {
 		performance := 1.0
 		quality := 1.0
 
-		if data.ActualWorkingTime > 0 {
+		if data.JobRunningTime+data.Downtime > 0 {
 			availability = float64(data.JobRunningTime) / float64(data.JobRunningTime+data.Downtime)
 		}
 		if data.AssignedWorkTime > 0 {
@@ -58,18 +58,17 @@ func (o oeeController) CalcOEEByDevice(c *gin.Context) {
 		}
 
 		model := dto.OEEByDeviceResponse{
-			DeviceID:          deviceID,
-			ActualWorkingTime: data.ActualWorkingTime,
-			JobRunningTime:    data.JobRunningTime,
-			AssignedWorkTime:  data.AssignedWorkTime,
-			DownTime:          data.Downtime,
-			DowntimeDetails:   data.DowntimeDetails,
-			Availability:      availability,
-			Performance:       performance,
-			Quality:           quality,
-			TotalQuantity:     data.TotalQuantity,
-			TotalDefective:    data.TotalDefective,
-			OEE:               availability * performance * quality,
+			DeviceID:         deviceID,
+			JobRunningTime:   data.JobRunningTime,
+			AssignedWorkTime: data.AssignedWorkTime,
+			DownTime:         data.Downtime,
+			DowntimeDetails:  data.DowntimeDetails,
+			Availability:     availability,
+			Performance:      performance,
+			Quality:          quality,
+			TotalQuantity:    data.TotalQuantity,
+			TotalDefective:   data.TotalDefective,
+			OEE:              availability * performance * quality,
 		}
 
 		assignedWork := make([]dto.AssignedWorkResponse, 0, len(data.AssignedWork))
@@ -142,7 +141,7 @@ func (o oeeController) CalcOEEByAssignedWork(c *gin.Context) {
 		performance := 1.0
 		quality := 1.0
 
-		if data.ActualWorkingTime > 0 {
+		if data.JobRunningTime+data.Downtime > 0 {
 			availability = float64(data.JobRunningTime) / float64(data.JobRunningTime+data.Downtime)
 		}
 		if data.AssignedWorkTime > 0 {
@@ -155,7 +154,6 @@ func (o oeeController) CalcOEEByAssignedWork(c *gin.Context) {
 		model := dto.OEEByAssignedWorkResponse{
 			AssignedWorkID:      assignedWorkID,
 			ProductionOrderName: data.ProductionOrderName,
-			ActualWorkingTime:   data.ActualWorkingTime,
 			JobRunningTime:      data.JobRunningTime,
 			AssignedWorkTime:    data.AssignedWorkTime,
 			DowntimeDetails:     data.DowntimeDetails,
