@@ -53,10 +53,11 @@ func parseDateOrDefault(date string) (string, error) {
 
 func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (map[string]model.OEE, error) {
 	var err error
-	locUTC7, err := time.LoadLocation("Asia/Ho_Chi_Minh")
-	if err != nil {
-		return nil, err
-	}
+	// locUTC7, err := time.LoadLocation("Asia/Ho_Chi_Minh")
+	// if err != nil {
+	// 	return nil, err
+	// }
+	locUTC7 := time.FixedZone("UTC+7", 7*60*60)
 	if opt.DateFrom, err = parseDateOrDefault(opt.DateFrom); err != nil {
 		return nil, err
 	}
@@ -170,10 +171,11 @@ func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (
 
 func (o calcOEEService) CalcOEEByAssignedWork(ctx context.Context, opt *CalcOEEOpts) (map[string]model.OEE, int64, error) {
 	var err error
-	locUTC7, err := time.LoadLocation("Asia/Ho_Chi_Minh")
-	if err != nil {
-		return nil, 0, err
-	}
+	// locUTC7, err := time.LoadLocation("Asia/Ho_Chi_Minh")
+	// if err != nil {
+	// 	return nil, 0, err
+	// }
+	locUTC7 := time.FixedZone("UTC+7", 7*60*60)
 	if opt.DateFrom, err = parseDateOrDefault(opt.DateFrom); err != nil {
 		return nil, 0, err
 	}
