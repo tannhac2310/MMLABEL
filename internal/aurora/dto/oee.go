@@ -29,7 +29,6 @@ type FindOEEByAssignedWorkResponse struct {
 
 type OEEByDeviceResponse struct {
 	DeviceID                      string                 `json:"deviceID"`
-	ActualWorkingTime             int64                  `json:"actualWorkingTime"`
 	JobRunningTime                int64                  `json:"jobRunningTime"`
 	DownTime                      int64                  `json:"downTime"`
 	AssignedWorkTime              int64                  `json:"assignedWorkTime"`
@@ -58,7 +57,6 @@ type OEEByAssignedWorkResponse struct {
 	AssignedWorkID      string           `json:"assignedWorkID"`
 	ProductionOrderName string           `json:"productionOrderName"`
 	DeviceID            string           `json:"deviceID"`
-	ActualWorkingTime   int64            `json:"actualWorkingTime"`
 	JobRunningTime      int64            `json:"jobRunningTime"`
 	DownTime            int64            `json:"downTime"`
 	AssignedWorkTime    int64            `json:"assignedWorkTime"`

@@ -90,18 +90,12 @@ func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (
 	result := make(map[string]model.OEE)
 
 	var lastHistory *repository.DeviceProgressStatusHistoryData
-	var startOfDay time.Time
 	for i := range listDeviceProgressStatusHistory {
 		history := &listDeviceProgressStatusHistory[i]
 		deviceID := history.DeviceID
 
 		oee, exists := result[deviceID]
 		if !exists {
-			if lastHistory != nil {
-				deviceData := result[lastHistory.DeviceID]
-				deviceData.ActualWorkingTime = lastHistory.CreatedAt.Sub(startOfDay).Milliseconds()
-				result[lastHistory.DeviceID] = deviceData
-			}
 
 			oee = model.OEE{
 				DowntimeDetails:               make(map[string]int64),
@@ -137,7 +131,6 @@ func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (
 			oee.DeviceProgressStatusHistories = append(oee.DeviceProgressStatusHistories, *history.DeviceProgressStatusHistory)
 			result[deviceID] = oee
 			lastHistory = history
-			startOfDay = history.CreatedAt
 			continue
 		}
 
@@ -166,11 +159,7 @@ func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (
 
 		lastHistory = history
 	}
-	if lastHistory != nil {
-		deviceData := result[lastHistory.DeviceID]
-		deviceData.ActualWorkingTime = lastHistory.CreatedAt.Sub(startOfDay).Milliseconds()
-		result[lastHistory.DeviceID] = deviceData
-	}
+
 	return result, nil
 }
 
@@ -243,7 +232,6 @@ func (o calcOEEService) CalcOEEByAssignedWork(ctx context.Context, opt *CalcOEEO
 		histories := processDeviceProgressStatusHistory[assignedWork.ID]
 		if len(histories) > 0 {
 			lastHistory := histories[0]
-			startOfDay := lastHistory.CreatedAt
 			for _, history := range histories[1:] {
 				duration := history.CreatedAt.Sub(lastHistory.CreatedAt).Milliseconds()
 
@@ -263,7 +251,6 @@ func (o calcOEEService) CalcOEEByAssignedWork(ctx context.Context, opt *CalcOEEO
 				}
 				lastHistory = history
 			}
-			oee.ActualWorkingTime = lastHistory.CreatedAt.Sub(startOfDay).Milliseconds()
 		}
 
 		var usernames []string
