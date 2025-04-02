@@ -129,12 +129,6 @@ func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (
 					workDuration -= 30 * time.Minute
 				}
 
-				if deviceID == "B_PR02" {
-					fmt.Println(startDate)
-					fmt.Println(endDate)
-					fmt.Println(workDuration)
-				}
-
 				oee.AssignedWorkTime += workDuration.Milliseconds()
 			}
 
