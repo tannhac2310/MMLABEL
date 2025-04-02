@@ -3,11 +3,12 @@ package oee
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/model"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/database/cockroach"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
-	"time"
 )
 
 type Service interface {
@@ -52,7 +53,7 @@ func parseDateOrDefault(date string) (string, error) {
 
 func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (map[string]model.OEE, error) {
 	var err error
-	locUTC7, err := time.LoadLocation("Asia/Bangkok")
+	locUTC7, err := time.LoadLocation("Asia/Ho_Chi_Minh")
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +170,7 @@ func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (
 
 func (o calcOEEService) CalcOEEByAssignedWork(ctx context.Context, opt *CalcOEEOpts) (map[string]model.OEE, int64, error) {
 	var err error
-	locUTC7, err := time.LoadLocation("Asia/Bangkok")
+	locUTC7, err := time.LoadLocation("Asia/Ho_Chi_Minh")
 	if err != nil {
 		return nil, 0, err
 	}
