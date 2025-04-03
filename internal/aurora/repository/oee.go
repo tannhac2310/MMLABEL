@@ -63,7 +63,7 @@ func (o *oeeRepo) GetByAssigned(ctx context.Context, opt OEEOpts, limit, offset 
 		SELECT posd.id, posd.production_order_stage_id, posd.device_id, posd.quantity, posd.settings, 
 		       posd.assigned_quantity, posd.estimated_start_at, posd.estimated_complete_at
 		FROM %s 
-		WHERE %s 
+		WHERE %s AND posd.deleted_at IS NULL
 		ORDER BY posd.device_id, posd.estimated_start_at`, sqlTable, sqlCons)
 
 	if limit > 0 {
