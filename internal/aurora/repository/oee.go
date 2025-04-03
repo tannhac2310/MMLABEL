@@ -45,7 +45,7 @@ func (o *oeeRepo) GetByAssigned(ctx context.Context, opt OEEOpts, limit, offset 
 	}
 
 	if opt.ProductionOrderID != "" {
-		sqlTable += ` JOIN production_order_stage pos ON posd.production_order_stage_id = pos.id`
+		sqlTable += ` JOIN production_order_stages pos ON posd.production_order_stage_id = pos.id`
 		sqlCons += fmt.Sprintf(" AND pos.production_order_id = $%d", argIndex)
 		args = append(args, opt.ProductionOrderID)
 		argIndex++
@@ -63,7 +63,7 @@ func (o *oeeRepo) GetByAssigned(ctx context.Context, opt OEEOpts, limit, offset 
 		SELECT posd.id, posd.production_order_stage_id, posd.device_id, posd.quantity, posd.settings, 
 		       posd.assigned_quantity, posd.estimated_start_at, posd.estimated_complete_at
 		FROM %s 
-		WHERE %s 
+		WHERE %s AND posd.deleted_at IS NULL
 		ORDER BY posd.device_id, posd.estimated_start_at`, sqlTable, sqlCons)
 
 	if limit > 0 {
@@ -83,8 +83,9 @@ func (o *oeeRepo) GetByAssigned(ctx context.Context, opt OEEOpts, limit, offset 
 
 func (o *oeeRepo) GetByDevice(ctx context.Context, opt OEEOpts) ([]DeviceProgressStatusHistoryData, error) {
 	var deviceProcessStatusHistoryData []DeviceProgressStatusHistoryData
-	sqlTable := `device_progress_status_history dpsh`
-	sqlCons := `dpsh.created_at::DATE BETWEEN $1 AND $2`
+	sqlTable := `device_progress_status_history dpsh
+				 JOIN production_order_stage_devices posd ON posd.id = dpsh.production_order_stage_device_id`
+	sqlCons := `dpsh.created_at::DATE BETWEEN $1 AND $2 AND posd.deleted_at IS NULL`
 	args := []interface{}{opt.DateFrom, opt.DateTo}
 	argIndex := 3
 
@@ -101,8 +102,7 @@ func (o *oeeRepo) GetByDevice(ctx context.Context, opt OEEOpts) ([]DeviceProgres
 	}
 
 	if opt.ProductionOrderID != "" {
-		sqlTable += ` JOIN production_order_stage_device posd ON posd.id = dpsh.production_order_stage_device_id
-		              JOIN production_order_stage pos ON posd.production_order_stage_id = pos.id`
+		sqlTable += ` JOIN production_order_stages pos ON posd.production_order_stage_id = pos.id`
 		sqlCons += fmt.Sprintf(" AND pos.production_order_id = $%d", argIndex)
 		args = append(args, opt.ProductionOrderID)
 	}
