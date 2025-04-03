@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/service/oee"
@@ -58,17 +57,18 @@ func (o oeeController) CalcOEEByDevice(c *gin.Context) {
 		}
 
 		model := dto.OEEByDeviceResponse{
-			DeviceID:         deviceID,
-			JobRunningTime:   data.JobRunningTime,
-			AssignedWorkTime: data.AssignedWorkTime,
-			DownTime:         data.Downtime,
-			DowntimeDetails:  data.DowntimeDetails,
-			Availability:     availability,
-			Performance:      performance,
-			Quality:          quality,
-			TotalQuantity:    data.TotalQuantity,
-			TotalDefective:   data.TotalDefective,
-			OEE:              availability * performance * quality,
+			DeviceID:            deviceID,
+			JobRunningTime:      data.JobRunningTime,
+			AssignedWorkTime:    data.AssignedWorkTime,
+			DownTime:            data.Downtime,
+			DowntimeDetails:     data.DowntimeDetails,
+			Availability:        availability,
+			Performance:         performance,
+			Quality:             quality,
+			TotalQuantity:       data.TotalQuantity,
+			TotalDefective:      data.TotalDefective,
+			TotalAssignQuantity: data.TotalAssignQuantity,
+			OEE:                 availability * performance * quality,
 		}
 
 		assignedWork := make([]dto.AssignedWorkResponse, 0, len(data.AssignedWork))
@@ -81,6 +81,7 @@ func (o oeeController) CalcOEEByDevice(c *gin.Context) {
 				EstimatedCompleteAt:    work.EstimatedCompleteAt,
 				Quantity:               work.Quantity,
 				Defective:              work.Defective,
+				AssignQuantity:         work.AssignedQuantity,
 			})
 		}
 		model.AssignedWork = assignedWork
@@ -119,7 +120,6 @@ func (o oeeController) CalcOEEByAssignedWork(c *gin.Context) {
 		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
 		return
 	}
-	fmt.Println(req.Paging)
 	datas, total, err := o.oeeService.CalcOEEByAssignedWork(c, &oee.CalcOEEOpts{
 		ProductionOrderID:            req.Filter.ProductionOrderID,
 		ProductionOrderStageDeviceID: req.Filter.ProductionOrderStageDeviceID,

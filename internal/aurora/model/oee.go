@@ -35,4 +35,5 @@ type AssignWorkOEE struct {
 	EstimatedCompleteAt    time.Time
 	Quantity               int64
 	Defective              int64
+	AssignedQuantity       int64
 }
