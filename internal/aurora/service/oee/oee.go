@@ -78,7 +78,7 @@ func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (
 		return nil, fmt.Errorf("p.CalcOEE: %w", err)
 	}
 
-	assignedWork, _, err := p.oeeRepo.GetByAssigned(ctx, optRepo, opt.Limit, opt.Offset)
+	assignedWork, _, err := p.oeeRepo.GetByAssigned(ctx, optRepo, -1, 0)
 	if err != nil {
 		return nil, fmt.Errorf("p.CalcOEE: %w", err)
 	}
@@ -86,7 +86,6 @@ func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (
 	if err != nil {
 		return nil, fmt.Errorf("p.CalcOEE: %w", err)
 	}
-
 	result := make(map[string]model.OEE)
 
 	var lastHistory *repository.DeviceProgressStatusHistoryData
@@ -107,7 +106,8 @@ func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (
 			for _, assigned := range assignedWorkByDeviceID[deviceID] {
 				oee.TotalQuantity += assigned.Quantity
 				oee.TotalDefective += assigned.Defective
-				oee.AssignedWorkTime += assigned.EstimatedStartAt.Sub(assigned.EstimatedCompleteAt).Milliseconds()
+				oee.TotalAssignQuantity += assigned.AssignedQuantity
+				oee.AssignedWorkTime += assigned.EstimatedCompleteAt.Sub(assigned.EstimatedStartAt).Milliseconds()
 			}
 
 			oee.DeviceProgressStatusHistories = append(oee.DeviceProgressStatusHistories, *history.DeviceProgressStatusHistory)
@@ -187,7 +187,7 @@ func (o calcOEEService) CalcOEEByAssignedWork(ctx context.Context, opt *CalcOEEO
 		}
 		oee := model.OEE{
 			DowntimeDetails:     make(map[string]int64),
-			AssignedWorkTime:    assignedWork.EstimatedStartAt.Time.Sub(assignedWork.EstimatedCompleteAt.Time).Milliseconds(),
+			AssignedWorkTime:    assignedWork.EstimatedCompleteAt.Time.Sub(assignedWork.EstimatedStartAt.Time).Milliseconds(),
 			TotalQuantity:       assignedWork.Quantity,
 			TotalDefective:      defective,
 			DeviceID:            assignedWork.DeviceID,
@@ -274,6 +274,7 @@ func processAssignedWorkByDeviceID(ctx context.Context, datas []model.Production
 			EstimatedStartAt:       datas[i].EstimatedStartAt.Time,
 			Quantity:               datas[i].Quantity,
 			Defective:              defective,
+			AssignedQuantity:       datas[i].AssignedQuantity,
 		})
 		mapKeyProductOrderStage[datas[i].ID] = stageID
 	}

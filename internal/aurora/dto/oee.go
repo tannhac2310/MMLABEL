@@ -39,6 +39,7 @@ type OEEByDeviceResponse struct {
 	Quality                       float64                `json:"quality"`
 	TotalQuantity                 int64                  `json:"totalQuantity"`
 	TotalDefective                int64                  `json:"totalDefective"`
+	TotalAssignQuantity           int64                  `json:"totalAssignQuantity"`
 	OEE                           float64                `json:"oee"`
 	DeviceProgressStatusHistories []DeviceStatusHistory  `json:"deviceStatusHistory"`
 }
@@ -51,6 +52,7 @@ type AssignedWorkResponse struct {
 	EstimatedCompleteAt    time.Time `json:"estimatedCompleteAt"`
 	Quantity               int64     `json:"quantity"`
 	Defective              int64     `json:"defective"`
+	AssignQuantity         int64     `json:"assignQuantity"`
 }
 
 type OEEByAssignedWorkResponse struct {
