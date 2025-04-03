@@ -25,7 +25,7 @@ func (o oeeController) CalcOEEByDevice(c *gin.Context) {
 		return
 	}
 
-	datas, err := o.oeeService.CalcOEEByDevice(c, &oee.CalcOEEOpts{
+	datas, mapProductionOrderStageDevice, err := o.oeeService.CalcOEEByDevice(c, &oee.CalcOEEOpts{
 		ProductionOrderID:            req.Filter.ProductionOrderID,
 		ProductionOrderStageDeviceID: req.Filter.ProductionOrderStageDeviceID,
 		DateFrom:                     req.Filter.DateFrom,
@@ -91,7 +91,7 @@ func (o oeeController) CalcOEEByDevice(c *gin.Context) {
 			deviceProgressStatusHistories = append(deviceProgressStatusHistories, dto.DeviceStatusHistory{
 				ID:                           deviceProcessStatusHistory.ID,
 				ProductionOrderStageDeviceID: deviceProcessStatusHistory.ProductionOrderStageDeviceID,
-				StageID:                      data.ProductionOrderStageDevice[deviceProcessStatusHistory.ProductionOrderStageDeviceID],
+				StageID:                      mapProductionOrderStageDevice[deviceProcessStatusHistory.ProductionOrderStageDeviceID],
 				DeviceID:                     deviceProcessStatusHistory.DeviceID,
 				ProcessStatus:                deviceProcessStatusHistory.ProcessStatus,
 				IsResolved:                   deviceProcessStatusHistory.IsResolved,
