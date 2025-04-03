@@ -12,7 +12,7 @@ import (
 )
 
 type Service interface {
-	CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (map[string]model.OEE, error)
+	CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (map[string]model.OEE, map[string]string, error)
 	CalcOEEByAssignedWork(ctx context.Context, opt *CalcOEEOpts) (map[string]model.OEE, int64, error)
 }
 
@@ -51,7 +51,7 @@ func parseDateOrDefault(date string) (string, error) {
 	return date, nil
 }
 
-func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (map[string]model.OEE, error) {
+func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (map[string]model.OEE, map[string]string, error) {
 	var err error
 	// locUTC7, err := time.LoadLocation("Asia/Ho_Chi_Minh")
 	// if err != nil {
@@ -59,10 +59,10 @@ func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (
 	// }
 	//locUTC7 := time.FixedZone("UTC+7", 7*60*60)
 	if opt.DateFrom, err = parseDateOrDefault(opt.DateFrom); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if opt.DateTo, err = parseDateOrDefault(opt.DateTo); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	optRepo := repository.OEEOpts{
@@ -75,16 +75,16 @@ func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (
 
 	listDeviceProgressStatusHistory, err := p.oeeRepo.GetByDevice(ctx, optRepo)
 	if err != nil {
-		return nil, fmt.Errorf("p.CalcOEE: %w", err)
+		return nil, nil, fmt.Errorf("p.CalcOEE: %w", err)
 	}
 
 	assignedWork, _, err := p.oeeRepo.GetByAssigned(ctx, optRepo, -1, 0)
 	if err != nil {
-		return nil, fmt.Errorf("p.CalcOEE: %w", err)
+		return nil, nil, fmt.Errorf("p.CalcOEE: %w", err)
 	}
 	assignedWorkByDeviceID, mapProductionOrderStageDevice, err := processAssignedWorkByDeviceID(ctx, assignedWork)
 	if err != nil {
-		return nil, fmt.Errorf("p.CalcOEE: %w", err)
+		return nil, nil, fmt.Errorf("p.CalcOEE: %w", err)
 	}
 	result := make(map[string]model.OEE)
 
@@ -100,7 +100,6 @@ func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (
 				DowntimeDetails:               make(map[string]int64),
 				AssignedWork:                  assignedWorkByDeviceID[deviceID],
 				DeviceProgressStatusHistories: make([]model.DeviceProgressStatusHistory, 0),
-				ProductionOrderStageDevice:    mapProductionOrderStageDevice,
 			}
 
 			for _, assigned := range assignedWorkByDeviceID[deviceID] {
@@ -142,7 +141,7 @@ func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (
 		lastHistory = history
 	}
 
-	return result, nil
+	return result, mapProductionOrderStageDevice, nil
 }
 
 func (o calcOEEService) CalcOEEByAssignedWork(ctx context.Context, opt *CalcOEEOpts) (map[string]model.OEE, int64, error) {

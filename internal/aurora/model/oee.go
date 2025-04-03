@@ -17,7 +17,6 @@ type OEE struct {
 	DowntimeDetails               map[string]int64
 	MachineOperator               []string
 	ProductionOrderName           string
-	ProductionOrderStageDevice    map[string]string
 }
 
 type SummaryOEE struct {
