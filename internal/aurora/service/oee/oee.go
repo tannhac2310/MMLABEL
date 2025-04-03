@@ -57,7 +57,7 @@ func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (
 	// if err != nil {
 	// 	return nil, err
 	// }
-	locUTC7 := time.FixedZone("UTC+7", 7*60*60)
+	//locUTC7 := time.FixedZone("UTC+7", 7*60*60)
 	if opt.DateFrom, err = parseDateOrDefault(opt.DateFrom); err != nil {
 		return nil, err
 	}
@@ -107,25 +107,7 @@ func (p calcOEEService) CalcOEEByDevice(ctx context.Context, opt *CalcOEEOpts) (
 			for _, assigned := range assignedWorkByDeviceID[deviceID] {
 				oee.TotalQuantity += assigned.Quantity
 				oee.TotalDefective += assigned.Defective
-
-				startDate := assigned.EstimatedStartAt
-				endDate := assigned.EstimatedCompleteAt
-
-				lunchBreakStart := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 11, 45, 0, 0, locUTC7)
-				lunchBreakEnd := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 12, 30, 0, 0, locUTC7)
-				dinnerBreak := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 18, 0, 0, 0, locUTC7)
-
-				workDuration := endDate.Sub(startDate)
-
-				if startDate.Before(lunchBreakStart) && endDate.After(lunchBreakEnd) {
-					workDuration -= 45 * time.Minute
-				}
-
-				if startDate.Before(dinnerBreak) && endDate.After(dinnerBreak) {
-					workDuration -= 30 * time.Minute
-				}
-
-				oee.AssignedWorkTime += workDuration.Milliseconds()
+				oee.AssignedWorkTime += assigned.EstimatedStartAt.Sub(assigned.EstimatedCompleteAt).Milliseconds()
 			}
 
 			oee.DeviceProgressStatusHistories = append(oee.DeviceProgressStatusHistories, *history.DeviceProgressStatusHistory)
@@ -169,7 +151,7 @@ func (o calcOEEService) CalcOEEByAssignedWork(ctx context.Context, opt *CalcOEEO
 	// if err != nil {
 	// 	return nil, 0, err
 	// }
-	locUTC7 := time.FixedZone("UTC+7", 7*60*60)
+	//locUTC7 := time.FixedZone("UTC+7", 7*60*60)
 	if opt.DateFrom, err = parseDateOrDefault(opt.DateFrom); err != nil {
 		return nil, 0, err
 	}
@@ -205,7 +187,7 @@ func (o calcOEEService) CalcOEEByAssignedWork(ctx context.Context, opt *CalcOEEO
 		}
 		oee := model.OEE{
 			DowntimeDetails:     make(map[string]int64),
-			AssignedWorkTime:    0,
+			AssignedWorkTime:    assignedWork.EstimatedStartAt.Time.Sub(assignedWork.EstimatedCompleteAt.Time).Milliseconds(),
 			TotalQuantity:       assignedWork.Quantity,
 			TotalDefective:      defective,
 			DeviceID:            assignedWork.DeviceID,
@@ -213,22 +195,7 @@ func (o calcOEEService) CalcOEEByAssignedWork(ctx context.Context, opt *CalcOEEO
 			Downtime:            0,
 			JobRunningTime:      0,
 		}
-		startDate := assignedWork.EstimatedStartAt.Time
-		endDate := assignedWork.EstimatedCompleteAt.Time
 
-		lunchBreakStart := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 11, 45, 0, 0, locUTC7)
-		lunchBreakEnd := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 12, 30, 0, 0, locUTC7)
-		dinnerBreak := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 18, 0, 0, 0, locUTC7)
-		workDuration := endDate.Sub(startDate)
-		if startDate.Before(lunchBreakStart) && endDate.After(lunchBreakEnd) {
-			workDuration -= 45 * time.Minute
-		}
-
-		if startDate.Before(dinnerBreak) && endDate.After(dinnerBreak) {
-			workDuration -= 30 * time.Minute
-		}
-
-		oee.AssignedWorkTime += workDuration.Milliseconds()
 		histories := processDeviceProgressStatusHistory[assignedWork.ID]
 		if len(histories) > 0 {
 			lastHistory := histories[0]
