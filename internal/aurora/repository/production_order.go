@@ -113,13 +113,16 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (
 		args = append(args, s.IDs)
 		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.ProductionOrderFieldID)
 	}
+
 	if s.Name != "" {
 		args = append(args, "%"+s.Name+"%")
-		conds += fmt.Sprintf(" AND ( b.%[2]s ILIKE $%[1]d OR  b.%[3]s ILIKE $%[1]d OR b.%[4]s ILIKE $%[1]d OR b.%[5]s ILIKE $%[1]d OR b.%[6]s ILIKE $%[1]d OR b.%[7]s ILIKE $%[1]d ) ",
+		joins += " JOIN custom_fields AS cf ON cf.entity_id = b.id "
+		conds += fmt.Sprintf(" AND ( b.%[2]s ILIKE $%[1]d OR b.%[3]s ILIKE $%[1]d OR b.%[4]s ILIKE $%[1]d OR b.%[5]s ILIKE $%[1]d OR b.%[6]s ILIKE $%[1]d OR b.%[7]s ILIKE $%[1]d OR cf.value ILIKE $%[1]d )",
 			len(args), model.ProductionOrderFieldName, model.ProductionOrderFieldProductCode, model.ProductionOrderFieldProductName, model.ProductionOrderFieldCustomerID,
 			model.ProductionOrderFieldSalesID, model.ProductionOrderFieldID,
 		)
 	}
+
 	if s.CustomerID != "" {
 		args = append(args, s.CustomerID)
 		conds += fmt.Sprintf(" AND b.%s = $%d", model.ProductionOrderFieldCustomerID, len(args))
@@ -237,7 +240,7 @@ func (s *SearchProductionOrdersOpts) buildQuery(isCount bool, isAnalysis bool) (
 	if s.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", s.Sort.By, s.Sort.Order)
 	}
-	return fmt.Sprintf(`SELECT b.%s
+	return fmt.Sprintf(`SELECT DISTINCT b.%s
 		FROM %s AS b %s
 		WHERE TRUE %s AND b.deleted_at IS NULL
 		%s
