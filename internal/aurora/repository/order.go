@@ -90,11 +90,13 @@ func (s *SearchOrderOpts) buildQuery(isCount bool) (string, []interface{}) {
 		args = append(args, s.IDs)
 		conds += fmt.Sprintf(" AND b.%s = ANY($1)", model.OrderFieldID)
 	}
-
 	if s.Search != "" {
+		joins += " JOIN order_items AS oi ON oi.order_id = b.id"
 		args = append(args, "%"+s.Search+"%")
-		// ma_dat_hang_mm ma_hop_dong_khach_hang ma_hop_dong sale_name sale_admin_name
-		conds += fmt.Sprintf(" AND (b.title LIKE $%d or b.ma_dat_hang_mm LIKE $%d or b.ma_hop_dong_khach_hang LIKE $%d or b.ma_hop_dong LIKE $%d or b.sale_name LIKE $%d or b.sale_admin_name LIKE $%d)", len(args), len(args), len(args), len(args), len(args), len(args))
+		// ma_dat_hang_mm ma_hop_dong_khach_hang ma_hop_dong sale_name sale_admin_name, delivery_address
+		// join order_items
+		conds += fmt.Sprintf(" AND (b.title LIKE $%d OR b.ma_dat_hang_mm LIKE $%d OR b.ma_hop_dong_khach_hang LIKE $%d OR b.ma_hop_dong LIKE $%d OR b.sale_name LIKE $%d OR b.sale_admin_name LIKE $%d OR b.delivery_address LIKE $%d OR oi.note ILIKE $%d)",
+			len(args), len(args), len(args), len(args), len(args), len(args), len(args), len(args))
 	}
 
 	if s.ProductionPlanID != "" {
@@ -121,7 +123,7 @@ func (s *SearchOrderOpts) buildQuery(isCount bool) (string, []interface{}) {
 	if s.Sort != nil {
 		order = fmt.Sprintf(" ORDER BY b.%s %s", s.Sort.By, s.Sort.Order)
 	}
-	return fmt.Sprintf("SELECT b.%s, cu.name AS created_by_name, uu.name AS updated_by_name FROM %s AS b %s WHERE TRUE %s AND b.deleted_at IS NULL %s LIMIT %d OFFSET %d", strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
+	return fmt.Sprintf("SELECT DISTINCT b.%s, cu.name AS created_by_name, uu.name AS updated_by_name FROM %s AS b %s WHERE TRUE %s AND b.deleted_at IS NULL %s LIMIT %d OFFSET %d", strings.Join(fields, ", b."), b.TableName(), joins, conds, order, s.Limit, s.Offset), args
 }
 
 type OrderData struct {
