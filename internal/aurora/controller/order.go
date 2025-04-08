@@ -47,13 +47,18 @@ func (o orderController) CreateOrder(ctx *gin.Context) {
 		return
 	}
 	orderParams := order.OrderData{
-		Title:              req.Order.Title,
-		MaDatHangMm:        req.Order.MaDatHangMm,
-		MaHopDongKhachHang: req.Order.MaHopDongKhachHang,
-		MaHopDong:          req.Order.MaHopDong,
-		SaleName:           req.Order.SaleName,
-		SaleAdminName:      req.Order.SaleAdminName,
-		Status:             req.Order.Status,
+		Title:                  req.Order.Title,
+		MaDatHangMm:            req.Order.MaDatHangMm,
+		MaHopDongKhachHang:     req.Order.MaHopDongKhachHang,
+		MaHopDong:              req.Order.MaHopDong,
+		SaleName:               req.Order.SaleName,
+		SaleAdminName:          req.Order.SaleAdminName,
+		PaymentMethod:          req.Order.PaymentMethod,
+		PaymentMethodOther:     req.Order.PaymentMethodOther,
+		CustomerID:             req.Order.CustomerID,
+		CustomerAddressOptions: req.Order.CustomerAddressOptions,
+		DeliveryAddress:        req.Order.DeliveryAddress,
+		Status:                 req.Order.Status,
 	}
 
 	orderItems := make([]*order.OrderItemData, 0, len(req.Items))
