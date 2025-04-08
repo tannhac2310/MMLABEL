@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/enum"
 	"mmlabel.gitlab.com/mm-printing-backend/pkg/interceptor"
@@ -395,6 +396,8 @@ func (s productionOrderStageDeviceController) CreateProductionOrderStageDevice(c
 		ProcessStatus:          req.ProcessStatus,
 		Status:                 req.Status,
 		Responsible:            req.Responsible,
+		Settings:               req.Settings,
+		Note:                   req.Note,
 		AssignedQuantity:       req.AssignedQuantity,
 		EstimatedStartAt:       req.EstimatedStartAt,
 		EstimatedCompleteAt:    req.EstimatedCompleteAt,
