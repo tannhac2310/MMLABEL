@@ -53,7 +53,7 @@ func (o oeeController) CalcOEEByDevice(c *gin.Context) {
 			performance = float64(data.AssignedWorkTime-data.Downtime) / float64(data.JobRunningTime)
 		}
 		if data.TotalQuantity > 0 {
-			quality = float64(data.TotalQuantity-data.TotalDefective) / float64(data.TotalQuantity)
+			quality = float64(data.TotalQuantity) / float64(data.TotalQuantity+data.TotalDefective)
 		}
 
 		model := dto.OEEByDeviceResponse{
@@ -148,7 +148,7 @@ func (o oeeController) CalcOEEByAssignedWork(c *gin.Context) {
 			performance = float64(data.AssignedWorkTime-data.Downtime) / float64(data.JobRunningTime)
 		}
 		if data.TotalQuantity > 0 {
-			quality = float64(data.TotalQuantity-data.TotalDefective) / float64(data.TotalQuantity)
+			quality = float64(data.TotalQuantity) / float64(data.TotalQuantity+data.TotalDefective)
 		}
 
 		model := dto.OEEByAssignedWorkResponse{
