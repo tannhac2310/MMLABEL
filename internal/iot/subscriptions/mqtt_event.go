@@ -392,8 +392,8 @@ func (p *EventMQTTSubscription) Subscribe() error {
 					orderStageDevice.Settings = make(map[string]interface{})
 				}
 
-				val, ok := orderStageDevice.Settings["san_pham_loi"].(int64)
-				if !ok || item.DefectQuantity != val {
+				val, ok := orderStageDevice.Settings["san_pham_loi"].(float64)
+				if !ok || item.DefectQuantity != int64(val) {
 					orderStageDevice.Settings["san_pham_loi"] = item.DefectQuantity
 					updaterDeviceStage.Set(model.ProductionOrderStageDeviceFieldSettings, orderStageDevice.Settings)
 					hasUpdate = true
