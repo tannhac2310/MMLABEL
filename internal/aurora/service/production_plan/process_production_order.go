@@ -70,8 +70,7 @@ func (c *productionPlanService) ProcessProductionOrder(ctx context.Context, opt 
 	if err != nil {
 		return "", fmt.Errorf("count production order by created date: %w", err)
 	}
-	newProductionOrderID := fmt.Sprintf("LSX%s-%d", startToday.Format("20060102"), count+1)
-	//countByCode, err := c.productionOrderRepo.CountByCode(ctx, fmt.Sprintf("%s-", plan.ProductCode))
+	newProductionOrderID := fmt.Sprintf("LSX%s-%d-%s", startToday.Format("20060102"), count+1, idutil.RandomString(3)) //countByCode, err := c.productionOrderRepo.CountByCode(ctx, fmt.Sprintf("%s-", plan.ProductCode))
 	//if err != nil {
 	//	return "", fmt.Errorf("count production order by product code: %w", err)
 	//}

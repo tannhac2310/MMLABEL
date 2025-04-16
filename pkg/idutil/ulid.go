@@ -2,6 +2,7 @@ package idutil
 
 import (
 	"crypto/rand"
+	"math/big"
 	"sync"
 	"time"
 
@@ -30,4 +31,15 @@ func ULID(t time.Time) string {
 // ULIDNow returns a new ULID.
 func ULIDNow() string {
 	return ULID(time.Now())
+}
+
+// RandomString generates a random alphanumeric string of the given length.
+func RandomString(length int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, length)
+	for i := range b {
+		randomByte, _ := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		b[i] = charset[randomByte.Int64()]
+	}
+	return string(b)
 }
