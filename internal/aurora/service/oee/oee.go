@@ -180,8 +180,8 @@ func (o calcOEEService) CalcOEEByAssignedWork(ctx context.Context, opt *CalcOEEO
 	for _, assignedWork := range assignedWorks {
 		defective := int64(0)
 		if assignedWork.Settings != nil {
-			if val, ok := assignedWork.Settings["san_pham_loi"].(int64); ok {
-				defective = val
+			if val, ok := assignedWork.Settings["san_pham_loi"].(float64); ok {
+				defective = int64(val)
 			}
 		}
 		oee := model.OEE{
@@ -261,8 +261,8 @@ func processAssignedWorkByDeviceID(ctx context.Context, datas []model.Production
 		}
 		var defective int64 = 0
 		if datas[i].Settings != nil {
-			if val, ok := datas[i].Settings["san_pham_loi"].(int64); ok {
-				defective = val
+			if val, ok := datas[i].Settings["san_pham_loi"].(float64); ok {
+				defective = int64(val)
 			}
 		}
 		result[datas[i].DeviceID] = append(result[datas[i].DeviceID], model.AssignWorkOEE{
