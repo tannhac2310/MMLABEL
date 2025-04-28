@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"strings"
+
 	"github.com/gin-gonic/gin"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
@@ -205,9 +207,10 @@ func (s productionPlanController) FindProductionPlansWithNoPermission(c *gin.Con
 	productionPlans, cnt, err := s.productionPlanService.FindProductionPlansWithNoPermission(c, &production_plan.FindProductionPlansOpts{
 		IDs: req.Filter.IDs,
 		//CustomerID:  req.Filter.CustomerID,
-		Name:        req.Filter.Name,
-		ProductName: req.Filter.ProductName,
-		ProductCode: req.Filter.ProductCode,
+		Search:      strings.TrimSpace(req.Filter.Search),
+		Name:        strings.TrimSpace(req.Filter.Name),
+		ProductName: strings.TrimSpace(req.Filter.ProductName),
+		ProductCode: strings.TrimSpace(req.Filter.ProductCode),
 		Statuses:    req.Filter.Statuses,
 		//UserID:      interceptor.UserIDFromCtx(c), // TODO add later
 		Stage: req.Filter.Stage,
@@ -267,10 +270,10 @@ func (s productionPlanController) FindProductionPlans(c *gin.Context) {
 	productionPlans, cnt, err := s.productionPlanService.FindProductionPlans(c, &production_plan.FindProductionPlansOpts{
 		IDs: req.Filter.IDs,
 		//CustomerID:  req.Filter.CustomerID,
-		Search:      req.Filter.Search,
-		Name:        req.Filter.Name,
-		ProductName: req.Filter.ProductName,
-		ProductCode: req.Filter.ProductCode,
+		Search:      strings.TrimSpace(req.Filter.Search),
+		Name:        strings.TrimSpace(req.Filter.Name),
+		ProductName: strings.TrimSpace(req.Filter.ProductName),
+		ProductCode: strings.TrimSpace(req.Filter.ProductCode),
 		Statuses:    req.Filter.Statuses,
 		//UserID:      interceptor.UserIDFromCtx(c),
 		Stage: req.Filter.Stage,
