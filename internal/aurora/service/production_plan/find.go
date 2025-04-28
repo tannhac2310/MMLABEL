@@ -2,6 +2,7 @@ package production_plan
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
@@ -26,6 +27,7 @@ type FindProductionPlansOpts struct {
 }
 
 func (c *productionPlanService) FindProductionPlans(ctx context.Context, opts *FindProductionPlansOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error) {
+	fmt.Printf("opts: %+v\n", opts)
 	filter := &repository.SearchProductionPlanOpts{
 		IDs: opts.IDs,
 		//CustomerID:  opts.CustomerID,
@@ -90,6 +92,44 @@ func (c *productionPlanService) FindProductionPlans(ctx context.Context, opts *F
 			customFieldMap[datum.Field] = datum.Value
 			userFields[datum.Field] = append(userFields[datum.Field], datum)
 		}
+
+		// Handle san_pham_nguon field
+		if productSource, ok := customFieldMap["san_pham_nguon"]; ok {
+			// First try to parse as JSON array
+			var productIDs []string
+			if err := json.Unmarshal([]byte(productSource), &productIDs); err != nil {
+				// If not a JSON array, try to parse as a single string
+				productIDs = []string{productSource}
+			}
+
+			if len(productIDs) > 0 {
+				// Find products by IDs
+				products, err := c.productRepo.Search(ctx, &repository.SearchProductOpts{
+					IDs:    productIDs,
+					Limit:  int64(len(productIDs)),
+					Offset: 0,
+				})
+				if err == nil && len(products) > 0 {
+					// Collect all product codes and names
+					productCodes := make([]string, 0, len(products))
+					productNames := make([]string, 0, len(products))
+					for _, product := range products {
+						productCodes = append(productCodes, product.Code)
+						productNames = append(productNames, product.Name)
+					}
+
+					// Convert to JSON string
+					productCodesJSON, _ := json.Marshal(productCodes)
+					productNamesJSON, _ := json.Marshal(productNames)
+
+					// Update custom fields
+					customFieldMap["product_code"] = string(productCodesJSON)
+					customFieldMap["sale_survey_customer_product_code"] = string(productCodesJSON)
+					customFieldMap["sale_survey_customer_product_name"] = string(productNamesJSON)
+				}
+			}
+		}
+
 		//_customerData := customerMap[productionPlan.CustomerID]
 		results = append(results, &Data{
 			ProductionPlanData: productionPlan,

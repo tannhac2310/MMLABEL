@@ -30,6 +30,7 @@ type Service interface {
 }
 
 type productionPlanService struct {
+	productRepo              repository.ProductRepo
 	productionPlanRepo       repository.ProductionPlanRepo
 	productionOrderRepo      repository.ProductionOrderRepo
 	productionOrderStageRepo repository.ProductionOrderStageRepo
@@ -43,6 +44,7 @@ type productionPlanService struct {
 }
 
 func NewService(
+	productRepo repository.ProductRepo,
 	productionPlanRepo repository.ProductionPlanRepo,
 	productionOrderRepo repository.ProductionOrderRepo,
 	productionOrderStageRepo repository.ProductionOrderStageRepo,
@@ -55,6 +57,7 @@ func NewService(
 	redisDB redis.Cmdable,
 ) Service {
 	return &productionPlanService{
+		productRepo:              productRepo,
 		productionPlanRepo:       productionPlanRepo,
 		productionOrderRepo:      productionOrderRepo,
 		productionOrderStageRepo: productionOrderStageRepo,
