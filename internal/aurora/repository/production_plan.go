@@ -148,12 +148,12 @@ func (s *SearchProductionPlanOpts) buildQuery(isCount bool) (string, []interface
 	}
 	if s.Name != "" {
 		args = append(args, "%"+strings.Trim(s.Name, " ")+"%")
-		conds += fmt.Sprintf(" AND (b.%[2]s ILIKE $%[1]d OR b.%[3]s ILIKE $%[1]d OR b.id = 'in+' || $%[1]d)", len(args), model.ProductionPlanFieldName, model.ProductionPlanFieldSearchContent)
+		conds += fmt.Sprintf(" AND (b.name ILIKE $%[1]d OR b.search_content ILIKE $%[1]d OR b.id ILIKE 'in+' || $%[1]d OR EXISTS (SELECT 1 FROM custom_fields cf WHERE cf.entity_id = b.id AND cf.value ILIKE $%[1]d) OR EXISTS (SELECT 1 FROM custom_fields cf INNER JOIN products p ON cf.value = p.id WHERE cf.entity_id = b.id AND cf.field = 'san_pham_nguon' AND p.name = $%[1]d))", len(args))
 	}
 
 	if s.Search != "" {
 		args = append(args, "%"+s.Search+"%")
-		conds += fmt.Sprintf(" AND (b.%[2]s ILIKE $%[1]d OR b.id = 'in+' || $%[1]d)", len(args), model.ProductionPlanFieldSearchContent)
+		conds += fmt.Sprintf(" AND (b.%[2]s ILIKE $%[1]d OR b.id = 'in+' || $%[1]d OR EXISTS (SELECT 1 FROM custom_fields cf WHERE cf.entity_id = b.id AND cf.value ILIKE $%[1]d))", len(args), model.ProductionPlanFieldSearchContent)
 	}
 
 	if s.ProductName != "" {

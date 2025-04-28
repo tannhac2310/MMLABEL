@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"strings"
+
 	"github.com/gin-gonic/gin"
 
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/dto"
@@ -39,15 +41,16 @@ func (p productController) CreateProduct(c *gin.Context) {
 		})
 	}
 	id, err := p.productService.CreateProduct(c, &product.CreateProductOpts{
-		Name:        req.Name,
-		Code:        req.Code,
-		CustomerID:  req.CustomerID,
-		SaleID:      req.SaleID,
-		Description: req.Description,
+		Name:        strings.Trim(req.Name, " "),
+		Code:        strings.Trim(req.Code, " "),
+		CustomerID:  strings.Trim(req.CustomerID, " "),
+		SaleID:      strings.Trim(req.SaleID, " "),
+		Description: strings.Trim(req.Description, " "),
 		Data:        req.Data,
 		CreatedBy:   userID,
 		UserField:   uf,
 	})
+
 	if err != nil {
 		transportutil.Error(c, err)
 		return
@@ -117,17 +120,17 @@ func (p productController) FindProduct(c *gin.Context) {
 
 	filter := product.FindProductOpts{
 		IDs:                           req.Filter.IDs,
-		Name:                          req.Filter.Name,
-		Code:                          req.Filter.Code,
-		CustomerID:                    req.Filter.CustomerID,
-		SaleID:                        req.Filter.SaleID,
-		ProductPlanID:                 req.Filter.ProductionPlanID,
-		ProductOrderID:                req.Filter.ProductionOrderID,
-		SaleSurveyCustomerProductName: req.Filter.SaleSurveyCustomerProductName,
-		ProductName:                   req.Filter.ProductName,
-		ProductCode:                   req.Filter.ProductCode,
-		SaleSurveyCustomerProductCode: req.Filter.SaleSurveyCustomerProductCode,
-		SaleSurveyBravoCode:           req.Filter.SaleSurveyBravoCode,
+		Name:                          strings.Trim(req.Filter.Name, " "),
+		Code:                          strings.Trim(req.Filter.Code, " "),
+		CustomerID:                    strings.Trim(req.Filter.CustomerID, " "),
+		SaleID:                        strings.Trim(req.Filter.SaleID, " "),
+		ProductPlanID:                 strings.Trim(req.Filter.ProductionPlanID, " "),
+		ProductOrderID:                strings.Trim(req.Filter.ProductionOrderID, " "),
+		SaleSurveyCustomerProductName: strings.Trim(req.Filter.SaleSurveyCustomerProductName, " "),
+		ProductName:                   strings.Trim(req.Filter.ProductName, " "),
+		ProductCode:                   strings.Trim(req.Filter.ProductCode, " "),
+		SaleSurveyCustomerProductCode: strings.Trim(req.Filter.SaleSurveyCustomerProductCode, " "),
+		SaleSurveyBravoCode:           strings.Trim(req.Filter.SaleSurveyBravoCode, " "),
 		//	sale_survey_customer_product_name
 		//productName
 		//productCode
