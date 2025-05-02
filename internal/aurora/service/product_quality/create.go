@@ -80,8 +80,8 @@ type CreateProductQualityOpts struct {
 	ProductID           string
 	SoLuongHopDong      int64
 	SoLuongIn           int64
-	NguoiKiemTra        string
-	NguoiPheDuyet       string
+	NguoiKiemTra        []string
+	NguoiPheDuyet       []string
 	SoLuongThanhPhamDat int64
 	CreatedBy           string
 	InspectionErrors    []*InspectionError
