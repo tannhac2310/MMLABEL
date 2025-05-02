@@ -53,8 +53,8 @@ type ProductQuality struct {
 	SoLuongHopDong           int64     `json:"soLuongHopDong"`
 	SoLuongIn                int64     `json:"soLuongIn"`
 	MaDonDatHang             string    `json:"maDonDatHang"`
-	NguoiKiemTra             string    `json:"nguoiKiemTra"`
-	NguoiPheDuyet            string    `json:"nguoiPheDuyet"`
+	NguoiKiemTra             []string  `json:"nguoiKiemTra"`
+	NguoiPheDuyet            []string  `json:"nguoiPheDuyet"`
 	SoLuongThanhPhamDat      int64     `json:"soLuongThanhPhamDat"`
 	OrderData                struct {
 		ID          string `json:"id"`
@@ -81,16 +81,15 @@ type InspectionError struct {
 }
 
 type CreateProductQualityRequest struct {
-	ProductionOrderID string    `json:"productionOrderID" binding:"required"`
-	InspectionDate    time.Time `json:"inspectionDate"  binding:"required"`
-	InspectorName     string    `json:"inspectorName"`
-	Quantity          int64     `json:"quantity" binding:"required"`
-	ProductID         string    `json:"productID" binding:"required"`
-	SoLuongHopDong    int64     `json:"soLuongHopDong"`
-	SoLuongIn         int64     `json:"soLuongIn"`
-	//MaDonDatHang        string            `json:"maDonDatHang"`
-	NguoiKiemTra        string            `json:"nguoiKiemTra"`
-	NguoiPheDuyet       string            `json:"nguoiPheDuyet"`
+	ProductionOrderID   string            `json:"productionOrderID" binding:"required"`
+	InspectionDate      time.Time         `json:"inspectionDate"  binding:"required"`
+	InspectorName       string            `json:"inspectorName"`
+	Quantity            int64             `json:"quantity" binding:"required"`
+	ProductID           string            `json:"productID" binding:"required"`
+	SoLuongHopDong      int64             `json:"soLuongHopDong"`
+	SoLuongIn           int64             `json:"soLuongIn"`
+	NguoiKiemTra        []string          `json:"nguoiKiemTra"`
+	NguoiPheDuyet       []string          `json:"nguoiPheDuyet"`
 	SoLuongThanhPhamDat int64             `json:"soLuongThanhPhamDat" binding:"required"`
 	Note                string            `json:"note"`
 	InspectionErrors    []InspectionError `json:"inspectionErrors" binding:"required"`
@@ -109,8 +108,8 @@ type EditProductQualityRequest struct {
 	ProductID           string            `json:"productID" binding:"required"`
 	SoLuongHopDong      int64             `json:"soLuongHopDong" binding:"required"`
 	SoLuongIn           int64             `json:"soLuongIn" binding:"required"`
-	NguoiKiemTra        string            `json:"nguoiKiemTra"`
-	NguoiPheDuyet       string            `json:"nguoiPheDuyet"`
+	NguoiKiemTra        []string          `json:"nguoiKiemTra"`
+	NguoiPheDuyet       []string          `json:"nguoiPheDuyet"`
 	SoLuongThanhPhamDat int64             `json:"soLuongThanhPhamDat" binding:"required"`
 	Note                string            `json:"note"`
 	InspectionErrors    []InspectionError `json:"inspectionErrors" binding:"required"`

@@ -76,8 +76,8 @@ type EditProductQualityOpts struct {
 	ProductID           string
 	SoLuongHopDong      int64
 	SoLuongIn           int64
-	NguoiKiemTra        string
-	NguoiPheDuyet       string
+	NguoiKiemTra        []string
+	NguoiPheDuyet       []string
 	SoLuongThanhPhamDat int64
 	InspectionErrors    []*EditInspectionError
 	CreatedBy           string

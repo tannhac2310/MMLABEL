@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+	"encoding/json"
 	"time"
 )
 
@@ -34,8 +35,8 @@ type InspectionForm struct {
 	ProductID           string       `db:"product_id"`
 	SoLuongHopDong      int64        `db:"so_luong_hop_dong"`
 	SoLuongIn           int64        `db:"so_luong_in"`
-	NguoiKiemTra        string       `db:"nguoi_kiem_tra"`
-	NguoiPheDuyet       string       `db:"nguoi_phe_duyet"`
+	NguoiKiemTra        []string     `db:"nguoi_kiem_tra"`
+	NguoiPheDuyet       []string     `db:"nguoi_phe_duyet"`
 	SoLuongThanhPhamDat int64        `db:"so_luong_thanh_pham_dat"`
 	Note                string       `db:"note"`
 	CreatedBy           string       `db:"created_by"`
@@ -91,4 +92,36 @@ func (rcv *InspectionForm) FieldMap() (fields []string, values []interface{}) {
 
 func (*InspectionForm) TableName() string {
 	return "inspection_forms"
+}
+
+// MarshalJSON implements custom JSON marshaling for NguoiKiemTra and NguoiPheDuyet
+func (f *InspectionForm) MarshalJSON() ([]byte, error) {
+	type Alias InspectionForm
+	return json.Marshal(&struct {
+		*Alias
+		NguoiKiemTra  []string `json:"nguoiKiemTra"`
+		NguoiPheDuyet []string `json:"nguoiPheDuyet"`
+	}{
+		Alias:         (*Alias)(f),
+		NguoiKiemTra:  f.NguoiKiemTra,
+		NguoiPheDuyet: f.NguoiPheDuyet,
+	})
+}
+
+// UnmarshalJSON implements custom JSON unmarshaling for NguoiKiemTra and NguoiPheDuyet
+func (f *InspectionForm) UnmarshalJSON(data []byte) error {
+	type Alias InspectionForm
+	aux := &struct {
+		*Alias
+		NguoiKiemTra  []string `json:"nguoiKiemTra"`
+		NguoiPheDuyet []string `json:"nguoiPheDuyet"`
+	}{
+		Alias: (*Alias)(f),
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	f.NguoiKiemTra = aux.NguoiKiemTra
+	f.NguoiPheDuyet = aux.NguoiPheDuyet
+	return nil
 }

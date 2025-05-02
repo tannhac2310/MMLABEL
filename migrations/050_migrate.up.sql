@@ -1,3 +1,4 @@
+
 DELETE FROM options WHERE entity = 'QC';
 INSERT INTO options (id, entity, code, name, created_by, created_at, updated_at)
 VALUES
