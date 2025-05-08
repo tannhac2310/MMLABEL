@@ -12,17 +12,12 @@ import (
 	"mmlabel.gitlab.com/mm-printing-backend/internal/aurora/repository"
 )
 
-type Analysis struct {
-	Status enum.ProductionOrderStatus `json:"status"`
-	Count  int64                      `json:"count"`
-}
-
-func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts *FindProductionOrdersOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, []*Analysis, error) {
+func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts *FindProductionOrdersOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error) {
 	// find permission stage for user
 	permissions, err := c.roleService.FindRolePermissionsByUser(ctx, opts.UserID)
 
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 	// find stage for user
 	stages := make([]string, 0)
@@ -76,12 +71,12 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 	}
 	productionOrders, err := c.productionOrderRepo.Search(ctx, filter)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 
 	total, err := c.productionOrderRepo.Count(ctx, filter)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 
 	results := make([]*Data, 0, len(productionOrders))
@@ -109,7 +104,7 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 		Offset: 0,
 	})
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("c.customerRepo.FindByIDs: %w", err)
+		return nil, nil, fmt.Errorf("c.customerRepo.FindByIDs: %w", err)
 	}
 
 	customerMap := make(map[string]*repository.CustomerData)
@@ -124,7 +119,7 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 		Offset: 0,
 	})
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("c.userRepo.FindByIDs: %w", err)
+		return nil, nil, fmt.Errorf("c.userRepo.FindByIDs: %w", err)
 	}
 
 	userMap := make(map[string]*model2.User)
@@ -139,7 +134,7 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 		Offset: 0,
 	})
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("c.productionPlanRepo.FindByIDs: %w", err)
+		return nil, nil, fmt.Errorf("c.productionPlanRepo.FindByIDs: %w", err)
 	}
 
 	productionPlanMap := make(map[string]*repository.ProductionPlanData)
@@ -154,7 +149,7 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 		Offset: 0,
 	})
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("c.orderRepo.FindByIDs: %w", err)
+		return nil, nil, fmt.Errorf("c.orderRepo.FindByIDs: %w", err)
 	}
 
 	orderMap := make(map[string]*repository.OrderData)
@@ -168,7 +163,7 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 		Offset: 0,
 	})
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 	stageMap := make(map[string]string)
 	for _, stage := range allStages {
@@ -186,7 +181,7 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 			Offset:            0,
 		})
 		if err != nil {
-			return nil, nil, nil, err
+			return nil, nil, err
 		}
 		stageData := make([]*ProductionOrderStageData, 0, len(wf))
 		stageDevicesOfPO, err := c.productionOrderStageDeviceRepo.Search(ctx, &repository.SearchProductionOrderStageDevicesOpts{
@@ -210,14 +205,14 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 				for _, responsible := range stageDevice.Responsible {
 					user, err := c.userRepo.FindByID(ctx, responsible)
 					if err != nil {
-						return nil, nil, nil, err
+						return nil, nil, err
 					}
 					users = append(users, user)
 				}
 				stageDevice.ResponsibleObject = users
 			}
 			if err != nil {
-				return nil, nil, nil, err
+				return nil, nil, err
 			}
 			stageData = append(stageData, &ProductionOrderStageData{
 				ProductionOrderStage:       stage,
@@ -261,17 +256,7 @@ func (c *productionOrderService) FindProductionOrders(ctx context.Context, opts 
 		})
 	}
 
-	// analysis
-	analysis := make([]*Analysis, 0)
-	analysisData, err := c.productionOrderRepo.Analysis(ctx, filter)
-	for _, status := range analysisData {
-		analysis = append(analysis, &Analysis{
-			Status: status.Status,
-			Count:  status.Count,
-		})
-	}
-
-	return results, total, analysis, nil
+	return results, total, nil
 }
 
 func (c *productionOrderService) FindProductionOrdersWithNoPermission(ctx context.Context, opts *FindProductionOrdersOpts, sort *repository.Sort, limit, offset int64) ([]*DataWithNoPermission, *repository.CountResult, error) {

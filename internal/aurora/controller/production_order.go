@@ -17,6 +17,7 @@ type ProductionOrderController interface {
 	EditProductionOrder(c *gin.Context)
 	DeleteProductionOrder(c *gin.Context)
 	FindProductionOrders(c *gin.Context)
+	FindAnalysis(c *gin.Context)
 	FindProductionOrdersWithNoPermission(c *gin.Context)
 	AcceptAndChangeNextStage(c *gin.Context)
 }
@@ -254,7 +255,7 @@ func (s productionOrderController) FindProductionOrders(c *gin.Context) {
 			By:    req.Sort.By,
 		}
 	}
-	productionOrders, cnt, analysis, err := s.productionOrderService.FindProductionOrders(c, &production_order.FindProductionOrdersOpts{
+	productionOrders, cnt, err := s.productionOrderService.FindProductionOrders(c, &production_order.FindProductionOrdersOpts{
 		IDs:                             req.Filter.IDs,
 		CustomerID:                      req.Filter.CustomerID,
 		Name:                            req.Filter.Name,
@@ -285,6 +286,47 @@ func (s productionOrderController) FindProductionOrders(c *gin.Context) {
 	for _, f := range productionOrders {
 		productionOrderResp = append(productionOrderResp, toProductionOrderResp(f))
 	}
+
+	transportutil.SendJSONResponse(c, &dto.FindProductionOrdersResponse{
+		ProductionOrders: productionOrderResp,
+		Total:            cnt.Count,
+	})
+}
+
+func (s productionOrderController) FindAnalysis(c *gin.Context) {
+	req := &dto.FindProductionOrdersAnalysisRequest{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		transportutil.Error(c, apperror.ErrInvalidArgument.WithDebugMessage(err.Error()))
+		return
+	}
+
+	analysis, err := s.productionOrderService.FindAnalysis(c, &production_order.FindProductionOrdersOpts{
+		IDs:                             req.Filter.IDs,
+		CustomerID:                      req.Filter.CustomerID,
+		Name:                            req.Filter.Name,
+		Status:                          req.Filter.Status,
+		ProductionPlanIDs:               req.Filter.ProductionPlanIDs,
+		Statuses:                        req.Filter.Statuses,
+		EstimatedStartAtFrom:            req.Filter.EstimatedStartAtFrom,
+		EstimatedStartAtTo:              req.Filter.EstimatedStartAtTo,
+		EstimatedCompleteAtFrom:         req.Filter.EstimatedCompleteAtFrom,
+		EstimatedCompleteAtTo:           req.Filter.EstimatedCompleteAtTo,
+		OrderStageStatus:                req.Filter.OrderStageStatus,
+		OrderStageEstimatedStartFrom:    req.Filter.OrderStageEstimatedStartFrom,
+		OrderStageEstimatedStartTo:      req.Filter.OrderStageEstimatedStartTo,
+		OrderStageEstimatedCompleteFrom: req.Filter.OrderStageEstimatedCompleteFrom,
+		OrderStageEstimatedCompleteTo:   req.Filter.OrderStageEstimatedCompleteTo,
+		Responsible:                     req.Filter.Responsible,
+		StageIDs:                        req.Filter.StageIDs,
+		StageInLine:                     req.Filter.StageInLine, // search lsx mà theo công đoạn StageInLine đang sản xuất: production_start
+		DeviceID:                        req.Filter.DeviceID,
+		UserID:                          interceptor.UserIDFromCtx(c),
+	})
+	if err != nil {
+		transportutil.Error(c, err)
+		return
+	}
 	// analysis
 	analysisResp := make([]*dto.Analysis, 0, len(analysis))
 	for _, a := range analysis {
@@ -293,11 +335,8 @@ func (s productionOrderController) FindProductionOrders(c *gin.Context) {
 			Count:  a.Count,
 		})
 	}
-
-	transportutil.SendJSONResponse(c, &dto.FindProductionOrdersResponse{
-		ProductionOrders: productionOrderResp,
-		Total:            cnt.Count,
-		Analysis:         analysisResp,
+	transportutil.SendJSONResponse(c, &dto.FindProductionOrdersAnalysisResponse{
+		Analysis: analysisResp,
 	})
 }
 
@@ -476,6 +515,14 @@ func RegisterProductionOrderController(
 		&dto.FindProductionOrdersRequest{},
 		&dto.FindProductionOrdersResponse{},
 		"Find productionOrders",
+	)
+	routeutil.AddEndpoint(
+		g,
+		"find-analysis",
+		c.FindAnalysis,
+		&dto.FindProductionOrdersAnalysisRequest{},
+		&dto.FindProductionOrdersAnalysisResponse{},
+		"Find productionOrders Analysis",
 	)
 	routeutil.AddEndpoint(
 		g,
