@@ -37,9 +37,20 @@ type FindProductionOrdersRequest struct {
 
 type FindProductionOrdersResponse struct {
 	ProductionOrders []*ProductionOrder `json:"productionOrders"`
-	Analysis         []*Analysis        `json:"analysis"`
 	Total            int64              `json:"total"`
 }
+
+type FindProductionOrdersAnalysisRequest struct {
+	Filter *ProductionOrderFilter `json:"filter" binding:"required"`
+	Paging *commondto.Paging      `json:"paging" binding:"required"`
+	Sort   *commondto.Sort        `json:"sort"`
+}
+
+type FindProductionOrdersAnalysisResponse struct {
+	Analysis []*Analysis `json:"analysis"`
+	Total    int64       `json:"total"`
+}
+
 type Analysis struct {
 	Status enum.ProductionOrderStatus `json:"status"`
 	Count  int64                      `json:"count"`
