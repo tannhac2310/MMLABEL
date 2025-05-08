@@ -13,12 +13,12 @@ type Analysis struct {
 	Count  int64                      `json:"count"`
 }
 
-func (c *productionOrderService) FindAnalysis(ctx context.Context, opts *FindProductionOrdersOpts, sort *repository.Sort, limit, offset int64) ([]*Analysis, *repository.CountResult, error) {
+func (c *productionOrderService) FindAnalysis(ctx context.Context, opts *FindProductionOrdersOpts) ([]*Analysis, error) {
 	// find permission stage for user
 	permissions, err := c.roleService.FindRolePermissionsByUser(ctx, opts.UserID)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	// find stage for user
 	stages := make([]string, 0)
@@ -66,9 +66,6 @@ func (c *productionOrderService) FindAnalysis(ctx context.Context, opts *FindPro
 		StageInLine:                     opts.StageInLine, // search lsx mà theo công đoạn StageInLine đang sản xuất: production_start
 		UserID:                          opts.UserID,
 		DeviceID:                        opts.DeviceID,
-		Limit:                           limit,
-		Offset:                          offset,
-		Sort:                            sort,
 	}
 	// analysis
 	analysis := make([]*Analysis, 0)
@@ -80,14 +77,8 @@ func (c *productionOrderService) FindAnalysis(ctx context.Context, opts *FindPro
 		})
 	}
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	// count (if required)
-	total, err := c.productionOrderRepo.Count(ctx, filter)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return analysis, total, err
+	return analysis, err
 }

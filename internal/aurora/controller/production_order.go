@@ -301,17 +301,7 @@ func (s productionOrderController) FindAnalysis(c *gin.Context) {
 		return
 	}
 
-	sort := &repository.Sort{
-		Order: repository.SortOrderDESC,
-		By:    "ID",
-	}
-	if req.Sort != nil {
-		sort = &repository.Sort{
-			Order: repository.SortOrder(req.Sort.Order),
-			By:    req.Sort.By,
-		}
-	}
-	analysis, count, err := s.productionOrderService.FindAnalysis(c, &production_order.FindProductionOrdersOpts{
+	analysis, err := s.productionOrderService.FindAnalysis(c, &production_order.FindProductionOrdersOpts{
 		IDs:                             req.Filter.IDs,
 		CustomerID:                      req.Filter.CustomerID,
 		Name:                            req.Filter.Name,
@@ -332,7 +322,7 @@ func (s productionOrderController) FindAnalysis(c *gin.Context) {
 		StageInLine:                     req.Filter.StageInLine, // search lsx mà theo công đoạn StageInLine đang sản xuất: production_start
 		DeviceID:                        req.Filter.DeviceID,
 		UserID:                          interceptor.UserIDFromCtx(c),
-	}, sort, req.Paging.Limit, req.Paging.Offset)
+	})
 	if err != nil {
 		transportutil.Error(c, err)
 		return
@@ -346,7 +336,6 @@ func (s productionOrderController) FindAnalysis(c *gin.Context) {
 		})
 	}
 	transportutil.SendJSONResponse(c, &dto.FindProductionOrdersAnalysisResponse{
-		Total:    count.Count,
 		Analysis: analysisResp,
 	})
 }

@@ -21,7 +21,7 @@ type Service interface {
 	CreateProductionOrder(ctx context.Context, opt *CreateProductionOrderOpts) (string, error)
 	EditProductionOrder(ctx context.Context, opt *EditProductionOrderOpts) error
 	FindProductionOrders(ctx context.Context, opts *FindProductionOrdersOpts, sort *repository.Sort, limit, offset int64) ([]*Data, *repository.CountResult, error)
-	FindAnalysis(ctx context.Context, opts *FindProductionOrdersOpts, sort *repository.Sort, limit, offset int64) ([]*Analysis, *repository.CountResult, error)
+	FindAnalysis(ctx context.Context, opts *FindProductionOrdersOpts) ([]*Analysis, error)
 	FindProductionOrdersWithNoPermission(ctx context.Context, opts *FindProductionOrdersOpts, sort *repository.Sort, limit, offset int64) ([]*DataWithNoPermission, *repository.CountResult, error)
 	DeleteProductionOrder(ctx context.Context, id string) error
 	GetCustomField() []string
